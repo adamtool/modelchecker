@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="adam_modelchecking" default="jar">
+
+	<dirname property="modelchecking.basedir" file="${ant.file.adam_modelchecking}"/>
+
+<!--  %%%%%%%%%%%%%%%%%%%%%%%%%%%%% IMPORTS %%%%%%%%%%%%%%%%%%%%%%%%%%% -->	
+	<property file="${modelchecking.basedir}/build.properties"/>
+	<import file="${mainfolder}/build_macros.xml" optional="false"/>
+	<include file="${mainfolder}/build_targets.xml" as="modelchecking.fu" optional="false"/>
+
+<!--  %%%%%%%%%%%%%%%%%%%%%%%%%%%%% PATHs %%%%%%%%%%%%%%%%%%%%%%%%%%% -->	
+	
+	<union id="modelchecking.jar.res">    			
+<!--			<zipfileset includes="**/*.class" src="${mainfolder}/lib/apt/apt.jar"/>
+			<zipfileset includes="**/*.stg" src="${mainfolder}/lib/apt/apt.jar"/>-->
+<!--			<zipfileset includes="**/*.class" src="${logics.basedir}/lib/apt/apt-module.jar"/>
+			<zipfileset includes="**/*.class" src="${logics.basedir}/lib/apt/apt-lib.jar"/>
+			<zipfileset includes="**/*.class" src="${logics.basedir}/lib/apt/apt-io.jar"/>
+			<zipfileset includes="**/*.stg" src="${logics.basedir}/lib/apt/apt-io.jar"/>-->
+	</union>
+
+<!--  %%%%%%%%%%%%%%%%%%%%%%%%%%%%% PROPERTIES %%%%%%%%%%%%%%%%%%%%%%%%%%% -->	
+	<target name="loadProperties">
+		<property file="${subproject.basedir}/build.properties"/>		
+	</target>
+
+<!--  %%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELEGATES %%%%%%%%%%%%%%%%%%%%%%%%%%% -->	
+	<target name="test" depends="loadProperties" description="Runs all tests">
+		<antcall target="modelchecking.fu.test"/>
+			<!--<ant antfile="${logics.basedir}/build_logics.xml" target="test"></ant>	-->	
+	</target>
+	<target name="test-method" depends="loadProperties" description="Runs the tests of a specific method">
+		<antcall target="modelchecking.fu.test-method"/>
+	</target>
+	<target name="test-class" depends="loadProperties" description="Runs the tests of a specific class">
+		<antcall target="modelchecking.fu.test-class"/>
+	</target>
+	<target name="jar" depends="loadProperties" description="Builds a jar with all its dependencies">
+		<antcall target="modelchecking.fu.jar"/>
+	</target>
+	<target name="jar-standalone" depends="loadProperties" description="Builds a jar with all its dependencies">
+		<antcall target="modelchecking.fu.jar-standalone"/>
+	</target>
+	<target name="javadoc" depends="loadProperties" description="Creates the JavaDoc of this package.">
+		<antcall target="modelchecking.fu.javadoc"/>
+	</target>
+
+	<target name="clean" depends="loadProperties" description="Cleans all temporary files.">
+		<antcall target="modelchecking.fu.clean"/>
+	</target>
+	<target name="clean-all" depends="loadProperties" description="Cleans all temporary files including the reports">
+		<antcall target="modelchecking.fu.clean-all"/>
+	</target>
+</project>
