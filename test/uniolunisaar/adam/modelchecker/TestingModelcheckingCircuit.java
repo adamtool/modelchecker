@@ -49,7 +49,14 @@ public class TestingModelcheckingCircuit {
 
         AdamTools.savePG2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
-        ModelCheckerMCHyper.check(game, "Forall(F (AP \"out_out\" 0))", "./" + game.getName());
+//        String formula = "Forall (F (AP \"#out#_out\" 0))";
+//        String formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
+//        String formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";
+//        String formula = "Forall (G (Implies (And (Neg (AP \"#out#_tB\", 0)) (Neg (AP \"#out#_tC\", 0))) (And (Neg (AP \"#out#_inittfl\", 0)) (Neg ((AP \"#out#_inittflB\", 0))))))";
+        String formula = "Forall (G (Implies (And (Neg (AP \"#out#_tB\", 0)) (Neg (AP \"#out#_tC\", 0))) (And (Neg (AP \"#out#_inittfl\", 0)) (Neg (AP \"#out#_inittflB\", 0)))))";
+//        String formula = "Forall ("+"Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
+
+        ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
     }
 
     @Test(enabled = true)

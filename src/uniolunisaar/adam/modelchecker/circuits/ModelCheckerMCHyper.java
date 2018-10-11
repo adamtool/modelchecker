@@ -3,6 +3,7 @@ package uniolunisaar.adam.modelchecker.circuits;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
+import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.Logger;
 
@@ -13,7 +14,8 @@ import uniolunisaar.adam.tools.Logger;
 public class ModelCheckerMCHyper {
 
     public static boolean check(PetriNet net, String formula, String path) throws InterruptedException, IOException {
-        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aiger", "-pdr", "-cex");
+        ModelCheckerTools.save2AigerAndPdf(net, path);
+        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aiger", "-pdr", "-cex", "-v", "1");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
 //        System.out.println(procBuilder.directory());
 //        procBuilder = new ProcessBuilder(System.getProperty("libfolder") + "/mchyper");

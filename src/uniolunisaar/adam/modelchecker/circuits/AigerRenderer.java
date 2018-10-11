@@ -16,7 +16,7 @@ public class AigerRenderer {
         AigerFile file = new AigerFile();
         // Add inputs
         for (Transition t : net.getTransitions()) {
-            file.addInput("in_" + t.getId());
+            file.addInput("#in#_" + t.getId());
         }
         // Add the latches
         // initialization latch
@@ -30,10 +30,10 @@ public class AigerRenderer {
 //        }
         // Add outputs
         for (Place p : net.getPlaces()) {
-            file.addOutput("out_" + p.getId());
+            file.addOutput("#out#_" + p.getId());
         }
         for (Transition t : net.getTransitions()) {
-            file.addOutput("out_" + t.getId());
+            file.addOutput("#out#_" + t.getId());
         }
 
         // Choose that only one transition at a time can be fired
@@ -42,13 +42,13 @@ public class AigerRenderer {
         for (Transition t1 : net.getTransitions()) {
             String[] inputs = new String[net.getTransitions().size()];
             int i = 0;
-            inputs[i++] = "in_" + t1.getId();
+            inputs[i++] = "#in#_" + t1.getId();
             for (Transition t2 : net.getTransitions()) {
                 if (!t1.getId().equals(t2.getId())) {
-                    inputs[i++] = "!in_" + t2.getId();
+                    inputs[i++] = "!#in#_" + t2.getId();
                 }
             }
-            file.addGate("out_" + t1.getId(), inputs);
+            file.addGate("#out#_" + t1.getId(), inputs);
         }
 
         // Update the init flag
@@ -69,7 +69,7 @@ public class AigerRenderer {
         String[] inputs = new String[net.getTransitions().size()];
         int i = 0;
         for (Transition t : net.getTransitions()) {
-            inputs[i++] = "!out_" + t.getId();
+            inputs[i++] = "!#out#_" + t.getId();
         }
         file.addGate("#allNegatedTransitions#", inputs);
         for (Place p : net.getPlaces()) {
@@ -92,7 +92,7 @@ public class AigerRenderer {
         // Set the outputs
         // the place outputs are directly the output of the latches
         for (Place p : net.getPlaces()) {
-            file.copyValues("out_" + p.getId(), p.getId() + "_new");
+            file.copyValues("#out#_" + p.getId(), p.getId() + "_new");
         }
         // for the transition output this is already done by the correcting 
         // choosing strategy
@@ -149,7 +149,7 @@ public class AigerRenderer {
         String[] inputs = new String[net.getTransitions().size()];
         int i = 0;
         for (Transition t : net.getTransitions()) {
-            file.addGate(id + "_" + t.getId() + "_buf", "out_" + t.getId(), "!" + p.getId() + "_" + t.getId() + "_fired");
+            file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), "!" + p.getId() + "_" + t.getId() + "_fired");
             inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
         }
         file.addGate(id, inputs);
