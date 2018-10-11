@@ -13,6 +13,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
@@ -53,8 +54,18 @@ public class TestingFlowLTLTransformer {
         AdamTools.savePG2PDF(game.getName(), game, true);
 
         // test maximality
+        // standard
         IRunFormula f = FlowLTLTransformer.getMaximaliltyStandardObject(game);
-        System.out.println(f.toSymbolString());
+//        System.out.println("Maximality standard:");
+//        System.out.println(f.toSymbolString());
+        // reisig
+        ILTLFormula f1 = FlowLTLTransformer.getMaximaliltyReisigDirectAsObject(game);
+//        System.out.println("Maximality Reisig:");
+//        System.out.println(f1.toSymbolString());
+        // reisig
+        f = FlowLTLTransformer.getMaximaliltyReisigObject(game);
+//        System.out.println("Maximality Reisig:");
+//        System.out.println(f.toSymbolString());
         
         // test to hyper ltl
         String formula = FlowLTLTransformer.toMCHyperFormat(game, f.toString());

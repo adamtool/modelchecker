@@ -7,7 +7,11 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.flowltl.LTLFormula;
+import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 
@@ -67,7 +71,7 @@ public class FlowLTLTransformer {
         for (Transition t : net.getTransitions()) {
             elements.add("!(" + t.getId() + ")");
         }
-        sb.append(FormulaCreator.bigWedge(elements));
+        sb.append(FormulaCreator.bigWedgeOrVee(elements, true));
 
         // implies
         sb.append(" -> ");
@@ -77,12 +81,62 @@ public class FlowLTLTransformer {
         for (Transition t : net.getTransitions()) {
             elements.add("!(" + FormulaCreator.enabled(t) + ")");
         }
-        sb.append(FormulaCreator.bigWedge(elements));
+        sb.append(FormulaCreator.bigWedgeOrVee(elements, true));
 
         // closing implies and globally
         sb.append("))");
 
         return sb.toString();
+    }
+
+    public static IRunFormula getMaximaliltyReisigObject(PetriNet net) {
+        String formula = getMaximaliltyReisig(net);
+        try {
+            return FlowLTLParser.parse(net, formula);
+        } catch (ParseException ex) {
+            System.out.println(formula);
+            ex.printStackTrace();
+            // Cannot happen
+            return null;
+        }
+    }
+
+    public static String getMaximaliltyReisig(PetriNet net) {
+        // all transitions have to globally be eventually not enabled or another transition with a place in the transitions preset fires
+        Collection<String> elements = new ArrayList<>();
+        for (Transition t : net.getTransitions()) {
+            StringBuilder sb = new StringBuilder("G(F(");
+            sb.append("(!(").append(FormulaCreator.enabled(t)).append(") OR ");
+            Collection<String> elems = new ArrayList<>();
+            for (Place p : t.getPreset()) {
+                for (Transition t2 : p.getPostset()) {
+                    elems.add(t2.getId());
+                }
+            }
+            sb.append(FormulaCreator.bigWedgeOrVee(elems, false));
+            sb.append(")))");
+            elements.add(sb.toString());
+        }
+        return FormulaCreator.bigWedgeOrVee(elements, true);
+    }
+
+    public static ILTLFormula getMaximaliltyReisigDirectAsObject(PetriNet net) {
+        // all transitions have to globally be eventually not enabled or another transition with a place in the transitions preset fires
+        Collection<ILTLFormula> elements = new ArrayList<>();
+        for (Transition t : net.getTransitions()) {
+            Collection<ILTLFormula> elems = new ArrayList<>();
+            for (Place p : t.getPreset()) {
+                for (Transition t2 : p.getPostset()) {
+                    elems.add(new AtomicProposition(t2));
+                }
+            }
+            ILTLFormula bigvee = FormulaCreator.bigWedgeOrVeeObject(elems, false);
+            ILTLFormula f = new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, FormulaCreator.enabledObject(t)), LTLOperators.Binary.OR, bigvee);
+            f = new LTLFormula(LTLOperators.Unary.F, f);
+            f = new LTLFormula(LTLOperators.Unary.G, f);
+            elements.add(f);
+        }
+        return FormulaCreator.bigWedgeOrVeeObject(elements, true);
     }
 
     public static String createFormula4ModelChecking4LoLA(PetriGame game, String formula) {
