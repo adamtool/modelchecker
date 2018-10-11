@@ -2,6 +2,7 @@ package uniolunisaar.adam.modelchecker;
 
 import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
 import java.io.IOException;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -49,14 +50,17 @@ public class TestingModelcheckingCircuit {
 
         AdamTools.savePG2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
-//        String formula = "Forall (F (AP \"#out#_out\" 0))";
-//        String formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
-//        String formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";
-//        String formula = "Forall (G (Implies (And (Neg (AP \"#out#_tB\", 0)) (Neg (AP \"#out#_tC\", 0))) (And (Neg (AP \"#out#_inittfl\", 0)) (Neg ((AP \"#out#_inittflB\", 0))))))";
-        String formula = "Forall (G (Implies (And (Neg (AP \"#out#_tB\", 0)) (Neg (AP \"#out#_tC\", 0))) (And (Neg (AP \"#out#_inittfl\", 0)) (Neg (AP \"#out#_inittflB\", 0)))))";
-//        String formula = "Forall ("+"Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
+        String formula = "Forall (F (AP \"#out#_out\" 0))";
+        boolean check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertFalse(check);
+        formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertTrue(check);
+        formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertTrue(check);
 
-        ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+//        String formula = "Forall ("+"Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
     }
 
     @Test(enabled = true)

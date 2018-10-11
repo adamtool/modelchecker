@@ -10,15 +10,15 @@ import uniol.apt.adt.pn.Transition;
  */
 public class AigerRenderer {
 
-    private static final String INIT_LATCH = "#initLatch#";
+    static final String INIT_LATCH = "#initLatch#";
 
     public static String render(PetriNet net) {
         AigerFile file = new AigerFile();
-        // Add inputs
+        //%%%%%%%%% Add inputs
         for (Transition t : net.getTransitions()) {
             file.addInput("#in#_" + t.getId());
         }
-        // Add the latches
+        //%%%%%%%%%% Add the latches
         // initialization latch
         file.addLatch(INIT_LATCH);
         // places
@@ -28,7 +28,7 @@ public class AigerRenderer {
 //        for (Transition t : net.getTransitions()) {
 //            file.addLatch(t.getId());
 //        }
-        // Add outputs
+        //%%%%%%%%% Add outputs
         for (Place p : net.getPlaces()) {
             file.addOutput("#out#_" + p.getId());
         }
@@ -36,11 +36,20 @@ public class AigerRenderer {
             file.addOutput("#out#_" + t.getId());
         }
 
+        //%%%%%%%%%%%%% Create the output for the transitions
+        // Create the general circuits for getting the enabledness of a transition
+        for (Transition t : net.getTransitions()) {
+            createEnabled(file, t);
+        }
+
         // Choose that only one transition at a time can be fired
+        //
         // todo: add other semantics (choose every not conflicting transition)
         // or put this choosing in the formula
+        //
+        // The transition is only choosen if it is enabled
         for (Transition t1 : net.getTransitions()) {
-            String[] inputs = new String[net.getTransitions().size()];
+            String[] inputs = new String[net.getTransitions().size() + 1];
             int i = 0;
             inputs[i++] = "#in#_" + t1.getId();
             for (Transition t2 : net.getTransitions()) {
@@ -48,17 +57,14 @@ public class AigerRenderer {
                     inputs[i++] = "!#in#_" + t2.getId();
                 }
             }
+            inputs[i++] = t1.getId() + "_enabled";
             file.addGate("#out#_" + t1.getId(), inputs);
         }
 
-        // Update the init flag
+        // %%%%%%%%%% Update the init flag
         file.copyValues(INIT_LATCH + "_new", AigerFile.TRUE);
 
-        // Update the place latches
-        // Create the general circuits for getting the enabledness of a transition
-        for (Transition t : net.getTransitions()) {
-            createEnabled(file, t);
-        }
+        // %%%%%%%%%% Update the place latches       
         // Create for each place and each transition what happens, when "firing"
         for (Place p : net.getPlaces()) {
             for (Transition t : net.getTransitions()) {

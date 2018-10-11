@@ -1,6 +1,5 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.modelchecker.circuits.Gate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,10 +72,12 @@ public class AigerFile {
         }
         // latches
         StringBuilder latis = new StringBuilder();
+        i = 0;
         for (Map.Entry<String, Integer> entry : latches.entrySet()) {
             String key = entry.getKey();
             Integer value = entry.getValue();
             latis.append(value).append(" ").append(getIndex(key + "_new")).append("\n");
+            symbols.append("l").append(i++).append(" ").append(key).append("\n");
 //            latis.append(value).append(" ").append(getIndex(key)).append("\n");
         }
         //outputs

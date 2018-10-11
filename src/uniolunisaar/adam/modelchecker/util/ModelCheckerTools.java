@@ -62,7 +62,7 @@ public class ModelCheckerTools {
         // move to original name
         Files.move(new File(bufferpath + "_circuit.pdf").toPath(), new File(path + "_circuit.pdf").toPath(), REPLACE_EXISTING);
         Logger.getInstance().addMessage("Moved: " + bufferpath + "_circuit.pdf --> " + path + "_circuit.pdf", true);
-        Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aiger").toPath(), REPLACE_EXISTING);
-        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aiger", true);
+        Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
+        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aag", true);
     }
 }

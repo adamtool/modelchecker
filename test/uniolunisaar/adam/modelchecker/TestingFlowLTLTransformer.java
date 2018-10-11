@@ -66,11 +66,11 @@ public class TestingFlowLTLTransformer {
         f = FlowLTLTransformer.getMaximaliltyReisigObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f.toSymbolString());
-        
+
         // test to hyper ltl
         String formula = FlowLTLTransformer.toMCHyperFormat(game, f.toString());
         System.out.println(formula);
-        ModelCheckerMCHyper.check(game, formula, "./");
+        ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
     }
 
 //    @Test(enabled = true)
