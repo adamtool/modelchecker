@@ -13,8 +13,12 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
+import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 import uniolunisaar.adam.tools.Tools;
 
 /**
@@ -25,7 +29,7 @@ import uniolunisaar.adam.tools.Tools;
 public class TestingModelcheckingCircuit {
 
     @Test
-    void testToyExample() throws RenderException, InterruptedException, IOException {
+    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException {
         PetriGame game = new PetriGame("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
@@ -50,17 +54,33 @@ public class TestingModelcheckingCircuit {
 
         AdamTools.savePG2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
-        String formula = "Forall (F (AP \"#out#_out\" 0))";
+        String formula = "Forall (G (AP \"#out#_inittflB\" 0))";
         boolean check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertTrue(check);
+        formula = "Forall (AP \"#out#_inittfl\" 0)";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertTrue(check);
+        formula = "Forall (F (AP \"#out#_out\" 0))";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
         Assert.assertFalse(check);
-        
+        formula = "Forall (Neg (AP \"#out#_out\" 0))";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertTrue(check);
+
+//        ILTLFormula f = FormulaCreator.enabledObject(tstolen);
+//        formula = FlowLTLTransformer.toMCHyperFormat(game, "( "+f.toString()+")");
+//        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+//        Assert.assertFalse(check);
+                
         formula = "Forall (Neg (AP \"#out#_tB\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertFalse(check); 
-        formula = "Forall (Implies (AP \"#out#_tB\" 0) False)";
+        Assert.assertTrue(check);
+        formula = "Forall (Neg (AP \"#out#_tC\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertFalse(check);
-
+        Assert.assertTrue(check);
+//        formula = "Forall (Implies (AP \"#out#_tB\" 0) false)"; // syntactic 'false' ? don't now how to give it to MCHyper
+//        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+//        Assert.assertFalse(check);
 
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());

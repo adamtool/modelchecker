@@ -64,13 +64,14 @@ public class AigerRenderer {
         // %%%%%%%%%% Update the init flag
         file.copyValues(INIT_LATCH + "_new", AigerFile.TRUE);
 
-        // %%%%%%%%%% Update the place latches       
-        // Create for each place and each transition what happens, when "firing"
-        for (Place p : net.getPlaces()) {
-            for (Transition t : net.getTransitions()) {
-                createDoFiring(file, p, t);
-            }
-        }
+        // %%%%%%%%%% Update the place latches      
+        // Not needed in the situation when we already only chosed enabled transitions
+//        // Create for each place and each transition what happens, when "firing"
+//        for (Place p : net.getPlaces()) {
+//            for (Transition t : net.getTransitions()) {
+//                createDoFiring(file, p, t);
+//            }
+//        }
         // Create for each place the chosing and the test if s.th. has fired
         String[] inputs = new String[net.getTransitions().size()];
         int i = 0;
@@ -80,19 +81,19 @@ public class AigerRenderer {
         file.addGate("#allNegatedTransitions#", inputs);
         for (Place p : net.getPlaces()) {
             // Create for each place the choosing of the transition
-//            createChooseTransition(file, net, p); // use this when not already checked that the transition is enabled
-            createChooseTransitionOfEnabled(file, net, p);
+            createChooseTransition(file, net, p); // use this when not already checked that the transition is enabled
+            createChooseTransitionOfEnabled(file, net, p); // F2
             // Create for each place the check if s.th. has fired
-            createSthFired(file, net, p);
+            createSthFired(file, p); // F1
         }
         // Do the final update for the places
         for (Place p : net.getPlaces()) {
             if (p.getInitialToken().getValue() > 0) { // is initial place
                 // !(!init_latch AND !F)
-                file.addGate(p.getId() + "_new_buf", "!" + INIT_LATCH, "!" + "#sthFired#_" + p.getId());
+                file.addGate(p.getId() + "_new_buf", INIT_LATCH, "!" + "#sthFired#_" + p.getId());
                 file.copyValues(p.getId() + "_new", "!" + p.getId() + "_new_buf");
             } else {
-                file.addGate(p.getId() + "_new", "!" + INIT_LATCH, "#sthFired#_" + p.getId());
+                file.addGate(p.getId() + "_new", INIT_LATCH, "#sthFired#_" + p.getId());
             }
         }
 
@@ -101,24 +102,7 @@ public class AigerRenderer {
         for (Place p : net.getPlaces()) {
             file.copyValues("#out#_" + p.getId(), p.getId() + "_new");
         }
-        // for the transition output this is already done by the correcting 
-        // choosing strategy
-//        // copy input transitions directly to the output
-//        for (Transition t : net.getTransitions()) {
-//            file.copyValues("out_" + t.getId(), t.getId());
-//        }
-
-//        // copy the latches
-//        for (Place p : net.getPlaces()) {
-//            file.copyValues(p.getId() + "_new", p.getId());
-//        }
-//        for (Transition t : net.getTransitions()) {
-//            file.copyValues(t.getId() + "_new", t.getId());
-//        }
-//        // copy input transitions directly to the output
-//        for (Transition t : net.getTransitions()) {
-//            file.copyValues("out_" + t.getId(), t.getId());
-//        }
+        
         return file.toString();
     }
 
@@ -189,20 +173,20 @@ public class AigerRenderer {
         for (Transition t : net.getTransitions()) {
             String firingResult;
             if (!t.getPreset().contains(p) && !t.getPostset().contains(p)) {
-                firingResult = p.getId();
+                firingResult = "!" + p.getId();
             } else if (t.getPreset().contains(p) && !t.getPostset().contains(p)) {
-                firingResult = AigerFile.FALSE;
-            } else {
                 firingResult = AigerFile.TRUE;
+            } else {
+                firingResult = AigerFile.FALSE;
             }
-            file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), "!" + firingResult);
+            file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), firingResult);
             inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
         }
         file.addGate(id, inputs);
         return id;
     }
 
-    private static String createSthFired(AigerFile file, PetriNet net, Place p) {
+    private static String createSthFired(AigerFile file, Place p) {
         String id = "#sthFired#_" + p.getId();
         // create A
         String idA = id + "_A";

@@ -24,7 +24,7 @@ public class FlowLTLTransformer {
     public static String toMCHyperFormat(PetriNet net, String formula) throws ParseException {
         // convert to prefix
         formula = FlowLTLParser.parse(net, formula).toPrefixString();
-        System.out.println(formula);
+//        System.out.println(formula);
         formula = formula.replace("IMP(", "(Implies ");
         formula = formula.replace("AND(", "(And ");
         formula = formula.replace("OR(", "(Or ");
