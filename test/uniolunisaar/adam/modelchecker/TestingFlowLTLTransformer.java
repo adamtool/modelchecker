@@ -11,6 +11,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 
@@ -49,15 +50,15 @@ public class TestingFlowLTLTransformer {
 
         // test maximality
         // standard
-        IRunFormula f = FlowLTLTransformer.getMaximaliltyStandardObject(game);
+        IRunFormula f = FormulaCreator.getMaximaliltyStandardObject(game);
 //        System.out.println("Maximality standard:");
 //        System.out.println(f.toSymbolString());
         // reisig
-        ILTLFormula f1 = FlowLTLTransformer.getMaximaliltyReisigDirectAsObject(game);
+        ILTLFormula f1 = FormulaCreator.getMaximaliltyReisigDirectAsObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f1.toSymbolString());
         // reisig
-        f = FlowLTLTransformer.getMaximaliltyReisigObject(game);
+        f = FormulaCreator.getMaximaliltyReisigObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f.toSymbolString());
 
@@ -71,104 +72,4 @@ public class TestingFlowLTLTransformer {
         String formula2 = FlowLTLTransformer.toMCHyperFormat(f);
         Assert.assertEquals(formula.replace(" ", ""), formula2.replace(" ", ""));
     }
-
-//    @Test(enabled = true)
-//    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
-//        final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
-//        PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-//        AdamTools.savePG2PDF("example", new PetriGame(pn), false);
-//        //todo:correct formula and all the other examples have to be adapted.
-//        ModelCheckerMCHyper.check(pn, "Forall(F (AP \"out_out\" 0))", "./" + pn.getName());
-//    }
-//
-//    @Test
-//    public void checkFirstExample() throws RenderException, IOException, InterruptedException {
-//        PetriGame net = ToyExamples.createFirstExample(true);
-//        AdamTools.saveAPT(net.getName(), net, false);
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-//        String formula = "F out > 0";
-////        boolean ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-////        Assert.assertFalse(ret);
-//
-//        net = ToyExamples.createFirstExample(false);
-//        AdamTools.saveAPT(net.getName(), net, false);
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-////        ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-////        Assert.assertTrue(ret);
-//    }
-//
-//    @Test
-//    public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException {
-//        PetriGame net = ToyExamples.createFirstExampleExtended(true);
-//        AdamTools.saveAPT(net.getName(), net, false);
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-//        String formula = "F out > 0";
-////        boolean ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-////        Assert.assertFalse(ret);
-//    }
-//
-//    @Test
-//    public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException {
-//        PetriGame net = ToyExamples.createFirstExampleExtended(false);
-//        AdamTools.saveAPT(net.getName(), net, false);
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-//        String formula = "F out > 0";
-////        boolean ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-////        Assert.assertTrue(ret);
-//    }
-//
-//    @Test
-//    public void updatingNetworkExample() throws IOException, InterruptedException, RenderException {
-//        PetriGame net = UpdatingNetwork.create(3, 2);
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-////        String formula = "F p3 > 0";
-////        check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-//    }
-//
-//    @Test
-//    public void redundantFlowExample() throws IOException, InterruptedException, RenderException {
-//        PetriGame net = RedundantNetwork.getBasis();
-//        AdamTools.saveAPT(net.getName(), net, false);
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-//        String formula = "F p3 > 0";
-////        check(mc, createModelCheckingFormula(net, formula), "./" + net.getName());
-//
-//        net = RedundantNetwork.getUpdatingNetwork();
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-////        check(mc, createModelCheckingFormula(net, formula), "./" + net.getName());
-//
-//        net = RedundantNetwork.getUpdatingMutexNetwork();
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-////        check(mc, createModelCheckingFormula(net, formula), "./" + net.getName());
-//
-//        net = RedundantNetwork.getUpdatingFixedMutexNetwork();
-//        AdamTools.savePG2PDF(net.getName(), net, false);
-//        mc = PetriNetTransformer.createNet4ModelChecking(net);
-//        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-////        check(mc, createModelCheckingFormula(net, formula), "./" + net.getName());
-//    }
-//
-//    @Test
-//    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException {
-//        final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
-//        PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
-//        final String formula = "EF qbadA > 0 OR qbadB > 0";
-////        check(pn, formula, path + "burglar");
-//    }
 }
