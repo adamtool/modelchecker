@@ -57,7 +57,7 @@ public class AigerRenderer {
                     inputs[i++] = "!#in#_" + t2.getId();
                 }
             }
-            inputs[i++] = t1.getId() + "_enabled";
+            inputs[i++] = t1.getId() + "_enabled"; // this one added to have only the enabled choosen
             file.addGate("#out#_" + t1.getId(), inputs);
         }
 
@@ -80,7 +80,8 @@ public class AigerRenderer {
         file.addGate("#allNegatedTransitions#", inputs);
         for (Place p : net.getPlaces()) {
             // Create for each place the choosing of the transition
-            createChooseTransition(file, net, p);
+//            createChooseTransition(file, net, p); // use this when not already checked that the transition is enabled
+            createChooseTransitionOfEnabled(file, net, p);
             // Create for each place the check if s.th. has fired
             createSthFired(file, net, p);
         }
@@ -137,6 +138,16 @@ public class AigerRenderer {
         return outId;
     }
 
+    /**
+     * Used if the enabledness is checked directly here and not at the beginning
+     *
+     * @param file
+     * @param p
+     * @param t
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     private static String createDoFiring(AigerFile file, Place p, Transition t) {
         String id = p.getId() + "_" + t.getId() + "_fired";
         if (!t.getPreset().contains(p) && !t.getPostset().contains(p)) {
@@ -150,12 +161,41 @@ public class AigerRenderer {
         return id;
     }
 
+    /**
+     * Used if the enabledness is checked directly here and not at the beginning
+     *
+     * @param file
+     * @param net
+     * @param p
+     * @return
+     */
+    @Deprecated
     private static String createChooseTransition(AigerFile file, PetriNet net, Place p) {
         String id = "#transChoosen#_" + p.getId();
         String[] inputs = new String[net.getTransitions().size()];
         int i = 0;
         for (Transition t : net.getTransitions()) {
             file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), "!" + p.getId() + "_" + t.getId() + "_fired");
+            inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
+        }
+        file.addGate(id, inputs);
+        return id;
+    }
+
+    private static String createChooseTransitionOfEnabled(AigerFile file, PetriNet net, Place p) {
+        String id = "#transChoosen#_" + p.getId();
+        String[] inputs = new String[net.getTransitions().size()];
+        int i = 0;
+        for (Transition t : net.getTransitions()) {
+            String firingResult;
+            if (!t.getPreset().contains(p) && !t.getPostset().contains(p)) {
+                firingResult = p.getId();
+            } else if (t.getPreset().contains(p) && !t.getPostset().contains(p)) {
+                firingResult = AigerFile.FALSE;
+            } else {
+                firingResult = AigerFile.TRUE;
+            }
+            file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), "!" + firingResult);
             inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
         }
         file.addGate(id, inputs);

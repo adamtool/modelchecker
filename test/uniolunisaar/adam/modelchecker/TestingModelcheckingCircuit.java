@@ -53,7 +53,19 @@ public class TestingModelcheckingCircuit {
         String formula = "Forall (F (AP \"#out#_out\" 0))";
         boolean check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
         Assert.assertFalse(check);
+        
+        formula = "Forall (Neg (AP \"#out#_tB\" 0))";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertFalse(check); 
+        formula = "Forall (Implies (AP \"#out#_tB\" 0) False)";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertFalse(check);
+
+
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
+        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertTrue(check);
+        formula = "Forall (Implies (AP \"#out#_tB\" 0) (AP \"#out#_out\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
         Assert.assertTrue(check);
         formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";

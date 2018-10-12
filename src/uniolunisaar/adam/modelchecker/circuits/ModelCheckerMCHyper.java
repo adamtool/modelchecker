@@ -32,6 +32,10 @@ public class ModelCheckerMCHyper {
         String output = IOUtils.toString(proc.getInputStream());
         Logger.getInstance().addMessage(output, true);
 
+        if (proc.exitValue() == 255) {
+            throw new RuntimeException("MCHyper didn't finshed correctly.");
+        }
+
         if (proc.exitValue() == 42) { // has a counter example, ergo read it
             try (FileInputStream inputStream = new FileInputStream(path + "_complete.cex")) {
                 String cexText = IOUtils.toString(inputStream);
@@ -94,9 +98,10 @@ public class ModelCheckerMCHyper {
                 }
                 Logger.getInstance().addMessage(cex.toString(), true);
             }
+            return false;
         }
 
-        return false;
+        return true;
     }
 
 }
