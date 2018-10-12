@@ -8,10 +8,17 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.Formula;
+import uniolunisaar.adam.logic.flowltl.FormulaBinary;
+import uniolunisaar.adam.logic.flowltl.FormulaUnary;
+import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.flowltl.IOperatorBinary;
+import uniolunisaar.adam.logic.flowltl.IOperatorUnary;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
+import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 
@@ -21,6 +28,90 @@ import uniolunisaar.adam.logic.util.FormulaCreator;
  */
 public class FlowLTLTransformer {
 
+    public static String toMCHyperFormat(IOperatorUnary op) {
+        if (op instanceof LTLOperators.Unary) {
+            switch ((LTLOperators.Unary) op) {
+                case F:
+                    return "F";
+                case G:
+                    return "G";
+                case NEG:
+                    return "Neg";
+                case X:
+                    return "X";
+            }
+        }
+        // todo throw exception but should never happen
+        return "error";
+
+    }
+
+    public static String toMCHyperFormat(IOperatorBinary op) {
+        if (op instanceof LTLOperators.Binary) {
+            switch ((LTLOperators.Binary) op) {
+                case AND:
+                    return "And";
+                case OR:
+                    return "Or";
+                case IMP:
+                    return "Implies";
+                case BIMP:
+                    return "Eq";
+                case U:
+                    return "Until";
+                case W:
+                    return "WUntil";
+                case R:
+                    return "Release";
+            }
+            // todo throw exception but should never happen
+            return "error";
+        } else if (op instanceof RunOperators.Binary) {
+            if (op == RunOperators.Binary.AND) {
+                return "And";
+            } else {
+                return "Or";
+            }
+        } else if (op instanceof RunOperators.Implication) {
+            return "Implies";
+        } else {
+            // todo throw exception but should never happen
+            return "error";
+        }
+    }
+
+    private static String subformulaToMCHyperFormat(IFormula formula) {
+        if (formula instanceof AtomicProposition) {
+            return "(AP \"#out#_" + ((AtomicProposition) formula).toString() + "\" 0)";
+        } else if (formula instanceof Formula) {
+            return subformulaToMCHyperFormat(((Formula) formula).getPhi());
+        } else if (formula instanceof FormulaUnary) {
+            FormulaUnary f = (FormulaUnary) formula;
+            return "(" + toMCHyperFormat(f.getOp()) + " " + subformulaToMCHyperFormat(f.getPhi()) + ")";
+        } else if (formula instanceof FormulaBinary) {
+            FormulaBinary f = (FormulaBinary) formula;
+            return "(" + toMCHyperFormat(f.getOp()) + " " + subformulaToMCHyperFormat(f.getPhi1()) + " " + subformulaToMCHyperFormat(f.getPhi2()) + ")";
+        } else {
+            // todo throw exception but should not happen.
+            return "error";
+        }
+    }
+
+    public static String toMCHyperFormat(IFormula formula) {
+        return "Forall " + subformulaToMCHyperFormat(formula);
+    }
+
+    /**
+     * The replacement of atomic propositions is not that nice and fault
+     * tolerant.
+     *
+     * @param net
+     * @param formula
+     * @return
+     * @throws ParseException
+     * @deprecated
+     */
+    @Deprecated
     public static String toMCHyperFormat(PetriNet net, String formula) throws ParseException {
         // convert to prefix
         formula = FlowLTLParser.parse(net, formula).toPrefixString();

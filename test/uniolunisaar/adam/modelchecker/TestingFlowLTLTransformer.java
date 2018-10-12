@@ -1,6 +1,5 @@
 package uniolunisaar.adam.modelchecker;
 
-import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -8,17 +7,12 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
-import uniolunisaar.adam.generators.modelchecking.ToyExamples;
-import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
-import uniolunisaar.adam.tools.Tools;
 
 /**
  *
@@ -70,7 +64,12 @@ public class TestingFlowLTLTransformer {
         // test to hyper ltl
         String formula = FlowLTLTransformer.toMCHyperFormat(game, f.toString());
         System.out.println(formula);
-        ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        boolean output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertFalse(output);
+
+        // new version
+        String formula2 = FlowLTLTransformer.toMCHyperFormat(f);
+        Assert.assertEquals(formula.replace(" ", ""), formula2.replace(" ", ""));
     }
 
 //    @Test(enabled = true)
