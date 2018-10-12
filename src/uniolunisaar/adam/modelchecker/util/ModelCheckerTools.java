@@ -28,41 +28,41 @@ public class ModelCheckerTools {
 
     public static void save2AigerAndDot(PetriNet net, String path) throws FileNotFoundException, IOException, InterruptedException {
         save2Aiger(net, path);
-        String command = AdamProperties.getInstance().getLibFolder() + "/aigtodot";
-        Logger.getInstance().addMessage(command, true);
-        ProcessBuilder procBuilder = new ProcessBuilder(command, path + ".aiger", path + "_circuit.dot");
-        Process proc = procBuilder.start();
-        proc.waitFor();
-        String error = IOUtils.toString(proc.getErrorStream());
-        Logger.getInstance().addMessage(error, true);
-        String output = IOUtils.toString(proc.getInputStream());
-        Logger.getInstance().addMessage(output, true);
+//        String command = AdamProperties.getInstance().getLibFolder() + "/aigtodot";
+//        Logger.getInstance().addMessage(command, true);
+//        ProcessBuilder procBuilder = new ProcessBuilder(command, path + ".aiger", path + "_circuit.dot");
+//        Process proc = procBuilder.start();
+//        proc.waitFor();
+//        String error = IOUtils.toString(proc.getErrorStream());
+//        Logger.getInstance().addMessage(error, true);
+//        String output = IOUtils.toString(proc.getInputStream());
+//        Logger.getInstance().addMessage(output, true);
     }
 
     public static void save2AigerAndDotAndPdf(PetriNet net, String path) throws FileNotFoundException, IOException, InterruptedException {
-        save2AigerAndDot(net, path);
-        // show circuit
-        String dotCommand = "dot -Tpdf " + path + "_circuit.dot -o " + path + "_circuit.pdf";
-        Logger.getInstance().addMessage(dotCommand, true);
-        ProcessBuilder procBuilder = new ProcessBuilder("dot", "-Tpdf", path + "_circuit.dot", "-o", path + "_circuit.pdf");
-        Process proc = procBuilder.start();
-        proc.waitFor();
-        String error = IOUtils.toString(proc.getErrorStream());
-        Logger.getInstance().addMessage(error, true);
-        String output = IOUtils.toString(proc.getInputStream());
-        Logger.getInstance().addMessage(output, true);
+//        save2AigerAndDot(net, path);
+//        // show circuit
+//        String dotCommand = "dot -Tpdf " + path + "_circuit.dot -o " + path + "_circuit.pdf";
+//        Logger.getInstance().addMessage(dotCommand, true);
+//        ProcessBuilder procBuilder = new ProcessBuilder("dot", "-Tpdf", path + "_circuit.dot", "-o", path + "_circuit.pdf");
+//        Process proc = procBuilder.start();
+//        proc.waitFor();
+//        String error = IOUtils.toString(proc.getErrorStream());
+//        Logger.getInstance().addMessage(error, true);
+//        String output = IOUtils.toString(proc.getInputStream());
+//        Logger.getInstance().addMessage(output, true);
     }
 
     public static void save2AigerAndPdf(PetriNet net, String path) throws FileNotFoundException, IOException, InterruptedException {
-        String bufferpath = path + "_" + System.currentTimeMillis();
-        save2AigerAndDotAndPdf(net, bufferpath);
-        // Delete dot file
-        new File(bufferpath + "_circuit.dot").delete();
-        Logger.getInstance().addMessage("Deleted: " + bufferpath + "_circuit.dot", true);
-        // move to original name
-        Files.move(new File(bufferpath + "_circuit.pdf").toPath(), new File(path + "_circuit.pdf").toPath(), REPLACE_EXISTING);
-        Logger.getInstance().addMessage("Moved: " + bufferpath + "_circuit.pdf --> " + path + "_circuit.pdf", true);
-        Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
-        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aag", true);
+//        String bufferpath = path + "_" + System.currentTimeMillis();
+//        save2AigerAndDotAndPdf(net, bufferpath);
+//        // Delete dot file
+//        new File(bufferpath + "_circuit.dot").delete();
+//        Logger.getInstance().addMessage("Deleted: " + bufferpath + "_circuit.dot", true);
+//        // move to original name
+//        Files.move(new File(bufferpath + "_circuit.pdf").toPath(), new File(path + "_circuit.pdf").toPath(), REPLACE_EXISTING);
+//        Logger.getInstance().addMessage("Moved: " + bufferpath + "_circuit.pdf --> " + path + "_circuit.pdf", true);
+//        Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
+//        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aag", true);
     }
 }
