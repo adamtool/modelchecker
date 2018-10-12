@@ -121,7 +121,7 @@ public class TestingModelcheckingCircuit {
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         AdamTools.savePG2PDF("example", new PetriGame(pn), false);
         //todo:correct formula and all the other examples have to be adapted.
-        ModelCheckerMCHyper.check(pn, "Forall(F (AP \"out_out\" 0))", "./" + pn.getName());
+        ModelCheckerMCHyper.check(pn, "Forall (F (AP \"#out#_out\" 0))", "./" + pn.getName());
     }
 
     @Test
