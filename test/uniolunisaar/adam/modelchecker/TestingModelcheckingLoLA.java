@@ -68,7 +68,7 @@ public class TestingModelcheckingLoLA {
         PetriGame net = ToyExamples.createFirstExample(true);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
+        PetriGame mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -77,7 +77,7 @@ public class TestingModelcheckingLoLA {
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformer.createNet4ModelChecking(net);
+        mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
         Assert.assertTrue(ret);
@@ -88,7 +88,7 @@ public class TestingModelcheckingLoLA {
         PetriGame net = ToyExamples.createFirstExampleExtended(true);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
+        PetriGame mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -100,7 +100,7 @@ public class TestingModelcheckingLoLA {
         PetriGame net = ToyExamples.createFirstExampleExtended(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
+        PetriGame mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -111,7 +111,7 @@ public class TestingModelcheckingLoLA {
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException {
         PetriGame net = UpdatingNetwork.create(3, 2);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
+        PetriGame mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -122,26 +122,26 @@ public class TestingModelcheckingLoLA {
         PetriGame net = RedundantNetwork.getBasis();
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        PetriGame mc = PetriNetTransformer.createNet4ModelChecking(net);
+        PetriGame mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformer.createNet4ModelChecking(net);
+        mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformer.createNet4ModelChecking(net);
+        mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformer.createNet4ModelChecking(net);
+        mc = PetriNetTransformer.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformer.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
     }

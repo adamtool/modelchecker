@@ -21,7 +21,7 @@ public class ModelCheckerLoLA {
         String file = new LoLAPNRenderer().render(pn);
 
         for (Transition t : pn.getTransitions()) {
-            if (pn.isFair(t)) {
+            if (pn.isStrongFair(t)) {
                 file = file.replaceAll("TRANSITION " + t.getId() + "\n", "TRANSITION " + t.getId() + " STRONG FAIR\n");
             }
         }

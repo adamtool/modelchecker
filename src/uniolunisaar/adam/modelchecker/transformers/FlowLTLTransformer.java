@@ -1,20 +1,29 @@
 package uniolunisaar.adam.modelchecker.transformers;
 
+import java.util.ArrayList;
+import java.util.List;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.Formula;
 import uniolunisaar.adam.logic.flowltl.FormulaBinary;
 import uniolunisaar.adam.logic.flowltl.FormulaUnary;
 import uniolunisaar.adam.logic.flowltl.IFormula;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IOperatorBinary;
 import uniolunisaar.adam.logic.flowltl.IOperatorUnary;
+import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
+import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
+import uniolunisaar.adam.logic.util.FormulaCreator;
 
 /**
  *
@@ -135,6 +144,97 @@ public class FlowLTLTransformer {
 
         formula = "Forall " + formula;
         return formula;
+    }
+
+    private static List<FlowFormula> getFlowFormulas(IFormula formula) {
+        List<FlowFormula> flowFormulas = new ArrayList<>();
+        if (formula instanceof FlowFormula) {
+            flowFormulas.add((FlowFormula) formula);
+            return flowFormulas;
+        } else if (formula instanceof ILTLFormula) {
+            return flowFormulas;
+        } else if (formula instanceof FormulaBinary) {
+            FormulaBinary binF = (FormulaBinary) formula;
+            flowFormulas.addAll(getFlowFormulas(binF.getPhi1()));
+            flowFormulas.addAll(getFlowFormulas(binF.getPhi2()));
+        }
+        return flowFormulas;
+    }
+
+    /**
+     * This is only done for ONE flow formula
+     *
+     * @param orig
+     * @param net
+     * @param formula
+     * @return
+     */
+    public static IRunFormula createFormula4ModelChecking4CircuitParallel(PetriGame orig, PetriNet net, IRunFormula formula) {
+        // Add Fairness to the formula
+        ILTLFormula fairness = null;
+        for (Transition t : orig.getTransitions()) {
+            if (orig.isStrongFair(t)) {
+                if (fairness == null) {
+                    fairness = FormulaCreator.createStrongFairness(t);
+                } else {
+                    fairness = new LTLFormula(fairness, LTLOperators.Binary.AND, FormulaCreator.createStrongFairness(t));
+                }
+            }
+            if (orig.isWeakFair(t)) {
+                if (fairness == null) {
+                    fairness = FormulaCreator.createWeakFairness(t);
+                } else {
+                    fairness = new LTLFormula(fairness, LTLOperators.Binary.AND, FormulaCreator.createWeakFairness(t));
+                }
+            }
+        }
+        IFormula f = (fairness != null)
+                ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
+
+        List<FlowFormula> flowFormulas = getFlowFormulas(f);
+        if (flowFormulas.size() > 1) {
+            throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
+        }
+        if (flowFormulas.size() == 1) {
+            try {
+                // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
+                // and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
+                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
+                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+                // Replace the place with the ones belonging to the guessing of the chain
+                for (Place place : orig.getPlaces()) {
+                    AtomicProposition p = new AtomicProposition(place);
+                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + "_tfl"));
+                    flowF = flowF.substitute(p, psub);
+                }
+                f = f.substitute(flowFormulas.get(0), new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
+                        LTLOperators.Binary.OR,
+                        (ILTLFormula) flowF)); // no cast error since ((FlowFormula) flowFormulas.get(0)).getPhi(); returns a ILTLFormula and the substitutions of an ILTLFormula with 
+                // Atomic propositions yields an ILTLFormula
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
+            }
+        }
+        // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+        // Replace the transitions with the big-or of all accordingly labelled transitions
+        for (Transition transition : orig.getTransitions()) {
+            try {
+                AtomicProposition trans = new AtomicProposition(transition);
+                ILTLFormula disjunct = trans;
+                for (Transition t : net.getTransitions()) {
+                    if (t.getLabel().equals(transition.getId())) {
+                        disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
+                    }
+                }
+                f = f.substitute(trans, disjunct);
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
+            }
+        }
+
+        // Replace the next operator
+        return new RunFormula(f);
     }
 
     public static String createFormula4ModelChecking4LoLA(PetriGame game, String formula) {

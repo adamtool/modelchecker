@@ -16,7 +16,8 @@ import uniolunisaar.adam.tools.Logger;
  * @author Manuel Gieseking
  */
 public class ModelCheckerMCHyper {
-
+    
+    
     public static boolean check(PetriNet net, String formula, String path) throws InterruptedException, IOException {
         ModelCheckerTools.save2AigerAndPdf(net, path);
         ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "2", "-o", path + "_complete");
