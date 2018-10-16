@@ -25,6 +25,8 @@ import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -205,8 +207,8 @@ public class FlowLTLTransformer {
         }
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
-    
-      /**
+
+    /**
      * This is only done for ONE flow formula
      *
      * @param orig
@@ -235,54 +237,48 @@ public class FlowLTLTransformer {
         }
         IFormula f = (fairness != null)
                 ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
-
-        // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
-        // Replace the transitions with the big-or of all accordingly labelled transitions
-        for (Transition transition : orig.getTransitions()) {
-            try {
-                AtomicProposition trans = new AtomicProposition(transition);
-                ILTLFormula disjunct = trans;
-                for (Transition t : net.getTransitions()) { // todo: what if only on transition is available?
-                    if (t.getLabel().equals(transition.getId())) {
-                        disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
-                    }
-                }
-                f = f.substitute(trans, disjunct);
-            } catch (NotSubstitutableException ex) {
-                throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
-            }
-        }
+        
+        // replace the next operator in the run-part
 
         List<FlowFormula> flowFormulas = getFlowFormulas(f);
-        if (flowFormulas.size() > 1) {
-            throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
-        }
-        if (flowFormulas.size() == 1) {
+        for (int i = 0; i < flowFormulas.size(); i++) {
+            FlowFormula flowFormula = flowFormulas.get(i);
             try {
-                // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
-                // NOT ANYMORE, do it later because of the next: and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
-//                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
-                FlowFormula flowF = ((FlowFormula) flowFormulas.get(0));
+                // replace the transitions and places within the flow formula accordingly                 
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
                     AtomicProposition p = new AtomicProposition(place);
-                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + "_tfl"));
-                    flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
+                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + i));
+                    flowFormula = (FlowFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
+                }
+
+                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+                // Replace the transitions with the big-or of all accordingly labelled transitions
+                for (Transition transition : orig.getTransitions()) {
+                    try {
+                        AtomicProposition trans = new AtomicProposition(transition);
+                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + i);
+                        ILTLFormula disjunct = trans;
+                        for (Transition t : act.getPostset()) { // todo: what if only on transition is available?
+                            disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
+                        }
+                        flowFormula = (FlowFormula) flowFormula.substitute(trans, disjunct);
+                    } catch (NotSubstitutableException ex) {
+                        throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
+                    }
                 }
 
                 // Replace the next operator within the flow formula
-                flowF = replaceNextInFlowFormula(orig, net, flowF);
+                flowFormula = replaceNextInFlowFormula(orig, net, flowFormula);
 
-                f = f.substitute(flowFormulas.get(0), new RunFormula(
+                f = f.substitute(flowFormulas.get(i), new RunFormula(
                         new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
                         LTLOperators.Binary.OR,
-                        flowF.getPhi()));
+                        flowFormula.getPhi()));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
-        } else {
-            Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
         }
 
         return new RunFormula(f);
