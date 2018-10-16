@@ -25,6 +25,7 @@ import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -154,6 +155,8 @@ public class FlowLTLTransformer {
             return flowFormulas;
         } else if (formula instanceof ILTLFormula) {
             return flowFormulas;
+        } else if (formula instanceof RunFormula) {
+            return getFlowFormulas(((RunFormula) formula).getPhi());
         } else if (formula instanceof FormulaBinary) {
             FormulaBinary binF = (FormulaBinary) formula;
             flowFormulas.addAll(getFlowFormulas(binF.getPhi1()));
@@ -167,13 +170,15 @@ public class FlowLTLTransformer {
         return new FlowFormula(replaceNextWithinFlowFormula(orig, net, phi));
     }
 
-    private static LTLFormula replaceNextWithinFlowFormula(PetriGame orig, PetriNet net, ILTLFormula phi) {
-        if (phi instanceof LTLFormula) {
+    private static ILTLFormula replaceNextWithinFlowFormula(PetriGame orig, PetriNet net, ILTLFormula phi) {
+        if (phi instanceof AtomicProposition) {
+            return phi;
+        } else if (phi instanceof LTLFormula) {
             return new LTLFormula(replaceNextWithinFlowFormula(orig, net, ((LTLFormula) phi).getPhi()));
         } else if (phi instanceof FormulaUnary) {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi;
-            LTLFormula subst = replaceNextWithinFlowFormula(orig, net, castPhi.getPhi());
-            if (subst.getPhi() instanceof FormulaUnary) {
+            ILTLFormula subst = replaceNextWithinFlowFormula(orig, net, castPhi.getPhi());
+            if (subst instanceof LTLFormula && ((LTLFormula) subst).getPhi() instanceof FormulaUnary) {
                 FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
                 if (substCast.getOp() == LTLOperators.Unary.X) {
                     Collection<ILTLFormula> elements = new ArrayList<>();
@@ -267,15 +272,17 @@ public class FlowLTLTransformer {
                 }
 
                 // Replace the next operator within the flow formula
-                f = replaceNextInFlowFormula(orig, net, flowF);
+                flowF = replaceNextInFlowFormula(orig, net, flowF);
 
-                f = f.substitute(flowFormulas.get(0), new LTLFormula(
+                f = f.substitute(flowFormulas.get(0), new RunFormula(
                         new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
                         LTLOperators.Binary.OR,
-                        (ILTLFormula) f)); // no cast error since ((FlowFormula) flowFormulas.get(0)).getPhi(); returns a ILTLFormula and the substitutions of an ILTLFormula yields an LTLFormula   
+                        flowF.getPhi()));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
+        } else {
+            Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
         }
 
         return new RunFormula(f);

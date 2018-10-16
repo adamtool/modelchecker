@@ -5,6 +5,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -26,9 +27,11 @@ public class ModelChecker {
      * @throws IOException
      */
     public static boolean checkWithParallelApproach(PetriGame game, IRunFormula formula, String path) throws InterruptedException, IOException {
+        Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
         PetriGame gameMC = PetriNetTransformer.createNet4ModelCheckingParallel(game);
         IRunFormula formulaMC = FlowLTLTransformer.createFormula4ModelChecking4CircuitParallel(game, gameMC, formula);
+        Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
         return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformer.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
     }
-
+    
 }

@@ -138,6 +138,12 @@ public class TestingModelcheckingCircuit {
         IRunFormula f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         boolean ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
+        Assert.assertTrue(ret);
+
+        formula = "A(F(out))";
+        f = FlowLTLParser.parse(net, formula);
+        f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
+        ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
         Assert.assertFalse(ret);
 
         net = ToyExamples.createFirstExample(false);
