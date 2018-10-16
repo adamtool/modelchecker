@@ -1,6 +1,7 @@
 package uniolunisaar.adam.modelchecker.transformers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
@@ -161,6 +162,45 @@ public class FlowLTLTransformer {
         return flowFormulas;
     }
 
+    private static FlowFormula replaceNextInFlowFormula(PetriGame orig, PetriNet net, FlowFormula flowFormula) {
+        ILTLFormula phi = flowFormula.getPhi();
+        return new FlowFormula(replaceNextWithinFlowFormula(orig, net, phi));
+    }
+
+    private static LTLFormula replaceNextWithinFlowFormula(PetriGame orig, PetriNet net, ILTLFormula phi) {
+        if (phi instanceof LTLFormula) {
+            return new LTLFormula(replaceNextWithinFlowFormula(orig, net, ((LTLFormula) phi).getPhi()));
+        } else if (phi instanceof FormulaUnary) {
+            FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi;
+            LTLFormula subst = replaceNextWithinFlowFormula(orig, net, castPhi.getPhi());
+            if (subst.getPhi() instanceof FormulaUnary) {
+                FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
+                if (substCast.getOp() == LTLOperators.Unary.X) {
+                    Collection<ILTLFormula> elements = new ArrayList<>();
+                    for (Transition t : orig.getTransitions()) {
+                        elements.add(new AtomicProposition(t));
+                    }
+                    ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+                    elements = new ArrayList<>();
+                    for (Transition t : net.getTransitions()) {
+                        if (!orig.containsTransition(t.getId())) {
+                            elements.add(new AtomicProposition(t));
+                        }
+                    }
+                    LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
+                    return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
+                }
+            }
+            return new LTLFormula(castPhi.getOp(), subst);
+        } else if (phi instanceof FormulaBinary) {
+            FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula> castPhi = (FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula>) phi;
+            ILTLFormula subst1 = replaceNextWithinFlowFormula(orig, net, castPhi.getPhi1());
+            ILTLFormula subst2 = replaceNextWithinFlowFormula(orig, net, castPhi.getPhi2());
+            return new LTLFormula(subst1, castPhi.getOp(), subst2);
+        }
+        throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+    }
+
     /**
      * This is only done for ONE flow formula
      *
@@ -191,38 +231,13 @@ public class FlowLTLTransformer {
         IFormula f = (fairness != null)
                 ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
 
-        List<FlowFormula> flowFormulas = getFlowFormulas(f);
-        if (flowFormulas.size() > 1) {
-            throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
-        }
-        if (flowFormulas.size() == 1) {
-            try {
-                // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
-                // and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
-                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
-                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
-                // Replace the place with the ones belonging to the guessing of the chain
-                for (Place place : orig.getPlaces()) {
-                    AtomicProposition p = new AtomicProposition(place);
-                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + "_tfl"));
-                    flowF = flowF.substitute(p, psub);
-                }
-                f = f.substitute(flowFormulas.get(0), new LTLFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
-                        LTLOperators.Binary.OR,
-                        (ILTLFormula) flowF)); // no cast error since ((FlowFormula) flowFormulas.get(0)).getPhi(); returns a ILTLFormula and the substitutions of an ILTLFormula with 
-                // Atomic propositions yields an ILTLFormula
-            } catch (NotSubstitutableException ex) {
-                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
-            }
-        }
         // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
         // Replace the transitions with the big-or of all accordingly labelled transitions
         for (Transition transition : orig.getTransitions()) {
             try {
                 AtomicProposition trans = new AtomicProposition(transition);
                 ILTLFormula disjunct = trans;
-                for (Transition t : net.getTransitions()) {
+                for (Transition t : net.getTransitions()) { // todo: what if only on transition is available?
                     if (t.getLabel().equals(transition.getId())) {
                         disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
                     }
@@ -233,7 +248,36 @@ public class FlowLTLTransformer {
             }
         }
 
-        // Replace the next operator
+        List<FlowFormula> flowFormulas = getFlowFormulas(f);
+        if (flowFormulas.size() > 1) {
+            throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
+        }
+        if (flowFormulas.size() == 1) {
+            try {
+                // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
+                // NOT ANYMORE, do it later because of the next: and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
+//                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
+                FlowFormula flowF = ((FlowFormula) flowFormulas.get(0));
+                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+                // Replace the place with the ones belonging to the guessing of the chain
+                for (Place place : orig.getPlaces()) {
+                    AtomicProposition p = new AtomicProposition(place);
+                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + "_tfl"));
+                    flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
+                }
+
+                // Replace the next operator within the flow formula
+                f = replaceNextInFlowFormula(orig, net, flowF);
+
+                f = f.substitute(flowFormulas.get(0), new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
+                        LTLOperators.Binary.OR,
+                        (ILTLFormula) f)); // no cast error since ((FlowFormula) flowFormulas.get(0)).getPhi(); returns a ILTLFormula and the substitutions of an ILTLFormula yields an LTLFormula   
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
+            }
+        }
+
         return new RunFormula(f);
     }
 
@@ -243,4 +287,5 @@ public class FlowLTLTransformer {
         }
         return "A(G init_tfl > 0 OR " + formula + ")";
     }
+
 }
