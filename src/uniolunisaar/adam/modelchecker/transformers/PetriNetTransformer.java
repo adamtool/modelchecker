@@ -6,6 +6,7 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.ds.petrigame.TokenFlow;
+import uniolunisaar.adam.logic.flowltl.IRunFormula;
 
 /**
  *
@@ -15,12 +16,27 @@ public class PetriNetTransformer {
 
     public static final String INIT_TOKENFLOW_ID = "init_tfl";
     public static final String TOKENFLOW_SUFFIX_ID = "_tfl";
+    
+    /**
+     * Adds maximally a new copy for each place and each sub flow formula.
+     * Thus, each sub flow formula yields one new block, where we check
+     * each flow chain by creating a run for each chain. The succeeding of the 
+     * flow chains is done sequentially. The original net choses a transition
+     * and this choice is sequentially given to each sub net concerning the
+     * belonging flow subformula.
+     * 
+     * @param game
+     * @return 
+     */
+    public static PetriGame createNet4ModelCheckingSequential(PetriGame game, IRunFormula formula) {
+        return game;
+    }
 
     /**
      * Only allows for checking one FlowFormula.
      *
      * Fairness assumptions must be put into the formula. Here wir only check
-     * one flow formula by checking each all runs and a run considers one chain.
+     * one flow formula by checking all runs and a run considers one chain.
      *
      * @param game
      * @return
