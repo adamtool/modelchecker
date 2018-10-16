@@ -6,6 +6,7 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.ds.petrigame.TokenFlow;
+import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 
 /**
@@ -14,22 +15,236 @@ import uniolunisaar.adam.logic.flowltl.IRunFormula;
  */
 public class PetriNetTransformer {
 
-    public static final String INIT_TOKENFLOW_ID = "init_tfl";
-    public static final String TOKENFLOW_SUFFIX_ID = "_tfl";
-    
+    public static final String ACTIVATION_PREFIX_ID = "$act$_";
+    public static final String INIT_TOKENFLOW_ID = "$init_tfl$";
+    public static final String TOKENFLOW_SUFFIX_ID = "_$tfl$";
+
     /**
-     * Adds maximally a new copy for each place and each sub flow formula.
-     * Thus, each sub flow formula yields one new block, where we check
-     * each flow chain by creating a run for each chain. The succeeding of the 
-     * flow chains is done sequentially. The original net choses a transition
-     * and this choice is sequentially given to each sub net concerning the
-     * belonging flow subformula.
-     * 
-     * @param game
-     * @return 
+     * Adds maximally a new copy for each place and each sub flow formula. Thus,
+     * each sub flow formula yields one new block, where we check each flow
+     * chain by creating a run for each chain. The succeeding of the flow chains
+     * is done sequentially. The original net choses a transition and this
+     * choice is sequentially given to each sub net concerning the belonging
+     * flow subformula.
+     *
+     * @param net
+     * @param formula
+     * @return
      */
-    public static PetriGame createNet4ModelCheckingSequential(PetriGame game, IRunFormula formula) {
-        return game;
+    public static PetriGame createNet4ModelCheckingSequential(PetriGame net, IRunFormula formula) {
+        // Copy the original net
+        PetriGame out = new PetriGame(net);
+        // Add to each original transition a place such that we can disable these transitions
+        // to give the token to the checking of the subflowformulas
+        for (Transition t : net.getTransitions()) {
+            if (!net.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows
+                Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+                act.setInitialToken(1);
+            }
+        }
+
+        // Add a subnet for each flow formula where each run of this subnet represents a flow chain of the original net
+        List<FlowFormula> flowFormulas = FlowLTLTransformer.getFlowFormulas(formula);
+        for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
+            // create an initial place representing the chosen place
+            Place init = out.createPlace(INIT_TOKENFLOW_ID + "_" + nb_ff);
+            init.setInitialToken(1);
+
+            // collect the places which are newly created to only copy the necessary part of the net
+            List<Place> todo = new ArrayList<>();
+
+            // %%%%% add places and transitions for the new creation of token flows
+            // %% via initial places
+            for (Place place : net.getPlaces()) {
+                if (place.getInitialToken().getValue() > 0 && net.isInitialTokenflow(place)) {
+                    // create the place which is states that the chain is currently in this place
+                    Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    out.setOrigID(p, place.getId());
+                    // create the dual place of p
+                    Place pNot = out.createPlace("!" + place.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    pNot.setInitialToken(1);
+                    out.setOrigID(pNot, place.getId());
+                    // create a transition which move the token for the chain to this new initial place of a token chain
+                    Transition t = out.createTransition("$initFlow$" + place.getId() + nb_ff);
+                    out.createFlow(init, t);
+                    out.createFlow(pNot, t);
+                    out.createFlow(t, p);
+                }
+            }
+            //%% via transitions
+            for (Transition t : net.getTransitions()) {
+                TokenFlow tfl = net.getInitialTokenFlows(t);
+                if (tfl == null) { // not initial token flows -> skip
+                    continue;
+                }
+                // if there is an initial token flow for this transition create
+                // a place which is used to activate or deactivate all of these transitions.
+                Place act = null;
+                if (!tfl.getPostset().isEmpty()) {
+                    act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                }
+                // for all token flows which are created during the game
+                for (Place post : tfl.getPostset()) {
+                    // create for all newly created flows a place (and its dual) (if not already existent)
+                    // and a transition moving the initial flow token to the place
+                    String id = post.getId() + TOKENFLOW_SUFFIX_ID + nb_ff;
+                    Place p, pNot;
+                    if (!out.containsPlace(id)) { // create or get the place in which the chain is created
+                        // create the place itself
+                        p = out.createPlace(id);
+                        out.setOrigID(p, post.getId());
+                        todo.add(p);
+                        // create the dual place of p
+                        pNot = out.createPlace("!" + id);
+                        pNot.setInitialToken(1);
+                        out.setOrigID(pNot, post.getId());
+                    } else {
+                        // get the belonging places
+                        p = out.getPlace(id);
+                        pNot = out.getPlace("!" + id);
+                    }
+                    // Create a copy of the transition which creates this flow
+                    // which creates the flow (moves the init token in the new place)
+                    // and gives the move token to the next formula (takes it, gives it later when the places are created)
+                    Transition tout = out.createTransition();
+                    tout.setLabel(t.getId());
+                    out.createFlow(init, tout);
+                    out.createFlow(pNot, tout);
+                    out.createFlow(act, tout);
+                    out.createFlow(tout, p);
+                }
+            }
+            // %%%% end add the stuff for the initial token thingys
+
+            // %%%% Inductively add for all newly created places the succeeding places
+            //      and transitions of the token flows
+            while (!todo.isEmpty()) {
+                Place pPre = todo.remove(todo.size() - 1); // do it for the next one
+                Place pPreOrig = net.getPlace(out.getOrigID(pPre)); // get the original place
+                // for all post transitions of the place add for all token flows a new transition
+                // and possibly the corresponding places which follow the flow
+                for (Transition t : pPreOrig.getPostset()) {
+                    TokenFlow tfl = net.getTokenFlow(t, pPreOrig);
+                    if (tfl == null) {
+                        continue;
+                    }
+
+                    // if there is a token flow for this transition create
+                    // a place which is used to activate or deactivate all of these transitions.
+                    Place act = null;
+                    if (!tfl.getPostset().isEmpty()) {
+                        String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff;
+                        if (!out.containsNode(id)) {
+                            act = out.createPlace(id);
+                        } else {
+                            act = out.getPlace(id);
+                        }
+                    }
+
+                    // for all succeeding token flows
+                    for (Place post : tfl.getPostset()) {
+                        // create for all newly created flows a place (and its dual) (if not already existent)
+                        // and a transition moving the initial flow token to the place
+                        String id = post.getId() + TOKENFLOW_SUFFIX_ID + nb_ff;
+                        Place pPost, pPostNot;
+                        if (!out.containsPlace(id)) { // create or get the place in which the chain is created
+                            // create the place itself
+                            pPost = out.createPlace(id);
+                            out.setOrigID(pPost, post.getId());
+                            todo.add(pPost);
+                            // create the dual place of p
+                            pPostNot = out.createPlace("!" + id);
+                            pPostNot.setInitialToken(1);
+                            out.setOrigID(pPostNot, post.getId());
+                        } else {
+                            // get the belonging places
+                            pPost = out.getPlace(id);
+                            pPostNot = out.getPlace("!" + id);
+                        }
+                        // Create a copy of the transition which creates this flow
+                        // which creates the flow (moves the init token in the new place)
+                        // and gives the move token to the next formula (takes it, gives it later when the places are created)
+                        Transition tout = out.createTransition();
+                        tout.setLabel(t.getId());
+                        // move the chain token
+                        out.createFlow(pPre, tout);
+                        out.createFlow(tout, pPost);
+                        // update the negation places accordingly
+                        out.createFlow(pPostNot, tout);
+                        out.createFlow(tout, out.getPlace("!" + pPre));
+                        // deactivate the transitions
+                        out.createFlow(act, tout);
+                    }
+                }
+            }
+            // Add a transition for every original transition which moves (takes, move is done later)
+            // the activation token to the next token flow subnet, when no
+            // chain is active
+            for (Transition t : net.getTransitions()) {
+                Transition tout = out.createTransition();
+                tout.setLabel(t.getId());
+                // all complements of places which can succeed the tokenflows of the transition
+                Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                for (Transition tpost : act.getPostset()) {
+                    for (Place p : tpost.getPreset()) {
+                        if (p != act) {
+                            out.createFlow(out.getPlace("!" + p.getId()), tout);
+                        }
+                    }
+                }
+                // deactivate the transitions
+                out.createFlow(act, tout);
+            }
+        }
+        if (!flowFormulas.isEmpty()) {
+            // Move the active token through the subnets of the flow formulas
+            // deactivate all orginal transitions whenever an original transition fires
+            for (Transition t : net.getTransitions()) {
+                if (!net.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows                        
+                    for (Transition t2 : net.getTransitions()) {
+                        if (!net.getTokenFlows(t2).isEmpty()) { // only for those which have tokenflows                        
+                            out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + t2.getId()), t);
+                        }
+                    }
+                    // and move the active token to the first subnet
+                    out.createFlow(t, out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + 0));
+                }
+            }
+            // move the active token through the subnets
+            for (int i = 1; i < flowFormulas.size(); i++) {
+                for (Transition t : net.getTransitions()) {
+                    Place acti = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + (i - 1));
+                    Place actii = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + i);
+                    for (Transition tr : acti.getPostset()) {
+                        out.createFlow(tr, actii);
+                    }
+                }
+            }
+            // give the token back to the original net (means reactivate all transitions
+            for (Transition tOrig : net.getTransitions()) {
+                Place actLast = out.getPlace(ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + (flowFormulas.size() - 1));
+                for (Transition tr : actLast.getPostset()) {
+                    for (Transition transition : net.getTransitions()) {
+                        out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));
+                    }
+                }
+            }
+        }
+        // delete the fairness assumption of all original transitions
+        for (Transition t : net.getTransitions()) {
+            out.removeStrongFair(out.getTransition(t.getId()));
+            out.removeWeakFair(out.getTransition(t.getId()));
+        }
+        // delete all token flows
+        for (Transition t : net.getTransitions()) {
+            for (Place p : t.getPreset()) {
+                net.removeTokenFlow(p, t);
+            }
+            for (Place p : t.getPostset()) {
+                net.removeTokenFlow(t, p);
+            }
+        }
+        return out;
     }
 
     /**
@@ -46,7 +261,7 @@ public class PetriNetTransformer {
         // Add to each original transition a place such that we can disable these transitions
         // as soon as we started to check a token chain
         for (Transition t : game.getTransitions()) {
-            Place act = out.createPlace("act_" + t.getId());
+            Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
             act.setInitialToken(1);
             out.createFlow(act, t);
             out.createFlow(t, act);
@@ -69,7 +284,7 @@ public class PetriNetTransformer {
                 for (Transition tr : place.getPostset()) {
                     TokenFlow tfl = game.getTokenFlow(tr, place);
                     if (tfl != null && !tfl.getPostset().isEmpty()) {
-                        out.createFlow(out.getPlace("act_" + tr.getId()), t);
+                        out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), t);
                     }
                 }
             }
@@ -104,7 +319,7 @@ public class PetriNetTransformer {
                 for (Transition tr : post.getPostset()) {
                     TokenFlow tfl_out = game.getTokenFlow(tr, post);
                     if (tfl_out != null && !tfl_out.getPostset().isEmpty()) {
-                        out.createFlow(out.getPlace("act_" + tr.getId()), tout);
+                        out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), tout);
                     }
                 }
             }
@@ -118,8 +333,7 @@ public class PetriNetTransformer {
                 if (tfl == null) {
                     continue;
                 }
-                String actID = "act_" + t.getId();
-                Place buffer = null;
+                String actID = ACTIVATION_PREFIX_ID + t.getId();
 
                 for (Place post : tfl.getPostset()) {
                     String id = post.getId() + TOKENFLOW_SUFFIX_ID;
@@ -139,11 +353,9 @@ public class PetriNetTransformer {
                     if (game.isWeakFair(t)) {
                         out.setWeakFair(tout);
                     }
-                    if (buffer == null) { // move the token along the token flow
-                        out.createFlow(pl, tout);
-                    } else {
-                        out.createFlow(buffer, tout);
-                    }
+                    // move the token along the token flow
+                    out.createFlow(pl, tout);
+
                     out.createFlow(tout, pout);
                     for (Place place : t.getPreset()) { // move the tokens in the original net
                         if (!place.getId().equals(actID)) {// don't add it to the added activation transition
@@ -161,19 +373,19 @@ public class PetriNetTransformer {
                     for (Transition tr : pOrig.getPostset()) {
                         TokenFlow tfl_out = game.getTokenFlow(tr, pOrig);
                         if (tfl_out != null && !tfl_out.getPostset().isEmpty()) {
-                            out.createFlow(tout, out.getPlace("act_" + tr.getId()));
+                            out.createFlow(tout, out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()));
                         }
                     }
                     // deactivate the succeeding the flow transitions of the original net
                     for (Transition tr : post.getPostset()) {
                         TokenFlow tfl_out = game.getTokenFlow(tr, post);
                         if (tfl_out != null && !tfl_out.getPostset().isEmpty()) {
-                            out.createFlow(out.getPlace("act_" + tr.getId()), tout);
+                            out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), tout);
                         }
                     }
                     // if tout has a loop to an act place means, that the transition was deactivated before and should still be deactivated -> remove the loop
                     for (Place pre : tout.getPreset()) {
-                        if (pre.getId().startsWith("act_") && tout.getPostset().contains(pre)) {
+                        if (pre.getId().startsWith(ACTIVATION_PREFIX_ID) && tout.getPostset().contains(pre)) {
                             out.removeFlow(pre, tout);
                             out.removeFlow(tout, pre);
                         }
@@ -184,6 +396,15 @@ public class PetriNetTransformer {
         for (Transition t : game.getTransitions()) { // delete the fairness assumption of all original transitions
             out.removeStrongFair(out.getTransition(t.getId()));
             out.removeWeakFair(out.getTransition(t.getId()));
+        }
+        // delete all token flows
+        for (Transition t : game.getTransitions()) {
+            for (Place p : t.getPreset()) {
+                game.removeTokenFlow(p, t);
+            }
+            for (Place p : t.getPostset()) {
+                game.removeTokenFlow(t, p);
+            }
         }
         return out;
     }

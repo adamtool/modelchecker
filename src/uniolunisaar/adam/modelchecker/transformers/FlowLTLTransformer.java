@@ -148,7 +148,7 @@ public class FlowLTLTransformer {
         return formula;
     }
 
-    private static List<FlowFormula> getFlowFormulas(IFormula formula) {
+    static List<FlowFormula> getFlowFormulas(IFormula formula) {
         List<FlowFormula> flowFormulas = new ArrayList<>();
         if (formula instanceof FlowFormula) {
             flowFormulas.add((FlowFormula) formula);
@@ -204,6 +204,88 @@ public class FlowLTLTransformer {
             return new LTLFormula(subst1, castPhi.getOp(), subst2);
         }
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+    }
+    
+      /**
+     * This is only done for ONE flow formula
+     *
+     * @param orig
+     * @param net
+     * @param formula
+     * @return
+     */
+    public static IRunFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, IRunFormula formula) {
+        // Add Fairness to the formula
+        ILTLFormula fairness = null;
+        for (Transition t : orig.getTransitions()) {
+            if (orig.isStrongFair(t)) {
+                if (fairness == null) {
+                    fairness = FormulaCreator.createStrongFairness(t);
+                } else {
+                    fairness = new LTLFormula(fairness, LTLOperators.Binary.AND, FormulaCreator.createStrongFairness(t));
+                }
+            }
+            if (orig.isWeakFair(t)) {
+                if (fairness == null) {
+                    fairness = FormulaCreator.createWeakFairness(t);
+                } else {
+                    fairness = new LTLFormula(fairness, LTLOperators.Binary.AND, FormulaCreator.createWeakFairness(t));
+                }
+            }
+        }
+        IFormula f = (fairness != null)
+                ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
+
+        // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+        // Replace the transitions with the big-or of all accordingly labelled transitions
+        for (Transition transition : orig.getTransitions()) {
+            try {
+                AtomicProposition trans = new AtomicProposition(transition);
+                ILTLFormula disjunct = trans;
+                for (Transition t : net.getTransitions()) { // todo: what if only on transition is available?
+                    if (t.getLabel().equals(transition.getId())) {
+                        disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
+                    }
+                }
+                f = f.substitute(trans, disjunct);
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
+            }
+        }
+
+        List<FlowFormula> flowFormulas = getFlowFormulas(f);
+        if (flowFormulas.size() > 1) {
+            throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
+        }
+        if (flowFormulas.size() == 1) {
+            try {
+                // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
+                // NOT ANYMORE, do it later because of the next: and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
+//                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
+                FlowFormula flowF = ((FlowFormula) flowFormulas.get(0));
+                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+                // Replace the place with the ones belonging to the guessing of the chain
+                for (Place place : orig.getPlaces()) {
+                    AtomicProposition p = new AtomicProposition(place);
+                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + "_tfl"));
+                    flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
+                }
+
+                // Replace the next operator within the flow formula
+                flowF = replaceNextInFlowFormula(orig, net, flowF);
+
+                f = f.substitute(flowFormulas.get(0), new RunFormula(
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
+                        LTLOperators.Binary.OR,
+                        flowF.getPhi()));
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
+            }
+        } else {
+            Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
+        }
+
+        return new RunFormula(f);
     }
 
     /**
