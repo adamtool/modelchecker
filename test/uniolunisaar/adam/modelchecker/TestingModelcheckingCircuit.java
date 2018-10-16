@@ -23,6 +23,7 @@ import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelChecker;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
@@ -62,61 +63,61 @@ public class TestingModelcheckingCircuit {
         AdamTools.savePG2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         String formula = "Forall (G (AP \"#out#_inittflB\" 0))";
-        boolean check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        CounterExample check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertNull(check);
         formula = "Forall (AP \"#out#_inittfl\" 0)";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
         formula = "Forall (F (AP \"#out#_out\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertFalse(check);
+        Assert.assertNotNull(check);
         formula = "Forall (Neg (AP \"#out#_out\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
 
         ILTLFormula f = FormulaCreator.enabledObject(tstolen);
         formula = FlowLTLTransformer.toMCHyperFormat(f);
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
 
         f = new LTLFormula(LTLOperators.Unary.G, f);
         formula = FlowLTLTransformer.toMCHyperFormat(f);
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertFalse(check);
+        Assert.assertNotNull(check);
 
         formula = "Forall (Neg (AP \"#out#_tB\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
         formula = "Forall (Neg (AP \"#out#_tC\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
 //        formula = "Forall (Implies (AP \"#out#_tB\" 0) false)"; // syntactic 'false' ? don't now how to give it to MCHyper
 //        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
 //        Assert.assertFalse(check);
 
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (AP \"#out#_out\" 0))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
         formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
 
         f = FormulaCreator.getMaximaliltyReisigDirectAsObject(game);
         ILTLFormula reachOut = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(out));
         f = new LTLFormula(f, LTLOperators.Binary.IMP, reachOut);
         formula = FlowLTLTransformer.toMCHyperFormat(f);
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertTrue(check);
+        Assert.assertNull(check);
 
         RunFormula maxStandard = FormulaCreator.getMaximaliltyStandardObject(game);
         LTLFormula ftest = new LTLFormula((ILTLFormula) maxStandard.getPhi(), LTLOperators.Binary.IMP, reachOut);
         System.out.println(ftest.toSymbolString());
         formula = FlowLTLTransformer.toMCHyperFormat(ftest);
         check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertFalse(check);
+        Assert.assertNotNull(check);
     }
 
     @Test(enabled = true)
@@ -137,20 +138,20 @@ public class TestingModelcheckingCircuit {
         String formula = "F(out)";
         IRunFormula f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
-        boolean ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertTrue(ret);
+        CounterExample ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
+        Assert.assertNull(ret);
 
         formula = "A(F(out))";
         f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertFalse(ret);
+        Assert.assertNotNull(ret);
 
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertTrue(ret);
+        Assert.assertNull(ret);
     }
 
     @Test

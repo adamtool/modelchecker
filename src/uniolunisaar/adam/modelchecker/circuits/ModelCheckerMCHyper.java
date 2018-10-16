@@ -16,9 +16,18 @@ import uniolunisaar.adam.tools.Logger;
  * @author Manuel Gieseking
  */
 public class ModelCheckerMCHyper {
-    
-    
-    public static boolean check(PetriNet net, String formula, String path) throws InterruptedException, IOException {
+
+    /**
+     * Returns null iff the formula holds.
+     *
+     * @param net
+     * @param formula
+     * @param path
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public static CounterExample check(PetriNet net, String formula, String path) throws InterruptedException, IOException {
         ModelCheckerTools.save2AigerAndPdf(net, path);
         ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "2", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
@@ -98,11 +107,11 @@ public class ModelCheckerMCHyper {
                     }
                 }
                 Logger.getInstance().addMessage(cex.toString(), true);
+                return cex;
             }
-            return false;
         }
 
-        return true;
+        return null;
     }
 
 }

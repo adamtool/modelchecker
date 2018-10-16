@@ -1,12 +1,9 @@
 package uniolunisaar.adam.modelchecker.libraries;
 
-import uniolunisaar.adam.modelchecker.*;
 import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import uniol.apt.adt.pn.Place;
-import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
@@ -14,19 +11,15 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
-import uniolunisaar.adam.logic.flowltl.AtomicProposition;
-import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
-import uniolunisaar.adam.logic.flowltl.LTLFormula;
-import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelChecker;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 import uniolunisaar.adam.tools.Tools;
 
 /**
@@ -35,7 +28,6 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingModelcheckingSequential {
-
 
     @Test(enabled = true)
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
@@ -55,20 +47,20 @@ public class TestingModelcheckingSequential {
         String formula = "F(out)";
         IRunFormula f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
-        boolean ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertTrue(ret);
+        CounterExample ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
+        Assert.assertNull(ret);
 
         formula = "A(F(out))";
         f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertFalse(ret);
+        Assert.assertNotNull(ret);
 
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertTrue(ret);
+        Assert.assertNull(ret);
     }
 
     @Test

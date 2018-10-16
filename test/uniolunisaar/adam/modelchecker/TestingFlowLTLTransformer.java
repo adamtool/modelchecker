@@ -12,6 +12,7 @@ import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 
@@ -65,8 +66,8 @@ public class TestingFlowLTLTransformer {
         // test to hyper ltl
         String formula = FlowLTLTransformer.toMCHyperFormat(game, f.toString());
         System.out.println(formula);
-        boolean output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
-        Assert.assertFalse(output);
+        CounterExample output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        Assert.assertNotNull(output);
 
         // new version
         String formula2 = FlowLTLTransformer.toMCHyperFormat(f);
