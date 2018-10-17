@@ -33,6 +33,8 @@ public class TestingModelcheckingFlowLTLSequential {
         String formula = "F(out)";
         IRunFormula f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
+        PetriGame mc = PetriNetTransformer.createNet4ModelCheckingSequential(net, f);
+        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         CounterExample ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName());
         Assert.assertNull(ret);
 

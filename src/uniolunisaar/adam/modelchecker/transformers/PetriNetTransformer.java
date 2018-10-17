@@ -8,6 +8,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.ds.petrigame.TokenFlow;
 import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -18,6 +19,7 @@ public class PetriNetTransformer {
     public static final String ACTIVATION_PREFIX_ID = "<act>_";
     public static final String INIT_TOKENFLOW_ID = "<init_tfl>";
     public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
+    public static final String NEXT_ID = "_<nxt>";
 
     /**
      * Adds maximally a new copy for each place and each sub flow formula. Thus,
@@ -182,7 +184,7 @@ public class PetriNetTransformer {
             // the activation token to the next token flow subnet, when no
             // chain is active
             for (Transition t : net.getTransitions()) {
-                Transition tout = out.createTransition();
+                Transition tout = out.createTransition(t.getId() + NEXT_ID);
                 tout.setLabel(t.getId());
                 // all complements of places which can succeed the tokenflows of the transition
                 Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
@@ -229,6 +231,17 @@ public class PetriNetTransformer {
                         out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));
                     }
                 }
+            }
+        } else {
+            // should not really be used, since the normal model checking should be used in these cases
+            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."
+                    + " The standard LTL model checker should be used.", false);
+            // but to have still some meaningful output add for all transition the
+            // connections to the act places
+            for (Transition t : out.getTransitions()) {
+                Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId());
+                out.createFlow(t, act);
+                out.createFlow(act, t);
             }
         }
         // delete the fairness assumption of all original transitions

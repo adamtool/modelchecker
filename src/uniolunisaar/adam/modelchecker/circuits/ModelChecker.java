@@ -52,6 +52,11 @@ public class ModelChecker {
      */
     public static CounterExample checkWithSequentialApproach(PetriGame game, IRunFormula formula, String path) throws InterruptedException, IOException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
+        if (FlowLTLTransformer.getFlowFormulas(formula).isEmpty()) {
+            Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");
+            formula  = FlowLTLTransformer.addFairness(game, formula);
+            return ModelCheckerMCHyper.check(game, FlowLTLTransformer.toMCHyperFormat(formula), "./" + game.getName());
+        }
         PetriGame gameMC = PetriNetTransformer.createNet4ModelCheckingSequential(game, formula);
         IRunFormula formulaMC = FlowLTLTransformer.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula);
         Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);

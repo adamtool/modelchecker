@@ -73,15 +73,20 @@ public class AigerRenderer {
 //            }
 //        }
         // Create for each place the chosing and the test if s.th. has fired
-        String[] inputs = new String[net.getTransitions().size()];
-        int i = 0;
-        for (Transition t : net.getTransitions()) {
-            inputs[i++] = "!#out#_" + t.getId();
+        if (net.getTransitions().size() == 1) {
+            Transition t = net.getTransitions().iterator().next();
+            file.copyValues("#allNegatedTransitions#", "!#out#_" + t.getId());
+        } else {
+            String[] inputs = new String[net.getTransitions().size()];
+            int i = 0;
+            for (Transition t : net.getTransitions()) {
+                inputs[i++] = "!#out#_" + t.getId();
+            }
+            file.addGate("#allNegatedTransitions#", inputs);
         }
-        file.addGate("#allNegatedTransitions#", inputs);
         for (Place p : net.getPlaces()) {
             // Create for each place the choosing of the transition
-            createChooseTransition(file, net, p); // use this when not already checked that the transition is enabled
+//            createChooseTransition(file, net, p); // use this when not already checked that the transition is enabled
             createChooseTransitionOfEnabled(file, net, p); // F2
             // Create for each place the check if s.th. has fired
             createSthFired(file, p); // F1
@@ -102,7 +107,7 @@ public class AigerRenderer {
         for (Place p : net.getPlaces()) {
             file.copyValues("#out#_" + p.getId(), p.getId() + "_new");
         }
-        
+
         return file.toString();
     }
 
@@ -179,10 +184,16 @@ public class AigerRenderer {
             } else {
                 firingResult = AigerFile.FALSE;
             }
-            file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), firingResult);
-            inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
+            if (net.getTransitions().size() == 1) {
+                file.addGate(id, "#out#_" + t.getId(), firingResult);
+            } else {
+                file.addGate(id + "_" + t.getId() + "_buf", "#out#_" + t.getId(), firingResult);
+                inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
+            }
         }
-        file.addGate(id, inputs);
+        if (net.getTransitions().size() > 1) {
+            file.addGate(id, inputs);
+        }
         return id;
     }
 
