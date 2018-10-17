@@ -159,4 +159,48 @@ public class TestingModelcheckingLTL {
         CounterExample cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformer.toMCHyperFormat(f), "./" + pn.getName());
         Assert.assertNotNull(cex);
     }
+
+    @Test
+    void testMaximality() throws RenderException, InterruptedException, IOException, ParseException {
+        PetriGame net = new PetriGame("testMaximalityA");
+        Place A = net.createPlace("A");
+        A.setInitialToken(1);
+        Place A2 = net.createPlace("A2");
+        Transition t = net.createTransition("tA");
+        net.createFlow(A, t);
+        net.createFlow(t, A2);
+
+        Place B = net.createPlace("B");
+        B.setInitialToken(1);
+        Place B2 = net.createPlace("B2");
+        Transition tB = net.createTransition("tB");
+        net.createFlow(B, tB);
+        net.createFlow(tB, B2);
+        Transition tloop = net.createTransition("tl");
+        net.createFlow(B, tloop);
+        net.createFlow(tloop, B);
+        AdamTools.savePG2PDF(net.getName(), new PetriGame(net), false);
+
+        ILTLFormula maxReisig = FormulaCreator.getMaximaliltyReisigDirectAsObject(net);
+        ILTLFormula maxStandard = FormulaCreator.getMaximaliltyStandardDirectAsObject(net);
+
+        LTLFormula evA2 = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(A2));
+        LTLFormula evB2 = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(B2));
+
+        LTLFormula f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
+        CounterExample cex = ModelCheckerMCHyper.check(net, FlowLTLTransformer.toMCHyperFormat(f), "./" + net.getName());
+        Assert.assertNotNull(cex);
+
+        f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evB2);
+        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformer.toMCHyperFormat(f), "./" + net.getName());
+        Assert.assertNotNull(cex);
+
+        f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evA2);
+        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformer.toMCHyperFormat(f), "./" + net.getName());
+        Assert.assertNull(cex);
+
+        f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evB2);
+        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformer.toMCHyperFormat(f), "./" + net.getName());
+        Assert.assertNotNull(cex);
+    }
 }
