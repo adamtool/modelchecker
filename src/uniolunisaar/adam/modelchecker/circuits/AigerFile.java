@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import uniol.apt.util.Pair;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -37,14 +38,18 @@ public class AigerFile {
     }
 
     public void addGate(String out, String... in) {
-        if (in.length < 2) {
-            throw new RuntimeException("Gates need at least two inputs");
-        }
-        String in1 = in[0];
-        for (int i = 1; i < in.length; i++) {
-            String internalOut = (i == (in.length - 1)) ? out : out + "_#" + uniqueIdentifier++;
-            addGate(new Gate(internalOut, in1, in[i]));
-            in1 = internalOut;
+        if (in.length == 0) {
+            copyValues(out, TRUE);
+            Logger.getInstance().addMessage("[WARNING] Created gates without inputs. Output: " + out, true);
+        } else if (in.length == 1) {
+            copyValues(out, in[0]);
+        } else {
+            String in1 = in[0];
+            for (int i = 1; i < in.length; i++) {
+                String internalOut = (i == (in.length - 1)) ? out : out + "_#" + uniqueIdentifier++;
+                addGate(new Gate(internalOut, in1, in[i]));
+                in1 = internalOut;
+            }
         }
     }
 

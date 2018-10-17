@@ -10,6 +10,7 @@ import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.Constants;
 import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.Formula;
 import uniolunisaar.adam.logic.flowltl.FormulaBinary;
@@ -50,9 +51,7 @@ public class FlowLTLTransformer {
                     return "X";
             }
         }
-        // todo throw exception but should never happen
-        return "error";
-
+        throw new RuntimeException("Only LTL operators are supported.");
     }
 
     public static String toMCHyperFormat(IOperatorBinary op) {
@@ -73,8 +72,7 @@ public class FlowLTLTransformer {
                 case R:
                     return "Release";
             }
-            // todo throw exception but should never happen
-            return "error";
+            throw new RuntimeException("Forgotten to provide a case for transforming operator " + op + ".");
         } else if (op instanceof RunOperators.Binary) {
             if (op == RunOperators.Binary.AND) {
                 return "And";
@@ -84,13 +82,16 @@ public class FlowLTLTransformer {
         } else if (op instanceof RunOperators.Implication) {
             return "Implies";
         } else {
-            // todo throw exception but should never happen
-            return "error";
+            throw new RuntimeException("Only LTL operators and run operators are supported.");
         }
     }
 
     private static String subformulaToMCHyperFormat(IFormula formula) {
-        if (formula instanceof AtomicProposition) {
+        if (formula instanceof Constants.True) {
+            return "true";
+        } else if (formula instanceof Constants.False) {
+            return "false";
+        } else if (formula instanceof AtomicProposition) {
             return "(AP \"#out#_" + ((AtomicProposition) formula).toString() + "\" 0)";
         } else if (formula instanceof Formula) {
             return subformulaToMCHyperFormat(((Formula) formula).getPhi());
@@ -132,6 +133,8 @@ public class FlowLTLTransformer {
         formula = formula.replace("G(", "(G ");
         formula = formula.replace("F(", "(F ");
         formula = formula.replace("X(", "(X ");
+        formula = formula.replace("TRUE", "True");
+        formula = formula.replace("FALSE", "False");
         formula = formula.replace(",", " ");
 
         for (Place p : net.getPlaces()) {

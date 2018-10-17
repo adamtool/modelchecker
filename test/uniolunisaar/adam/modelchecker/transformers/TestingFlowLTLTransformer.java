@@ -10,11 +10,12 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.flowltl.RunFormula;
+import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 
 /**
  *
@@ -22,6 +23,22 @@ import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
  */
 @Test
 public class TestingFlowLTLTransformer {
+
+    @Test
+    public void testMCHyperTransformation() throws ParseException, InterruptedException, IOException {
+        PetriGame net = new PetriGame("testing");
+        Place init = net.createPlace("a");
+        Place end= net.createPlace("b");
+        Transition t = net.createTransition();
+        net.createFlow(init, t);
+//        String formula = "F (TRUE OR b)";
+//        String formula = "F (b)";
+        String formula = "F TRUE";
+        formula = FlowLTLTransformer.toMCHyperFormat(net, formula);
+        System.out.println(formula);
+        CounterExample output = ModelCheckerMCHyper.check(net, formula, "./" + net.getName());
+        Assert.assertNotNull(output);
+    }
 
     @Test
     void testToyExample() throws RenderException, InterruptedException, IOException, ParseException {

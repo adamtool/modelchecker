@@ -73,17 +73,13 @@ public class AigerRenderer {
 //            }
 //        }
         // Create for each place the chosing and the test if s.th. has fired
-        if (net.getTransitions().size() == 1) {
-            Transition t = net.getTransitions().iterator().next();
-            file.copyValues("#allNegatedTransitions#", "!#out#_" + t.getId());
-        } else {
-            String[] inputs = new String[net.getTransitions().size()];
-            int i = 0;
-            for (Transition t : net.getTransitions()) {
-                inputs[i++] = "!#out#_" + t.getId();
-            }
-            file.addGate("#allNegatedTransitions#", inputs);
+        String[] inputs = new String[net.getTransitions().size()];
+        int i = 0;
+        for (Transition t : net.getTransitions()) {
+            inputs[i++] = "!#out#_" + t.getId();
         }
+        file.addGate("#allNegatedTransitions#", inputs);
+
         for (Place p : net.getPlaces()) {
             // Create for each place the choosing of the transition
 //            createChooseTransition(file, net, p); // use this when not already checked that the transition is enabled
