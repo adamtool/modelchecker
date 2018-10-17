@@ -34,7 +34,7 @@ public class TestingModelcheckingFlowLTLSequential {
         IRunFormula f;
         PetriGame mc;
         CounterExample ret;
-        
+
 //        String formula = "F(out)";
 //        IRunFormula f = FlowLTLParser.parse(net, formula);
 //        f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
@@ -42,20 +42,19 @@ public class TestingModelcheckingFlowLTLSequential {
 //        AdamTools.savePG2PDF(net.getName() + "_mc" + formula, mc, true);
 //        CounterExample ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName()+formula);
 //        Assert.assertNull(ret);
-
         formula = "A(F(out))";
         f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         mc = PetriNetTransformer.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc" + formula, mc, true);
-        ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName()+formula);
+        ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName() + formula);
         Assert.assertNotNull(ret);
 
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName());
-        Assert.assertNull(ret);
+        Assert.assertNull(ret); // here is an error it is not null
     }
 
     @Test(enabled = true)
@@ -69,7 +68,7 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         CounterExample ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName());
-        Assert.assertNotNull(ret);
+        Assert.assertNotNull(ret); // here is an error it is null
     }
 
     @Test(enabled = true)

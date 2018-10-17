@@ -65,7 +65,8 @@ public class TestingFlowLTLTransformer {
 
         // test to hyper ltl
         String formula = FlowLTLTransformer.toMCHyperFormat(game, f.toString());
-        System.out.println(formula);
+//        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
+        Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
         CounterExample output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
         Assert.assertNotNull(output);
 

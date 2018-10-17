@@ -131,15 +131,16 @@ public class FlowLTLTransformer {
         formula = formula.replace("NEG(", "(Neg ");
         formula = formula.replace("G(", "(G ");
         formula = formula.replace("F(", "(F ");
+        formula = formula.replace("X(", "(X ");
         formula = formula.replace(",", " ");
 
         for (Place p : net.getPlaces()) {
-            formula = formula.replace(" " + p.getId() + " ", "@#" + p.getId() + "#@ "); //todo; make it better with regular expressions
-            formula = formula.replace(" " + p.getId() + ")", "@#" + p.getId() + "#@)");
+            formula = formula.replace(" " + p.getId() + " ", " @#" + p.getId() + "#@ "); //todo; make it better with regular expressions
+            formula = formula.replace(" " + p.getId() + ")", " @#" + p.getId() + "#@)");
         }
         for (Transition t : net.getTransitions()) {
-            formula = formula.replace(" " + t.getId() + " ", "@#" + t.getId() + "#@ ");//todo; make it better with regular expressions
-            formula = formula.replace(" " + t.getId() + ")", "@#" + t.getId() + "#@)");
+            formula = formula.replace(" " + t.getId() + " ", " @#" + t.getId() + "#@ ");//todo; make it better with regular expressions
+            formula = formula.replace(" " + t.getId() + ")", " @#" + t.getId() + "#@)");
         }
         for (Place p : net.getPlaces()) {
             formula = formula.replace("@#" + p.getId() + "#@", "(AP \"#out#_" + p.getId() + "\" 0)");

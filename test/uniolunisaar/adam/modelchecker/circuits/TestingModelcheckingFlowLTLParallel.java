@@ -30,7 +30,7 @@ public class TestingModelcheckingFlowLTLParallel {
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
 
-        String formula = "F(out)";
+        String formula = "F out";
         IRunFormula f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         PetriGame mc = PetriNetTransformer.createNet4ModelCheckingParallel(net);
@@ -50,7 +50,7 @@ public class TestingModelcheckingFlowLTLParallel {
         mc = PetriNetTransformer.createNet4ModelCheckingParallel(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
-        Assert.assertNull(ret);
+        Assert.assertNull(ret); // todo: here is an error, it is not null
     }
 
     @Test(enabled = true)
