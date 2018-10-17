@@ -110,20 +110,53 @@ public class TestingModelcheckingLTL {
         Assert.assertNotNull(check);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        AdamTools.savePG2PDF("example", new PetriGame(pn), false);
-        //todo:correct formula and all the other examples have to be adapted.
-        ModelCheckerMCHyper.check(pn, "Forall (F (AP \"#out#_out\" 0))", "./" + pn.getName());
+        AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
+
+        LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new AtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new AtomicProposition(pn.getPlace("B"))));
+        f = new LTLFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(pn), LTLOperators.Binary.IMP, f);
+        CounterExample cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformer.toMCHyperFormat(f), "./" + pn.getName());
+        Assert.assertNull(cex);
+
+        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbad"))));
+        f = new LTLFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(pn), LTLOperators.Binary.IMP, f);
+        cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformer.toMCHyperFormat(f), "./" + pn.getName());
+        Assert.assertNotNull(cex);
+
+        LTLFormula bothA = new LTLFormula(
+                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("A"))),
+                LTLOperators.Binary.AND,
+                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("A_")))
+        );
+        LTLFormula bothB = new LTLFormula(
+                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("B"))),
+                LTLOperators.Binary.AND,
+                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("B_")))
+        );
+        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbad"))));
+        f = new LTLFormula(new LTLFormula(bothA, LTLOperators.Binary.OR, bothB), LTLOperators.Binary.IMP, f);
+        f = new LTLFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(pn), LTLOperators.Binary.IMP, f);
+        cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformer.toMCHyperFormat(f), "./" + pn.getName());
+        Assert.assertNull(cex);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
-        final String formula = "EF qbadA > 0 OR qbadB > 0";
-//        check(pn, formula, path + "burglar");
+        AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
+
+        LTLFormula f = new LTLFormula(LTLOperators.Unary.G,
+                new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbadA"))),
+                        LTLOperators.Binary.AND,
+                        new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbadB")))
+                ));
+        f = new LTLFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(pn), LTLOperators.Binary.IMP, f);
+        CounterExample cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformer.toMCHyperFormat(f), "./" + pn.getName());
+        Assert.assertNotNull(cex);
     }
 }

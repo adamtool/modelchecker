@@ -350,6 +350,7 @@ public class FlowLTLTransformer {
                     elements.add(new AtomicProposition(t));
                 }
                 LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
+//                ILTLFormula untilSecond =  castPhi.getPhi();
                 return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
             }
             return new LTLFormula(castPhi.getOp(), substChildPhi);

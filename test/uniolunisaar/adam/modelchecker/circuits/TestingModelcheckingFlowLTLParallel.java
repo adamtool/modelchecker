@@ -47,6 +47,8 @@ public class TestingModelcheckingFlowLTLParallel {
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
+        mc = PetriNetTransformer.createNet4ModelCheckingParallel(net);
+        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
         Assert.assertNull(ret);
     }

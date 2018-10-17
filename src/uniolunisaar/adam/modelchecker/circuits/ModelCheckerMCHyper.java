@@ -34,7 +34,7 @@ public class ModelCheckerMCHyper {
 //        System.out.println(procBuilder.directory());
 //        procBuilder = new ProcessBuilder(System.getProperty("libfolder") + "/mchyper");
 
-        System.out.println(procBuilder.command());
+        Logger.getInstance().addMessage(procBuilder.command().toString(), true);
         Process proc = procBuilder.start();
         proc.waitFor();
         String error = IOUtils.toString(proc.getErrorStream());
@@ -72,7 +72,7 @@ public class ModelCheckerMCHyper {
                         }
                     }
                 }
-                Logger.getInstance().addMessage(cropped.toString(), true);
+//                Logger.getInstance().addMessage(cropped.toString(), true);
                 // create the counter example
                 CounterExample cex = new CounterExample();
                 int timestep = 0;
