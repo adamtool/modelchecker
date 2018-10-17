@@ -38,7 +38,7 @@ public class ModelCheckerMCHyper {
         Process proc = procBuilder.start();
         proc.waitFor();
         String error = IOUtils.toString(proc.getErrorStream());
-        Logger.getInstance().addMessage(error, true);
+        Logger.getInstance().addMessage(error, true); // todo: print it as error and a proper exception
         String output = IOUtils.toString(proc.getInputStream());
         Logger.getInstance().addMessage(output, true);
 

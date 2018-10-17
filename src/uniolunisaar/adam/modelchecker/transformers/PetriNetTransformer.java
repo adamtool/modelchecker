@@ -34,6 +34,7 @@ public class PetriNetTransformer {
     public static PetriGame createNet4ModelCheckingSequential(PetriGame net, IRunFormula formula) {
         // Copy the original net
         PetriGame out = new PetriGame(net);
+        out.setName(net.getName() + "_mc");
         // Add to each original transition a place such that we can disable these transitions
         // to give the token to the checking of the subflowformulas
         for (Transition t : net.getTransitions()) {
@@ -65,7 +66,7 @@ public class PetriNetTransformer {
                     pNot.setInitialToken(1);
                     out.setOrigID(pNot, place.getId());
                     // create a transition which move the token for the chain to this new initial place of a token chain
-                    Transition t = out.createTransition("$initFlow$" + place.getId() + nb_ff);
+                    Transition t = out.createTransition(INIT_TOKENFLOW_ID + place.getId() + nb_ff);
                     out.createFlow(init, t);
                     out.createFlow(pNot, t);
                     out.createFlow(t, p);
@@ -238,10 +239,16 @@ public class PetriNetTransformer {
         // delete all token flows
         for (Transition t : net.getTransitions()) {
             for (Place p : t.getPreset()) {
-                net.removeTokenFlow(p, t);
+                out.removeTokenFlow(p, t);
             }
             for (Place p : t.getPostset()) {
-                net.removeTokenFlow(t, p);
+                out.removeTokenFlow(t, p);
+            }
+        }
+        // and the initial token flow markers
+        for (Place place : net.getPlaces()) {
+            if (place.getInitialToken().getValue() > 0 && net.isInitialTokenflow(place)) {
+                out.removeInitialTokenflow(out.getPlace(place.getId()));
             }
         }
         return out;
@@ -258,6 +265,7 @@ public class PetriNetTransformer {
      */
     public static PetriGame createNet4ModelCheckingParallel(PetriGame game) {
         PetriGame out = new PetriGame(game);
+        out.setName(game.getName() + "_mc");
         // Add to each original transition a place such that we can disable these transitions
         // as soon as we started to check a token chain
         for (Transition t : game.getTransitions()) {
@@ -400,10 +408,16 @@ public class PetriNetTransformer {
         // delete all token flows
         for (Transition t : game.getTransitions()) {
             for (Place p : t.getPreset()) {
-                game.removeTokenFlow(p, t);
+                out.removeTokenFlow(p, t);
             }
             for (Place p : t.getPostset()) {
-                game.removeTokenFlow(t, p);
+                out.removeTokenFlow(t, p);
+            }
+        }
+        // and the initial token flow markers
+        for (Place place : game.getPlaces()) {
+            if (place.getInitialToken().getValue() > 0 && game.isInitialTokenflow(place)) {
+                out.removeInitialTokenflow(out.getPlace(place.getId()));
             }
         }
         return out;
@@ -421,6 +435,7 @@ public class PetriNetTransformer {
      */
     public static PetriGame createNet4ModelChecking4LoLA(PetriGame game) {
         PetriGame out = new PetriGame(game);
+        out.setName(game.getName() + "_mc");
         // Add to each original transition a place such that we can disable these transitions
         // as soon as we started to check a token chain
         for (Transition t : game.getTransitions()) {

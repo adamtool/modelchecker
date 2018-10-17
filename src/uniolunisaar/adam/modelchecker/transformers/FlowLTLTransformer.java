@@ -348,7 +348,7 @@ public class FlowLTLTransformer {
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
                     AtomicProposition p = new AtomicProposition(place);
-                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + "_tfl"));
+                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID));
                     flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                 }
 
