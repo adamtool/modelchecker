@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker;
+package uniolunisaar.adam.modelchecker.transformers;
 
 import java.io.IOException;
 import org.testng.Assert;

@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker;
+package uniolunisaar.adam.modelchecker.lola;
 
 import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
