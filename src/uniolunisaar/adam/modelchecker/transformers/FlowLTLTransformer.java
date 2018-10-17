@@ -183,14 +183,29 @@ public class FlowLTLTransformer {
             if (subst instanceof LTLFormula && ((LTLFormula) subst).getPhi() instanceof FormulaUnary) {
                 FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
                 if (substCast.getOp() == LTLOperators.Unary.X) {
+                    List<Transition> newTransitions = new ArrayList<>();
+                    for (Place place : orig.getPlaces()) {
+                        if (place.getInitialToken().getValue() > 0 && orig.isInitialTokenflow(place)) {
+                            String id = "t_" + place.getId() + TOKENFLOW_SUFFIX_ID + TOKENFLOW_SUFFIX_ID + "_new";
+                            newTransitions.add(net.getTransition(id));
+                        }
+                    }
+
+                    // all original transitions
                     Collection<ILTLFormula> elements = new ArrayList<>();
                     for (Transition t : orig.getTransitions()) {
                         elements.add(new AtomicProposition(t));
                     }
+                    // and the new transitions
+                    for (Transition t : newTransitions) {
+                        elements.add(new AtomicProposition(t));
+                    }
+
                     ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
                     elements = new ArrayList<>();
+                    // all transitions which are not original or the new ones
                     for (Transition t : net.getTransitions()) {
-                        if (!orig.containsTransition(t.getId())) {
+                        if (!orig.containsTransition(t.getId()) || !newTransitions.contains(t)) {
                             elements.add(new AtomicProposition(t));
                         }
                     }
