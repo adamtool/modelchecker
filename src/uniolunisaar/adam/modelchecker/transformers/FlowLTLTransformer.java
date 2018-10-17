@@ -208,6 +208,10 @@ public class FlowLTLTransformer {
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
+    private static ILTLFormula replaceNextWithinRunFormula(PetriGame orig, PetriNet net, ILTLFormula phi) {
+        return null;
+    }
+
     /**
      * This is only done for ONE flow formula
      *
@@ -237,9 +241,8 @@ public class FlowLTLTransformer {
         }
         IFormula f = (fairness != null)
                 ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
-        
-        // replace the next operator in the run-part
 
+        // replace the next operator in the run-part
         List<FlowFormula> flowFormulas = getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
             FlowFormula flowFormula = flowFormulas.get(i);
@@ -259,11 +262,11 @@ public class FlowLTLTransformer {
                     try {
                         AtomicProposition trans = new AtomicProposition(transition);
                         Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + i);
-                        ILTLFormula disjunct = trans;
-                        for (Transition t : act.getPostset()) { // todo: what if only on transition is available?
-                            disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
+                        Collection<ILTLFormula> elements = new ArrayList<>();
+                        for (Transition t : act.getPostset()) {
+                            elements.add(new AtomicProposition(t));
                         }
-                        flowFormula = (FlowFormula) flowFormula.substitute(trans, disjunct);
+                        flowFormula = (FlowFormula) flowFormula.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
                     } catch (NotSubstitutableException ex) {
                         throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
                     }
@@ -319,13 +322,13 @@ public class FlowLTLTransformer {
         for (Transition transition : orig.getTransitions()) {
             try {
                 AtomicProposition trans = new AtomicProposition(transition);
-                ILTLFormula disjunct = trans;
-                for (Transition t : net.getTransitions()) { // todo: what if only on transition is available?
+                Collection<ILTLFormula> elements = new ArrayList<>();
+                for (Transition t : net.getTransitions()) {
                     if (t.getLabel().equals(transition.getId())) {
-                        disjunct = new LTLFormula(disjunct, LTLOperators.Binary.OR, new AtomicProposition(t));
+                        elements.add(new AtomicProposition(t));
                     }
                 }
-                f = f.substitute(trans, disjunct);
+                f = f.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
             }

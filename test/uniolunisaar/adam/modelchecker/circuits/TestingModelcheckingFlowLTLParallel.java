@@ -33,6 +33,8 @@ public class TestingModelcheckingFlowLTLParallel {
         String formula = "F(out)";
         IRunFormula f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
+        PetriGame mc = PetriNetTransformer.createNet4ModelCheckingParallel(net);
+        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         CounterExample ret = ModelChecker.checkWithParallelApproach(net, f, "./" + net.getName());
         Assert.assertNull(ret);
 
@@ -49,7 +51,6 @@ public class TestingModelcheckingFlowLTLParallel {
         Assert.assertNull(ret);
     }
 
-   
     @Test(enabled = true)
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException {
         PetriGame net = ToyExamples.createFirstExampleExtended(true);

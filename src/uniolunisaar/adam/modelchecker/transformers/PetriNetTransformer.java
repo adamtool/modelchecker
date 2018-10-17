@@ -15,9 +15,9 @@ import uniolunisaar.adam.logic.flowltl.IRunFormula;
  */
 public class PetriNetTransformer {
 
-    public static final String ACTIVATION_PREFIX_ID = "$act$_";
-    public static final String INIT_TOKENFLOW_ID = "$init_tfl$";
-    public static final String TOKENFLOW_SUFFIX_ID = "_$tfl$";
+    public static final String ACTIVATION_PREFIX_ID = "<act>_";
+    public static final String INIT_TOKENFLOW_ID = "<init_tfl>";
+    public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
 
     /**
      * Adds maximally a new copy for each place and each sub flow formula. Thus,
@@ -277,7 +277,7 @@ public class PetriNetTransformer {
                 Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID);
                 todo.add(p);
                 out.setOrigID(p, place.getId());
-                Transition t = out.createTransition(place.getId() + "_tf_new");
+                Transition t = out.createTransition("t_" + place.getId() + TOKENFLOW_SUFFIX_ID + "_new");
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 // Deactivate all original postset transitions which continue the flow
