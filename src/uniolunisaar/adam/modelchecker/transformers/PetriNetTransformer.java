@@ -306,7 +306,7 @@ public class PetriNetTransformer {
                 Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID);
                 todo.add(p);
                 out.setOrigID(p, place.getId());
-                Transition t = out.createTransition("t_" + place.getId() + TOKENFLOW_SUFFIX_ID + "_new");
+                Transition t = out.createTransition(INIT_TOKENFLOW_ID + place.getId());
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 // Deactivate all original postset transitions which continue the flow

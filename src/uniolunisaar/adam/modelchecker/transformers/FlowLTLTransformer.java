@@ -27,6 +27,7 @@ import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.INIT_TOKENFLOW_ID;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.tools.Logger;
 
@@ -233,7 +234,7 @@ public class FlowLTLTransformer {
                     List<Transition> newTransitions = new ArrayList<>();
                     for (Place place : orig.getPlaces()) {
                         if (place.getInitialToken().getValue() > 0 && orig.isInitialTokenflow(place)) {
-                            String id = "t_" + place.getId() + TOKENFLOW_SUFFIX_ID + TOKENFLOW_SUFFIX_ID + "_new";
+                            String id = INIT_TOKENFLOW_ID + place.getId();
                             newTransitions.add(net.getTransition(id));
                         }
                     }
@@ -270,19 +271,19 @@ public class FlowLTLTransformer {
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    private static IFormula replaceNextWithinRunFormula(PetriGame orig, PetriNet net, IFormula phi) {
+    private static IFormula replaceNextWithinRunFormulaSequential(PetriGame orig, PetriNet net, IFormula phi) {
         if (phi instanceof AtomicProposition) {
             return phi;
         } else if (phi instanceof IFlowFormula) {
             return phi;
         } else if (phi instanceof RunFormula) {
-            return new RunFormula(replaceNextWithinRunFormula(orig, net, ((RunFormula) phi).getPhi()));
+            return new RunFormula(replaceNextWithinRunFormulaSequential(orig, net, ((RunFormula) phi).getPhi()));
         } else if (phi instanceof LTLFormula) {
-            IFormula f = replaceNextWithinRunFormula(orig, net, ((LTLFormula) phi).getPhi());
+            IFormula f = replaceNextWithinRunFormulaSequential(orig, net, ((LTLFormula) phi).getPhi());
             return new LTLFormula((ILTLFormula) f); // cast no problem since the next is replace by an LTLFormula
         } else if (phi instanceof FormulaUnary) {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
-            ILTLFormula substChildPhi = (ILTLFormula) replaceNextWithinRunFormula(orig, net, castPhi.getPhi()); // since castPhi is of type ILTLFormula this must result an ILTLFormula
+            ILTLFormula substChildPhi = (ILTLFormula) replaceNextWithinRunFormulaSequential(orig, net, castPhi.getPhi()); // since castPhi is of type ILTLFormula this must result an ILTLFormula
             if (castPhi.getOp() == LTLOperators.Unary.X) {
                 // all not original transitions
                 Collection<ILTLFormula> elements = new ArrayList<>();
@@ -303,8 +304,58 @@ public class FlowLTLTransformer {
             }
             return new LTLFormula(castPhi.getOp(), substChildPhi);
         } else if (phi instanceof FormulaBinary) {
-            IFormula subst1 = replaceNextWithinRunFormula(orig, net, ((FormulaBinary) phi).getPhi1());
-            IFormula subst2 = replaceNextWithinRunFormula(orig, net, ((FormulaBinary) phi).getPhi2());
+            IFormula subst1 = replaceNextWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi1());
+            IFormula subst2 = replaceNextWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi2());
+            IOperatorBinary op = ((FormulaBinary) phi).getOp();
+            if (phi instanceof ILTLFormula) {
+                return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
+            } else if (phi instanceof IRunFormula) {
+                if (op instanceof RunOperators.Binary) {
+                    return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
+                } else {
+                    return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+                }
+            }
+        }
+        throw new RuntimeException(
+                "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+    }
+
+    private static IFormula replaceNextWithinRunFormulaParallel(PetriGame orig, PetriNet net, IFormula phi) {
+        if (phi instanceof AtomicProposition) {
+            return phi;
+        } else if (phi instanceof IFlowFormula) {
+            return phi;
+        } else if (phi instanceof RunFormula) {
+            return new RunFormula(replaceNextWithinRunFormulaParallel(orig, net, ((RunFormula) phi).getPhi()));
+        } else if (phi instanceof LTLFormula) {
+            IFormula f = replaceNextWithinRunFormulaParallel(orig, net, ((LTLFormula) phi).getPhi());
+            return new LTLFormula((ILTLFormula) f); // cast no problem since the next is replace by an LTLFormula
+        } else if (phi instanceof FormulaUnary) {
+            FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
+            ILTLFormula substChildPhi = (ILTLFormula) replaceNextWithinRunFormulaParallel(orig, net, castPhi.getPhi()); // since castPhi is of type ILTLFormula this must result an ILTLFormula
+            if (castPhi.getOp() == LTLOperators.Unary.X) {
+                // all init transitions can be skipped
+                Collection<ILTLFormula> elements = new ArrayList<>();
+                for (Transition t : net.getTransitions()) {
+                    if (t.getId().startsWith(INIT_TOKENFLOW_ID)) {
+                        elements.add(new AtomicProposition(t));
+                    }
+                }
+
+                ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+                elements = new ArrayList<>();
+                // all transitions which are original
+                for (Transition t : orig.getTransitions()) {
+                    elements.add(new AtomicProposition(t));
+                }
+                LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
+                return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
+            }
+            return new LTLFormula(castPhi.getOp(), substChildPhi);
+        } else if (phi instanceof FormulaBinary) {
+            IFormula subst1 = replaceNextWithinRunFormulaParallel(orig, net, ((FormulaBinary) phi).getPhi1());
+            IFormula subst2 = replaceNextWithinRunFormulaParallel(orig, net, ((FormulaBinary) phi).getPhi2());
             IOperatorBinary op = ((FormulaBinary) phi).getOp();
             if (phi instanceof ILTLFormula) {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
@@ -355,7 +406,7 @@ public class FlowLTLTransformer {
         IFormula f = addFairness(orig, formula);
 
         // replace the next operator in the run-part
-        f = replaceNextWithinRunFormula(orig, net, f);
+        f = replaceNextWithinRunFormulaSequential(orig, net, f);
 
         List<FlowFormula> flowFormulas = getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
@@ -412,6 +463,9 @@ public class FlowLTLTransformer {
     public static IRunFormula createFormula4ModelChecking4CircuitParallel(PetriGame orig, PetriNet net, IRunFormula formula) {
         // Add the fairness from the transitions to the formula
         IFormula f = addFairness(orig, formula);
+
+        // replace the next operator in the run-part
+        f = replaceNextWithinRunFormulaParallel(orig, net, f);
 
         // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
         // Replace the transitions with the big-or of all accordingly labelled transitions
