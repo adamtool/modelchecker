@@ -185,7 +185,7 @@ public class FlowLTLTransformer {
                 // all transitions apart from those which are dependent of my act place (but the transition which just moves the token to the next formula)
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
-                    Place act = net.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    Place act = net.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
                     if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformer.NEXT_ID)) {
                         elements.add(new AtomicProposition(t));
                     }
@@ -196,7 +196,7 @@ public class FlowLTLTransformer {
                 // all transitions which are dependent on my act place (but the transition which just moves the token to the next formula)
                 elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
-                    Place act = net.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    Place act = net.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
                     if (act.getPostset().contains(t) && !t.getId().equals(t.getLabel() + PetriNetTransformer.NEXT_ID)) {
                         elements.add(new AtomicProposition(t));
                     }
@@ -366,7 +366,7 @@ public class FlowLTLTransformer {
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
                     AtomicProposition p = new AtomicProposition(place);
-                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + i));
+                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i));
                     flowFormula = (FlowFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                 }
 
@@ -375,7 +375,7 @@ public class FlowLTLTransformer {
                 for (Transition transition : orig.getTransitions()) {
                     try {
                         AtomicProposition trans = new AtomicProposition(transition);
-                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + i);
+                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
                         Collection<ILTLFormula> elements = new ArrayList<>();
                         for (Transition t : act.getPostset()) {
                             elements.add(new AtomicProposition(t));
@@ -390,7 +390,7 @@ public class FlowLTLTransformer {
                 flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
                 f = f.substitute(flowFormulas.get(i), new RunFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID + "-" + i))),
                         LTLOperators.Binary.OR,
                         flowFormula.getPhi()));
             } catch (NotSubstitutableException ex) {

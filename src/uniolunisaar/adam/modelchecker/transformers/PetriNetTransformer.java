@@ -50,7 +50,7 @@ public class PetriNetTransformer {
         List<FlowFormula> flowFormulas = FlowLTLTransformer.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // create an initial place representing the chosen place
-            Place init = out.createPlace(INIT_TOKENFLOW_ID + "_" + nb_ff);
+            Place init = out.createPlace(INIT_TOKENFLOW_ID + "-" + nb_ff);
             init.setInitialToken(1);
 
             // collect the places which are newly created to only copy the necessary part of the net
@@ -61,17 +61,18 @@ public class PetriNetTransformer {
             for (Place place : net.getPlaces()) {
                 if (place.getInitialToken().getValue() > 0 && net.isInitialTokenflow(place)) {
                     // create the place which is states that the chain is currently in this place
-                    Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
                     out.setOrigID(p, place.getId());
                     // create the dual place of p
-                    Place pNot = out.createPlace("!" + place.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    Place pNot = out.createPlace("!" + place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
                     pNot.setInitialToken(1);
                     out.setOrigID(pNot, place.getId());
                     // create a transition which move the token for the chain to this new initial place of a token chain
-                    Transition t = out.createTransition(INIT_TOKENFLOW_ID + place.getId() + nb_ff);
+                    Transition t = out.createTransition(INIT_TOKENFLOW_ID + place.getId() + "-" + nb_ff);
                     out.createFlow(init, t);
                     out.createFlow(pNot, t);
                     out.createFlow(t, p);
+                    todo.add(p);
                 }
             }
             //%% via transitions
@@ -84,13 +85,13 @@ public class PetriNetTransformer {
                 // a place which is used to activate or deactivate all of these transitions.
                 Place act = null;
                 if (!tfl.getPostset().isEmpty()) {
-                    act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
+                    act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
                 }
                 // for all token flows which are created during the game
                 for (Place post : tfl.getPostset()) {
                     // create for all newly created flows a place (and its dual) (if not already existent)
                     // and a transition moving the initial flow token to the place
-                    String id = post.getId() + TOKENFLOW_SUFFIX_ID + nb_ff;
+                    String id = post.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                     Place p, pNot;
                     if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                         // create the place itself
@@ -136,7 +137,7 @@ public class PetriNetTransformer {
                     // a place which is used to activate or deactivate all of these transitions.
                     Place act = null;
                     if (!tfl.getPostset().isEmpty()) {
-                        String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff;
+                        String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                         if (!out.containsNode(id)) {
                             act = out.createPlace(id);
                         } else {
@@ -148,7 +149,7 @@ public class PetriNetTransformer {
                     for (Place post : tfl.getPostset()) {
                         // create for all newly created flows a place (and its dual) (if not already existent)
                         // and a transition moving the initial flow token to the place
-                        String id = post.getId() + TOKENFLOW_SUFFIX_ID + nb_ff;
+                        String id = post.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                         Place pPost, pPostNot;
                         if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                             // create the place itself
@@ -174,7 +175,7 @@ public class PetriNetTransformer {
                         out.createFlow(tout, pPost);
                         // update the negation places accordingly
                         out.createFlow(pPostNot, tout);
-                        out.createFlow(tout, out.getPlace("!" + pPre));
+                        out.createFlow(tout, out.getPlace("!" + pPre.getId()));
                         // deactivate the transitions
                         out.createFlow(act, tout);
                     }
@@ -184,19 +185,26 @@ public class PetriNetTransformer {
             // the activation token to the next token flow subnet, when no
             // chain is active
             for (Transition t : net.getTransitions()) {
-                Transition tout = out.createTransition(t.getId() + NEXT_ID);
+                Transition tout = out.createTransition(t.getId() + NEXT_ID + "-" + nb_ff);
                 tout.setLabel(t.getId());
                 // all complements of places which can succeed the tokenflows of the transition
-                Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + nb_ff);
-                for (Transition tpost : act.getPostset()) {
-                    for (Place p : tpost.getPreset()) {
-                        if (p != act) {
-                            out.createFlow(out.getPlace("!" + p.getId()), tout);
+                // Only the transition is used for a token flow
+                String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
+                if (out.containsNode(id)) {
+                    Place act = out.getPlace(id);
+                    for (Transition tpost : act.getPostset()) { // transitions which take the active token
+                        for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
+                            if (p != act && !p.getId().startsWith("!")) { // but not the active itself and the negation
+                                Place negInput = out.getPlace("!" + p.getId());
+                                if (!tout.getPreset().contains(negInput)) { // if not already created before
+                                    out.createFlow(negInput, tout);
+                                }
+                            }
                         }
                     }
+                    // deactivate the transitions
+                    out.createFlow(act, tout);
                 }
-                // deactivate the transitions
-                out.createFlow(act, tout);
             }
         }
         if (!flowFormulas.isEmpty()) {
@@ -210,14 +218,14 @@ public class PetriNetTransformer {
                         }
                     }
                     // and move the active token to the first subnet
-                    out.createFlow(t, out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + 0));
+                    out.createFlow(t, out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + 0));
                 }
             }
             // move the active token through the subnets
             for (int i = 1; i < flowFormulas.size(); i++) {
                 for (Transition t : net.getTransitions()) {
-                    Place acti = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + (i - 1));
-                    Place actii = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + i);
+                    Place acti = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + (i - 1));
+                    Place actii = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
                     for (Transition tr : acti.getPostset()) {
                         out.createFlow(tr, actii);
                     }
@@ -225,7 +233,7 @@ public class PetriNetTransformer {
             }
             // give the token back to the original net (means reactivate all transitions
             for (Transition tOrig : net.getTransitions()) {
-                Place actLast = out.getPlace(ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + (flowFormulas.size() - 1));
+                Place actLast = out.getPlace(ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1));
                 for (Transition tr : actLast.getPostset()) {
                     for (Transition transition : net.getTransitions()) {
                         out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));

@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
-import uniolunisaar.adam.tools.AdamProperties;
-import uniolunisaar.adam.tools.Logger;
 
 /**
  *
