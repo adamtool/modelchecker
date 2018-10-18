@@ -92,22 +92,29 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
             ILTLFormula substChildPhi = (ILTLFormula) replaceNextWithinRunFormulaSequential(orig, net, castPhi.getPhi()); // since castPhi is of type ILTLFormula this must result an ILTLFormula
             if (castPhi.getOp() == LTLOperators.Unary.X) {
-                // all not original transitions
-                Collection<ILTLFormula> elements = new ArrayList<>();
-                for (Transition t : net.getTransitions()) {
-                    if (!orig.containsTransition(t.getId())) {
+                Collection<ILTLFormula> outer = new ArrayList<>();
+                for (Place p : orig.getPlaces()) {
+                    // all not original transitions and those which not succeed this place
+                    Collection<ILTLFormula> elements = new ArrayList<>();
+                    for (Transition t : net.getTransitions()) {
+                        if (!orig.containsTransition(t.getId()) || !p.getPostset().contains(t)) {
+                            elements.add(new AtomicProposition(t));
+                        }
+                    }
+
+                    ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+                    elements = new ArrayList<>();
+//                     all transitions which are original
+//                    for (Transition t : orig.getTransitions()) {
+                    // only those which are succeeding the chosen place
+                    for (Transition t : p.getPostset()) {
                         elements.add(new AtomicProposition(t));
                     }
+                    LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
+                    LTLFormula secondConjunct = new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
+                    outer.add(new LTLFormula(new AtomicProposition(p), LTLOperators.Binary.AND, secondConjunct));
                 }
-
-                ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
-                elements = new ArrayList<>();
-                // all transitions which are original
-                for (Transition t : orig.getTransitions()) {
-                    elements.add(new AtomicProposition(t));
-                }
-                LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
-                return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
+                return FormulaCreator.bigWedgeOrVeeObject(outer, false);
             }
             return new LTLFormula(castPhi.getOp(), substChildPhi);
         } else if (phi instanceof FormulaBinary) {
@@ -178,16 +185,16 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 f = f.substitute(flowFormulas.get(i), new RunFormula(
                         new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID + "-" + i))),
                         LTLOperators.Binary.OR,
-                        new LTLFormula(
-                                new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.NEW_TOKENFLOW_ID + "-" + i))),
-                                LTLOperators.Binary.OR,
-                                flowFormula.getPhi())
+                        //                        new LTLFormula(
+                        //                                new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.NEW_TOKENFLOW_ID + "-" + i))),
+                        //                                LTLOperators.Binary.OR,
+                        flowFormula.getPhi()
+                //                )
                 ));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
         }
-
         return new RunFormula(f);
     }
 

@@ -54,7 +54,7 @@ public class TestingMCHyper {
         String formula = "Forall (And (AP \"#out#_out\" 0) (AP \"#out#_out\" 0))"; // correct
 //        String formula = "Forall (F (Eq (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // correkt
 
-        ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        ModelCheckerMCHyper.check(game, formula, "./" + game.getName(), true);
     }
 
 }

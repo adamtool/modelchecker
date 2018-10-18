@@ -23,12 +23,13 @@ public class ModelCheckerMCHyper {
      * @param net
      * @param formula
      * @param path
+     * @param previousSemantics
      * @return
      * @throws InterruptedException
      * @throws IOException
      */
-    public static CounterExample check(PetriNet net, String formula, String path) throws InterruptedException, IOException {
-        ModelCheckerTools.save2AigerAndPdf(net, path);
+    public static CounterExample check(PetriNet net, String formula, String path, boolean previousSemantics) throws InterruptedException, IOException {
+        ModelCheckerTools.save2AigerAndPdf(net, path, previousSemantics);
         ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "2", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
 //        System.out.println(procBuilder.directory());
@@ -56,7 +57,7 @@ public class ModelCheckerMCHyper {
                 // only take the inputs and registers                
                 // and removes the only for hyperLTL relevant _0 at each identifier
                 for (int i = 0; i < lines.length; i++) {
-                    if (lines[i].startsWith("#in#_")) {
+                    if (lines[i].startsWith(AigerRenderer.INPUT_PREFIX)) {
                         cropped.add(lines[i].substring(5).replace("_0@", "@"));
                     } else if (lines[i].startsWith(AigerRenderer.INIT_LATCH)) {
                         cropped.add(lines[i].replace("_0@", "@"));

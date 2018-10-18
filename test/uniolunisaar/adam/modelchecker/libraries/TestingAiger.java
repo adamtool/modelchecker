@@ -34,7 +34,7 @@ public class TestingAiger {
         // save aiger file
         final String outputFolder = ".";
 //        ModelCheckerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
-        ModelCheckerTools.save2AigerAndPdf(pn, outputFolder + "/" + pn.getName());
+        ModelCheckerTools.save2AigerAndPdf(pn, outputFolder + "/" + pn.getName(), true);
     }
 
     @Test(enabled = true)

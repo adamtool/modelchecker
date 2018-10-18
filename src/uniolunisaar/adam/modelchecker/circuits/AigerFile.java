@@ -81,7 +81,7 @@ public class AigerFile {
         for (Map.Entry<String, Integer> entry : latches.entrySet()) {
             String key = entry.getKey();
             Integer value = entry.getValue();
-            latis.append(value).append(" ").append(getIndex(key + "_new")).append("\n");
+            latis.append(value).append(" ").append(getIndex(key + AigerRenderer.NEW_VALUE_OF_LATCH_SUFFIX)).append("\n");
             symbols.append("l").append(i++).append(" ").append(key).append("\n");
 //            latis.append(value).append(" ").append(getIndex(key)).append("\n");
         }
