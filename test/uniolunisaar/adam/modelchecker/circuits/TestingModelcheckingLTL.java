@@ -1,8 +1,10 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import java.io.IOException;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
@@ -25,7 +27,7 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingModelcheckingLTL {
-
+	
     @Test
     void testToyExample() throws RenderException, InterruptedException, IOException, ParseException {
         PetriGame game = new PetriGame("testing");

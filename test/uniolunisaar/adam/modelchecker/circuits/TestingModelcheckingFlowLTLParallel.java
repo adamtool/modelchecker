@@ -3,9 +3,15 @@ package uniolunisaar.adam.modelchecker.circuits;
 import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
 import java.io.IOException;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import uniol.apt.adt.pn.PetriNet;
+import uniol.apt.adt.pn.Place;
+import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
@@ -24,6 +30,41 @@ import uniolunisaar.adam.logic.util.FormulaCreator;
 @Test
 public class TestingModelcheckingFlowLTLParallel {
 
+	@BeforeClass
+    public void setProperties() {
+        if (System.getProperty("examplesfolder") == null) {
+        	System.setProperty("examplesfolder", "examples");
+        }
+    }
+	
+	@Test
+	void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, NotSupportedGameException {
+		PetriNet net = new PetriNet("jesko");
+		Place init = net.createPlace("in");
+		init.setInitialToken(1);
+	    Transition t1 = net.createTransition("t1");
+	    net.createFlow(init, t1);
+	    net.createFlow(t1, init);
+	    Transition t2 = net.createTransition("t2");
+	    net.createFlow(init, t2);
+	    net.createFlow(t2, init);
+	    
+	    String formula = "Forall (G (AP \"#out#_in\" 0))";
+	    CounterExample check = ModelCheckerMCHyper.check(net, formula, "./" + net.getName());
+	    Assert.assertNull(check);
+	     
+	    formula = "Forall (G (AP \"#out#_t1\" 0))";
+	    check = ModelCheckerMCHyper.check(net, formula, "./" + net.getName());
+	    Assert.assertNotNull(check);
+	     
+	    formula = "X( X( G( t1 AND t2)))";
+	    IRunFormula f = FlowLTLParser.parse(net, formula);
+	    f = new RunFormula(FormulaCreator.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
+	    CounterExample ret = ModelChecker.checkWithParallelApproach(new PetriGame(net), f, "./" + net.getName());
+	    Assert.assertNull(ret);
+
+	}
+	
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException {
         PetriGame net = ToyExamples.createFirstExample(true);

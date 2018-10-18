@@ -1,6 +1,8 @@
 package uniolunisaar.adam.modelchecker.libraries;
 
 import java.io.IOException;
+
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
@@ -19,6 +21,13 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingAiger {
+	
+	@BeforeClass
+    public void setProperties() {
+        if (System.getProperty("examplesfolder") == null) {
+        	System.setProperty("examplesfolder", "examples");
+        }
+    }
 
     private void testAiger(PetriNet pn) throws IOException, InterruptedException {
 //        final String outputFolder = AdamProperties.getInstance().getLibFolder();
