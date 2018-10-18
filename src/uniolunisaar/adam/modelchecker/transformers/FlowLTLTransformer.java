@@ -88,9 +88,9 @@ public class FlowLTLTransformer {
 
     private static String subformulaToMCHyperFormat(IFormula formula) {
         if (formula instanceof Constants.True) {
-            return "true";
+            return "Const True";
         } else if (formula instanceof Constants.False) {
-            return "false";
+            return "Const False";
         } else if (formula instanceof AtomicProposition) {
             return "(AP \"#out#_" + ((AtomicProposition) formula).toString() + "\" 0)";
         } else if (formula instanceof Formula) {
@@ -133,8 +133,8 @@ public class FlowLTLTransformer {
         formula = formula.replace("G(", "(G ");
         formula = formula.replace("F(", "(F ");
         formula = formula.replace("X(", "(X ");
-        formula = formula.replace("TRUE", "True");
-        formula = formula.replace("FALSE", "False");
+        formula = formula.replace("TRUE", "Const True");
+        formula = formula.replace("FALSE", "Const False");
         formula = formula.replace(",", " ");
 
         for (Place p : net.getPlaces()) {
