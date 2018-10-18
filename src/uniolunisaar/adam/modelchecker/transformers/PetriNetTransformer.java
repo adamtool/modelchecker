@@ -174,8 +174,11 @@ public class PetriNetTransformer {
                         out.createFlow(pPre, tout);
                         out.createFlow(tout, pPost);
                         // update the negation places accordingly
-                        out.createFlow(pPostNot, tout);
-                        out.createFlow(tout, out.getPlace("!" + pPre.getId()));
+                        Place pPreNot = out.getPlace("!" + pPre.getId());
+                        if (pPreNot != pPostNot) {
+                            out.createFlow(pPostNot, tout);
+                            out.createFlow(tout, pPreNot);
+                        }
                         // deactivate the transitions
                         out.createFlow(act, tout);
                     }
@@ -198,6 +201,7 @@ public class PetriNetTransformer {
                                 Place negInput = out.getPlace("!" + p.getId());
                                 if (!tout.getPreset().contains(negInput)) { // if not already created before
                                     out.createFlow(negInput, tout);
+                                    out.createFlow(tout, negInput);
                                 }
                             }
                         }

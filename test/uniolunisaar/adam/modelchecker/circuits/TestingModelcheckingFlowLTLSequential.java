@@ -51,9 +51,12 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertNotNull(ret);
 
         net = ToyExamples.createFirstExample(false);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName());
+        AdamTools.saveAPT(net.getName() + "_" + formula, net, false);
+        AdamTools.savePG2PDF(net.getName() + "_" + formula, net, false);  
+        mc = PetriNetTransformer.createNet4ModelCheckingSequential(net, f);
+        AdamTools.savePG2PDF(net.getName() + "_mc" + "_" + formula, mc, true);
+        AdamTools.saveAPT(mc.getName() + "_" + formula, mc, false);
+        ret = ModelChecker.checkWithSequentialApproach(net, f, "./" + net.getName() + "_" + formula);
         Assert.assertNull(ret); // here is an error it is not null
     }
 
