@@ -11,7 +11,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.logic.util.FormulaCreatorPrevSemantics;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 
@@ -34,7 +34,7 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        CounterExample output = ModelCheckerMCHyper.check(net, formula, "./" + net.getName());
+        CounterExample output = ModelCheckerMCHyper.check(net, formula, "./" + net.getName(), true);
         Assert.assertNull(output);
     }
 
@@ -66,15 +66,15 @@ public class TestingFlowLTLTransformer {
 
         // test maximality
         // standard
-        IRunFormula f = FormulaCreator.getMaximaliltyStandardObject(game);
+        IRunFormula f = FormulaCreatorPrevSemantics.getMaximaliltyStandardObject(game);
 //        System.out.println("Maximality standard:");
 //        System.out.println(f.toSymbolString());
         // reisig
-        ILTLFormula f1 = FormulaCreator.getMaximaliltyReisigDirectAsObject(game);
+        ILTLFormula f1 = FormulaCreatorPrevSemantics.getMaximaliltyReisigDirectAsObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f1.toSymbolString());
         // reisig
-        f = FormulaCreator.getMaximaliltyReisigObject(game);
+        f = FormulaCreatorPrevSemantics.getMaximaliltyReisigObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f.toSymbolString());
 
@@ -82,7 +82,7 @@ public class TestingFlowLTLTransformer {
         String formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(game, f.toString());
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
-        CounterExample output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
+        CounterExample output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName(), true);
         Assert.assertNotNull(output);
 
         // new version
