@@ -10,8 +10,6 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
-import uniolunisaar.adam.logic.flowltl.RunFormula;
-import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
@@ -28,16 +26,16 @@ public class TestingFlowLTLTransformer {
     public void testMCHyperTransformation() throws ParseException, InterruptedException, IOException {
         PetriGame net = new PetriGame("testing");
         Place init = net.createPlace("a");
-        Place end= net.createPlace("b");
+        Place end = net.createPlace("b");
         Transition t = net.createTransition();
         net.createFlow(init, t);
 //        String formula = "F (TRUE OR b)";
 //        String formula = "F (b)";
         String formula = "F TRUE";
-        formula = FlowLTLTransformer.toMCHyperFormat(net, formula);
-        System.out.println(formula);
+        formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
+//        System.out.println(formula);
         CounterExample output = ModelCheckerMCHyper.check(net, formula, "./" + net.getName());
-        Assert.assertNotNull(output);
+        Assert.assertNull(output);
     }
 
     @Test
@@ -81,14 +79,14 @@ public class TestingFlowLTLTransformer {
 //        System.out.println(f.toSymbolString());
 
         // test to hyper ltl
-        String formula = FlowLTLTransformer.toMCHyperFormat(game, f.toString());
+        String formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(game, f.toString());
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
         CounterExample output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
         Assert.assertNotNull(output);
 
         // new version
-        String formula2 = FlowLTLTransformer.toMCHyperFormat(f);
+        String formula2 = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
         Assert.assertEquals(formula.replace(" ", ""), formula2.replace(" ", ""));
     }
 }

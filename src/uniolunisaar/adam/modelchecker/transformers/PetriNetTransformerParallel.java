@@ -19,15 +19,15 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
      * Fairness assumptions must be put into the formula. Here wir only check
      * one flow formula by checking all runs and a run considers one chain.
      *
-     * @param game
+     * @param net
      * @return
      */
-    public static PetriGame createNet4ModelCheckingParallel(PetriGame game) {
-        PetriGame out = new PetriGame(game);
-        out.setName(game.getName() + "_mc");
+    public static PetriGame createNet4ModelCheckingParallel(PetriGame net) {
+        PetriGame out = new PetriGame(net);
+        out.setName(net.getName() + "_mc");
         // Add to each original transition a place such that we can disable these transitions
         // as soon as we started to check a token chain
-        for (Transition t : game.getTransitions()) {
+        for (Transition t : net.getTransitions()) {
             Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
             act.setInitialToken(1);
             out.createFlow(act, t);
@@ -39,17 +39,17 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
         init.setInitialToken(1);
         // Add places which create a new token flow
         // via initial places
-        for (Place place : game.getPlaces()) {
-            if (place.getInitialToken().getValue() > 0 && game.isInitialTokenflow(place)) {
+        for (Place place : net.getPlaces()) {
+            if (place.getInitialToken().getValue() > 0 && net.isInitialTokenflow(place)) {
                 Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID);
                 todo.add(p);
                 out.setOrigID(p, place.getId());
-                Transition t = out.createTransition(INIT_TOKENFLOW_ID + place.getId());
+                Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId());
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 // Deactivate all original postset transitions which continue the flow
                 for (Transition tr : place.getPostset()) {
-                    TokenFlow tfl = game.getTokenFlow(tr, place);
+                    TokenFlow tfl = net.getTokenFlow(tr, place);
                     if (tfl != null && !tfl.getPostset().isEmpty()) {
                         out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), t);
                     }
@@ -57,8 +57,8 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
             }
         }
         // via transitions
-        for (Transition t : game.getTransitions()) {
-            TokenFlow tfl = game.getInitialTokenFlows(t);
+        for (Transition t : net.getTransitions()) {
+            TokenFlow tfl = net.getInitialTokenFlows(t);
             if (tfl == null) {
                 continue;
             }
@@ -84,7 +84,7 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
                 }
                 // Deactivate all original postset transitions which continue the flow
                 for (Transition tr : post.getPostset()) {
-                    TokenFlow tfl_out = game.getTokenFlow(tr, post);
+                    TokenFlow tfl_out = net.getTokenFlow(tr, post);
                     if (tfl_out != null && !tfl_out.getPostset().isEmpty()) {
                         out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), tout);
                     }
@@ -94,9 +94,9 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
 
         while (!todo.isEmpty()) {
             Place pl = todo.remove(todo.size() - 1); // do it for the next one
-            Place pOrig = game.getPlace(out.getOrigID(pl));
+            Place pOrig = net.getPlace(out.getOrigID(pl));
             for (Transition t : pOrig.getPostset()) { // for all transitions of the place add for all token flows a new transition
-                TokenFlow tfl = game.getTokenFlow(t, pOrig);
+                TokenFlow tfl = net.getTokenFlow(t, pOrig);
                 if (tfl == null) {
                     continue;
                 }
@@ -114,10 +114,10 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
                     }
                     Transition tout = out.createTransition(); // create the new transition
                     tout.setLabel(t.getId());
-                    if (game.isStrongFair(t)) {
+                    if (net.isStrongFair(t)) {
                         out.setStrongFair(tout);
                     }
-                    if (game.isWeakFair(t)) {
+                    if (net.isWeakFair(t)) {
                         out.setWeakFair(tout);
                     }
                     // move the token along the token flow
@@ -138,14 +138,14 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
 
                     // reactivate the transitions of the former step
                     for (Transition tr : pOrig.getPostset()) {
-                        TokenFlow tfl_out = game.getTokenFlow(tr, pOrig);
+                        TokenFlow tfl_out = net.getTokenFlow(tr, pOrig);
                         if (tfl_out != null && !tfl_out.getPostset().isEmpty()) {
                             out.createFlow(tout, out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()));
                         }
                     }
                     // deactivate the succeeding the flow transitions of the original net
                     for (Transition tr : post.getPostset()) {
-                        TokenFlow tfl_out = game.getTokenFlow(tr, post);
+                        TokenFlow tfl_out = net.getTokenFlow(tr, post);
                         if (tfl_out != null && !tfl_out.getPostset().isEmpty()) {
                             out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), tout);
                         }
@@ -160,12 +160,12 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
                 }
             }
         }
-        for (Transition t : game.getTransitions()) { // delete the fairness assumption of all original transitions
+        for (Transition t : net.getTransitions()) { // delete the fairness assumption of all original transitions
             out.removeStrongFair(out.getTransition(t.getId()));
             out.removeWeakFair(out.getTransition(t.getId()));
         }
         // delete all token flows
-        for (Transition t : game.getTransitions()) {
+        for (Transition t : net.getTransitions()) {
             for (Place p : t.getPreset()) {
                 out.removeTokenFlow(p, t);
             }
@@ -174,8 +174,8 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
             }
         }
         // and the initial token flow markers
-        for (Place place : game.getPlaces()) {
-            if (place.getInitialToken().getValue() > 0 && game.isInitialTokenflow(place)) {
+        for (Place place : net.getPlaces()) {
+            if (place.getInitialToken().getValue() > 0 && net.isInitialTokenflow(place)) {
                 out.removeInitialTokenflow(out.getPlace(place.getId()));
             }
         }

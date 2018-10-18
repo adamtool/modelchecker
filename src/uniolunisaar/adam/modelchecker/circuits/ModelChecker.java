@@ -4,7 +4,12 @@ import java.io.IOException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
-import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer;
+import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerParallel;
+import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerSequential;
+import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerParallel;
+import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerSequential;
+import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -30,10 +35,10 @@ public class ModelChecker {
      */
     public static CounterExample checkWithParallelApproach(PetriGame game, IRunFormula formula, String path) throws InterruptedException, IOException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
-        PetriGame gameMC = PetriNetTransformer.createNet4ModelCheckingParallel(game);
-        IRunFormula formulaMC = FlowLTLTransformer.createFormula4ModelChecking4CircuitParallel(game, gameMC, formula);
+        PetriGame gameMC = PetriNetTransformerParallel.createNet4ModelCheckingParallel(game);
+        IRunFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(game, gameMC, formula);
         Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
-        return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformer.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
+        return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
     }
 
     /**
@@ -52,15 +57,15 @@ public class ModelChecker {
      */
     public static CounterExample checkWithSequentialApproach(PetriGame game, IRunFormula formula, String path) throws InterruptedException, IOException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
-        if (FlowLTLTransformer.getFlowFormulas(formula).isEmpty()) {
+        if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");
-            formula  = FlowLTLTransformer.addFairness(game, formula);
-            return ModelCheckerMCHyper.check(game, FlowLTLTransformer.toMCHyperFormat(formula), "./" + game.getName());
+            formula = FlowLTLTransformer.addFairness(game, formula);
+            return ModelCheckerMCHyper.check(game, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName());
         }
-        PetriGame gameMC = PetriNetTransformer.createNet4ModelCheckingSequential(game, formula);
-        IRunFormula formulaMC = FlowLTLTransformer.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula);
+        PetriGame gameMC = PetriNetTransformerSequential.createNet4ModelCheckingSequential(game, formula);
+        IRunFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula);
         Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
-        return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformer.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
+        return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
     }
 
 }

@@ -6,7 +6,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import java.util.ArrayList;
+import java.util.List;
 import uniol.apt.adt.pn.PetriNet;
+import uniolunisaar.adam.logic.flowltl.FlowFormula;
+import uniolunisaar.adam.logic.flowltl.FormulaBinary;
+import uniolunisaar.adam.logic.flowltl.IFormula;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
 
 /**
@@ -14,6 +21,23 @@ import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
  * @author Manuel Gieseking
  */
 public class ModelCheckerTools {
+
+    public static List<FlowFormula> getFlowFormulas(IFormula formula) {
+        List<FlowFormula> flowFormulas = new ArrayList<>();
+        if (formula instanceof FlowFormula) {
+            flowFormulas.add((FlowFormula) formula);
+            return flowFormulas;
+        } else if (formula instanceof ILTLFormula) {
+            return flowFormulas;
+        } else if (formula instanceof RunFormula) {
+            return getFlowFormulas(((RunFormula) formula).getPhi());
+        } else if (formula instanceof FormulaBinary) {
+            FormulaBinary binF = (FormulaBinary) formula;
+            flowFormulas.addAll(getFlowFormulas(binF.getPhi1()));
+            flowFormulas.addAll(getFlowFormulas(binF.getPhi2()));
+        }
+        return flowFormulas;
+    }
 
     public static void save2Aiger(PetriNet net, String path) throws FileNotFoundException {
         String aigerFile = AigerRenderer.render(net);
