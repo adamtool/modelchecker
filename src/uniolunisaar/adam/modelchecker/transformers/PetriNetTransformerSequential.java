@@ -14,12 +14,7 @@ import uniolunisaar.adam.tools.Logger;
  *
  * @author Manuel Gieseking
  */
-public class PetriNetTransformerSequential {
-
-    public static final String ACTIVATION_PREFIX_ID = "<act>_";
-    public static final String INIT_TOKENFLOW_ID = "<init_tfl>";
-    public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
-    public static final String NEXT_ID = "_<nxt>";
+public class PetriNetTransformerSequential extends PetriNetTransformer {
 
     /**
      * Adds maximally a new copy for each place and each sub flow formula. Thus,
