@@ -56,6 +56,50 @@ public class TestingModelcheckingLoLA {
     }
 
     @Test
+    void testSemantics() throws RenderException, InterruptedException, IOException {
+        PetriGame game = new PetriGame("testSemantics");
+        Place init = game.createPlace("inA");
+        init.setInitialToken(1);
+
+        Transition tstolen = game.createTransition("tB");
+        game.createFlow(init, tstolen);
+        Place out = game.createPlace("out");
+        game.createFlow(tstolen, out);
+
+        // test finite        
+        AdamTools.savePG2PDF(game.getName() + "_finite", game, true);
+        boolean ret = check(game, "A(inA > 0)", "./testing");
+        Assert.assertEquals(ret, true);
+        ret = check(game, "A(X(out > 0))", "./testing");
+        Assert.assertEquals(ret, true);
+        ret = check(game, "A(X(X(out > 0)))", "./testing");
+        Assert.assertEquals(ret, false); // this means LoLA is not stuttering at the end
+
+        Place init2 = game.createPlace("inB");
+        init2.setInitialToken(1);
+        Transition t = game.createTransition("tA");
+        game.createFlow(init2, t);
+        game.createFlow(t, init2);
+        ret = check(game, "A(X(out > 0))", "./testing");
+        Assert.assertEquals(ret, false); // this means LoLA considers the interleaving semantics also for the next
+
+//
+//        Place init2 = game.createPlace("inB");
+//        init2.setInitialToken(1);
+//        
+//        Place init3 = game.createPlace("inittflB");
+//        init3.setInitialToken(1);
+////        
+//        Transition t2 = game.createTransition("tC");
+//        game.createFlow(init3, t2);
+//        game.createFlow(t2, init3);
+//        check(game, "(F out > 0)", "./testing");
+//
+//        AdamTools.savePG2PDF(game.getName(), game, true);
+//        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
+    }
+
+    @Test
     public void testLoLa() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
