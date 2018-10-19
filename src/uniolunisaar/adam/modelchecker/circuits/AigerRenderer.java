@@ -10,15 +10,15 @@ import uniol.apt.adt.pn.Transition;
  */
 public class AigerRenderer {
 
-    static final String INIT_LATCH = "#initLatch#";
-    static final String INPUT_PREFIX = "#in#_";
-    static final String OUTPUT_PREFIX = "#out#_";
-    static final String NEW_VALUE_OF_LATCH_SUFFIX = "_#new#";
-    static final String ENABLED_PREFIX = "#enabled#_";
-    static final String VALID_TRANSITION_PREFIX = "#chosen#_";
-    static final String ALL_TRANS_NOT_TRUE = "#allTransitionsNotTrue#";
-    static final String SUCCESSOR_REGISTER_PREFIX = "#succReg#_";
-    static final String SUCCESSOR_PREFIX = "#succ#_";
+    public static final String INIT_LATCH = "#initLatch#";
+    public static final String INPUT_PREFIX = "#in#_";
+    public static final String OUTPUT_PREFIX = "#out#_";
+    public static final String NEW_VALUE_OF_LATCH_SUFFIX = "_#new#";
+    public static final String ENABLED_PREFIX = "#enabled#_";
+    public static final String VALID_TRANSITION_PREFIX = "#chosen#_";
+    public static final String ALL_TRANS_NOT_TRUE = "#allTransitionsNotTrue#";
+    public static final String SUCCESSOR_REGISTER_PREFIX = "#succReg#_";
+    public static final String SUCCESSOR_PREFIX = "#succ#_";
 
     /**
      * Adds inputs for all transitions.

@@ -1,5 +1,7 @@
 package uniolunisaar.adam.modelchecker.transformers;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
@@ -16,26 +18,28 @@ import uniolunisaar.adam.logic.util.FormulaCreator;
  */
 public class FlowLTLTransformer {
 
-    public static IRunFormula addFairness(PetriGame net, IRunFormula formula) {
+    public static ILTLFormula getFairness(PetriGame net) {
         // Add Fairness to the formula
-        ILTLFormula fairness = null;
+        Collection<ILTLFormula> elements = new ArrayList<>();
         for (Transition t : net.getTransitions()) {
             if (net.isStrongFair(t)) {
-                if (fairness == null) {
-                    fairness = FormulaCreator.createStrongFairness(t);
-                } else {
-                    fairness = new LTLFormula(fairness, LTLOperators.Binary.AND, FormulaCreator.createStrongFairness(t));
-                }
+                elements.add(FormulaCreator.createStrongFairness(t));
             }
             if (net.isWeakFair(t)) {
-                if (fairness == null) {
-                    fairness = FormulaCreator.createWeakFairness(t);
-                } else {
-                    fairness = new LTLFormula(fairness, LTLOperators.Binary.AND, FormulaCreator.createWeakFairness(t));
-                }
+                elements.add(FormulaCreator.createWeakFairness(t));
             }
         }
-        return (fairness != null) ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
+        return FormulaCreator.bigWedgeOrVeeObject(elements, true);
+    }
+
+    public static IRunFormula addFairness(PetriGame net, IRunFormula formula) {
+        ILTLFormula fairness = getFairness(net);
+        return (!fairness.toString().equals("TRUE")) ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
+    }
+
+    public static ILTLFormula addFairness(PetriGame net, ILTLFormula formula) {
+        ILTLFormula fairness = getFairness(net);
+        return (!fairness.toString().equals("TRUE")) ? new LTLFormula(fairness, LTLOperators.Binary.IMP, formula) : formula;
     }
 
 }

@@ -1,6 +1,7 @@
 package uniolunisaar.adam.modelchecker.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -8,7 +9,9 @@ import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
+import uniol.apt.adt.pn.Place;
 import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.FormulaBinary;
 import uniolunisaar.adam.logic.flowltl.IFormula;
@@ -17,6 +20,9 @@ import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
 import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeNxt;
 import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafePrev;
+import uniolunisaar.adam.modelchecker.circuits.CounterExample;
+import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -88,5 +94,70 @@ public class ModelCheckerTools {
 //        Logger.getInstance().addMessage("Moved: " + bufferpath + "_circuit.pdf --> " + path + "_circuit.pdf", true);
         Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
 //        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aag", true);
+    }
+
+    public static CounterExample parseCounterExample(PetriNet net, String path) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(path)) {
+            String cexText = IOUtils.toString(inputStream);
+            Logger.getInstance().addMessage(cexText, true);
+            // crop counter example
+            List<String> cropped = new ArrayList<>();
+            String[] lines = cexText.split(" \n");
+            // only take the inputs and registers                
+            // and removes the only for hyperLTL relevant _0 at each identifier
+            for (int i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith(AigerRenderer.INPUT_PREFIX)) {
+                    cropped.add(lines[i].substring(5).replace("_0@", "@"));
+                } else if (lines[i].startsWith(AigerRenderer.INIT_LATCH)) {
+                    cropped.add(lines[i].replace("_0@", "@"));
+                } else {
+                    for (Place p : net.getPlaces()) {
+                        int idx = lines[i].lastIndexOf("_0@");
+                        if (idx != -1) {
+                            String id = lines[i].substring(0, idx);
+                            if (id.equals(p.getId())) {
+                                cropped.add(lines[i].replace("_0@", "@"));
+                            }
+                        }
+                    }
+                }
+            }
+//                Logger.getInstance().addMessage(cropped.toString(), true);
+            // create the counter example
+            CounterExample cex = new CounterExample();
+            int timestep = 0;
+            while (timestep >= 0) {
+                CounterExampleElement cexe = new CounterExampleElement(timestep);
+                boolean found = false;
+                for (int i = 0; i < cropped.size(); i++) {
+                    String elem = cropped.get(i);
+                    if (elem.contains("@" + timestep)) {
+                        elem = elem.replace("@" + timestep, "");
+                        char val = elem.charAt(elem.length() - 1);
+                        if (elem.startsWith(AigerRenderer.INIT_LATCH)) {
+                            cexe.setInit(val == '1');
+                        } else {
+                            String id = elem.substring(0, elem.length() - 2);
+                            if (val == '1') {
+                                if (net.containsPlace(id)) {
+                                    cexe.add(net.getPlace(id));
+                                } else if (net.containsTransition(id)) {
+                                    cexe.add(net.getTransition(id));
+                                }
+                            }
+                        }
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    timestep = -1;
+                } else {
+                    cex.addTimeStep(cexe);
+                    ++timestep;
+                }
+            }
+            Logger.getInstance().addMessage(cex.toString(), true);
+            return cex;
+        }
     }
 }
