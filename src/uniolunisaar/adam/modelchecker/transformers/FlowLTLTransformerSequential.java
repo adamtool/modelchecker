@@ -22,8 +22,8 @@ import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.ACTIVATION_PREFIX_ID;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.TOKENFLOW_SUFFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 
 /**
@@ -50,7 +50,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     Place act = net.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
-                    if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformer.NEXT_ID)) {
+                    if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTL.NEXT_ID)) {
                         elements.add(new AtomicProposition(t));
                     }
                 }
@@ -61,7 +61,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     Place act = net.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
-                    if (act.getPostset().contains(t) && !t.getId().equals(t.getLabel() + PetriNetTransformer.NEXT_ID)) {
+                    if (act.getPostset().contains(t) && !t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTL.NEXT_ID)) {
                         elements.add(new AtomicProposition(t));
                     }
                 }
@@ -183,10 +183,10 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
                 f = f.substitute(flowFormulas.get(i), new RunFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID + "-" + i))),
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))),
                         LTLOperators.Binary.OR,
                         //                        new LTLFormula(
-                        //                                new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.NEW_TOKENFLOW_ID + "-" + i))),
+                        //                                new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))),
                         //                                LTLOperators.Binary.OR,
                         flowFormula.getPhi()
                 //                )

@@ -15,7 +15,7 @@ import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreatorPrevSemantics;
-import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerSequential;
+import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTLSequential;
 
 /**
  *
@@ -70,7 +70,7 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamTools.savePG2PDF(net.getName(), net, false);
         String formula = "A(F(out)";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriGame mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorPrevSemantics.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         CounterExample ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
@@ -84,7 +84,7 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamTools.savePG2PDF(net.getName(), net, false);
         String formula = "A(F(out)";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriGame mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorPrevSemantics.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         CounterExample ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
@@ -97,7 +97,7 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamTools.savePG2PDF(net.getName(), net, false);
         String formula = "A(F(p3)";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriGame mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorPrevSemantics.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         CounterExample ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
@@ -110,26 +110,26 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamTools.savePG2PDF(net.getName(), net, false);
         String formula = "A(F(p3)";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriGame mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorPrevSemantics.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, f);
         CounterExample ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
 
         net = RedundantNetwork.getUpdatingNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
 
         net = RedundantNetwork.getUpdatingMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
 
         net = RedundantNetwork.getUpdatingFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        mc = PetriNetTransformerSequential.createNet4ModelCheckingSequential(net, f);
+        mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
     }

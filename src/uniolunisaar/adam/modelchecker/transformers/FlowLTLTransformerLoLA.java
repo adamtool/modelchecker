@@ -7,7 +7,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
  *
  * @author Manuel Gieseking
  */
-public class FlowLTLTransformerHyperLoLA {
+public class FlowLTLTransformerLoLA {
 
     // todo: should do the thing with the other initialization of the flow chains
     public static String createFormula4ModelChecking4LoLA(PetriGame game, String formula) {

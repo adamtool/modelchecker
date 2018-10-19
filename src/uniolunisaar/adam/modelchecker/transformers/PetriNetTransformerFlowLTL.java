@@ -15,13 +15,28 @@ import uniolunisaar.adam.tools.Logger;
  *
  * @author Manuel Gieseking
  */
-public class PetriNetTransformer {
+public class PetriNetTransformerFlowLTL {
 
     public static final String ACTIVATION_PREFIX_ID = "<act>_";
     public static final String INIT_TOKENFLOW_ID = "<init_tfl>";
     public static final String NEW_TOKENFLOW_ID = "<new_tfl>";
     public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
     public static final String NEXT_ID = "_<nxt>";
+
+    static PetriGame createOriginalPartOfTheNet(PetriGame orig) {
+        // Copy the original net
+        PetriGame out = new PetriGame(orig);
+        out.setName(orig.getName() + "_mc");
+
+        // Add to each original transition a place such that we can disable the transitions
+        for (Transition t : orig.getTransitions()) {
+            if (!orig.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows
+                Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+                act.setInitialToken(1);
+            }
+        }
+        return out;
+    }
 
     // todo:  since we have no time, do the splitting later
     static PetriGame createNet4ModelCheckingSequential(PetriGame net, IRunFormula formula) {
@@ -37,8 +52,8 @@ public class PetriNetTransformer {
                 initialMarking.add(p);
             }
         }
-        
-         // Add to each original transition a place such that we can disable these transitions
+
+        // Add to each original transition a place such that we can disable these transitions
         // to give the token to the checking of the subflowformulas
         for (Transition t : net.getTransitions()) {
             if (!net.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows

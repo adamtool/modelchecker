@@ -22,8 +22,8 @@ import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.INIT_TOKENFLOW_ID;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformer.TOKENFLOW_SUFFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 
@@ -194,7 +194,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 flowF = replaceNextInFlowFormulaParallel(orig, net, flowF);
 
                 f = f.substitute(flowFormulas.get(0), new RunFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformer.INIT_TOKENFLOW_ID))),
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID))),
                         LTLOperators.Binary.OR,
                         flowF.getPhi()));
             } catch (NotSubstitutableException ex) {

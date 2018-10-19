@@ -214,6 +214,22 @@ public class TestingModelcheckingLTL {
         Assert.assertNotNull(check);
     }
 
+    @Test
+    void testStuttering() throws InterruptedException, IOException {
+        PetriGame game = new PetriGame("testStuttering");
+        Place init = game.createPlace("a");
+        init.setInitialToken(1);
+        Transition tloop = game.createTransition("t");
+        game.createFlow(init, tloop);
+        game.createFlow(tloop, init);
+
+        CounterExample cex;
+
+        ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.PREV, ModelCheckerLTL.Maximality.STANDARD);
+        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(tloop)), "./" + game.getName(), true);
+        Assert.assertEquals(cex == null, true);
+    }
+
     @Test(enabled = true)
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";

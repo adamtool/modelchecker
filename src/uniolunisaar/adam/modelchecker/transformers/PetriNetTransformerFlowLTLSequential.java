@@ -15,7 +15,7 @@ import uniolunisaar.adam.tools.Logger;
  *
  * @author Manuel Gieseking
  */
-public class PetriNetTransformerSequential extends PetriNetTransformer {
+public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlowLTL {
 //     /**
 //     * Adds maximally a new copy for each place and each sub flow formula. Thus,
 //     * each sub flow formula yields one new block, where we check each flow
@@ -29,7 +29,7 @@ public class PetriNetTransformerSequential extends PetriNetTransformer {
 //     * @return
 //     */
 //    public static PetriGame createNet4ModelCheckingSequential(PetriGame net, IRunFormula formula) {
-//        return PetriNetTransformer.createNet4ModelCheckingSequential(net, formula);
+//        return PetriNetTransformerFlowLTL.createNet4ModelCheckingSequential(net, formula);
 //    }
 
     /**

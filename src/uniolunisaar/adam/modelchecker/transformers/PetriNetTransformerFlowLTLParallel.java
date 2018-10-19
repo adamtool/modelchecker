@@ -11,7 +11,7 @@ import uniolunisaar.adam.ds.petrigame.TokenFlow;
  *
  * @author Manuel Gieseking
  */
-public class PetriNetTransformerParallel extends PetriNetTransformer {
+public class PetriNetTransformerFlowLTLParallel extends PetriNetTransformerFlowLTL {
 
     /**
      * Only allows for checking one FlowFormula.
@@ -22,7 +22,7 @@ public class PetriNetTransformerParallel extends PetriNetTransformer {
      * @param net
      * @return
      */
-    public static PetriGame createNet4ModelCheckingParallel(PetriGame net) {
+    public static PetriGame createNet4ModelCheckingParallelOneFlowFormula(PetriGame net) {
         PetriGame out = new PetriGame(net);
         out.setName(net.getName() + "_mc");
         // Add to each original transition a place such that we can disable these transitions
