@@ -11,7 +11,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreatorPrevSemantics;
+import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 
@@ -66,15 +66,15 @@ public class TestingFlowLTLTransformer {
 
         // test maximality
         // standard
-        IRunFormula f = FormulaCreatorPrevSemantics.getMaximaliltyStandardObject(game);
+        IRunFormula f = FormulaCreatorIngoingSemantics.getMaximaliltyStandardObject(game);
 //        System.out.println("Maximality standard:");
 //        System.out.println(f.toSymbolString());
         // reisig
-        ILTLFormula f1 = FormulaCreatorPrevSemantics.getMaximaliltyReisigDirectAsObject(game);
+        ILTLFormula f1 = FormulaCreatorIngoingSemantics.getMaximaliltyParallelDirectAsObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f1.toSymbolString());
         // reisig
-        f = FormulaCreatorPrevSemantics.getMaximaliltyReisigObject(game);
+        f = FormulaCreatorIngoingSemantics.getMaximaliltyReisigObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f.toSymbolString());
 

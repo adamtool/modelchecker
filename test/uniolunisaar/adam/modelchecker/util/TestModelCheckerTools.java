@@ -17,13 +17,13 @@ import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
  */
 public class TestModelCheckerTools {
 
-    public static void testModelCheckerFlowLTL(PetriGame net, String formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws ParseException, InterruptedException, IOException {
-        testModelCheckerFlowLTL(net, FlowLTLParser.parse(net, formula), path, resMaxStandard, resMaxReisig);
+    public static void testModelCheckerFlowLTL(PetriGame net, String formula, String path, boolean resMaxInterleaving, boolean resMaxParallel) throws ParseException, InterruptedException, IOException {
+        testModelCheckerFlowLTL(net, FlowLTLParser.parse(net, formula), path, resMaxInterleaving, resMaxParallel);
     }
 
-    public static void testModelCheckerFlowLTL(PetriGame net, IRunFormula formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws InterruptedException, IOException {
-        testModelCheckerFlowLTL(net, formula, path, ModelCheckerFlowLTL.Maximality.STANDARD, resMaxStandard);
-        testModelCheckerFlowLTL(net, formula, path, ModelCheckerFlowLTL.Maximality.REISIG, resMaxReisig);
+    public static void testModelCheckerFlowLTL(PetriGame net, IRunFormula formula, String path, boolean resMaxInterleaving, boolean resMaxParallel) throws InterruptedException, IOException {
+        testModelCheckerFlowLTL(net, formula, path, ModelCheckerFlowLTL.Maximality.MAX_INTERLEAVING, resMaxInterleaving);
+        testModelCheckerFlowLTL(net, formula, path, ModelCheckerFlowLTL.Maximality.MAX_PARALLEL, resMaxParallel);
     }
 
     public static void testModelCheckerFlowLTL(PetriGame net, String formula, String path, ModelCheckerFlowLTL.Maximality max, boolean result) throws InterruptedException, IOException, ParseException {
@@ -38,21 +38,21 @@ public class TestModelCheckerTools {
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
         mc.setApproach(ModelCheckerFlowLTL.Approach.SEQUENTIAL);
-        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.NXT);
+        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.OUTGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
         //%%%% previous semantics
-        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.PREV);
+        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.INGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
         mc.setApproach(ModelCheckerFlowLTL.Approach.PARALLEL);
-        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.NXT);
+        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.OUTGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
         //%%%% previous semantics
-        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.PREV);
+        mc.setSemantics(ModelCheckerFlowLTL.TransitionSemantics.INGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
     }
@@ -62,8 +62,8 @@ public class TestModelCheckerTools {
     }
 
     public static void testModelCheckerLTL(PetriGame net, ILTLFormula formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws InterruptedException, IOException {
-        testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.STANDARD, resMaxStandard);
-        testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.REISIG, resMaxReisig);
+        testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, resMaxStandard);
+        testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_PARALLEL, resMaxReisig);
     }
 
     public static void testModelCheckerLTL(PetriGame net, String formula, String path, ModelCheckerLTL.Maximality max, boolean result) throws InterruptedException, IOException, ParseException {
@@ -77,20 +77,20 @@ public class TestModelCheckerTools {
         CounterExample cex;
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.NXT);
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
         //%%%% previous semantics
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.PREV);
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.NXT);
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
         //%%%% previous semantics
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.PREV);
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
         cex = mc.check(net, formula, path, true);
         Assert.assertEquals(cex == null, result);
     }

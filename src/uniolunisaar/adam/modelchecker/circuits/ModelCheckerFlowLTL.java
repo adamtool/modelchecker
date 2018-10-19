@@ -6,8 +6,8 @@ import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreatorNxtSemantics;
-import uniolunisaar.adam.logic.util.FormulaCreatorPrevSemantics;
+import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
+import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerParallel;
@@ -24,8 +24,8 @@ import uniolunisaar.adam.tools.Logger;
 public class ModelCheckerFlowLTL {
 
     public enum TransitionSemantics {
-        PREV,
-        NXT
+        INGOING,
+        OUTGOING
     }
 
     public enum Approach {
@@ -34,14 +34,14 @@ public class ModelCheckerFlowLTL {
     }
 
     public enum Maximality {
-        REISIG,
-        STANDARD,
-        NONE
+        MAX_PARALLEL,
+        MAX_INTERLEAVING,
+        MAX_NONE
     }
 
-    private TransitionSemantics semantics = TransitionSemantics.NXT;
+    private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
     private Approach approach = Approach.SEQUENTIAL;
-    private Maximality maximality = Maximality.STANDARD;
+    private Maximality maximality = Maximality.MAX_INTERLEAVING;
 
     public ModelCheckerFlowLTL() {
     }
@@ -68,25 +68,25 @@ public class ModelCheckerFlowLTL {
                 + " With maximality term: " + maximality
                 + " approach: " + approach + " semantics: " + semantics, true);
         switch (maximality) {
-            case STANDARD:
-                if (semantics == TransitionSemantics.PREV) {
-                    formula = new RunFormula(FormulaCreatorPrevSemantics.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, formula);
+            case MAX_INTERLEAVING:
+                if (semantics == TransitionSemantics.INGOING) {
+                    formula = new RunFormula(FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), RunOperators.Implication.IMP, formula);
                 } else {
-                    formula = new RunFormula(FormulaCreatorNxtSemantics.getMaximaliltyStandardDirectAsObject(net), RunOperators.Implication.IMP, formula);
+                    formula = new RunFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), RunOperators.Implication.IMP, formula);
                 }
                 break;
-            case REISIG:
-                if (semantics == TransitionSemantics.PREV) {
-                    formula = new RunFormula(FormulaCreatorPrevSemantics.getMaximaliltyReisigDirectAsObject(net), RunOperators.Implication.IMP, formula);
+            case MAX_PARALLEL:
+                if (semantics == TransitionSemantics.INGOING) {
+                    formula = new RunFormula(FormulaCreatorIngoingSemantics.getMaximaliltyParallelDirectAsObject(net), RunOperators.Implication.IMP, formula);
                 } else {
-                    formula = new RunFormula(FormulaCreatorNxtSemantics.getMaximaliltyReisigDirectAsObject(net), RunOperators.Implication.IMP, formula);
+                    formula = new RunFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyParallelDirectAsObject(net), RunOperators.Implication.IMP, formula);
                 }
                 break;
         }
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");
             formula = FlowLTLTransformer.addFairness(net, formula);
-            return ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, (semantics == TransitionSemantics.PREV));
+            return ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, (semantics == TransitionSemantics.INGOING));
         }
         if (approach == Approach.PARALLEL) {
             PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
@@ -95,7 +95,7 @@ public class ModelCheckerFlowLTL {
             }
             IRunFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, gameMC, formula);
             Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
-            return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc", (semantics == TransitionSemantics.PREV));
+            return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc", (semantics == TransitionSemantics.INGOING));
         } else {
             PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, formula);
             if (verbose) {
@@ -103,7 +103,7 @@ public class ModelCheckerFlowLTL {
             }
             IRunFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, formula);
             Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
-            return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc", (semantics == TransitionSemantics.PREV));
+            return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc", (semantics == TransitionSemantics.INGOING));
         }
     }
 
@@ -135,9 +135,9 @@ public class ModelCheckerFlowLTL {
      * Returns null iff the formula holds.
      *
      * This only works for formulas with at most one flow formula.
-     *
-     * It uses the PARALLEL approach (the first idea), where the flow and the
-     * orignal net are succeed simulaneously.
+
+ It uses the MAX_PARALLEL approach (the first idea), where the flow and the
+ orignal net are succeed simulaneously.
      *
      * @param game
      * @param formula

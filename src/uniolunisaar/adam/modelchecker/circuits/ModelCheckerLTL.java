@@ -5,8 +5,8 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
-import uniolunisaar.adam.logic.util.FormulaCreatorNxtSemantics;
-import uniolunisaar.adam.logic.util.FormulaCreatorPrevSemantics;
+import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
+import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.tools.Logger;
@@ -18,18 +18,18 @@ import uniolunisaar.adam.tools.Logger;
 public class ModelCheckerLTL {
 
     public enum TransitionSemantics {
-        PREV,
-        NXT
+        INGOING,
+        OUTGOING
     }
 
     public enum Maximality {
-        REISIG,
-        STANDARD,
-        NONE
+        MAX_PARALLEL,
+        MAX_INTERLEAVING,
+        MAX_NONE
     }
 
-    private TransitionSemantics semantics = TransitionSemantics.NXT;
-    private Maximality maximality = Maximality.STANDARD;
+    private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
+    private Maximality maximality = Maximality.MAX_INTERLEAVING;
 
     public ModelCheckerLTL() {
     }
@@ -55,24 +55,24 @@ public class ModelCheckerLTL {
                 + " With maximality term: " + maximality
                 + " semantics: " + semantics, true);
         switch (maximality) {
-            case STANDARD:
-                if (semantics == TransitionSemantics.PREV) {
-                    formula = new LTLFormula(FormulaCreatorPrevSemantics.getMaximaliltyStandardDirectAsObject(net), LTLOperators.Binary.IMP, formula);
+            case MAX_INTERLEAVING:
+                if (semantics == TransitionSemantics.INGOING) {
+                    formula = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), LTLOperators.Binary.IMP, formula);
                 } else {
-                    formula = new LTLFormula(FormulaCreatorNxtSemantics.getMaximaliltyStandardDirectAsObject(net), LTLOperators.Binary.IMP, formula);
+                    formula = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), LTLOperators.Binary.IMP, formula);
                 }
                 break;
-            case REISIG:
-                if (semantics == TransitionSemantics.PREV) {
-                    formula = new LTLFormula(FormulaCreatorPrevSemantics.getMaximaliltyReisigDirectAsObject(net), LTLOperators.Binary.IMP, formula);
+            case MAX_PARALLEL:
+                if (semantics == TransitionSemantics.INGOING) {
+                    formula = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximaliltyParallelDirectAsObject(net), LTLOperators.Binary.IMP, formula);
                 } else {
-                    formula = new LTLFormula(FormulaCreatorNxtSemantics.getMaximaliltyReisigDirectAsObject(net), LTLOperators.Binary.IMP, formula);
+                    formula = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyParallelDirectAsObject(net), LTLOperators.Binary.IMP, formula);
                 }
                 break;
         }
 
         formula = FlowLTLTransformer.addFairness(net, formula);
-        return ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, (semantics == TransitionSemantics.PREV));
+        return ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, (semantics == TransitionSemantics.INGOING));
     }
 
     public TransitionSemantics getSemantics() {

@@ -23,7 +23,7 @@ public class PetriNetTransformerFlowLTL {
     public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
     public static final String NEXT_ID = "_<nxt>";
 
-    static PetriGame createOriginalPartOfTheNet(PetriGame orig) {
+    static PetriGame createOriginalPartOfTheNet(PetriGame orig, boolean initFirstStep) {
         // Copy the original net
         PetriGame out = new PetriGame(orig);
         out.setName(orig.getName() + "_mc");
