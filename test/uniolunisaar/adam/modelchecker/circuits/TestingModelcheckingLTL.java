@@ -126,6 +126,7 @@ public class TestingModelcheckingLTL {
 
         // Fairness
         f = new LTLFormula(FormulaCreator.createStrongFairness(l));
+        f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
         check = ModelCheckerMCHyper.check(doublediamond, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
         Assert.assertNull(check);
     }
