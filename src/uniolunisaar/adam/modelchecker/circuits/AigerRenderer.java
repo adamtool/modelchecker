@@ -139,16 +139,10 @@ public class AigerRenderer {
             } else {
                 firingResult = AigerFile.FALSE;
             }
-            if (net.getTransitions().size() == 1) {
-                file.addGate(id, VALID_TRANSITION_PREFIX + t.getId(), firingResult);
-            } else {
-                file.addGate(id + "_" + t.getId() + "_buf", VALID_TRANSITION_PREFIX + t.getId(), firingResult);
-                inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
-            }
+            file.addGate(id + "_" + t.getId() + "_buf", VALID_TRANSITION_PREFIX + t.getId(), firingResult);
+            inputs[i++] = "!" + id + "_" + t.getId() + "_buf";
         }
-        if (net.getTransitions().size() > 1) {
-            file.addGate(id, inputs);
-        }
+        file.addGate(id, inputs);
         return id;
     }
 
@@ -191,9 +185,10 @@ public class AigerRenderer {
     }
 
     void setOutputs(AigerFile file, PetriNet net) {
-        // the valid transitions are already the output
+        // the valid transitions are already the output in the case that it is not init
         for (Transition t : net.getTransitions()) {
-            file.copyValues(OUTPUT_PREFIX + t.getId(), VALID_TRANSITION_PREFIX + t.getId());
+            file.addGate(OUTPUT_PREFIX + t.getId(), INIT_LATCH, VALID_TRANSITION_PREFIX + t.getId());
+//            file.copyValues(OUTPUT_PREFIX + t.getId(), VALID_TRANSITION_PREFIX + t.getId());
         }
         // the place outputs are directly the output of the place latches
         for (Place p : net.getPlaces()) {

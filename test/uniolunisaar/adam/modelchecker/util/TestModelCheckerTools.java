@@ -4,6 +4,7 @@ import java.io.IOException;
 import org.testng.Assert;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
@@ -57,20 +58,20 @@ public class TestModelCheckerTools {
         Assert.assertEquals(cex == null, result);
     }
 
-    public static void testModelCheckerLTL(PetriGame net, String formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws ParseException, InterruptedException, IOException {
+    public static void testModelCheckerLTL(PetriGame net, String formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws ParseException, InterruptedException, IOException, NotSubstitutableException {
         testModelCheckerLTL(net, (ILTLFormula) FlowLTLParser.parse(net, formula), path, resMaxStandard, resMaxReisig);
     }
 
-    public static void testModelCheckerLTL(PetriGame net, ILTLFormula formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws InterruptedException, IOException {
+    public static void testModelCheckerLTL(PetriGame net, ILTLFormula formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws InterruptedException, IOException, NotSubstitutableException, ParseException {
         testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, resMaxStandard);
         testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_PARALLEL, resMaxReisig);
     }
 
-    public static void testModelCheckerLTL(PetriGame net, String formula, String path, ModelCheckerLTL.Maximality max, boolean result) throws InterruptedException, IOException, ParseException {
+    public static void testModelCheckerLTL(PetriGame net, String formula, String path, ModelCheckerLTL.Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotSubstitutableException {
         testModelCheckerLTL(net, (ILTLFormula) FlowLTLParser.parse(net, formula), path, max, result);
     }
 
-    public static void testModelCheckerLTL(PetriGame net, ILTLFormula formula, String path, ModelCheckerLTL.Maximality max, boolean result) throws InterruptedException, IOException {
+    public static void testModelCheckerLTL(PetriGame net, ILTLFormula formula, String path, ModelCheckerLTL.Maximality max, boolean result) throws InterruptedException, IOException, NotSubstitutableException, ParseException {
         ModelCheckerLTL mc = new ModelCheckerLTL();
         mc.setMaximality(max);
 

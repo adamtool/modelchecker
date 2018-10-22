@@ -6,6 +6,11 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.ds.petrigame.TokenFlow;
+import uniolunisaar.adam.logic.flowltl.FlowFormula;
+import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.createOriginalPartOfTheNet;
+import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -14,10 +19,91 @@ import uniolunisaar.adam.ds.petrigame.TokenFlow;
 public class PetriNetTransformerFlowLTLParallel extends PetriNetTransformerFlowLTL {
 
     /**
+     * Fairness must be stated within the formula.
+     *
+     * Not yet finished, other algorithms are more urgent :$.
+     *
+     * @param orig
+     * @param formula
+     * @param initFirstStep
+     * @return
+     */
+    public static PetriGame createNet4ModelCheckingParallel(PetriGame orig, IRunFormula formula, boolean initFirstStep) {
+        PetriGame out = createOriginalPartOfTheNet(orig, initFirstStep);
+        // for every original transition add a self dependency to the activation place
+        for (Transition t : orig.getTransitions()) {
+            Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId());
+            out.createFlow(act, t);
+            out.createFlow(t, act);
+        }
+
+        // for all subformulas
+        List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(formula);
+        if (flowFormulas.isEmpty()) {
+            // should not really be used, since the normal model checking should be used in these cases
+            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."
+                    + " The standard LTL model checker should be used.", false);
+
+            return out;
+        }
+        int[] indices = new int[flowFormulas.size()];
+        for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
+            // adds the subnet which only creates places and copies of transitions for each flow
+            addSubFlowFormulaNet(orig, out, nb_ff, initFirstStep);
+            indices[nb_ff] = nb_ff;
+        }
+        // add the power set of for all transitions which move the token flow
+        ArrayList<ArrayList<Integer>> powerSet = new ArrayList<>();
+        powerSet(indices, 0, new ArrayList<>(), powerSet);
+        for (Transition t : out.getTransitions()) {
+            if (!orig.containsNode(t)) {
+                for (ArrayList<Integer> set : powerSet) {
+                    if (set.isEmpty()) { // skip the empty set
+                        continue;
+                    }
+                    if (set.size() == 1) { // the case that the transition had already been created by addSubFlowFormulaNet
+                        if (orig.containsTransition(t.getLabel())) { // it is not the additional init transitions
+                            // add the original pre- and postset                        
+                            Transition torig = orig.getTransition(t.getLabel());
+                            for (Place place : torig.getPreset()) {
+                                out.createFlow(place, t);
+                            }
+                            for (Place place : torig.getPostset()) {
+                                out.createFlow(t, place);
+                            }
+
+                        } else {
+                            // todo do the stuff for init
+                        }
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    private static void powerSet(int[] flowFormulaIndices, int index, ArrayList<Integer> used, ArrayList<ArrayList<Integer>> powerSet) {
+        if (index == flowFormulaIndices.length) {
+            powerSet.add(used);
+        } else {
+            powerSet(flowFormulaIndices, index + 1, used, powerSet);
+            ArrayList<Integer> set = new ArrayList<>(used);
+            set.add(flowFormulaIndices[index]);
+            powerSet(flowFormulaIndices, index + 1, set, powerSet);
+        }
+    }
+
+    /**
      * Only allows for checking one FlowFormula.
      *
      * Fairness assumptions must be put into the formula. Here wir only check
      * one flow formula by checking all runs and a run considers one chain.
+     *
+     * Deprecated since there is a version which handels more then one
+     * FlowFormula and handles the other initialization approach.
+     *
+     * This version is from 19.10.2018 and should be identically to the
+     * semantics of createNet4ModelCheckingParallel concerning the special case.
      *
      * @param net
      * @return

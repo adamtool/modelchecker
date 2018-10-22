@@ -13,7 +13,9 @@ import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.Constants;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
@@ -132,6 +134,52 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
+    void testOutgoingSemantics() throws InterruptedException, IOException, NotSubstitutableException, ParseException {
+        PetriGame game = new PetriGame("testNext");
+        Place init = game.createPlace("pA");
+        init.setInitialToken(1);
+        Place init2 = game.createPlace("pA2");
+        Place out = game.createPlace("pB");
+
+        Transition t = game.createTransition("t");
+        game.createFlow(init, t);
+        game.createFlow(t, out);
+
+//        Transition t2 = game.createTransition("t2");
+//        game.createFlow(init2, t2);
+//        game.createFlow(t2, init2);
+        ModelCheckerLTL mc = new ModelCheckerLTL();
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE);
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+
+        // initially the initial place
+        ILTLFormula pA = new AtomicProposition(init);
+        CounterExample cex = mc.check(game, pA, "./" + game.getName(), true);
+        Assert.assertNull(cex);
+        // but not the other one
+        ILTLFormula pA2 = new AtomicProposition(init2);
+        cex = mc.check(game, pA2, "./" + game.getName(), true);
+        Assert.assertNotNull(cex);
+
+        // not the transition is force to leave the state since we  can stay in the initial marking
+        ILTLFormula propT = new AtomicProposition(t);
+        cex = mc.check(game, propT, "./" + game.getName(), true);
+        Assert.assertNotNull(cex);
+        // but not when we demand maximality
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        cex = mc.check(game, propT, "./" + game.getName(), true);
+        Assert.assertNull(cex);
+        // Not all runs should be maximal
+        cex = mc.check(game, new Constants.False(), "./" + game.getName(), true);
+        Assert.assertNotNull(cex);
+        AdamTools.savePG2PDF(game.getName(), game, true);
+        // but not globally since the net is finite
+        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, propT), "./" + game.getName(), true);
+        Assert.assertNotNull(cex);
+
+    }
+
+    @Test
     void testToyExample() throws RenderException, InterruptedException, IOException, ParseException {
         PetriGame game = new PetriGame("testing");
         Place init = game.createPlace("inittfl");
@@ -216,7 +264,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testStuttering() throws InterruptedException, IOException {
+    void testStuttering() throws InterruptedException, IOException, NotSubstitutableException, ParseException {
         PetriGame game = new PetriGame("testStuttering");
         Place init = game.createPlace("a");
         init.setInitialToken(1);
@@ -226,7 +274,7 @@ public class TestingModelcheckingLTL {
 
         CounterExample cex;
 
-        ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.INGOING, ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.OUTGOING, ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(tloop)), "./" + game.getName(), true);
         Assert.assertEquals(cex == null, true);
     }
@@ -271,7 +319,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = true)
-    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException {
+    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException, NotSubstitutableException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
         AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
@@ -282,19 +330,25 @@ public class TestingModelcheckingLTL {
                         LTLOperators.Binary.AND,
                         new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbadB")))
                 ));
+        ModelCheckerLTL mc = new ModelCheckerLTL();
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since it is done by hand
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
         // test previous
         LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        CounterExample cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), true);
+//        CounterExample cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), true);
+        CounterExample cex = mc.check(pn, maxf, "./" + pn.getName(), true);
         Assert.assertNotNull(cex);
 
         //test next
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), false);
+//        cex = ModelCheckerMCHyper.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), false);
+        cex = mc.check(pn, maxf, "./" + pn.getName(), false);
         Assert.assertNotNull(cex);
     }
 
     @Test
-    void testMaximality() throws RenderException, InterruptedException, IOException, ParseException {
+    void testMaximality() throws RenderException, InterruptedException, IOException, ParseException, NotSubstitutableException {
         PetriGame net = new PetriGame("testMaximalityA");
         Place A = net.createPlace("A");
         A.setInitialToken(1);
@@ -315,6 +369,9 @@ public class TestingModelcheckingLTL {
         AdamTools.savePG2PDF(net.getName(), new PetriGame(net), false);
 
         // Check previous semantics
+        ModelCheckerLTL mc = new ModelCheckerLTL();
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since we do it by hand
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
         ILTLFormula maxReisig = FormulaCreatorIngoingSemantics.getMaximaliltyParallelDirectAsObject(net);
         ILTLFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(net);
 
@@ -323,39 +380,48 @@ public class TestingModelcheckingLTL {
 
         LTLFormula f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
 
-        CounterExample cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+//        CounterExample cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+        CounterExample cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
 
         f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evB2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true); 
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evA2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(cex);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evB2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
 
         // Check next semantics
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         maxReisig = FormulaCreatorOutgoingSemantics.getMaximaliltyParallelDirectAsObject(net);
         maxStandard = FormulaCreatorOutgoingSemantics.getMaximaliltyInterleavingDirectAsObject(net);
 
         f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
 
         f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evB2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evA2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(cex);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evB2);
-        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+//        cex = ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
+        cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
     }
 }

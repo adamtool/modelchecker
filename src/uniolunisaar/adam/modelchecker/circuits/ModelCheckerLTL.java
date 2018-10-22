@@ -1,7 +1,9 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import java.io.IOException;
+import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
@@ -50,16 +52,18 @@ public class ModelCheckerLTL {
      * @throws InterruptedException
      * @throws IOException
      */
-    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException {
-        Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula + "'."
+    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, NotSubstitutableException, ParseException {
+        Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'."
                 + " With maximality term: " + maximality
                 + " semantics: " + semantics, true);
+        formula = FlowLTLTransformer.addFairness(net, formula);
         switch (maximality) {
             case MAX_INTERLEAVING:
                 if (semantics == TransitionSemantics.INGOING) {
                     formula = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), LTLOperators.Binary.IMP, formula);
                 } else {
                     formula = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), LTLOperators.Binary.IMP, formula);
+                    formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula);
                 }
                 break;
             case MAX_PARALLEL:
@@ -67,11 +71,18 @@ public class ModelCheckerLTL {
                     formula = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximaliltyParallelDirectAsObject(net), LTLOperators.Binary.IMP, formula);
                 } else {
                     formula = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyParallelDirectAsObject(net), LTLOperators.Binary.IMP, formula);
+                    formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula);
+                }
+                break;
+            case MAX_NONE:
+                if (semantics == TransitionSemantics.INGOING) {
+                    // todo: when INGOING finished do the formula transformation here
+                } else {
+                    formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula);
                 }
                 break;
         }
-
-        formula = FlowLTLTransformer.addFairness(net, formula);
+        Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
         return ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, (semantics == TransitionSemantics.INGOING));
     }
 

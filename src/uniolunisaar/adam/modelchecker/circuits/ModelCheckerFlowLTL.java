@@ -64,7 +64,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     public CounterExample check(PetriGame net, IRunFormula formula, String path, boolean verbose) throws InterruptedException, IOException {
-        Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula + "'."
+        Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'."
                 + " With maximality term: " + maximality
                 + " approach: " + approach + " semantics: " + semantics, true);
         switch (maximality) {
@@ -84,7 +84,7 @@ public class ModelCheckerFlowLTL {
                 break;
         }
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
-            Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");
+            Logger.getInstance().addMessage("There is no flow formula within '" + formula.toSymbolString() + "'. Thus, we use the standard model checking algorithm for LTL.");
             formula = FlowLTLTransformer.addFairness(net, formula);
             return ModelCheckerMCHyper.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, (semantics == TransitionSemantics.INGOING));
         }
@@ -94,7 +94,7 @@ public class ModelCheckerFlowLTL {
                 AdamTools.savePG2PDF(path + "_mc", gameMC, true);
             }
             IRunFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, gameMC, formula);
-            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
+            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
             return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc", (semantics == TransitionSemantics.INGOING));
         } else {
             PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, formula);
@@ -102,7 +102,7 @@ public class ModelCheckerFlowLTL {
                 AdamTools.savePG2PDF(path + "_mc", gameMC, true);
             }
             IRunFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, formula);
-            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
+            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
             return ModelCheckerMCHyper.check(gameMC, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc", (semantics == TransitionSemantics.INGOING));
         }
     }

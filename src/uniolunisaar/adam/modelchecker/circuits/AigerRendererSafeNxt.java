@@ -32,13 +32,19 @@ public class AigerRendererSafeNxt extends AigerRenderer {
 
     @Override
     void setOutputs(AigerFile file, PetriNet net) {
-        // the valid transitions are already the output
+        // the valid transitions are already the output in the case that it is not init
         for (Transition t : net.getTransitions()) {
-            file.copyValues(OUTPUT_PREFIX + t.getId(), VALID_TRANSITION_PREFIX + t.getId());
+            file.addGate(OUTPUT_PREFIX + t.getId(), INIT_LATCH, VALID_TRANSITION_PREFIX + t.getId());
+//            file.copyValues(OUTPUT_PREFIX + t.getId(), VALID_TRANSITION_PREFIX + t.getId());
         }
-        // the place outputs are the save output of the place latches
+        // if it is not the initial step
+        // the place outputs are the saved output of the place latches
+        // otherwise it is the new value of the places
         for (Place p : net.getPlaces()) {
-            file.copyValues(OUTPUT_PREFIX + p.getId(), p.getId());
+//            file.addGate(OUTPUT_PREFIX + p.getId() + "_bufA", "!" + INIT_LATCH, "!" + p.getId() + NEW_VALUE_OF_LATCH_SUFFIX);
+//            file.addGate(OUTPUT_PREFIX + p.getId() + "_bufB", INIT_LATCH, "!" + p.getId());
+//            file.addGate(OUTPUT_PREFIX + p.getId(), "!" + OUTPUT_PREFIX + p.getId() + "_bufA", "!" + OUTPUT_PREFIX + p.getId() + "_bufB");
+ file.copyValues(OUTPUT_PREFIX + p.getId(), p.getId() + NEW_VALUE_OF_LATCH_SUFFIX);
         }
     }
 
