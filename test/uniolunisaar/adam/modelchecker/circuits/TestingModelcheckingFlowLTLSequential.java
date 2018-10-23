@@ -39,7 +39,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
-        true);
+                true);
 
         // check standard maximality
         // + sequential
@@ -61,11 +61,18 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamTools.saveAPT(net.getName() + "_" + formula, net, false);
         AdamTools.savePG2PDF(net.getName() + "_" + formula, net, false);
         ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret); 
+        Assert.assertNull(ret);
         // previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
         ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret); // here is an error it is not null        
+        Assert.assertNull(ret);
+
+        // check to flow formulas
+        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+        f = new RunFormula(f, RunOperators.Binary.OR, f);
+        ret = mc.check(net, f, "./" + net.getName() + "_" + f.toString(), true);
+        Assert.assertNull(ret);
+
     }
 
     @Test(enabled = true)

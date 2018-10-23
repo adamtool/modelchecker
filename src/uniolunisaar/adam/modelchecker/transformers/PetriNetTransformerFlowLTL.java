@@ -126,6 +126,7 @@ public class PetriNetTransformerFlowLTL {
                 // (moves the init token in the new place)
                 Transition tout = out.createTransition(t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-" + (count++));
                 tout.setLabel(t.getId());
+                tout.putExtension("subformula", nb_ff);
                 if (initFirstStep) {
                     out.createFlow(out.getPlace(NEW_TOKENFLOW_ID + "-" + nb_ff), tout);
                 } else {
@@ -171,6 +172,7 @@ public class PetriNetTransformerFlowLTL {
                     // label is not working so easily since also in a next while run the same transition could be used from another place
                     Transition tout = out.createTransition();
                     tout.setLabel(t.getId());
+                    tout.putExtension("subformula", nb_ff);
                     // move the chain token
                     out.createFlow(pPre, tout);
                     out.createFlow(tout, pPost);

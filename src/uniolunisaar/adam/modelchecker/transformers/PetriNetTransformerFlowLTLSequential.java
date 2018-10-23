@@ -110,10 +110,11 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
             // for each original transition which is used create an active place 
             // from which all copies are dependent
             for (Transition t : orig.getTransitions()) {
-                // search for a transition with the same label
+                // search for a transition with the same label of my subformula
                 boolean found = false;
                 for (Transition t1 : out.getTransitions()) {
-                    if (t1 != t && t1.getLabel().equals(t.getId())) {
+                    if (!t1.getId().equals(t.getId()) && t1.getLabel().equals(t.getId())
+                            && t1.hasExtension("subformula") && t1.getExtension("subformula").equals(nb_ff)) {
                         found = true;
                     }
                 }
@@ -127,9 +128,11 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     // chain is active
                     Transition tout = out.createTransition(t.getId() + NEXT_ID + "-" + nb_ff);
                     tout.setLabel(t.getId());
+                    tout.putExtension("subformula", nb_ff);
                     // add the activation token to every created token for the chains
                     for (Transition tflow : out.getTransitions()) {
-                        if (!tflow.getId().equals(t.getId()) && tflow.getLabel().equals(t.getId())) {
+                        if (!tflow.getId().equals(t.getId()) && tflow.getLabel().equals(t.getId())
+                                && tflow.hasExtension("subformula") && tflow.getExtension("subformula").equals(nb_ff)) {
                             out.createFlow(act, tflow);
                         }
                     }
