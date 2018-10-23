@@ -34,7 +34,12 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
-        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+        true);
 
         // check standard maximality
         // + sequential
@@ -45,7 +50,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertNotNull(ret); // here is an error it is null
         // previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
-        ret = mc.check(net, f, "./" + net.getName(), true);
+        ret = mc.check(net, f, "./" + net.getName(), false);
         Assert.assertNotNull(ret);
 
         // check standard maximality

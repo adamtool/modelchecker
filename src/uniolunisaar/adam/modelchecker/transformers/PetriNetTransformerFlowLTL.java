@@ -50,12 +50,12 @@ public class PetriNetTransformerFlowLTL {
     }
 
     /**
-     * 
+     *
      * @param orig
      * @param out
      * @param nb_ff
      * @param initFirstStep
-     * @return 
+     * @return
      */
     static PetriGame addSubFlowFormulaNet(PetriGame orig, PetriGame out, int nb_ff, boolean initFirstStep) {
         // create an initial place representing the chosen flow chain
@@ -137,7 +137,7 @@ public class PetriNetTransformerFlowLTL {
                 }
 
                 // for all succeeding token flows
-                int count = 0;
+//                int count = 0;
                 for (Place post : tfl.getPostset()) {
                     // create for all flows a place (if not already existent)
                     // and a transition moving the flow token to the place
@@ -153,7 +153,9 @@ public class PetriNetTransformerFlowLTL {
                         pPost = out.getPlace(id);
                     }
                     // Create a copy of the transition which moves this flow
-                    Transition tout = out.createTransition(t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-" + (count++));
+//                    Transition tout = out.createTransition(t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-" + (count++));
+                    // label is not working so easily since also in a next while run the same transition could be used from another place
+                    Transition tout = out.createTransition();
                     tout.setLabel(t.getId());
                     // move the chain token
                     out.createFlow(pPre, tout);

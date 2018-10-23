@@ -64,13 +64,56 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     }
                 }
             }
-
+// CODE when I give all transitions a proper name, so fare I don't have it so do a little bit more searching in the net
+//            // for each original transition which is used create an active place 
+//            // from which all copies are dependent
+//            for (Transition t : orig.getTransitions()) {
+//                String idPref = t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-";
+//                Place act = null;
+//                if (out.containsNode(idPref + 0)) { // for all transition which create or succeed a token chain
+//                    // create the activation place                    
+//                    String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
+//                    act = out.createPlace(id);
+//                    // Add a transition which moves (takes, move is done later)
+//                    // the activation token to the next token flow subnet, when no
+//                    // chain is active
+//                    Transition tout = out.createTransition(t.getId() + NEXT_ID + "-" + nb_ff);
+//                    tout.setLabel(t.getId());
+//                    // all complements of places which can succeed the tokenflows of the transition
+//                    for (Transition tpost : act.getPostset()) { // transitions which take the active token
+//                        for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
+//                            if (p != act && !p.getId().startsWith("!")) { // but not the active itself and the negation
+//                                Place negInput = out.getPlace("!" + p.getId());
+//                                if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
+//                                    out.createFlow(negInput, tout);
+//                                    out.createFlow(tout, negInput);
+//                                }
+//                            }
+//                        }
+//                    }
+//                    // deactivate the transitions
+//                    out.createFlow(act, tout);
+//                }
+//                // add the activation token to every created token for the chains
+//                int count = 0;
+//                while (out.containsNode(idPref + count)) {
+//                    Transition tout = out.getTransition(idPref + (count++));
+//                    out.createFlow(act, tout);
+//                }
+//            }
+///// HERE END CODE
             // for each original transition which is used create an active place 
             // from which all copies are dependent
             for (Transition t : orig.getTransitions()) {
-                String idPref = t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-";
+                // search for a transition with the same label
+                boolean found = false;
+                for (Transition t1 : out.getTransitions()) {
+                    if (t1 != t && t1.getLabel().equals(t.getId())) {
+                        found = true;
+                    }
+                }
                 Place act = null;
-                if (out.containsNode(idPref + 0)) { // for all transition which create or succeed a token chain
+                if (found) { // for all transition which create or succeed a token chain
                     // create the activation place                    
                     String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                     act = out.createPlace(id);
@@ -91,14 +134,12 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                             }
                         }
                     }
-                    // deactivate the transitions
-                    out.createFlow(act, tout);
                 }
                 // add the activation token to every created token for the chains
-                int count = 0;
-                while (out.containsNode(idPref + count)) {
-                    Transition tout = out.getTransition(idPref + (count++));
-                    out.createFlow(act, tout);
+                for (Transition tout : out.getTransitions()) {
+                    if (tout != t && tout.getLabel().equals(t.getId())) {
+                        out.createFlow(act, tout);
+                    }
                 }
             }
         }

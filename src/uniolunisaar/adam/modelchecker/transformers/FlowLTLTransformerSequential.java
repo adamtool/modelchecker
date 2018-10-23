@@ -3,6 +3,8 @@ package uniolunisaar.adam.modelchecker.transformers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -24,6 +26,7 @@ import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 
@@ -142,12 +145,15 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
      * @param orig
      * @param net
      * @param formula
+     * @param initFirst
      * @return
+     * @throws uniolunisaar.adam.modelchecker.exceptions.NotConvertableException
      */
-    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, IRunFormula formula) throws NotConvertableException {
+    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, IRunFormula formula, boolean initFirst) throws NotConvertableException {
         // replace the next operator in the run-part
         IFormula f = replaceNextWithinRunFormulaSequential(orig, net, formula);
 
+        List<AtomicProposition> allInitTransitions = new ArrayList<>();
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
             FlowFormula flowFormula = flowFormulas.get(i);
@@ -160,26 +166,29 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i));
                     flowFormula = (FlowFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                 }
-
-                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
-                // Replace the transitions with the big-or of all accordingly labelled transitions
-                for (Transition transition : orig.getTransitions()) {
-                    try {
-                        AtomicProposition trans = new AtomicProposition(transition);
-                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
-                        Collection<ILTLFormula> elements = new ArrayList<>();
-                        for (Transition t : act.getPostset()) {
-                            elements.add(new AtomicProposition(t));
-                        }
-                        flowFormula = (FlowFormula) flowFormula.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
-                    } catch (NotSubstitutableException ex) {
-                        throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
+            }
+            // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
+            // Replace the transitions with the big-or of all accordingly labelled transitions
+            for (Transition transition : orig.getTransitions()) {
+                try {
+                    AtomicProposition trans = new AtomicProposition(transition);
+                    Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
+                    Collection<ILTLFormula> elements = new ArrayList<>();
+                    for (Transition t : act.getPostset()) {
+                        elements.add(new AtomicProposition(t));
                     }
+                    flowFormula = (FlowFormula) flowFormula.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
+                } catch (NotSubstitutableException ex) {
+                    throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
                 }
+            }
 
-                // Replace the next operator within the flow formula
-                flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
+            // Replace the next operator within the flow formula
+            flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
+            try {
                 f = f.substitute(flowFormulas.get(i), new RunFormula(
                         new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))),
                         LTLOperators.Binary.OR,
@@ -187,14 +196,21 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         //                                new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))),
                         //                                LTLOperators.Binary.OR,
                         flowFormula.getPhi()
-                //                )
+                        //                )
                 ));
-                return convert(f);
             } catch (NotSubstitutableException ex) {
-                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
+                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
+            }
+            // add all init transitions
+            Place init = net.getPlace(INIT_TOKENFLOW_ID + "-" + i);
+            for (Transition t : init.getPostset()) {
+                allInitTransitions.add(new AtomicProposition(t));
             }
         }
-        return convert(f);
+
+        ILTLFormula ret = convert(f);
+        // in the beginning all init transitions are allowed to fire until the original formula has to hold
+        return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(allInitTransitions, false), LTLOperators.Binary.U, ret);
     }
 
 }
