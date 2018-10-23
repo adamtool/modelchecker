@@ -47,7 +47,7 @@ public class TestingModelcheckingFlowLTLSequential {
         formula = "A(F(out))";
         f = FlowLTLParser.parse(net, formula);
         ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); // here is an error it is null
+        Assert.assertNotNull(ret); // here is an error when I do the maximality before the transformation of the formula and not afterwards (it is null)
         // previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
         ret = mc.check(net, f, "./" + net.getName(), false);

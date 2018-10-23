@@ -117,17 +117,22 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                         found = true;
                     }
                 }
-                Place act = null;
                 if (found) { // for all transition which create or succeed a token chain
                     // create the activation place                    
                     String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
-                    act = out.createPlace(id);
+                    Place act = out.createPlace(id);
                     out.setPartition(act, nb_ff);
                     // Add a transition which moves (takes, move is done later)
                     // the activation token to the next token flow subnet, when no
                     // chain is active
                     Transition tout = out.createTransition(t.getId() + NEXT_ID + "-" + nb_ff);
                     tout.setLabel(t.getId());
+                    // add the activation token to every created token for the chains
+                    for (Transition tflow : out.getTransitions()) {
+                        if (!tflow.getId().equals(t.getId()) && tflow.getLabel().equals(t.getId())) {
+                            out.createFlow(act, tflow);
+                        }
+                    }
                     // all complements of places which can succeed the tokenflows of the transition
                     for (Transition tpost : act.getPostset()) { // transitions which take the active token
                         for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
@@ -141,12 +146,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                         }
                     }
                 }
-                // add the activation token to every created token for the chains
-                for (Transition tout : out.getTransitions()) {
-                    if (!tout.getId().equals(t.getId()) && tout.getLabel().equals(t.getId())) {
-                        out.createFlow(act, tout);
-                    }
-                }
+
             }
         }
 

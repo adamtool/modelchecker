@@ -75,15 +75,16 @@ public class ModelCheckerFlowLTL {
             return mcLTL.check(net, formula.toLTLFormula(), path, verbose);
         }
 
-        // Add Fairness
-        IRunFormula f = FlowLTLTransformer.addFairness(net, formula);
-
-        // Get the formula for the maximality (null if MAX_NONE)
-        ILTLFormula max = ModelCheckerTools.getMaximality(maximality, semantics, net);
-        if (max != null) {
-            f = new RunFormula(max, RunOperators.Implication.IMP, f);
-            mcLTL.setMaximality(Maximality.MAX_NONE); // already done the maximality here
-        }
+//        // Add Fairness
+//        IRunFormula f = FlowLTLTransformer.addFairness(net, formula);
+//
+//        // Get the formula for the maximality (null if MAX_NONE)
+//        ILTLFormula max = ModelCheckerTools.getMaximality(maximality, semantics, net);
+//        if (max != null) {
+//            f = new RunFormula(max, RunOperators.Implication.IMP, f);
+//            mcLTL.setMaximality(Maximality.MAX_NONE); // already done the maximality here
+//        }
+        IRunFormula f = formula;
 
         if (approach == Approach.PARALLEL) {
             PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
