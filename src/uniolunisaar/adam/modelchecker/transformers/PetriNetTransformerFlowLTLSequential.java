@@ -78,6 +78,24 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     }
                 }
             }
+            // also for the place which is used for the newly creation of chains
+            Place newTflPlace = out.getPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+            // create the dual place of p
+            Place pNot = out.createPlace("!" + newTflPlace.getId());
+            pNot.setInitialToken(1);
+            out.setOrigID(pNot, newTflPlace.getId());
+            out.setPartition(pNot, nb_ff);
+            for (Transition t : newTflPlace.getPreset()) {
+                if (!newTflPlace.getPostset().contains(t)) {
+                    out.createFlow(pNot, t);
+                }
+            }
+            for (Transition t : newTflPlace.getPostset()) {
+                if (!newTflPlace.getPreset().contains(t)) {
+                    out.createFlow(t, pNot);
+                }
+            }
+
 // CODE when I give all transitions a proper name, so fare I don't have it so do a little bit more searching in the net
 //            // for each original transition which is used create an active place 
 //            // from which all copies are dependent

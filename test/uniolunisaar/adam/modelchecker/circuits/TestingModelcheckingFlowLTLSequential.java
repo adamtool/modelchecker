@@ -121,16 +121,26 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertNull(ret);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true) // takes to long for MCHyper
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException {
         PetriGame net = UpdatingNetwork.create(3, 2);
         AdamTools.savePG2PDF(net.getName(), net, false);
-        String formula = "A(F(p3)";
-        RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        CounterExample ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
+
+        String formula;
+        RunFormula f;
+        CounterExample ret;
+
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                true);
+
+        formula = "A(F(p3)";
+        f = FlowLTLParser.parse(net, formula);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
     }
 
     @Test(enabled = false)
