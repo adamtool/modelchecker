@@ -16,6 +16,8 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
 import uniolunisaar.adam.logic.flowltl.Constants;
+import uniolunisaar.adam.logic.flowltl.IAtomicProposition;
+import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
@@ -158,7 +160,21 @@ public class TestingModelcheckingLTL {
         ILTLFormula pA = new AtomicProposition(init);
         CounterExample cex = mc.check(game, pA, "./" + game.getName(), true);
         Assert.assertNull(cex);
-        // but not the other one
+        //// but not the other one
+        // first test the stuttering formula         
+        IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
+        IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+        ILTLFormula stutt = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
+                LTLOperators.Binary.IMP,
+                new LTLFormula(LTLOperators.Unary.G, stutterReg)))
+        );
+//        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutt), "./" + game.getName(), true);
+//        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), "./" + game.getName(), true);
+//        cex = mc.check(game, new Constants.False(), "./" + game.getName(), true);
+        IFormula f = new Constants.False();
+        cex = ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName());
+        Assert.assertNotNull(cex);
+
         ILTLFormula pA2 = new AtomicProposition(init2);
         cex = mc.check(game, pA2, "./" + game.getName(), true);
         Assert.assertNotNull(cex);

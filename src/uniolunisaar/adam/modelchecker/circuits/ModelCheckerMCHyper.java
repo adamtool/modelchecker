@@ -44,7 +44,7 @@ public class ModelCheckerMCHyper {
         }
 
         if (proc.exitValue() == 42) { // has a counter example, ergo read it
-            return ModelCheckerTools.parseCounterExample(net, path + "_complete.cex");
+            return circ.parseCounterExample(net, path + "_complete.cex");
         }
 
         return null;

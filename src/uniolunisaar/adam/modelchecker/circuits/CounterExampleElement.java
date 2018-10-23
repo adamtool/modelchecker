@@ -15,9 +15,13 @@ public class CounterExampleElement {
     private final List<Place> marking = new ArrayList<>();
     private boolean init;
     private final int timestep;
+    // only needed for SafeOutStutterRegisterRenderer
+    private boolean withStuttering;
+    private boolean stutter;
 
-    public CounterExampleElement(int timestep) {
+    public CounterExampleElement(int timestep, boolean withStuttering) {
         this.timestep = timestep;
+        this.withStuttering = withStuttering;
     }
 
     public void add(Transition transition) {
@@ -44,14 +48,34 @@ public class CounterExampleElement {
         this.init = init;
     }
 
+    public boolean isStutter() {
+        return stutter;
+    }
+
+    public void setStutter(boolean stutter) {
+        this.stutter = stutter;
+    }
+
+    public boolean isWithStuttering() {
+        return withStuttering;
+    }
+
+    public void setWithStuttering(boolean withStuttering) {
+        this.withStuttering = withStuttering;
+    }
+
     public boolean isEmpty() {
         return init && transitions.isEmpty() && marking.isEmpty();
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(timestep);
-        sb.append(": ").append(init).append(" - [");
+        StringBuilder sb = new StringBuilder();
+        sb.append("init:").append(init);
+        if (withStuttering) {
+            sb.append(", stutt:").append(stutter);
+        }
+        sb.append("\n[");
         for (Transition t : transitions) {
             sb.append(t.getId()).append(", ");
         }
