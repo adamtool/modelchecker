@@ -301,7 +301,7 @@ public class AigerRenderer {
       public CounterExample parseCounterExample(PetriNet net, String path) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
             String cexText = IOUtils.toString(inputStream);
-            Logger.getInstance().addMessage(cexText, true);
+//            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
             List<String> cropped = new ArrayList<>();
             String[] lines = cexText.split(" \n");

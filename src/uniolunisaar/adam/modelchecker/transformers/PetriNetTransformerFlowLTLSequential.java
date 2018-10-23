@@ -33,6 +33,15 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
     public static PetriGame createNet4ModelCheckingSequential(PetriGame orig, IRunFormula formula, boolean initFirstStep) {
         PetriGame out = createOriginalPartOfTheNet(orig, initFirstStep);
 
+        // add for all weak fairness a strong fairness assumptions, because now transitions cannot be 
+        // enabled infinitely long since the active token is move to the subformulas
+        // and also add again the strong fairness, since we deleted them in the super method
+        for (Transition t : orig.getTransitions()) {
+            if (orig.isWeakFair(t) || orig.isStrongFair(t)) {
+                out.setStrongFair(out.getTransition(t.getId()));
+            }
+        }
+
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
