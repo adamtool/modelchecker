@@ -83,11 +83,20 @@ public class PetriNetTransformerFlowLTL {
         }
         if (initFirstStep) {
             // create the place and transition which choses that a new chain will be created during the processing of the net
-            Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
-            Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
-            out.setPartition(newTflPlace, nb_ff);
-            out.createFlow(init, newTfl);
-            out.createFlow(newTfl, newTflPlace);
+            // if there is any
+            boolean newFlowCanBeCreated = false;
+            for (Transition t : orig.getTransitions()) {
+                if (orig.getInitialTokenFlows(t) != null) {
+                    newFlowCanBeCreated = true;
+                }
+            }
+            if (newFlowCanBeCreated) {
+                Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
+                Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+                out.setPartition(newTflPlace, nb_ff);
+                out.createFlow(init, newTfl);
+                out.createFlow(newTfl, newTflPlace);
+            }
         }
 
         //%% via transitions
