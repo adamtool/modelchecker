@@ -64,7 +64,7 @@ public class TestModelCheckerTools {
 
     public static void testModelCheckerLTL(PetriGame net, ILTLFormula formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws InterruptedException, IOException, NotSubstitutableException, ParseException {
         testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, resMaxStandard);
-        testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_PARALLEL, resMaxReisig);
+        testModelCheckerLTL(net, formula, path, ModelCheckerLTL.Maximality.MAX_CONCURRENT, resMaxReisig);
     }
 
     public static void testModelCheckerLTL(PetriGame net, String formula, String path, ModelCheckerLTL.Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotSubstitutableException {

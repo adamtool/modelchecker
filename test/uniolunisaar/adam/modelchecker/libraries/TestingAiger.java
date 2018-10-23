@@ -12,6 +12,7 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.modelchecker.circuits.Circuit;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Tools;
 
@@ -21,11 +22,11 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingAiger {
-	
-	@BeforeClass
+
+    @BeforeClass
     public void setProperties() {
         if (System.getProperty("examplesfolder") == null) {
-        	System.setProperty("examplesfolder", "examples");
+            System.setProperty("examplesfolder", "examples");
         }
     }
 
@@ -34,7 +35,7 @@ public class TestingAiger {
         // save aiger file
         final String outputFolder = ".";
 //        ModelCheckerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
-        ModelCheckerTools.save2AigerAndPdf(pn, outputFolder + "/" + pn.getName(), true);
+        ModelCheckerTools.save2AigerAndPdf(pn, Circuit.getRenderer(Circuit.Renderer.INGOING), outputFolder + "/" + pn.getName());
     }
 
     @Test(enabled = true)

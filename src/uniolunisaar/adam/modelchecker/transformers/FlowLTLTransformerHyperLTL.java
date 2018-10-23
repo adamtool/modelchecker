@@ -6,6 +6,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
 import uniolunisaar.adam.logic.flowltl.Constants;
+import uniolunisaar.adam.logic.flowltl.Constants.Container;
 import uniolunisaar.adam.logic.flowltl.Formula;
 import uniolunisaar.adam.logic.flowltl.FormulaBinary;
 import uniolunisaar.adam.logic.flowltl.FormulaUnary;
@@ -75,6 +76,8 @@ public class FlowLTLTransformerHyperLTL {
             return "(Const True)";
         } else if (formula instanceof Constants.False) {
             return "(Const False)";
+        } else if (formula instanceof Constants.Container) {
+            return "(AP \"" + ((Container) formula).toString() + "\" 0)";
         } else if (formula instanceof AtomicProposition) {
             return "(AP \"#out#_" + ((AtomicProposition) formula).toString() + "\" 0)";
         } else if (formula instanceof Formula) {
@@ -86,8 +89,7 @@ public class FlowLTLTransformerHyperLTL {
             FormulaBinary f = (FormulaBinary) formula;
             return "(" + toMCHyperFormat(f.getOp()) + " " + subformulaToMCHyperFormat(f.getPhi1()) + " " + subformulaToMCHyperFormat(f.getPhi2()) + ")";
         } else {
-            // todo throw exception but should not happen.
-            return "error";
+            throw new RuntimeException("Forgotten to handle is subformula in the transformation to HyperLTL: '" + formula + "'.");
         }
     }
 

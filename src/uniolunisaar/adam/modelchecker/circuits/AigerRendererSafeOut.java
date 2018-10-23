@@ -8,7 +8,7 @@ import uniol.apt.adt.pn.Transition;
  *
  * @author Manuel Gieseking
  */
-public class AigerRendererSafeNxt extends AigerRenderer {
+public class AigerRendererSafeOut extends AigerRenderer {
 
     public String renderToString(PetriNet net) {
         return super.render(net).toString();

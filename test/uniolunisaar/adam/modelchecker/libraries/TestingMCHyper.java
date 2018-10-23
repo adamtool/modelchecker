@@ -7,6 +7,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.modelchecker.circuits.Circuit;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 
 /**
@@ -54,7 +55,7 @@ public class TestingMCHyper {
         String formula = "Forall (And (AP \"#out#_out\" 0) (AP \"#out#_out\" 0))"; // correct
 //        String formula = "Forall (F (Eq (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // correkt
 
-        ModelCheckerMCHyper.check(game, formula, "./" + game.getName(), true);
+        ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName());
     }
 
 }

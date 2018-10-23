@@ -18,8 +18,6 @@ import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
-import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeNxt;
-import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafePrev;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
 import uniolunisaar.adam.tools.Logger;
@@ -47,8 +45,7 @@ public class ModelCheckerTools {
         return flowFormulas;
     }
 
-    public static void save2Aiger(PetriNet net, String path, boolean previousSemantics) throws FileNotFoundException {
-        AigerRenderer renderer = (previousSemantics) ? new AigerRendererSafePrev() : new AigerRendererSafeNxt();
+    public static void save2Aiger(PetriNet net, AigerRenderer renderer, String path) throws FileNotFoundException {
         String aigerFile = renderer.render(net).toString();
         // save aiger file
         try (PrintStream out = new PrintStream(path + ".aiger")) {
@@ -56,8 +53,8 @@ public class ModelCheckerTools {
         }
     }
 
-    public static void save2AigerAndDot(PetriNet net, String path, boolean previousSemantics) throws FileNotFoundException, IOException, InterruptedException {
-        save2Aiger(net, path, previousSemantics);
+    public static void save2AigerAndDot(PetriNet net, AigerRenderer renderer, String path) throws FileNotFoundException, IOException, InterruptedException {
+        save2Aiger(net, renderer, path);
 //        String command = AdamProperties.getInstance().getLibFolder() + "/aigtodot";
 //        Logger.getInstance().addMessage(command, true);
 //        ProcessBuilder procBuilder = new ProcessBuilder(command, path + ".aiger", path + "_circuit.dot");
@@ -69,8 +66,8 @@ public class ModelCheckerTools {
 //        Logger.getInstance().addMessage(output, true);
     }
 
-    public static void save2AigerAndDotAndPdf(PetriNet net, String path, boolean previousSemantics) throws FileNotFoundException, IOException, InterruptedException {
-        save2AigerAndDot(net, path, previousSemantics);
+    public static void save2AigerAndDotAndPdf(PetriNet net, AigerRenderer renderer, String path) throws FileNotFoundException, IOException, InterruptedException {
+        save2AigerAndDot(net, renderer, path);
         // show circuit
 //        String dotCommand = "dot -Tpdf " + path + "_circuit.dot -o " + path + "_circuit.pdf";
 //        Logger.getInstance().addMessage(dotCommand, true);
@@ -83,9 +80,9 @@ public class ModelCheckerTools {
 //        Logger.getInstance().addMessage(output, true);
     }
 
-    public static void save2AigerAndPdf(PetriNet net, String path, boolean previousSemantics) throws FileNotFoundException, IOException, InterruptedException {
+    public static void save2AigerAndPdf(PetriNet net, AigerRenderer renderer, String path) throws FileNotFoundException, IOException, InterruptedException {
         String bufferpath = path + "_" + System.currentTimeMillis();
-        save2AigerAndDotAndPdf(net, bufferpath, previousSemantics);
+        save2AigerAndDotAndPdf(net, renderer, bufferpath);
 //        // Delete dot file
 //        new File(bufferpath + "_circuit.dot").delete();
 //        Logger.getInstance().addMessage("Deleted: " + bufferpath + "_circuit.dot", true);

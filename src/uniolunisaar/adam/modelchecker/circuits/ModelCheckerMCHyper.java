@@ -17,15 +17,15 @@ public class ModelCheckerMCHyper {
      * Returns null iff the formula holds.
      *
      * @param net
+     * @param circ
      * @param formula - in MCHyper format
      * @param path
-     * @param previousSemantics
      * @return
      * @throws InterruptedException
      * @throws IOException
      */
-    public static CounterExample check(PetriNet net, String formula, String path, boolean previousSemantics) throws InterruptedException, IOException {
-        ModelCheckerTools.save2AigerAndPdf(net, path, previousSemantics);
+    public static CounterExample check(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException {
+        ModelCheckerTools.save2AigerAndPdf(net, circ, path);
         ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "2", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
 //        System.out.println(procBuilder.directory());

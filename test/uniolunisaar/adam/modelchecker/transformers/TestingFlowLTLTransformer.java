@@ -12,8 +12,10 @@ import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.modelchecker.circuits.Circuit;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
+import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 
 /**
  *
@@ -34,7 +36,7 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        CounterExample output = ModelCheckerMCHyper.check(net, formula, "./" + net.getName(), true);
+        CounterExample output = ModelCheckerMCHyper.check(net, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + net.getName());
         Assert.assertNull(output);
     }
 
@@ -70,7 +72,7 @@ public class TestingFlowLTLTransformer {
 //        System.out.println("Maximality standard:");
 //        System.out.println(f.toSymbolString());
         // reisig
-        ILTLFormula f1 = FormulaCreatorIngoingSemantics.getMaximaliltyParallelDirectAsObject(game);
+        ILTLFormula f1 = FormulaCreatorIngoingSemantics.getMaximaliltyConcurrentDirectAsObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f1.toSymbolString());
         // reisig
@@ -82,7 +84,8 @@ public class TestingFlowLTLTransformer {
         String formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(game, f.toString());
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
-        CounterExample output = ModelCheckerMCHyper.check(game, formula, "./" + game.getName(), true);
+
+        CounterExample output = ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName());
         Assert.assertNotNull(output);
 
         // new version
