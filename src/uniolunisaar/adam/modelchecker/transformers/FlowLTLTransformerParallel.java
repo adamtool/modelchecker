@@ -22,6 +22,7 @@ import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
@@ -148,12 +149,9 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
      * @param formula
      * @return
      */
-    public static IRunFormula createFormula4ModelChecking4CircuitParallel(PetriGame orig, PetriNet net, IRunFormula formula) {
-        // Add the fairness from the transitions to the formula
-        IFormula f = addFairness(orig, formula);
-
+    public static ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriGame orig, PetriNet net, IRunFormula formula) throws NotConvertableException {
         // replace the next operator in the run-part
-        f = replaceNextWithinRunFormulaParallel(orig, net, f);
+        IFormula f = replaceNextWithinRunFormulaParallel(orig, net, formula);
 
         // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
         // Replace the transitions with the big-or of all accordingly labelled transitions
@@ -181,7 +179,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
                 // NOT ANYMORE, do it later because of the next: and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
 //                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
-                FlowFormula flowF = ((FlowFormula) flowFormulas.get(0));
+                FlowFormula flowF = flowFormulas.get(0);
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
@@ -193,18 +191,18 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 // Replace the next operator within the flow formula
                 flowF = replaceNextInFlowFormulaParallel(orig, net, flowF);
 
-                f = f.substitute(flowFormulas.get(0), new RunFormula(
+                f = f.substitute(flowFormulas.get(0), new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID))),
                         LTLOperators.Binary.OR,
                         flowF.getPhi()));
+                return convert(f);
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
         } else {
             Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
+            return convert(f);
         }
-
-        return new RunFormula(f);
     }
 
 }

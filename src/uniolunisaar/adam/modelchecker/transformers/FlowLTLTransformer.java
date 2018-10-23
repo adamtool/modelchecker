@@ -8,8 +8,12 @@ import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
 import uniolunisaar.adam.logic.flowltl.Constants;
+import uniolunisaar.adam.logic.flowltl.FormulaBinary;
 import uniolunisaar.adam.logic.flowltl.IAtomicProposition;
+import uniolunisaar.adam.logic.flowltl.IFlowFormula;
+import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.flowltl.IOperatorBinary;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
@@ -19,6 +23,7 @@ import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeOutStutterRegister;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
+import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 
 /**
  *
@@ -48,6 +53,31 @@ public class FlowLTLTransformer {
     public static ILTLFormula addFairness(PetriGame net, ILTLFormula formula) {
         ILTLFormula fairness = getFairness(net);
         return (!fairness.toString().equals("TRUE")) ? new LTLFormula(fairness, LTLOperators.Binary.IMP, formula) : formula;
+    }
+
+    public static ILTLFormula convert(IFormula f) throws NotConvertableException {
+        if (f instanceof IFlowFormula) {
+            throw new NotConvertableException("The formula contains a flow formula '" + f.toSymbolString() + "'. Hence, we cannot transform it to an LTL formula.");
+        } else if (f instanceof RunFormula) {
+            return new LTLFormula(convert(((RunFormula) f).getPhi()));
+        } else if (f instanceof IRunFormula && f instanceof FormulaBinary) {
+            FormulaBinary form = ((FormulaBinary) f);
+            IOperatorBinary op = form.getOp();
+            ILTLFormula f1 = convert(form.getPhi1());
+            ILTLFormula f2 = convert(form.getPhi2());
+            if (op instanceof RunOperators.Binary) {
+                if (op.equals(RunOperators.Binary.AND)) {
+                    return new LTLFormula(f1, LTLOperators.Binary.AND, f2);
+                } else if (op.equals(RunOperators.Binary.OR)) {
+                    return new LTLFormula(f1, LTLOperators.Binary.OR, f2);
+                }
+            } else if (op instanceof RunOperators.Implication) {
+                return new LTLFormula(f1, LTLOperators.Binary.IMP, f2);
+            }
+            throw new RuntimeException("Not every possible case matched.");
+        } else {
+            return (ILTLFormula) f;
+        }
     }
 
     public static ILTLFormula handleStutteringOutGoingSemantics(PetriGame net, ILTLFormula formula, ModelCheckerLTL.Stuttering stutt) throws ParseException {
@@ -114,18 +144,29 @@ public class FlowLTLTransformer {
 //                LTLOperators.Binary.IMP,
 //                new LTLFormula(LTLOperators.Unary.G, allNotTrue))),
 //                LTLOperators.Binary.IMP, formula);// also wrong since we have to skip the first allZero because of the initilization step
-                return new LTLFormula(allNotTrue, LTLOperators.Binary.U, new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(allNotTrue,
+                return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(allNotTrue,
                         LTLOperators.Binary.IMP,
                         new LTLFormula(LTLOperators.Unary.G, allNotTrue))),
                         LTLOperators.Binary.IMP, formula));
             }
             case PREFIX_REGISTER: {
-                IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
+//                IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
                 IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
-                return new LTLFormula(initReg, LTLOperators.Binary.IMP, new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
-                        LTLOperators.Binary.IMP,
-                        new LTLFormula(LTLOperators.Unary.G, stutterReg))),
-                        LTLOperators.Binary.IMP, formula));
+//                return new LTLFormula(initReg, LTLOperators.Binary.IMP, new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
+//                        LTLOperators.Binary.IMP,
+//                        new LTLFormula(LTLOperators.Unary.G, stutterReg))),
+//                        LTLOperators.Binary.IMP, formula)); // this would make it true in every moment since initReg is not holding. Would have to be a globally around
+                return new LTLFormula(
+                        LTLOperators.Unary.X,
+                        new LTLFormula(
+                                new LTLFormula(
+                                        LTLOperators.Unary.G,
+                                        new LTLFormula(stutterReg,
+                                                LTLOperators.Binary.IMP,
+                                                new LTLFormula(LTLOperators.Unary.G, stutterReg))
+                                ),
+                                LTLOperators.Binary.IMP, formula)
+                );
             }
         }
         throw new RuntimeException("Not for every possibility of stuttering approaches a case is handled. " + stutt + " is missing.");

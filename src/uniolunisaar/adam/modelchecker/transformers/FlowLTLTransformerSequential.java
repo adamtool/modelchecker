@@ -22,6 +22,7 @@ import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
+import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.ACTIVATION_PREFIX_ID;
 import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
@@ -143,12 +144,9 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
      * @param formula
      * @return
      */
-    public static IRunFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, IRunFormula formula) {
-        // Add the fairness from the transitions to the formula
-        IFormula f = addFairness(orig, formula);
-
+    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, IRunFormula formula) throws NotConvertableException {
         // replace the next operator in the run-part
-        f = replaceNextWithinRunFormulaSequential(orig, net, f);
+        IFormula f = replaceNextWithinRunFormulaSequential(orig, net, formula);
 
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
@@ -191,11 +189,12 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         flowFormula.getPhi()
                 //                )
                 ));
+                return convert(f);
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
         }
-        return new RunFormula(f);
+        return convert(f);
     }
 
 }

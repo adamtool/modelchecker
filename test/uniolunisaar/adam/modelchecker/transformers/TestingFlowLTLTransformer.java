@@ -68,15 +68,15 @@ public class TestingFlowLTLTransformer {
 
         // test maximality
         // standard
-        IRunFormula f = FormulaCreatorIngoingSemantics.getMaximaliltyStandardObject(game);
+        IRunFormula f = FormulaCreatorIngoingSemantics.getMaximalityInterleavingObject(game);
 //        System.out.println("Maximality standard:");
 //        System.out.println(f.toSymbolString());
         // reisig
-        ILTLFormula f1 = FormulaCreatorIngoingSemantics.getMaximaliltyConcurrentDirectAsObject(game);
+        ILTLFormula f1 = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f1.toSymbolString());
         // reisig
-        f = FormulaCreatorIngoingSemantics.getMaximaliltyReisigObject(game);
+        f = FormulaCreatorIngoingSemantics.getMaximalityConcurrentObject(game);
 //        System.out.println("Maximality Reisig:");
 //        System.out.println(f.toSymbolString());
 

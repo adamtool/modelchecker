@@ -14,7 +14,10 @@ import uniolunisaar.adam.logic.flowltl.FormulaBinary;
 import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
+import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
 import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
+import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
 
 /**
  *
@@ -37,6 +40,33 @@ public class ModelCheckerTools {
             flowFormulas.addAll(getFlowFormulas(binF.getPhi2()));
         }
         return flowFormulas;
+    }
+
+    /**
+     * 
+     * @param maximality
+     * @param semantics
+     * @param net
+     * @return null iff MAX_NONE
+     */
+    public static ILTLFormula getMaximality(ModelCheckerLTL.Maximality maximality, ModelCheckerLTL.TransitionSemantics semantics, PetriNet net) {
+        switch (maximality) {
+            case MAX_INTERLEAVING:
+                if (semantics == ModelCheckerLTL.TransitionSemantics.INGOING) {
+                    return FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net);
+                } else {
+                    return FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(net);
+                }
+            case MAX_CONCURRENT:
+                if (semantics == ModelCheckerLTL.TransitionSemantics.INGOING) {
+                    return FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(net);
+                } else {
+                    return FormulaCreatorOutgoingSemantics.getMaximalityConcurrentDirectAsObject(net);
+                }
+            case MAX_NONE:
+                return null;
+        }
+        throw new RuntimeException("Not all maximality terms had been considered: " + maximality);
     }
 
     public static void save2Aiger(PetriNet net, AigerRenderer renderer, String path) throws FileNotFoundException {

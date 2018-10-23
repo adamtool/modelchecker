@@ -1,13 +1,16 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import java.io.IOException;
+import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
-import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL.Maximality;
+import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL.TransitionSemantics;
+import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerParallel;
@@ -23,33 +26,24 @@ import uniolunisaar.adam.tools.Logger;
  */
 public class ModelCheckerFlowLTL {
 
-    public enum TransitionSemantics {
-        INGOING,
-        OUTGOING
-    }
-
     public enum Approach {
         PARALLEL,
         SEQUENTIAL
     }
 
-    public enum Maximality {
-        MAX_PARALLEL,
-        MAX_INTERLEAVING,
-        MAX_NONE
-    }
-
     private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
     private Approach approach = Approach.SEQUENTIAL;
     private Maximality maximality = Maximality.MAX_INTERLEAVING;
+    private ModelCheckerLTL.Stuttering stuttering = ModelCheckerLTL.Stuttering.PREFIX_REGISTER;
 
     public ModelCheckerFlowLTL() {
     }
 
-    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality) {
+    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, ModelCheckerLTL.Stuttering stuttering) {
         this.semantics = semantics;
         this.approach = approach;
         this.maximality = maximality;
+        this.stuttering = stuttering;
     }
 
     /**
@@ -63,52 +57,45 @@ public class ModelCheckerFlowLTL {
      * @throws InterruptedException
      * @throws IOException
      */
-    public CounterExample check(PetriGame net, IRunFormula formula, String path, boolean verbose) throws InterruptedException, IOException {
+    public CounterExample check(PetriGame net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'."
                 + " With maximality term: " + maximality
-                + " approach: " + approach + " semantics: " + semantics, true);
-        AigerRenderer renderer = null;
-        switch (maximality) {
-            case MAX_INTERLEAVING:
-                if (semantics == TransitionSemantics.INGOING) {
-                    formula = new RunFormula(FormulaCreatorIngoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), RunOperators.Implication.IMP, formula);
-                    renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
-                } else {
-                    formula = new RunFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyInterleavingDirectAsObject(net), RunOperators.Implication.IMP, formula);
-                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
-                }
-                break;
-            case MAX_PARALLEL:
-                if (semantics == TransitionSemantics.INGOING) {
-                    formula = new RunFormula(FormulaCreatorIngoingSemantics.getMaximaliltyConcurrentDirectAsObject(net), RunOperators.Implication.IMP, formula);
-                    renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
-                } else {
-                    formula = new RunFormula(FormulaCreatorOutgoingSemantics.getMaximaliltyConcurrentDirectAsObject(net), RunOperators.Implication.IMP, formula);
-                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
-                }
-                break;
-        }
+                + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering, true);
+
+        ModelCheckerLTL mcLTL = new ModelCheckerLTL(semantics, maximality, stuttering);
+
+        // If we have the LTL fragment just use the standard LTLModelchecker
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula.toSymbolString() + "'. Thus, we use the standard model checking algorithm for LTL.");
-            formula = FlowLTLTransformer.addFairness(net, formula);
-            return ModelCheckerMCHyper.check(net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path);
+            return mcLTL.check(net, formula.toLTLFormula(), path, verbose);
         }
+
+        // Add Fairness
+        IRunFormula f = FlowLTLTransformer.addFairness(net, formula);
+
+        // Get the formula for the maximality (null if MAX_NONE)
+        ILTLFormula max = ModelCheckerTools.getMaximality(maximality, semantics, net);
+        if (max != null) {
+            f = new RunFormula(max, RunOperators.Implication.IMP, f);
+            mcLTL.setMaximality(Maximality.MAX_NONE); // already done the maximality here
+        }
+
         if (approach == Approach.PARALLEL) {
             PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
             if (verbose) {
                 AdamTools.savePG2PDF(path + "_mc", gameMC, true);
             }
-            IRunFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, gameMC, formula);
-            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
-            return ModelCheckerMCHyper.check(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc");
+            ILTLFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, gameMC, f);
+//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
+            return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
         } else {
-            PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, formula);
+            PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f);
             if (verbose) {
                 AdamTools.savePG2PDF(path + "_mc", gameMC, true);
             }
-            IRunFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, formula);
-            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
-            return ModelCheckerMCHyper.check(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), path + "_mc");
+            ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f);
+//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
+            return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
         }
     }
 
@@ -136,6 +123,14 @@ public class ModelCheckerFlowLTL {
         this.maximality = maximality;
     }
 
+    public ModelCheckerLTL.Stuttering getStuttering() {
+        return stuttering;
+    }
+
+    public void setStuttering(ModelCheckerLTL.Stuttering stuttering) {
+        this.stuttering = stuttering;
+    }
+
     /**
      * Returns null iff the formula holds.
      *
@@ -153,10 +148,10 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static CounterExample checkWithParallelApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException {
+    public static CounterExample checkWithParallelApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
         PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(game);
-        IRunFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(game, gameMC, formula);
+        ILTLFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(game, gameMC, formula);
         Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
         AigerRenderer renderer;
         if (previousSemantics) {
@@ -183,7 +178,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static CounterExample checkWithSequentialApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException {
+    public static CounterExample checkWithSequentialApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");
@@ -197,7 +192,7 @@ public class ModelCheckerFlowLTL {
             return ModelCheckerMCHyper.check(game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName());
         }
         PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(game, formula);
-        IRunFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula);
+        ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula);
         Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
         AigerRenderer renderer;
         if (previousSemantics) {

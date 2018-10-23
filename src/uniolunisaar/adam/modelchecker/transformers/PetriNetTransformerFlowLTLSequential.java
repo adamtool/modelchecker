@@ -202,8 +202,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
      * @return
      */
     @Deprecated
-    public static PetriGame createNet4ModelCheckingSequential(PetriGame net, IRunFormula formula
-    ) {
+    public static PetriGame createNet4ModelCheckingSequential(PetriGame net, IRunFormula formula) {
         // Copy the original net 
         PetriGame out = new PetriGame(net);
         out.setName(net.getName() + "_mc");
