@@ -61,6 +61,7 @@ public class PetriNetTransformerFlowLTL {
         // create an initial place representing the chosen flow chain
         Place init = out.createPlace(INIT_TOKENFLOW_ID + "-" + nb_ff);
         init.setInitialToken(1);
+        out.setPartition(init, nb_ff);
 
         // collect the places which are newly created to only copy the necessary part of the net
         List<Place> todo = new ArrayList<>();
@@ -71,6 +72,7 @@ public class PetriNetTransformerFlowLTL {
             if (place.getInitialToken().getValue() > 0 && orig.isInitialTokenflow(place)) {
                 // create the place which states that the chain is currently in this place
                 Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
+                out.setPartition(p, nb_ff);
                 out.setOrigID(p, place.getId());
                 // create a transition which move the token for the chain to this new initial place of a token chain
                 Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId() + "-" + nb_ff);
@@ -83,6 +85,7 @@ public class PetriNetTransformerFlowLTL {
             // create the place and transition which choses that a new chain will be created during the processing of the net
             Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
             Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+            out.setPartition(newTflPlace, nb_ff);
             out.createFlow(init, newTfl);
             out.createFlow(newTfl, newTflPlace);
         }
@@ -103,6 +106,7 @@ public class PetriNetTransformerFlowLTL {
                 if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                     // create the place itself
                     p = out.createPlace(id);
+                    out.setPartition(p, nb_ff);
                     out.setOrigID(p, post.getId());
                     todo.add(p);
                 } else {
@@ -146,6 +150,7 @@ public class PetriNetTransformerFlowLTL {
                     if (!out.containsPlace(id)) { // create or get the place in which the chain is moved
                         // create the place itself
                         pPost = out.createPlace(id);
+                        out.setPartition(pPost, nb_ff);
                         out.setOrigID(pPost, post.getId());
                         todo.add(pPost);
                     } else {

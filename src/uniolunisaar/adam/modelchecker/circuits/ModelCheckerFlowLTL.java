@@ -1,6 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import java.io.IOException;
+import uniol.apt.adt.pn.Place;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
@@ -95,7 +96,13 @@ public class ModelCheckerFlowLTL {
         } else {
             PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f, initFirst);
             if (verbose) {
-                AdamTools.savePG2PDF(path + "_mc", gameMC, true);
+                // color all original places
+                for (Place p : gameMC.getPlaces()) {
+                    if (!gameMC.hasPartition(p)) {
+                        gameMC.setEnvironment(p);
+                    }
+                }
+                AdamTools.savePG2PDF(path + "_mc", gameMC, true, ModelCheckerTools.getFlowFormulas(formula).size());
             }
             ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
 //            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);

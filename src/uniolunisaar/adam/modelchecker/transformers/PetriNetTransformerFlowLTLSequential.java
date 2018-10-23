@@ -40,7 +40,11 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
 
             if (initFirstStep) {
                 // create an activation place for the initialization
-                out.createPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + nb_ff);
+                Place act = out.createPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + nb_ff);
+                out.setPartition(act, nb_ff);
+                if (nb_ff == 0) {
+                    act.setInitialToken(1);
+                }
             }
 
             // additionally add the negations of each place and connect them accordingly
@@ -52,6 +56,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     Place pNot = out.createPlace("!" + id);
                     pNot.setInitialToken(1);
                     out.setOrigID(pNot, place.getId());
+                    out.setPartition(pNot, nb_ff);
                     for (Transition t : place.getPreset()) {
                         if (!place.getPostset().contains(t)) {
                             out.createFlow(pNot, t);
@@ -117,6 +122,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     // create the activation place                    
                     String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                     act = out.createPlace(id);
+                    out.setPartition(act, nb_ff);
                     // Add a transition which moves (takes, move is done later)
                     // the activation token to the next token flow subnet, when no
                     // chain is active
@@ -137,7 +143,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                 }
                 // add the activation token to every created token for the chains
                 for (Transition tout : out.getTransitions()) {
-                    if (tout != t && tout.getLabel().equals(t.getId())) {
+                    if (!tout.getId().equals(t.getId()) && tout.getLabel().equals(t.getId())) {
                         out.createFlow(act, tout);
                     }
                 }
@@ -148,7 +154,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
             if (initFirstStep) {
                 // Get the original initial Marking
                 List<Place> initialMarking = new ArrayList<>();
-                for (Place p : out.getPlaces()) {
+                for (Place p : orig.getPlaces()) {
                     if (p.getInitialToken().getValue() > 0) {
                         initialMarking.add(p);
                     }
@@ -169,7 +175,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                             out.createFlow(t, initActNext);
                         } else {
                             for (Place place : initialMarking) {
-                                out.createFlow(t, place);
+                                out.createFlow(t, out.getPlace(place.getId()));
                             }
                         }
                     }
