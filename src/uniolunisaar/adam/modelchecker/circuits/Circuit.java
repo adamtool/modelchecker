@@ -10,7 +10,8 @@ public class Circuit {
         INGOING,
         INGOING_REGISTER,
         OUTGOING,
-        OUTGOING_REGISTER;
+        OUTGOING_REGISTER,
+        OUTGOING_REGISTER_MAX_INTERLEAVING;
     }
 
     public static AigerRenderer getRenderer(Renderer renderer) {
@@ -23,6 +24,8 @@ public class Circuit {
                 return new AigerRendererSafeOut();
             case OUTGOING_REGISTER:
                 return new AigerRendererSafeOutStutterRegister();
+            case OUTGOING_REGISTER_MAX_INTERLEAVING:
+                return new AigerRendererSafeOutStutterRegisterMaxInterleaving();
         }
         throw new RuntimeException("The case " + renderer + " is not yet implemented.");
     }

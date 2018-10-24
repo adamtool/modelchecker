@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.petrinet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,7 @@ public class PetriNetTransformerFlowLTL {
     public static final String ACTIVATION_PREFIX_ID = "<act>_";
     public static final String INIT_TOKENFLOW_ID = "<init_tfl>";
     public static final String NEW_TOKENFLOW_ID = "<new_tfl>";
+    public static final String NO_CHAIN_ID = "<no_tfl>";
     public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
     public static final String NEXT_ID = "_<nxt>";
 
@@ -24,8 +25,7 @@ public class PetriNetTransformerFlowLTL {
         PetriGame out = new PetriGame(orig);
         out.setName(orig.getName() + "_mc");
 
-        // delete the initial marking if init
-        if (initFirstStep) {
+        if (initFirstStep) { // delete the initial marking if init
             for (Place p : out.getPlaces()) {
                 if (p.getInitialToken().getValue() > 0) {
                     p.setInitialToken(0);
@@ -97,6 +97,12 @@ public class PetriNetTransformerFlowLTL {
                 out.createFlow(init, newTfl);
                 out.createFlow(newTfl, newTflPlace);
             }
+            // create the place and transition which states that no chain exists at all
+            Transition noChain = out.createTransition(INIT_TOKENFLOW_ID + "-" + NO_CHAIN_ID + "-" + nb_ff);
+            Place noChainPlace = out.createPlace(NO_CHAIN_ID + "-" + nb_ff);
+            out.setPartition(noChainPlace, nb_ff);
+            out.createFlow(init, noChain);
+            out.createFlow(noChain, noChainPlace);
         }
 
         //%% via transitions

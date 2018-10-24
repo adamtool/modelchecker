@@ -1,10 +1,8 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.formula;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -25,9 +23,10 @@ import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.ACTIVATION_PREFIX_ID;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL;
+import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
+import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 
 /**
@@ -189,17 +188,20 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
             try {
-                f = f.substitute(flowFormulas.get(i), new RunFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))),
+                LTLFormula flowLTL = new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NO_CHAIN_ID + "-" + i))), // it's OK when there is no chain
                         LTLOperators.Binary.OR,
-                        //                        new LTLFormula(
-                        //                                new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))),
-                        //                                LTLOperators.Binary.OR,
-                        flowFormula.getPhi()
-                        //                )
-                ));
+                        flowFormula.getPhi());
+                if (net.containsPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)) {
+                    // it's also OK if when I chosed to have a new chain but this run doesn't get to it
+                    flowLTL = new LTLFormula(flowLTL,
+                            LTLOperators.Binary.OR,
+                            new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))));
+                }
+
+                f = f.substitute(flowFormulas.get(i), new RunFormula(flowLTL));
             } catch (NotSubstitutableException ex) {
-                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
+                throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
             }
             // add all init transitions
             Place init = net.getPlace(INIT_TOKENFLOW_ID + "-" + i);

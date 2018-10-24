@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.transformers;
 
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -26,7 +26,7 @@ import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
 
 import uniolunisaar.adam.tools.Tools;
 

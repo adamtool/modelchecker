@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.formula;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,8 +23,9 @@ import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL;
+import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
+import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 

@@ -6,8 +6,8 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformer;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 
@@ -21,7 +21,8 @@ public class ModelCheckerLTL {
         REPLACEMENT,
         REPLACEMENT_REGISTER,
         PREFIX,
-        PREFIX_REGISTER
+        PREFIX_REGISTER,
+        PREFIX_REGISTER_MAX_INTERLEAVING
     }
 
     public enum TransitionSemantics {
@@ -82,7 +83,7 @@ public class ModelCheckerLTL {
             renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
         } else {
             formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula, stuttering);
-            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
+            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING); // todo: make a proper choosing of the renderer
         }
 
         Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");

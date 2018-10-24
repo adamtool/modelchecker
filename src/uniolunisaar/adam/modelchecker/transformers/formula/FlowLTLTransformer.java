@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.formula;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +22,7 @@ import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeOutStutterRegister;
+import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeOutStutterRegisterMaxInterleaving;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 
@@ -164,6 +165,18 @@ public class FlowLTLTransformer {
                                         new LTLFormula(stutterReg,
                                                 LTLOperators.Binary.IMP,
                                                 new LTLFormula(LTLOperators.Unary.G, stutterReg))
+                                ),
+                                LTLOperators.Binary.IMP, formula)
+                );
+            }
+            case PREFIX_REGISTER_MAX_INTERLEAVING: {
+                IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegisterMaxInterleaving.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegisterMaxInterleaving.STUTT_LATCH);
+                return new LTLFormula(
+                        LTLOperators.Unary.X,
+                        new LTLFormula(
+                                new LTLFormula(
+                                        LTLOperators.Unary.G,
+                                        new LTLFormula(LTLOperators.Unary.NEG, stutterReg)
                                 ),
                                 LTLOperators.Binary.IMP, formula)
                 );

@@ -14,8 +14,8 @@ import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.logic.util.AdamTools;
 import static uniolunisaar.adam.modelchecker.lola.ModelCheckerLoLA.check;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerLoLA;
-import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerLoLA;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerLoLA;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerLoLA;
 import uniolunisaar.adam.tools.Tools;
 
 /**

@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.petrinet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.ds.petrigame.TokenFlow;
 import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
-import static uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTL.createOriginalPartOfTheNet;
+import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.createOriginalPartOfTheNet;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 

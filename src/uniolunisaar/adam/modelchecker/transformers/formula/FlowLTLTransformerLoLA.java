@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.formula;
 
 import uniol.apt.adt.pn.Place;
 import uniolunisaar.adam.ds.petrigame.PetriGame;

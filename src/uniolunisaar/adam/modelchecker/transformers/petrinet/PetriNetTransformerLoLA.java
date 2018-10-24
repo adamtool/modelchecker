@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.petrinet;
 
 import java.util.ArrayList;
 import java.util.List;

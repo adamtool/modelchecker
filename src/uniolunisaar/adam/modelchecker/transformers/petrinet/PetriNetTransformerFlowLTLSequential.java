@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.transformers.petrinet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +36,11 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
         // add for all weak fairness a strong fairness assumptions, because now transitions cannot be 
         // enabled infinitely long since the active token is move to the subformulas
         // and also add again the strong fairness, since we deleted them in the super method
-        for (Transition t : orig.getTransitions()) {
-            if (orig.isWeakFair(t) || orig.isStrongFair(t)) {
-                out.setStrongFair(out.getTransition(t.getId()));
-            }
-        }
+//        for (Transition t : orig.getTransitions()) {
+//            if (orig.isWeakFair(t) || orig.isStrongFair(t)) {
+//                out.setStrongFair(out.getTransition(t.getId()));
+//            }
+//        } todo: did it in the modelchecker but think of a better way
 
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
@@ -78,21 +78,23 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     }
                 }
             }
-            // also for the place which is used for the newly creation of chains
-            Place newTflPlace = out.getPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
-            // create the dual place of p
-            Place pNot = out.createPlace("!" + newTflPlace.getId());
-            pNot.setInitialToken(1);
-            out.setOrigID(pNot, newTflPlace.getId());
-            out.setPartition(pNot, nb_ff);
-            for (Transition t : newTflPlace.getPreset()) {
-                if (!newTflPlace.getPostset().contains(t)) {
-                    out.createFlow(pNot, t);
+            // also for the place which is used for the newly creation of chains if it exists
+            if (out.containsPlace(NEW_TOKENFLOW_ID + "-" + nb_ff)) {
+                Place newTflPlace = out.getPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+                // create the dual place of p
+                Place pNot = out.createPlace("!" + newTflPlace.getId());
+                pNot.setInitialToken(1);
+                out.setOrigID(pNot, newTflPlace.getId());
+                out.setPartition(pNot, nb_ff);
+                for (Transition t : newTflPlace.getPreset()) {
+                    if (!newTflPlace.getPostset().contains(t)) {
+                        out.createFlow(pNot, t);
+                    }
                 }
-            }
-            for (Transition t : newTflPlace.getPostset()) {
-                if (!newTflPlace.getPreset().contains(t)) {
-                    out.createFlow(t, pNot);
+                for (Transition t : newTflPlace.getPostset()) {
+                    if (!newTflPlace.getPreset().contains(t)) {
+                        out.createFlow(t, pNot);
+                    }
                 }
             }
 
@@ -189,8 +191,8 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                         initialMarking.add(p);
                     }
                 }
-                // all initialization transitions of each subformula get an active place (each subformula one)
-                // from which they are dependent by firing the give it to the next subformula
+                // all initialization transitions of each subformula already have an active place added (each subformula one)
+                // from which they are dependent by firing they give it to the next subformula (this is done here)
                 // the last one puts the initial marking to the original net
                 for (int i = 0; i < flowFormulas.size(); i++) {
                     Place init = out.getPlace(INIT_TOKENFLOW_ID + "-" + i);

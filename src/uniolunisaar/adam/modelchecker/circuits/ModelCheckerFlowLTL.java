@@ -1,23 +1,29 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import uniol.apt.adt.pn.Place;
+import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.flowltl.LTLFormula;
+import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL.Maximality;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL.TransitionSemantics;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformer;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerHyperLTL;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerParallel;
-import uniolunisaar.adam.modelchecker.transformers.FlowLTLTransformerSequential;
-import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTLParallel;
-import uniolunisaar.adam.modelchecker.transformers.PetriNetTransformerFlowLTLSequential;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformer;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerParallel;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerSequential;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLParallel;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 
@@ -106,6 +112,17 @@ public class ModelCheckerFlowLTL {
                 AdamTools.savePG2PDF(path + "_mc", gameMC, true, ModelCheckerTools.getFlowFormulas(formula).size());
             }
             ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
+            // Add Fairness but without the active places in the preset
+            Collection<ILTLFormula> elements = new ArrayList<>();
+            for (Transition t : net.getTransitions()) {
+                if (net.isStrongFair(t)) {
+                    elements.add(FormulaCreator.createStrongFairness(t));
+                }
+                if (net.isWeakFair(t)) {
+                    elements.add(FormulaCreator.createStrongFairness(t)); // everything is strong fair in the sequential approach
+                }
+            }
+            formulaMC = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, formulaMC);
 //            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
             return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
         }
