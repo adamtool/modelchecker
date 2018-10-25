@@ -1,5 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRendererSafeOutStutterRegister;
+import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
 
 import org.testng.Assert;

@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

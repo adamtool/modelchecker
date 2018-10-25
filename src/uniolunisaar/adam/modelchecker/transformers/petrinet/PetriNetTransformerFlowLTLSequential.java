@@ -41,7 +41,6 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
 //                out.setStrongFair(out.getTransition(t.getId()));
 //            }
 //        } todo: did it in the modelchecker but think of a better way
-
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
@@ -78,25 +77,26 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     }
                 }
             }
-            // also for the place which is used for the newly creation of chains if it exists
-            if (out.containsPlace(NEW_TOKENFLOW_ID + "-" + nb_ff)) {
-                Place newTflPlace = out.getPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
-                // create the dual place of p
-                Place pNot = out.createPlace("!" + newTflPlace.getId());
-                pNot.setInitialToken(1);
-                out.setOrigID(pNot, newTflPlace.getId());
-                out.setPartition(pNot, nb_ff);
-                for (Transition t : newTflPlace.getPreset()) {
-                    if (!newTflPlace.getPostset().contains(t)) {
-                        out.createFlow(pNot, t);
-                    }
-                }
-                for (Transition t : newTflPlace.getPostset()) {
-                    if (!newTflPlace.getPreset().contains(t)) {
-                        out.createFlow(t, pNot);
-                    }
-                }
-            }
+// not necessary since when a new chain is chosen all negation places are occupied and thus the active token can be passed to the next subformula anyways            
+//            // also for the place which is used for the newly creation of chains if it exists
+//            if (out.containsPlace(NEW_TOKENFLOW_ID + "-" + nb_ff)) {
+//                Place newTflPlace = out.getPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+//                // create the dual place of p
+//                Place pNot = out.createPlace("!" + newTflPlace.getId());
+//                pNot.setInitialToken(1);
+//                out.setOrigID(pNot, newTflPlace.getId());
+//                out.setPartition(pNot, nb_ff);
+//                for (Transition t : newTflPlace.getPreset()) {
+//                    if (!newTflPlace.getPostset().contains(t)) {
+//                        out.createFlow(pNot, t);
+//                    }
+//                }
+//                for (Transition t : newTflPlace.getPostset()) {
+//                    if (!newTflPlace.getPreset().contains(t)) {
+//                        out.createFlow(t, pNot);
+//                    }
+//                }
+//            }
 
 // CODE when I give all transitions a proper name, so fare I don't have it so do a little bit more searching in the net
 //            // for each original transition which is used create an active place 
@@ -168,11 +168,13 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     // all complements of places which can succeed the tokenflows of the transition
                     for (Transition tpost : act.getPostset()) { // transitions which take the active token
                         for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
-                            if (p != act && !p.getId().startsWith("!")) { // but not the active itself and the negation
-                                Place negInput = out.getPlace("!" + p.getId());
-                                if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
-                                    out.createFlow(negInput, tout);
-                                    out.createFlow(tout, negInput);
+                            if (p != act && !p.getId().startsWith("!")) { // but not the active place itself and its negation
+                                if (!p.getId().equals(NEW_TOKENFLOW_ID + "-" + nb_ff)) { // also not for place for newly created chains
+                                    Place negInput = out.getPlace("!" + p.getId());
+                                    if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
+                                        out.createFlow(negInput, tout);
+                                        out.createFlow(tout, negInput);
+                                    }
                                 }
                             }
                         }
@@ -238,10 +240,15 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
             }
             // give the token back to the original net (means reactivate all transitions
             for (Transition tOrig : orig.getTransitions()) {
-                Place actLast = out.getPlace(ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1));
-                for (Transition tr : actLast.getPostset()) {
-                    for (Transition transition : orig.getTransitions()) {
-                        out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));
+                String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1);
+                if (out.containsPlace(id)) { // only if the transition has a token flow
+                    Place actLast = out.getPlace(id);
+                    for (Transition tr : actLast.getPostset()) {
+                        for (Transition transition : orig.getTransitions()) {
+                            if (out.containsPlace(ACTIVATION_PREFIX_ID + transition.getId())) { // only if it had a token flow
+                                out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));
+                            }
+                        }
                     }
                 }
             }

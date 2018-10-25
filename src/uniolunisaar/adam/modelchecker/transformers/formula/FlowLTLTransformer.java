@@ -21,8 +21,7 @@ import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.FormulaCreator;
-import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeOutStutterRegister;
-import uniolunisaar.adam.modelchecker.circuits.AigerRendererSafeOutStutterRegisterMaxInterleaving;
+import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRendererSafeOutStutterRegister;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 
@@ -81,7 +80,7 @@ public class FlowLTLTransformer {
         }
     }
 
-    public static ILTLFormula handleStutteringOutGoingSemantics(PetriGame net, ILTLFormula formula, ModelCheckerLTL.Stuttering stutt) throws ParseException {
+    public static ILTLFormula handleStutteringOutGoingSemantics(PetriGame net, ILTLFormula formula, ModelCheckerLTL.Stuttering stutt, ModelCheckerLTL.Maximality max) throws ParseException {
         switch (stutt) {
             case REPLACEMENT: {
                 Collection<ILTLFormula> elements = new ArrayList<>();
@@ -157,27 +156,25 @@ public class FlowLTLTransformer {
 //                        LTLOperators.Binary.IMP,
 //                        new LTLFormula(LTLOperators.Unary.G, stutterReg))),
 //                        LTLOperators.Binary.IMP, formula)); // this would make it true in every moment since initReg is not holding. Would have to be a globally around
+
+                ILTLFormula f;
+                if (max != ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
+                    f = new LTLFormula(
+                            LTLOperators.Unary.G,
+                            new LTLFormula(stutterReg,
+                                    LTLOperators.Binary.IMP,
+                                    new LTLFormula(LTLOperators.Unary.G, stutterReg))
+                    );
+                } else {
+                    f = new LTLFormula(
+                            new LTLFormula(
+                                    LTLOperators.Unary.G,
+                                    new LTLFormula(LTLOperators.Unary.NEG, stutterReg)
+                            ));
+                }
                 return new LTLFormula(
                         LTLOperators.Unary.X,
-                        new LTLFormula(
-                                new LTLFormula(
-                                        LTLOperators.Unary.G,
-                                        new LTLFormula(stutterReg,
-                                                LTLOperators.Binary.IMP,
-                                                new LTLFormula(LTLOperators.Unary.G, stutterReg))
-                                ),
-                                LTLOperators.Binary.IMP, formula)
-                );
-            }
-            case PREFIX_REGISTER_MAX_INTERLEAVING: {
-                IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegisterMaxInterleaving.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegisterMaxInterleaving.STUTT_LATCH);
-                return new LTLFormula(
-                        LTLOperators.Unary.X,
-                        new LTLFormula(
-                                new LTLFormula(
-                                        LTLOperators.Unary.G,
-                                        new LTLFormula(LTLOperators.Unary.NEG, stutterReg)
-                                ),
+                        new LTLFormula(f,
                                 LTLOperators.Binary.IMP, formula)
                 );
             }

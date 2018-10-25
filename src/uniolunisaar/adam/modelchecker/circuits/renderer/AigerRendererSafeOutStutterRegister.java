@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.circuits;
+package uniolunisaar.adam.modelchecker.circuits.renderer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,13 +8,16 @@ import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.modelchecker.circuits.AigerFile;
+import uniolunisaar.adam.modelchecker.circuits.CounterExample;
+import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
 import uniolunisaar.adam.tools.Logger;
 
 /**
  *
  * @author Manuel Gieseking
  */
-public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRenderer {
+public class AigerRendererSafeOutStutterRegister extends AigerRenderer {
 
     public static final String STUTT_LATCH = "#stutt#";
 
@@ -85,7 +88,7 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
         String[] inputs = new String[net.getTransitions().size()];
         int i = 0;
         for (Transition t : net.getTransitions()) {
-            inputs[i++] = "!" + ENABLED_PREFIX + t.getId();
+            inputs[i++] = "!" + INPUT_PREFIX + t.getId();
         }
         file.addGate(STUTT_LATCH + "_buf", inputs);
         file.addGate(STUTT_LATCH + NEW_VALUE_OF_LATCH_SUFFIX, ALL_TRANS_NOT_TRUE, "!" + STUTT_LATCH + "_buf");

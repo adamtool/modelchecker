@@ -16,7 +16,7 @@ public class PetriNetTransformerFlowLTL {
     public static final String ACTIVATION_PREFIX_ID = "<act>_";
     public static final String INIT_TOKENFLOW_ID = "<init_tfl>";
     public static final String NEW_TOKENFLOW_ID = "<new_tfl>";
-    public static final String NO_CHAIN_ID = "<no_tfl>";
+//    public static final String NO_CHAIN_ID = "<no_tfl>"; // is subsumed by the new_tokenflow_id place
     public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
     public static final String NEXT_ID = "_<nxt>";
 
@@ -83,26 +83,27 @@ public class PetriNetTransformerFlowLTL {
         }
         if (initFirstStep) {
             // create the place and transition which choses that a new chain will be created during the processing of the net
-            // if there is any
-            boolean newFlowCanBeCreated = false;
-            for (Transition t : orig.getTransitions()) {
-                if (orig.getInitialTokenFlows(t) != null) {
-                    newFlowCanBeCreated = true;
-                }
-            }
-            if (newFlowCanBeCreated) {
+            // if there is any // just do it in every case this can subsume the place that no_chain had been chosen.
+//            boolean newFlowCanBeCreated = false;
+//            for (Transition t : orig.getTransitions()) {
+//                if (orig.getInitialTokenFlows(t) != null) {
+//                    newFlowCanBeCreated = true;
+//                }
+//            }
+//            if (newFlowCanBeCreated) {
                 Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
                 Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
                 out.setPartition(newTflPlace, nb_ff);
                 out.createFlow(init, newTfl);
                 out.createFlow(newTfl, newTflPlace);
-            }
+//            }
             // create the place and transition which states that no chain exists at all
-            Transition noChain = out.createTransition(INIT_TOKENFLOW_ID + "-" + NO_CHAIN_ID + "-" + nb_ff);
-            Place noChainPlace = out.createPlace(NO_CHAIN_ID + "-" + nb_ff);
-            out.setPartition(noChainPlace, nb_ff);
-            out.createFlow(init, noChain);
-            out.createFlow(noChain, noChainPlace);
+            // is no subsumed of the above case
+//            Transition noChain = out.createTransition(INIT_TOKENFLOW_ID + "-" + NO_CHAIN_ID + "-" + nb_ff);
+//            Place noChainPlace = out.createPlace(NO_CHAIN_ID + "-" + nb_ff);
+//            out.setPartition(noChainPlace, nb_ff);
+//            out.createFlow(init, noChain);
+//            out.createFlow(noChain, noChainPlace);
         }
 
         //%% via transitions

@@ -16,7 +16,7 @@ import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
-import uniolunisaar.adam.modelchecker.circuits.AigerRenderer;
+import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
 
 /**
@@ -43,7 +43,7 @@ public class ModelCheckerTools {
     }
 
     /**
-     * 
+     *
      * @param maximality
      * @param semantics
      * @param net
@@ -64,6 +64,8 @@ public class ModelCheckerTools {
                     return FormulaCreatorOutgoingSemantics.getMaximalityConcurrentDirectAsObject(net);
                 }
             case MAX_NONE:
+                return null;
+            case MAX_INTERLEAVING_IN_CIRCUIT:
                 return null;
         }
         throw new RuntimeException("Not all maximality terms had been considered: " + maximality);

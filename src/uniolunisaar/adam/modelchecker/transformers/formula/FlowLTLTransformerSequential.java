@@ -161,7 +161,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
-                    if (net.containsNode(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i)) {
+                    if (net.containsNode(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i)) { // only if the place is part of the subnet
                         AtomicProposition p = new AtomicProposition(place);
                         AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i));
                         flowFormula = (FlowFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
@@ -174,13 +174,16 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             // Replace the transitions with the big-or of all accordingly labelled transitions
             for (Transition transition : orig.getTransitions()) {
                 try {
-                    AtomicProposition trans = new AtomicProposition(transition);
-                    Place act = net.getPlace(ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
-                    Collection<ILTLFormula> elements = new ArrayList<>();
-                    for (Transition t : act.getPostset()) {
-                        elements.add(new AtomicProposition(t));
+                    String id = ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + "-" + i;
+                    if (net.containsPlace(id)) { // only if the transition has a token flow
+                        Place act = net.getPlace(id);
+                        Collection<ILTLFormula> elements = new ArrayList<>();
+                        for (Transition t : act.getPostset()) {
+                            elements.add(new AtomicProposition(t));
+                        }
+                        AtomicProposition trans = new AtomicProposition(transition);
+                        flowFormula = (FlowFormula) flowFormula.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
                     }
-                    flowFormula = (FlowFormula) flowFormula.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
                 } catch (NotSubstitutableException ex) {
                     throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
                 }
@@ -190,16 +193,22 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
             try {
+                // this is replaced by the stuff below since the no_chain case is subsumed by the new_tokenflow
+//                LTLFormula flowLTL = new LTLFormula(
+//                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NO_CHAIN_ID + "-" + i))), // it's OK when there is no chain
+//                        LTLOperators.Binary.OR,
+//                        flowFormula.getPhi());
+//                if (net.containsPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)) {
+//                    // it's also OK if when I chosed to have a new chain but this run doesn't get to it
+//                    flowLTL = new LTLFormula(flowLTL,
+//                            LTLOperators.Binary.OR,
+//                            new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))));
+//                }
                 LTLFormula flowLTL = new LTLFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NO_CHAIN_ID + "-" + i))), // it's OK when there is no chain
+                        // it's OK when there is no chain or the subformula decided to consider in newly created chain but this doesn't exists in this run.
+                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))), 
                         LTLOperators.Binary.OR,
-                        flowFormula.getPhi());
-                if (net.containsPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)) {
-                    // it's also OK if when I chosed to have a new chain but this run doesn't get to it
-                    flowLTL = new LTLFormula(flowLTL,
-                            LTLOperators.Binary.OR,
-                            new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))));
-                }
+                        flowFormula.getPhi());           
 
                 f = f.substitute(flowFormulas.get(i), new RunFormula(flowLTL));
             } catch (NotSubstitutableException ex) {

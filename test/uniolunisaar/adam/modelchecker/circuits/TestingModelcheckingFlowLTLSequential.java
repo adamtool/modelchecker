@@ -26,7 +26,7 @@ import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 @Test
 public class TestingModelcheckingFlowLTLSequential {
 
-    @Test
+    @Test(enabled = true)
     public void introducingExample() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException {
         PetriGame net = new PetriGame("introduction");
         Place a = net.createPlace("a");
@@ -63,8 +63,8 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_NONE,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER_MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
         formula = new RunFormula(new FlowFormula(new AtomicProposition(e)));
@@ -72,7 +72,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertNotNull(ret);
     }
 
-    @Test
+    @Test(enabled = true)
     public void checkToyExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException {
         PetriGame net = ToyExamples.createFirstExample(false);
         net.setName(net.getName() + "_infinite");
@@ -96,8 +96,8 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_NONE,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER_MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
         // check standard maximality
@@ -109,7 +109,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertNull(ret);
     }
 
-    @Test
+    @Test(enabled = true)
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException {
         PetriGame net = ToyExamples.createFirstExample(true);
         AdamTools.saveAPT(net.getName(), net, false);
@@ -141,7 +141,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check standard maximality
         // + sequential
         // + next semantics
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+//        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName() + "_" + formula, net, false);
         AdamTools.savePG2PDF(net.getName() + "_" + formula, net, false);
@@ -153,7 +153,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertNull(ret);
 
         // check to flow formulas
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+//        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         f = new RunFormula(f, RunOperators.Binary.OR, f);
         ret = mc.check(net, f, "./" + net.getName() + "_" + f.toString(), true);
         Assert.assertNull(ret);
@@ -206,7 +206,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertNull(ret);
     }
 
-    @Test(enabled = true) // takes to long for MCHyper
+    @Test(enabled = true)
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException {
         PetriGame net = UpdatingNetwork.create(3, 2);
         AdamTools.savePG2PDF(net.getName(), net, false);
@@ -240,8 +240,8 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_NONE,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER_MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
         formula = "A(F(p3)";
@@ -263,8 +263,8 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_NONE,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER_MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
         formula = "A(F(p3)";
@@ -281,10 +281,12 @@ public class TestingModelcheckingFlowLTLSequential {
         net = RedundantNetwork.getUpdatingMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNotNull(ret); // error is null (possibly because of the fairness yields in every case false?)
 
         net = RedundantNetwork.getUpdatingFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
     }
 
 }

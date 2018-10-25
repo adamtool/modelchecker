@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.circuits;
+package uniolunisaar.adam.modelchecker.circuits.renderer;
 
 import uniol.apt.adt.pn.PetriNet;
 

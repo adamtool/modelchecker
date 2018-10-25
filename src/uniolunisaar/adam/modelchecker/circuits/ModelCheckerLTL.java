@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
@@ -21,8 +22,7 @@ public class ModelCheckerLTL {
         REPLACEMENT,
         REPLACEMENT_REGISTER,
         PREFIX,
-        PREFIX_REGISTER,
-        PREFIX_REGISTER_MAX_INTERLEAVING
+        PREFIX_REGISTER
     }
 
     public enum TransitionSemantics {
@@ -33,6 +33,7 @@ public class ModelCheckerLTL {
     public enum Maximality {
         MAX_CONCURRENT,
         MAX_INTERLEAVING,
+        MAX_INTERLEAVING_IN_CIRCUIT,
         MAX_NONE
     }
 
@@ -82,8 +83,12 @@ public class ModelCheckerLTL {
             // todo: do the stuttering here
             renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
         } else {
-            formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula, stuttering);
-            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING); // todo: make a proper choosing of the renderer
+            formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
+            if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
+                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING);
+            } else {
+                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
+            }
         }
 
         Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
