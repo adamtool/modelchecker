@@ -1,6 +1,8 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
@@ -33,11 +35,25 @@ public class ModelCheckerMCHyper {
 
         Logger.getInstance().addMessage(procBuilder.command().toString(), true);
         Process proc = procBuilder.start();
+        // buffering the output and error as it comes
+        try (BufferedReader is = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+            String line;
+            while ((line = is.readLine()) != null) {
+                Logger.getInstance().addMessage(line, true);
+            }
+        }
+        try (BufferedReader is = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+            String line;
+            while ((line = is.readLine()) != null) {
+                Logger.getInstance().addMessage(line, true);
+            }
+        }
+        // buffering in total
+//        String error = IOUtils.toString(proc.getErrorStream());
+//        Logger.getInstance().addMessage(error, true); // todo: print it as error and a proper exception
+//        String output = IOUtils.toString(proc.getInputStream());
+//        Logger.getInstance().addMessage(output, true);
         proc.waitFor();
-        String error = IOUtils.toString(proc.getErrorStream());
-        Logger.getInstance().addMessage(error, true); // todo: print it as error and a proper exception
-        String output = IOUtils.toString(proc.getInputStream());
-        Logger.getInstance().addMessage(output, true);
 
         if (proc.exitValue() == 255) {
             throw new RuntimeException("MCHyper didn't finshed correctly.");

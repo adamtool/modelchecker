@@ -11,6 +11,8 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
+import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
@@ -23,6 +25,52 @@ import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
  */
 @Test
 public class TestingModelcheckingFlowLTLSequential {
+
+    @Test
+    public void introducingExample() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException {
+        PetriGame net = new PetriGame("introduction");
+        Place a = net.createPlace("a");
+        a.setInitialToken(1);
+        net.setInitialTokenflow(a);
+        Place b = net.createPlace("B");
+        b.setInitialToken(1);
+        net.setInitialTokenflow(b);
+        Place c = net.createPlace("C");
+        c.setInitialToken(1);
+        Place d = net.createPlace("D");
+        Place e = net.createPlace("E");
+        Place f = net.createPlace("F");
+        Transition t1 = net.createTransition();
+        Transition t2 = net.createTransition();
+        net.createFlow(a, t1);
+        net.createFlow(b, t1);
+        net.createFlow(t1, d);
+        net.createFlow(c, t2);
+        net.createFlow(d, t2);
+        net.createFlow(t2, e);
+        net.createFlow(t2, f);
+        net.createFlow(t2, b);
+        net.createTokenFlow(a, t1, d);
+        net.createTokenFlow(b, t1, d);
+        net.createTokenFlow(d, t2, e, b);
+        net.createInitialTokenFlow(t2, f);
+        AdamTools.saveAPT(net.getName(), net, false);
+        AdamTools.savePG2PDF(net.getName(), net, false);
+
+        RunFormula formula;
+        CounterExample ret;
+
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
+                ModelCheckerLTL.Maximality.MAX_NONE,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER_MAX_INTERLEAVING,
+                true);
+
+        formula = new RunFormula(new FlowFormula(new AtomicProposition(e)));
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+    }
 
     @Test
     public void checkToyExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException {
@@ -237,42 +285,6 @@ public class TestingModelcheckingFlowLTLSequential {
         net = RedundantNetwork.getUpdatingFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = mc.check(net, f, "./" + net.getName(), true);
-    }
-
-    @Test(enabled = true)
-    public void redundantFlowExampleMaxInterleavingInCircuit() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException {
-        PetriGame net = RedundantNetwork.getBasis();
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
-
-        String formula;
-        RunFormula f;
-        CounterExample ret;
-
-        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
-                ModelCheckerLTL.TransitionSemantics.OUTGOING,
-                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_NONE,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER_MAX_INTERLEAVING,
-                true);
-
-        formula = "A(F(p3)";
-        f = FlowLTLParser.parse(net, formula);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret);
-
-        net = RedundantNetwork.getUpdatingNetwork();
-        AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret);
-
-        net = RedundantNetwork.getUpdatingMutexNetwork();
-        AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
-
-        net = RedundantNetwork.getUpdatingFixedMutexNetwork();
-        AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = ModelCheckerFlowLTL.checkWithSequentialApproach(net, f, "./" + net.getName(), true);
     }
 
 }
