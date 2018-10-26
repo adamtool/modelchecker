@@ -4,7 +4,6 @@ import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.AdamProperties;

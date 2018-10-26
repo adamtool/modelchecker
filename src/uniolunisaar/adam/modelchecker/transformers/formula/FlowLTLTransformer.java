@@ -45,7 +45,7 @@ public class FlowLTLTransformer {
         return FormulaCreator.bigWedgeOrVeeObject(elements, true);
     }
 
-    public static IRunFormula addFairness(PetriGame net, IRunFormula formula) {
+    public static RunFormula addFairness(PetriGame net, RunFormula formula) {
         ILTLFormula fairness = getFairness(net);
         return (!fairness.toString().equals("TRUE")) ? new RunFormula(fairness, RunOperators.Implication.IMP, formula) : formula;
     }

@@ -18,7 +18,6 @@ public class PetriNetTransformerFlowLTL {
     public static final String NEW_TOKENFLOW_ID = "<new_tfl>";
 //    public static final String NO_CHAIN_ID = "<no_tfl>"; // is subsumed by the new_tokenflow_id place
     public static final String TOKENFLOW_SUFFIX_ID = "_<tfl>";
-    public static final String NEXT_ID = "_<nxt>";
 
     static PetriGame createOriginalPartOfTheNet(PetriGame orig, boolean initFirstStep) {
         // Copy the original net

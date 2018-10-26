@@ -17,6 +17,8 @@ import uniolunisaar.adam.tools.Logger;
  */
 public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlowLTL {
 
+    public static final String NEXT_ID = "_<nxt>";
+
     /**
      * Adds maximally a new copy for each place and each sub flow formula. Thus,
      * each sub flow formula yields one new block, where we check each flow

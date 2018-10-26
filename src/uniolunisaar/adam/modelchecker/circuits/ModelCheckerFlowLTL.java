@@ -85,16 +85,16 @@ public class ModelCheckerFlowLTL {
             return mcLTL.check(net, formula.toLTLFormula(), path, verbose);
         }
 
-//        // Add Fairness
-//        IRunFormula f = FlowLTLTransformer.addFairness(net, formula);
-//
-//        // Get the formula for the maximality (null if MAX_NONE)
-//        ILTLFormula max = ModelCheckerTools.getMaximality(maximality, semantics, net);
-//        if (max != null) {
-//            f = new RunFormula(max, RunOperators.Implication.IMP, f);
-//            mcLTL.setMaximality(Maximality.MAX_NONE); // already done the maximality here
-//        }
-        IRunFormula f = formula;
+        // Add Fairness
+        RunFormula f = FlowLTLTransformer.addFairness(net, formula);
+
+        // Get the formula for the maximality (null if MAX_NONE)
+        ILTLFormula max = ModelCheckerTools.getMaximality(maximality, semantics, net);
+        if (max != null) {
+            f = new RunFormula(max, RunOperators.Implication.IMP, f);
+            mcLTL.setMaximality(Maximality.MAX_NONE); // already done the maximality here
+        }
+//        IRunFormula f = formula;
 
         if (approach == Approach.PARALLEL) {
             PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
@@ -114,26 +114,26 @@ public class ModelCheckerFlowLTL {
                     }
                 }
                 AdamTools.savePG2PDF(path + "_mc", gameMC, true, ModelCheckerTools.getFlowFormulas(formula).size());
-                try {
-                    AdamTools.saveAPT(path+"_mc", gameMC, false);
-                } catch (RenderException ex) {
-                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//                try {
+//                    AdamTools.saveAPT(path + "_mc", gameMC, false);
+//                } catch (RenderException ex) {
+//                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (FileNotFoundException ex) {
+//                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
+//                }
             }
             ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
-            // Add Fairness but without the active places in the preset
-            Collection<ILTLFormula> elements = new ArrayList<>();
-            for (Transition t : net.getTransitions()) {
-                if (net.isStrongFair(t)) {
-                    elements.add(FormulaCreator.createStrongFairness(t));
-                }
-                if (net.isWeakFair(t)) {
-                    elements.add(FormulaCreator.createStrongFairness(t)); // everything is strong fair in the sequential approach
-                }
-            }
-            formulaMC = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, formulaMC);
+//            // Add Fairness but without the active places in the preset
+//            Collection<ILTLFormula> elements = new ArrayList<>();
+//            for (Transition t : net.getTransitions()) {
+//                if (net.isStrongFair(t)) {
+//                    elements.add(FormulaCreator.createStrongFairness(t));
+//                }
+//                if (net.isWeakFair(t)) {
+//                    elements.add(FormulaCreator.createStrongFairness(t)); // everything is strong fair in the sequential approach
+//                }
+//            }
+//            formulaMC = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, formulaMC);
 //            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
             return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
         }
@@ -218,7 +218,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static CounterExample checkWithSequentialApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException {
+    public static CounterExample checkWithSequentialApproach(PetriGame game, RunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");

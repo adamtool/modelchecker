@@ -122,7 +122,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
@@ -173,7 +173,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
@@ -196,7 +196,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
 
