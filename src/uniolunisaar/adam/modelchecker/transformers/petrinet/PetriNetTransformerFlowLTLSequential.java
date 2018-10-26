@@ -256,7 +256,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
             }
         } else {
             // should not really be used, since the normal model checking should be used in these cases
-            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."
+            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "'."
                     + " The standard LTL model checker should be used.", false);
             // but to have still some meaningful output add for all transition the
             // connections to the act places
@@ -503,7 +503,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
             }
         } else {
             // should not really be used, since the normal model checking should be used in these cases
-            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."
+            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "'."
                     + " The standard LTL model checker should be used.", false);
             // but to have still some meaningful output add for all transition the
             // connections to the act places

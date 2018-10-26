@@ -9,9 +9,11 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.Constants;
 import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.FormulaBinary;
 import uniolunisaar.adam.logic.flowltl.FormulaUnary;
+import uniolunisaar.adam.logic.flowltl.IAtomicProposition;
 import uniolunisaar.adam.logic.flowltl.IFlowFormula;
 import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
@@ -42,7 +44,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     }
 
     private static ILTLFormula replaceNextWithinFlowFormulaSequential(PetriGame orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually) {
-        if (phi instanceof AtomicProposition) {
+        if (phi instanceof IAtomicProposition) {
             return phi;
         } else if (phi instanceof LTLFormula) {
             return new LTLFormula(replaceNextWithinFlowFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), nb_ff, scopeEventually));
@@ -115,8 +117,77 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
+    private static FlowFormula replaceTransitionsInFlowFormulaSequential(PetriGame orig, PetriNet net, FlowFormula flowFormula, int nb_ff) {
+        ILTLFormula phi = flowFormula.getPhi();
+        return new FlowFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, phi, nb_ff, false));
+    }
+
+    private static ILTLFormula replaceTransitionsWithinFlowFormulaSequential(PetriGame orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually) {
+        if (phi instanceof Constants) {
+            return phi;
+        } else if (phi instanceof AtomicProposition) {
+            AtomicProposition atom = (AtomicProposition) phi;
+            if (atom.isTransition()) {
+                // if it's in the direct scope of an eventually we don't need the until
+                if (scopeEventually) {
+                    return phi;
+                }
+                // All other transitions
+                Collection<ILTLFormula> elements = new ArrayList<>();
+                for (Transition t : net.getTransitions()) { // all transitions
+                    String actid = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
+                    if (net.containsPlace(actid)) { // not mine
+                        Place act = net.getPlace(actid);
+                        if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) { // todo: dependent on the sequential approach
+                            elements.add(new AtomicProposition(t));
+                        }
+                    } else {// if it is not dependent on the act place it could still be the initial transitions 
+                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + nb_ff);
+                        if (!act.getPostset().contains(t)) {
+                            elements.add(new AtomicProposition(t));
+                        }
+                    }
+                }
+                ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+
+                // all transitions which are dependent on my act place (but the transition which just moves the token to the next formula)
+                elements = new ArrayList<>();
+                for (Transition t : net.getTransitions()) {
+                    String actid = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
+                    if (net.containsPlace(actid)) {
+                        Place act = net.getPlace(actid);
+                        if (act.getPostset().contains(t) && !t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) {// todo: dependent on the sequential approach
+                            elements.add(new AtomicProposition(t));
+                        }
+                    } // don't want to add the initial transitions since the have to be happend before (for not initial we have to change it here!)
+                }
+                ILTLFormula myTransitions = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+                return new LTLFormula(untilFirst, LTLOperators.Binary.U, myTransitions);
+            }
+            return phi;
+        } else if (phi instanceof LTLFormula) {
+            return new LTLFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), nb_ff, scopeEventually));
+        } else if (phi instanceof FormulaUnary) {
+            FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // since we are in the scope of a FlowFormula
+            // check if it's in the scope of an eventually
+            if (!scopeEventually && castPhi.getOp() == LTLOperators.Unary.F) {
+                scopeEventually = true;
+            } else if (scopeEventually && castPhi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
+                scopeEventually = false;
+            }
+            ILTLFormula substChildPhi = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi(), nb_ff, scopeEventually);
+            return new LTLFormula(castPhi.getOp(), substChildPhi);
+        } else if (phi instanceof FormulaBinary) {
+            FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula> castPhi = (FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula>) phi;
+            ILTLFormula subst1 = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi1(), nb_ff, scopeEventually);
+            ILTLFormula subst2 = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi2(), nb_ff, scopeEventually);
+            return new LTLFormula(subst1, castPhi.getOp(), subst2);
+        }
+        throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+    }
+
     private static IFormula replaceNextWithinRunFormulaSequential(PetriGame orig, PetriNet net, IFormula phi, boolean scopeEventually) {
-        if (phi instanceof AtomicProposition) {
+        if (phi instanceof IAtomicProposition) {
             return phi;
         } else if (phi instanceof IFlowFormula) {
             return phi;
@@ -212,8 +283,71 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    private static IFormula replaceNextWithinRunFormulaSequential(PetriGame orig, PetriNet net, RunFormula phi) {
-        return replaceNextWithinRunFormulaSequential(orig, net, phi.getPhi(), false);
+    private static RunFormula replaceNextWithinRunFormulaSequential(PetriGame orig, PetriNet net, RunFormula phi) {
+        return new RunFormula(replaceNextWithinRunFormulaSequential(orig, net, phi.getPhi(), false));
+    }
+
+    private static IFormula replaceTransitionsWithinRunFormulaSequential(PetriGame orig, PetriNet net, IFormula phi, boolean scopeEventually) {
+        if (phi instanceof Constants) {
+            return phi;
+        } else if (phi instanceof AtomicProposition) {
+            AtomicProposition atom = (AtomicProposition) phi;
+            if (atom.isTransition()) {
+                // if it's in the direct scope of an eventually we don't need the until
+                if (scopeEventually) {
+                    return phi;
+                }
+                // if it's not in the last scope of an eventually, then replace it according to the document
+                // all transitions of the subnets
+                Collection<ILTLFormula> elements = new ArrayList<>();
+                for (Transition t : net.getTransitions()) {
+                    if (!orig.containsTransition(t.getId())) {
+                        elements.add(new AtomicProposition(t));
+                    }
+                }
+                ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+                return new LTLFormula(untilFirst, LTLOperators.Binary.U, atom);
+            }
+            return phi;
+        } else if (phi instanceof IFlowFormula) {
+            return phi;
+        } else if (phi instanceof RunFormula) {
+            return new RunFormula(replaceTransitionsWithinRunFormulaSequential(orig, net, ((RunFormula) phi).getPhi(), scopeEventually));
+        } else if (phi instanceof LTLFormula) {
+            IFormula f = replaceTransitionsWithinRunFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), scopeEventually);
+            return new LTLFormula((ILTLFormula) f);
+        } else if (phi instanceof FormulaUnary) {
+            FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
+
+            // check if it's in the scope of an eventually
+            if (!scopeEventually && castPhi.getOp() == LTLOperators.Unary.F) {
+                scopeEventually = true;
+            } else if (scopeEventually && castPhi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
+                scopeEventually = false;
+            }
+
+            ILTLFormula substChildPhi = (ILTLFormula) replaceTransitionsWithinRunFormulaSequential(orig, net, castPhi.getPhi(), scopeEventually); // since castPhi is of type ILTLFormula this must result an ILTLFormula
+            return new LTLFormula(castPhi.getOp(), substChildPhi);
+        } else if (phi instanceof FormulaBinary) {
+            IFormula subst1 = replaceTransitionsWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi1(), scopeEventually);
+            IFormula subst2 = replaceTransitionsWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi2(), scopeEventually);
+            IOperatorBinary op = ((FormulaBinary) phi).getOp();
+            if (phi instanceof ILTLFormula) {
+                return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
+            } else if (phi instanceof IRunFormula) {
+                if (op instanceof RunOperators.Binary) {
+                    return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
+                } else {
+                    return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+                }
+            }
+        }
+        throw new RuntimeException(
+                "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+    }
+
+    private static RunFormula replaceTransitionsWithinRunFormulaSequential(PetriGame orig, PetriNet net, RunFormula phi) {
+        return new RunFormula(replaceTransitionsWithinRunFormulaSequential(orig, net, phi.getPhi(), false));
     }
 
     /**
@@ -227,8 +361,10 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
      * @throws uniolunisaar.adam.modelchecker.exceptions.NotConvertableException
      */
     public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, RunFormula formula, boolean initFirst) throws NotConvertableException {
+        // replace the transitions
+        RunFormula runF = replaceTransitionsWithinRunFormulaSequential(orig, net, formula);
         // replace the next operator in the run-part
-        IFormula f = replaceNextWithinRunFormulaSequential(orig, net, formula);
+        IFormula f = replaceNextWithinRunFormulaSequential(orig, net, runF);
 
 //        List<AtomicProposition> allInitTransitions = new ArrayList<>();
         List<LTLFormula> allInitPlaces = new ArrayList<>();
@@ -236,7 +372,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         for (int i = 0; i < flowFormulas.size(); i++) {
             FlowFormula flowFormula = flowFormulas.get(i);
             try {
-                // replace the transitions and places within the flow formula accordingly                 
+                // replace the places within the flow formula accordingly                 
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
@@ -249,25 +385,8 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
-            // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
-            // Replace the transitions with the big-or of all accordingly labelled transitions
-            for (Transition transition : orig.getTransitions()) {
-                try {
-                    String id = ACTIVATION_PREFIX_ID + transition.getId() + TOKENFLOW_SUFFIX_ID + "-" + i;
-                    if (net.containsPlace(id)) { // only if the transition has a token flow
-                        Place act = net.getPlace(id);
-                        Collection<ILTLFormula> elements = new ArrayList<>();
-                        for (Transition t : act.getPostset()) {
-                            elements.add(new AtomicProposition(t));
-                        }
-                        AtomicProposition trans = new AtomicProposition(transition);
-                        flowFormula = (FlowFormula) flowFormula.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
-                    }
-                } catch (NotSubstitutableException ex) {
-                    throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
-                }
-            }
-
+            // Replace the transitions
+            flowFormula = replaceTransitionsInFlowFormulaSequential(orig, net, flowFormula, i);
             // Replace the next operator within the flow formula
             flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
@@ -285,7 +404,12 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 //                }
                 LTLFormula flowLTL = new LTLFormula(
                         // it's OK when there is no chain or the subformula decided to consider a newly created chain but this doesn't exists in this run.
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))),
+                        new LTLFormula(LTLOperators.Unary.G,
+                                new LTLFormula(new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)),
+                                        LTLOperators.Binary.OR,
+                                        new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
+                                )
+                        ),
                         LTLOperators.Binary.OR,
                         flowFormula.getPhi());
 

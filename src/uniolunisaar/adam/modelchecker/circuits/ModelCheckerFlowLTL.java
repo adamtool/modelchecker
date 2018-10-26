@@ -1,24 +1,15 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.logging.Level;
 import uniol.apt.adt.pn.Place;
-import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
-import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
-import uniolunisaar.adam.logic.flowltl.LTLFormula;
-import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL.Maximality;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL.TransitionSemantics;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;

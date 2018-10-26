@@ -9,14 +9,22 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.flowltl.AtomicProposition;
+import uniolunisaar.adam.logic.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.flowltl.LTLFormula;
+import uniolunisaar.adam.logic.flowltl.LTLOperators;
+import uniolunisaar.adam.logic.flowltl.RunFormula;
+import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.modelchecker.circuits.Circuit;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
-import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
+import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
+import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerSequential;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
 
 /**
  *
@@ -24,6 +32,47 @@ import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
  */
 @Test
 public class TestingFlowLTLTransformer {
+
+    @Test
+    public void transitionReplacement() throws RenderException, IOException, InterruptedException, NotConvertableException {
+        PetriGame net = new PetriGame("introduction");
+        Place a = net.createPlace("a");
+        a.setInitialToken(1);
+        net.setInitialTokenflow(a);
+        Place b = net.createPlace("B");
+        b.setInitialToken(1);
+        net.setInitialTokenflow(b);
+        Place c = net.createPlace("C");
+        c.setInitialToken(1);
+        Place d = net.createPlace("D");
+        Place e = net.createPlace("E");
+        Place f = net.createPlace("F");
+        Transition t1 = net.createTransition();
+        Transition t2 = net.createTransition();
+        net.createFlow(a, t1);
+        net.createFlow(b, t1);
+        net.createFlow(t1, d);
+        net.createFlow(c, t2);
+        net.createFlow(d, t2);
+        net.createFlow(t2, e);
+        net.createFlow(t2, f);
+        net.createFlow(t2, b);
+        net.createTokenFlow(a, t1, d);
+        net.createTokenFlow(b, t1, d);
+        net.createTokenFlow(d, t2, e, b);
+        net.createInitialTokenFlow(t2, f);
+        AdamTools.saveAPT(net.getName(), net, false);
+        AdamTools.savePG2PDF(net.getName(), net, false);
+
+//        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
+        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
+
+        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, formula, true);
+        AdamTools.savePG2PDF(mc.getName() + "mc", mc, true);
+        ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, true);
+        System.out.println(f_mc);
+
+    }
 
     @Test
     public void testMCHyperTransformation() throws ParseException, InterruptedException, IOException {

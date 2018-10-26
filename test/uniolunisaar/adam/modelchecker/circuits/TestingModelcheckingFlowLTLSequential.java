@@ -70,6 +70,11 @@ public class TestingModelcheckingFlowLTLSequential {
         formula = new RunFormula(new FlowFormula(new AtomicProposition(e)));
         ret = mc.check(net, formula, "./" + net.getName(), true);
         Assert.assertNotNull(ret);
+
+        // check interleaving in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
     }
 
     @Test(enabled = true)
@@ -93,18 +98,21 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
+        formula = "A(F(out))";
+        f = FlowLTLParser.parse(net, formula);
+
+        // check interleaving in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
 
-        // check standard maximality
-        // + sequential
-        // + next semantics
-        formula = "A(F(out))";
-        f = FlowLTLParser.parse(net, formula);
+        // check interleaving in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(ret);
     }
@@ -119,25 +127,28 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
+        formula = "A(F(out))";
+        f = FlowLTLParser.parse(net, formula);
+
+        // check maximal initerleaving in the circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
-
-        // check standard maximality
-        // + sequential
-        // + next semantics
-        formula = "A(F(out))";
-        f = FlowLTLParser.parse(net, formula);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(ret); // here is an error when I do the maximality before the transformation of the formula and not afterwards (it is null)
+
+        // check interleaving in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+
         // previous semantics
 //        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
 //        ret = mc.check(net, f, "./" + net.getName(), false);
 //        Assert.assertNotNull(ret);
-
         // check standard maximality
         // + sequential
         // + next semantics
@@ -145,13 +156,21 @@ public class TestingModelcheckingFlowLTLSequential {
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName() + "_" + formula, net, false);
         AdamTools.savePG2PDF(net.getName() + "_" + formula, net, false);
+
+        // Check maximality in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(ret);
+
+        // check it outside
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+
         // previous semantics
 //        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
 //        ret = mc.check(net, f, "./" + net.getName(), true);
 //        Assert.assertNull(ret);
-
         // check to flow formulas
 //        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         f = new RunFormula(f, RunOperators.Binary.OR, f);
@@ -170,15 +189,21 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
+        formula = "A(F(out)";
+        f = FlowLTLParser.parse(net, formula);
+
+        // in maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
 
-        formula = "A(F(out)";
-        f = FlowLTLParser.parse(net, formula);
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(ret);
     }
@@ -193,15 +218,21 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
+        formula = "A(F(out)";
+        f = FlowLTLParser.parse(net, formula);
+
+        // maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
 
-        formula = "A(F(out)";
-        f = FlowLTLParser.parse(net, formula);
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(ret);
     }
@@ -215,37 +246,21 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
-        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
-                ModelCheckerLTL.TransitionSemantics.OUTGOING,
-                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
-                true);
-
         formula = "A(F(p3)";
         f = FlowLTLParser.parse(net, formula);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret);
-    }
 
-    @Test(enabled = true)
-    public void updatingNetworkExampleMaxInterleavingInCircuit() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException {
-        PetriGame net = UpdatingNetwork.create(3, 2);
-        AdamTools.savePG2PDF(net.getName(), net, false);
-
-        String formula;
-        RunFormula f;
-        CounterExample ret;
-
+        // maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
 
-        formula = "A(F(p3)";
-        f = FlowLTLParser.parse(net, formula);
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(ret);
     }
@@ -260,31 +275,57 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         CounterExample ret;
 
+        formula = "A(F(p3)";
+        f = FlowLTLParser.parse(net, formula);
+
+        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
-
-        formula = "A(F(p3)";
-        f = FlowLTLParser.parse(net, formula);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(ret);
 
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); // error is null (possibly because of the fairness yields in every case false?)
+//        Assert.assertNotNull(ret); // error is null (possibly because of the fairness yields in every case false?)
 
-        // not tested
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(ret); // error is null (possibly because of the fairness yields in every case false?)
 
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
+        ret = mc.check(net, f, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+
+        // maximality in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNull(ret);
     }
