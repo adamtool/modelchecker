@@ -367,7 +367,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         IFormula f = replaceNextWithinRunFormulaSequential(orig, net, runF);
 
 //        List<AtomicProposition> allInitTransitions = new ArrayList<>();
-        List<LTLFormula> allInitPlaces = new ArrayList<>();
+//        List<LTLFormula> allInitPlaces = new ArrayList<>();
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
             FlowFormula flowFormula = flowFormulas.get(i);
@@ -417,31 +417,50 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
             }
-
-            if (initFirst) {
-                Place init = net.getPlace(INIT_TOKENFLOW_ID + "-" + i);
-                // add the init place
-                allInitPlaces.add(new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(init)));
-// to expensive we use the next  
-//                // add all init transitions
-//                for (Transition t : init.getPostset()) {
-//                    allInitTransitions.add(new AtomicProposition(t));
-//                }
-            }
+// don't need it anymore since it is done with all the other act places
+//            if (initFirst) {
+//                Place init = net.getPlace(INIT_TOKENFLOW_ID + "-" + i);
+//                // add the init place
+//                allInitPlaces.add(new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(init)));
+//// to expensive we use the next  
+////                // add all init transitions
+////                for (Transition t : init.getPostset()) {
+////                    allInitTransitions.add(new AtomicProposition(t));
+////                }
+//            }
         }
 
         ILTLFormula ret = convert(f);
+
         if (initFirst) {
+            // don't need the forcing of the firing since it is done with the activ places
             // in the beginning all init transitions are allowed to fire until the original formula has to hold
 // to expensive better use the next            
-            ILTLFormula init = new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(allInitPlaces, true));
+//            ILTLFormula init = new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(allInitPlaces, true));
 //            return new LTLFormula(init, LTLOperators.Binary.IMP, new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(allInitTransitions, false), LTLOperators.Binary.U, ret));
             ILTLFormula next = ret;
             for (int i = 0; i < flowFormulas.size(); i++) {
                 next = new LTLFormula(LTLOperators.Unary.X, next);
             }
-            return new LTLFormula(init, LTLOperators.Binary.IMP, next);
+//            return new LTLFormula(init, LTLOperators.Binary.IMP, next);
         }
+        
+        // since we don't want to stop within the subnets, omit these runs
+        // this means we demand for every activation place of the subnets
+        // that have to be left
+        List<LTLFormula> elements = new ArrayList<>();
+        for (Place p : net.getPlaces()) {
+            String id = p.getId();
+            if (id.startsWith(ACTIVATION_PREFIX_ID)) {
+                // if it's not a orignal one (meaning the rest of the string is not a transition of the original net
+                if (!orig.containsTransition(id.substring(ACTIVATION_PREFIX_ID.length()))) {
+                    LTLFormula inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(p))));
+                    elements.add(inf);
+                }
+            }
+        }
+        ret = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, ret);
+
         return ret;
     }
 

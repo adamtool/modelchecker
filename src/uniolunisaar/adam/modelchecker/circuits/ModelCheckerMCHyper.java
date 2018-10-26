@@ -123,7 +123,7 @@ public class ModelCheckerMCHyper {
 ////        String output = IOUtils.toString(proc.getInputStream());
 ////        Logger.getInstance().addMessage(output, true);
 //        proc.waitFor();
-        String[] command = {AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "2", "-o", path + "_complete"};
+        String[] command = {AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete"};
         Logger.getInstance().addMessage(Arrays.toString(command), true);
         ExternalProcessHandler proc = new ExternalProcessHandler(true, command);
         int exitValue = proc.startAndWaitFor(true);
