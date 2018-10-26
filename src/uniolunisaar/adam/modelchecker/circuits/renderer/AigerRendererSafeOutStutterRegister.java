@@ -85,13 +85,16 @@ public class AigerRendererSafeOutStutterRegister extends AigerRenderer {
     }
 
     void updateStuttering(AigerFile file, PetriNet net) {
-        String[] inputs = new String[net.getTransitions().size()];
-        int i = 0;
-        for (Transition t : net.getTransitions()) {
-            inputs[i++] = "!" + INPUT_PREFIX + t.getId();
-        }
-        file.addGate(STUTT_LATCH + "_buf", inputs);
-        file.addGate(STUTT_LATCH + NEW_VALUE_OF_LATCH_SUFFIX, ALL_TRANS_NOT_TRUE, "!" + STUTT_LATCH + "_buf");
+        // old version: setting stutt =1 iff several transition are chosen or a not enable transition is chosen
+        //              not for when the input is all Zero
+//        String[] inputs = new String[net.getTransitions().size()];
+//        int i = 0;
+//        for (Transition t : net.getTransitions()) {
+//            inputs[i++] = "!" + INPUT_PREFIX + t.getId();
+//        }        
+//        file.addGate(STUTT_LATCH + "_buf", inputs);
+//        file.addGate(STUTT_LATCH + NEW_VALUE_OF_LATCH_SUFFIX, ALL_TRANS_NOT_TRUE, "!" + STUTT_LATCH + "_buf");
+        file.addGate(STUTT_LATCH + NEW_VALUE_OF_LATCH_SUFFIX, INIT_LATCH, ALL_TRANS_NOT_TRUE);
     }
 
     @Override

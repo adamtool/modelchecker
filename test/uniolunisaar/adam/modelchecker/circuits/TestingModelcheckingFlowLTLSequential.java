@@ -13,6 +13,9 @@ import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
 import uniolunisaar.adam.logic.flowltl.FlowFormula;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.flowltl.LTLFormula;
+import uniolunisaar.adam.logic.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
@@ -40,8 +43,8 @@ public class TestingModelcheckingFlowLTLSequential {
         Place d = net.createPlace("D");
         Place e = net.createPlace("E");
         Place f = net.createPlace("F");
-        Transition t1 = net.createTransition();
-        Transition t2 = net.createTransition();
+        Transition t1 = net.createTransition("o1");
+        Transition t2 = net.createTransition("o2");
         net.createFlow(a, t1);
         net.createFlow(b, t1);
         net.createFlow(t1, d);
@@ -59,19 +62,119 @@ public class TestingModelcheckingFlowLTLSequential {
 
         RunFormula formula;
         CounterExample ret;
+        
+        //%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(new FlowFormula(new AtomicProposition(e))); // should not be true
 
+        // check in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
-
-        formula = new RunFormula(new FlowFormula(new AtomicProposition(e)));
         ret = mc.check(net, formula, "./" + net.getName(), true);
         Assert.assertNotNull(ret);
 
         // check interleaving in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+
+        ILTLFormula ltlE = new AtomicProposition(e);
+        ILTLFormula finallyE = new LTLFormula(LTLOperators.Unary.F, ltlE);
+        ILTLFormula ltlF = new AtomicProposition(f);
+        ILTLFormula finallyF = new LTLFormula(LTLOperators.Unary.F, ltlF);
+        ILTLFormula ltlB = new AtomicProposition(b);
+        ILTLFormula inifintelyB = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlB));
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(
+                new FlowFormula(
+                        new LTLFormula(finallyE, LTLOperators.Binary.OR, ltlB))); // should not be true since the new chain in F exists
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+        // check in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula( // should not be true, since flow A->D->B
+                new FlowFormula(
+                        new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, ltlB))));
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+        // check in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula( // should be true
+                new FlowFormula(
+                        new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, ltlB)))));
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+        // check in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(
+                new FlowFormula(
+                        new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, inifintelyB))));
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+//        ret = mc.check(net, formula, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);  // an error it's null
+        // check in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret); // since finite
+
+        //%%%%%%%%%%%%%%%%%%%%%
+        // add a transition such that it is not finite anymore
+        Transition restart = net.createTransition("reset");
+        net.createFlow(restart, a);
+        net.createFlow(restart, c);
+        net.createFlow(e, restart);
+        net.createFlow(f, restart);
+
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+        // check in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(new AtomicProposition(t1)); // should not hold since t2 generates a new one which directly dies
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret); // error is null
+        // check in formula
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret); // error is null
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(new AtomicProposition(t2)); // should not hold since the flows starting in A and B
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNotNull(ret);
+        // check in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, formula, "./" + net.getName(), true);
         Assert.assertNotNull(ret);
