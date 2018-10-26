@@ -118,4 +118,16 @@ public class ModelCheckerTools {
         Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
 //        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aag", true);
     }
+
+    public static String getMCHyperPath() {
+        return "/home/thewn/tools/mchyper-0.91/mchyper";
+    }
+
+    public static String getABCPath() {
+        return "/home/thewn/tools/abc/abc";
+    }
+
+    public static String getAigerPath() {
+        return "/home/thewn/tools/mchyper-0.91/aiger/";
+    }
 }

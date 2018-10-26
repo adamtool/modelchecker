@@ -52,10 +52,12 @@ public class TestingMCHyper {
 //        String formula = "Forall ((AP \"#out#_out\" 0))"; // correct
 //        String formula = "Forall (AP \"#out#_out\" 0)"; // also correct
 //        String formula = "Forall (And ((AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // incorrect
-        String formula = "Forall (And (AP \"#out#_out\" 0) (AP \"#out#_out\" 0))"; // correct
+//        String formula = "Forall (And (AP \"#out#_out\" 0) (AP \"#out#_out\" 0))"; // correct
 //        String formula = "Forall (F (Eq (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // correkt
 
-        ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName());
+        String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
+
+        ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), formula, "./" + game.getName());
     }
 
 }
