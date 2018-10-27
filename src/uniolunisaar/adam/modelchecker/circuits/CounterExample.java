@@ -10,6 +10,13 @@ import java.util.List;
 public class CounterExample {
 
     private final List<CounterExampleElement> timestep = new ArrayList<>();
+    private final boolean safety;
+    private final boolean liveness;
+
+    public CounterExample(boolean safety, boolean liveness) {
+        this.safety = safety;
+        this.liveness = liveness;
+    }
 
     public boolean addTimeStep(CounterExampleElement elem) {
         return timestep.add(elem);
@@ -17,7 +24,8 @@ public class CounterExample {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Counter example: \n");
+        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
+        StringBuilder sb = new StringBuilder("Counter example " + cause + " \n");
         for (int i = 0; i < timestep.size(); i++) {
             sb.append("----------- time step ").append(i).append(" -----------------\n");
             sb.append(timestep.get(i).toString()).append("\n");

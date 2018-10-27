@@ -28,6 +28,7 @@ import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -48,7 +49,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, NotSupportedGameException, ProcessNotStartedException {
+    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, NotSupportedGameException, ProcessNotStartedException, ExternalToolException {
         PetriNet net = new PetriNet("jesko");
         Place init = net.createPlace("in");
         init.setInitialToken(1);
@@ -141,7 +142,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testOutgoingSemantics() throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException {
+    void testOutgoingSemantics() throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
         PetriGame game = new PetriGame("testNext");
         Place init = game.createPlace("pA");
         init.setInitialToken(1);
@@ -204,7 +205,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException {
+    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         PetriGame game = new PetriGame("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
@@ -290,7 +291,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testStuttering() throws InterruptedException, IOException, NotSubstitutableException, ParseException {
+    void testStuttering() throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
         PetriGame game = new PetriGame("testStuttering");
         Place init = game.createPlace("a");
         init.setInitialToken(1);
@@ -306,7 +307,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = true)
-    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException, NotSubstitutableException {
+    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
@@ -350,7 +351,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = true)
-    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException, NotSubstitutableException {
+    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
         AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
@@ -379,7 +380,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testMaximality() throws RenderException, InterruptedException, IOException, ParseException, NotSubstitutableException {
+    void testMaximality() throws RenderException, InterruptedException, IOException, ParseException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = new PetriGame("testMaximalityA");
         Place A = net.createPlace("A");
         A.setInitialToken(1);

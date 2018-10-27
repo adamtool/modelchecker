@@ -17,8 +17,10 @@ import uniolunisaar.adam.logic.flowltl.RunOperators;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLParallel;
+import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
  *
@@ -35,7 +37,7 @@ public class TestingModelcheckingFlowLTLParallel {
     }
 
     @Test
-    public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException {
+    public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = ToyExamples.createFirstExample(true);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
@@ -65,7 +67,7 @@ public class TestingModelcheckingFlowLTLParallel {
     }
 
     @Test(enabled = true)
-    public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException {
+    public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = ToyExamples.createFirstExampleExtended(true);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
@@ -79,7 +81,7 @@ public class TestingModelcheckingFlowLTLParallel {
     }
 
     @Test(enabled = true)
-    public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException {
+    public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = ToyExamples.createFirstExampleExtended(false);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
@@ -93,7 +95,7 @@ public class TestingModelcheckingFlowLTLParallel {
     }
 
     @Test(enabled = false)
-    public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException {
+    public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = UpdatingNetwork.create(3, 2);
         AdamTools.savePG2PDF(net.getName(), net, false);
         String formula = "A(F(p3)";
@@ -105,7 +107,7 @@ public class TestingModelcheckingFlowLTLParallel {
     }
 
     @Test(enabled = false)
-    public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException {
+    public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = RedundantNetwork.getBasis();
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);

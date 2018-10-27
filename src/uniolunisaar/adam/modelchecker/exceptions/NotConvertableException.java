@@ -1,12 +1,10 @@
 package uniolunisaar.adam.modelchecker.exceptions;
 
-import uniolunisaar.adam.ds.exceptions.SolvingException;
-
 /**
  *
  * @author Manuel Gieseking
  */
-public class NotConvertableException extends SolvingException {
+public class NotConvertableException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

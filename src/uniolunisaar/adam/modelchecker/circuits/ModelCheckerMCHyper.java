@@ -1,10 +1,12 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import java.io.File;
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
+import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
@@ -28,7 +30,7 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static CounterExample checkSeparate(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException {
+    private static CounterExample checkSeparate(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         ModelCheckerTools.save2AigerAndPdf(net, circ, path);
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut");
 //
@@ -54,30 +56,34 @@ public class ModelCheckerMCHyper {
 //        Logger.getInstance().addMessage(output, true);
 //        procAiger.waitFor();
 
-        String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut"};
+        //%%%%%%%%%%%%%%%%%% MCHyper
+        String inputFile = path + ".aag";
+        String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), inputFile, formula, path + "_mcHyperOut"};
         Logger.getInstance().addMessage(Arrays.toString(command), true);
         ExternalProcessHandler procMCHyper = new ExternalProcessHandler(true, command);
         int exitValue = procMCHyper.startAndWaitFor(true);
-
-        System.out.println("EXIT VALUE" + exitValue);
         if (exitValue != 0) {
-            throw new RuntimeException("MCHyper didn't finshed correctly.");
+            String error = "";
+            if (procMCHyper.getErrors().contains("mchyper: Prelude.read: no parse")) {
+                error = " Error parsing formula: " + formula;
+            } else if (procMCHyper.getErrors().contains("mchyper: " + inputFile + ": openFile: does not exist (No such file or directory)")) {
+                error = " File '" + inputFile + "' does not exist (No such file or directory).";
+            }
+            throw new ExternalToolException("MCHyper didn't finshed correctly." + error);
         }
 
-        // todo to error for formula and when no model is provided
+        // %%%%%%%%%%%%%%%% Aiger
         String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
         Logger.getInstance().addMessage(Arrays.toString(aiger_command), true);
         ExternalProcessHandler procAiger = new ExternalProcessHandler(true, aiger_command);
         exitValue = procAiger.startAndWaitFor(true);
-        System.out.println("EXIT VALUE" + exitValue);
-
         if (exitValue != 0) {
-            throw new RuntimeException("Aigertools didn't finshed correctly. 'aigtoaig' couldn't produce an 'aig'-file from '" + path + "_mcHyperOut.aag'");
+            throw new ExternalToolException("Aigertools didn't finshed correctly. 'aigtoaig' couldn't produce an 'aig'-file from '" + path + "_mcHyperOut.aag'");
         }
 
+        // %%%%%%%%%%%%%%% Abc
         String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC), path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
         Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
-
         ExternalProcessHandler procAbc = new ExternalProcessHandler(true, abc_command);
         procAbc.start(true);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
@@ -87,14 +93,34 @@ public class ModelCheckerMCHyper {
         abcInput.println("quit");
         abcInput.flush();
         procAbc.waitFor();
-
         if (exitValue != 0) {
-            throw new RuntimeException("ABC didn't finshed correctly.");
+            throw new ExternalToolException("ABC didn't finshed correctly.");
         }
-
-        boolean hasCounterExample = !procAbc.getOutput().contains("Counter-example is not available");
-        if (hasCounterExample) { // has a counter example, ergo read it
-            return circ.parseCounterExample(net, path + ".cex");
+        if (procAbc.getOutput().contains("Io_ReadAiger: The network check has failed.")) {
+            throw new ExternalToolException("ABC didn't finshed correctly. The check of the aiger network '" + path + "_mcHyperOut.aig' has failed."
+                    + " Check the abc output for more information:\n" + procAbc.getOutput());
+        }
+        if (procAbc.getOutput().contains("There is no current network.")) {
+            Logger.getInstance().addMessage("[WARNING] abc says there is no current network to solve."
+                    + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
+        }
+        if (procAbc.getOutput().contains("Empty network.")) {
+            Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
+                    + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
+        }
+        // has a counter example, ergo read it
+        if (!procAbc.getOutput().contains("Counter-example is not available")) {
+            String file = path + ".cex";
+            File f = new File(file);
+            if (f.exists() && !f.isDirectory()) {
+                boolean safety = procAbc.getOutput().contains("Output 0 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
+                boolean liveness = procAbc.getOutput().contains("Output 1 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
+                return circ.parseCounterExample(net, file, new CounterExample(safety, liveness));
+            } else {
+                throw new ExternalToolException("ABC didn't finshed as expected. There should be a counter-example written to '" + file + "'"
+                        + " but the file doesn't exist."
+                        + " Check the abc output for more information:\n" + procAbc.getOutput());
+            }
         }
         return null;
     }
@@ -111,7 +137,7 @@ public class ModelCheckerMCHyper {
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
-    public static CounterExample check(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException {
+    public static CounterExample check(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
         return checkSeparate(net, circ, formula, path);
     }
@@ -127,7 +153,7 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static CounterExample checkWithPythonScript(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException {
+    private static CounterExample checkWithPythonScript(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ExternalToolException {
         ModelCheckerTools.save2AigerAndPdf(net, circ, path);
         // version without threads
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete");
@@ -162,11 +188,11 @@ public class ModelCheckerMCHyper {
         int exitValue = proc.startAndWaitFor(true);
 
         if (exitValue == 255) {
-            throw new RuntimeException("MCHyper didn't finshed correctly.");
+            throw new ExternalToolException("MCHyper didn't finshed correctly.");
         }
 
         if (exitValue == 42) { // has a counter example, ergo read it
-            return circ.parseCounterExample(net, path + "_complete.cex");
+            return circ.parseCounterExample(net, path + "_complete.cex", new CounterExample(false, false));
         }
 
         return null;

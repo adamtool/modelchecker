@@ -300,8 +300,8 @@ public class AigerRenderer {
         file.addGate(id, inputs);
         return id;
     }
-    
-      public CounterExample parseCounterExample(PetriNet net, String path) throws IOException {
+
+    public CounterExample parseCounterExample(PetriNet net, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
             String cexText = IOUtils.toString(inputStream);
 //            Logger.getInstance().addMessage(cexText, true);
@@ -328,8 +328,6 @@ public class AigerRenderer {
                 }
             }
 //                Logger.getInstance().addMessage(cropped.toString(), true);
-            // create the counter example
-            CounterExample cex = new CounterExample();
             int timestep = 0;
             while (timestep >= 0) {
                 CounterExampleElement cexe = new CounterExampleElement(timestep, false);

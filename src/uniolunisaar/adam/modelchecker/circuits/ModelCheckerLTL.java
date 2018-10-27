@@ -7,10 +7,12 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
+import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformer;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
  *
@@ -61,8 +63,10 @@ public class ModelCheckerLTL {
      * @throws InterruptedException
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
+     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
-    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException {
+    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " semantics: " + semantics
