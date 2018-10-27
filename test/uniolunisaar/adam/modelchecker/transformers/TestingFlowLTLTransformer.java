@@ -25,6 +25,7 @@ import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerSequential;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
+import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
  *
@@ -75,7 +76,7 @@ public class TestingFlowLTLTransformer {
     }
 
     @Test
-    public void testMCHyperTransformation() throws ParseException, InterruptedException, IOException {
+    public void testMCHyperTransformation() throws ParseException, InterruptedException, IOException, ProcessNotStartedException {
         PetriGame net = new PetriGame("testing");
         Place init = net.createPlace("a");
         Place end = net.createPlace("b");
@@ -91,7 +92,7 @@ public class TestingFlowLTLTransformer {
     }
 
     @Test
-    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException {
+    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException {
         PetriGame game = new PetriGame("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);

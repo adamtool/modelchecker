@@ -9,6 +9,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.modelchecker.circuits.Circuit;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
+import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
  *
@@ -18,7 +19,7 @@ import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
 public class TestingMCHyper {
 
     @Test
-    void testFormulaParser() throws RenderException, InterruptedException, IOException {
+    void testFormulaParser() throws RenderException, InterruptedException, IOException, ProcessNotStartedException {
         PetriGame game = new PetriGame("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);

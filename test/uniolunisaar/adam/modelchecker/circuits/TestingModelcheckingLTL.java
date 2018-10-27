@@ -29,6 +29,7 @@ import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
 import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 import uniolunisaar.adam.tools.Tools;
 
@@ -47,7 +48,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, NotSupportedGameException {
+    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, NotSupportedGameException, ProcessNotStartedException {
         PetriNet net = new PetriNet("jesko");
         Place init = net.createPlace("in");
         init.setInitialToken(1);
@@ -140,7 +141,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testOutgoingSemantics() throws InterruptedException, IOException, NotSubstitutableException, ParseException {
+    void testOutgoingSemantics() throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException {
         PetriGame game = new PetriGame("testNext");
         Place init = game.createPlace("pA");
         init.setInitialToken(1);
@@ -203,7 +204,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException {
+    void testToyExample() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException {
         PetriGame game = new PetriGame("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);

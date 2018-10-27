@@ -1,15 +1,15 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
  *
@@ -28,43 +28,74 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static CounterExample checkSeparate(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException {
+    private static CounterExample checkSeparate(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException {
         ModelCheckerTools.save2AigerAndPdf(net, circ, path);
-        ProcessBuilder procBuilder = new ProcessBuilder(ModelCheckerTools.getMCHyperPath(), path + ".aag", formula, path + "_mcHyperOut");
-//        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
-//        System.out.println(procBuilder.directory());
-//        procBuilder = new ProcessBuilder(System.getProperty("libfolder") + "/mchyper");
-
-        Logger.getInstance().addMessage(procBuilder.command().toString(), true);
-        Process proc = procBuilder.start();
-        // buffering the output and error as it comes
-        try (BufferedReader is = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-            String line;
-            while ((line = is.readLine()) != null) {
-                Logger.getInstance().addMessage("[MCHyper-Out]: " + line, true);
-            }
-        }
-        try (BufferedReader is = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
-            String line;
-            while ((line = is.readLine()) != null) {
-                Logger.getInstance().addMessage("[MCHyper-ERROR]: " + line, true);
-            }
-        }
+//        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut");
+//
+//        Logger.getInstance().addMessage(procBuilder.command().toString(), true);
+//        Process procAiger = procBuilder.start();
+//        // buffering the output and error as it comes
+//        try (BufferedReader is = new BufferedReader(new InputStreamReader(procAiger.getInputStream()))) {
+//            String line;
+//            while ((line = is.readLine()) != null) {
+//                Logger.getInstance().addMessage("[MCHyper-Out]: " + line, true);
+//            }
+//        }
+//        try (BufferedReader is = new BufferedReader(new InputStreamReader(procAiger.getErrorStream()))) {
+//            String line;
+//            while ((line = is.readLine()) != null) {
+//                Logger.getInstance().addMessage("[MCHyper-ERROR]: " + line, true);
+//            }
+//        }
         // buffering in total
-//        String error = IOUtils.toString(proc.getErrorStream());
+//        String error = IOUtils.toString(procAiger.getErrorStream());
 //        Logger.getInstance().addMessage(error, true); // todo: print it as error and a proper exception
-//        String output = IOUtils.toString(proc.getInputStream());
+//        String output = IOUtils.toString(procAiger.getInputStream());
 //        Logger.getInstance().addMessage(output, true);
-        proc.waitFor();
+//        procAiger.waitFor();
 
-        if (proc.exitValue() == 255) {
+        String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut"};
+        Logger.getInstance().addMessage(Arrays.toString(command), true);
+        ExternalProcessHandler procMCHyper = new ExternalProcessHandler(true, command);
+        int exitValue = procMCHyper.startAndWaitFor(true);
+
+        System.out.println("EXIT VALUE" + exitValue);
+        if (exitValue != 0) {
             throw new RuntimeException("MCHyper didn't finshed correctly.");
         }
 
-        if (proc.exitValue() == 42) { // has a counter example, ergo read it
-            return circ.parseCounterExample(net, path + "_complete.cex");
+        // todo to error for formula and when no model is provided
+        String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
+        Logger.getInstance().addMessage(Arrays.toString(aiger_command), true);
+        ExternalProcessHandler procAiger = new ExternalProcessHandler(true, aiger_command);
+        exitValue = procAiger.startAndWaitFor(true);
+        System.out.println("EXIT VALUE" + exitValue);
+
+        if (exitValue != 0) {
+            throw new RuntimeException("Aigertools didn't finshed correctly. 'aigtoaig' couldn't produce an 'aig'-file from '" + path + "_mcHyperOut.aag'");
         }
 
+        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC), path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
+        Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
+
+        ExternalProcessHandler procAbc = new ExternalProcessHandler(true, abc_command);
+        procAbc.start(true);
+        PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
+        abcInput.println("read " + path + "_mcHyperOut.aig");
+        abcInput.println("pdr");
+        abcInput.println("write_cex -f " + path + ".cex");
+        abcInput.println("quit");
+        abcInput.flush();
+        procAbc.waitFor();
+
+        if (exitValue != 0) {
+            throw new RuntimeException("ABC didn't finshed correctly.");
+        }
+
+        boolean hasCounterExample = !procAbc.getOutput().contains("Counter-example is not available");
+        if (hasCounterExample) { // has a counter example, ergo read it
+            return circ.parseCounterExample(net, path + ".cex");
+        }
         return null;
     }
 
@@ -78,9 +109,11 @@ public class ModelCheckerMCHyper {
      * @return
      * @throws InterruptedException
      * @throws IOException
+     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
-    public static CounterExample check(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException {
-        return checkWithPythonScript(net, circ, formula, path);
+    public static CounterExample check(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException {
+//        return checkWithPythonScript(net, circ, formula, path);
+        return checkSeparate(net, circ, formula, path);
     }
 
     /**
@@ -103,26 +136,26 @@ public class ModelCheckerMCHyper {
 //        procBuilder = new ProcessBuilder(System.getProperty("libfolder") + "/mchyper");
 
 //        Logger.getInstance().addMessage(procBuilder.command().toString(), true);
-//        Process proc = procBuilder.start();
+//        Process procAiger = procBuilder.start();
 //        // buffering the output and error as it comes
-//        try (BufferedReader is = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+//        try (BufferedReader is = new BufferedReader(new InputStreamReader(procAiger.getInputStream()))) {
 //            String line;
 //            while ((line = is.readLine()) != null) {
 //                Logger.getInstance().addMessage(line, true);
 //            }
 //        }
-//        try (BufferedReader is = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+//        try (BufferedReader is = new BufferedReader(new InputStreamReader(procAiger.getErrorStream()))) {
 //            String line;
 //            while ((line = is.readLine()) != null) {
 //                Logger.getInstance().addMessage(line, true);
 //            }
 //        }
 //        // buffering in total
-////        String error = IOUtils.toString(proc.getErrorStream());
+////        String error = IOUtils.toString(procAiger.getErrorStream());
 ////        Logger.getInstance().addMessage(error, true); // todo: print it as error and a proper exception
-////        String output = IOUtils.toString(proc.getInputStream());
+////        String output = IOUtils.toString(procAiger.getInputStream());
 ////        Logger.getInstance().addMessage(output, true);
-//        proc.waitFor();
+//        procAiger.waitFor();
         String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.LIBRARY_FOLDER) + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete"};
         Logger.getInstance().addMessage(Arrays.toString(command), true);
         ExternalProcessHandler proc = new ExternalProcessHandler(true, command);

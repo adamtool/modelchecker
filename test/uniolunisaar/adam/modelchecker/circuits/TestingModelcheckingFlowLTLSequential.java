@@ -75,7 +75,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         ret = mc.check(net, formula, "./" + net.getName(), true);
-        Assert.assertNull(ret); 
+        Assert.assertNull(ret);
         // check in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, formula, "./" + net.getName(), true);
@@ -85,24 +85,24 @@ public class TestingModelcheckingFlowLTLSequential {
         formula = new RunFormula(new AtomicProposition(t2)); // should not hold since the flows starting in A and B
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, "./" + net.getName(), true);
+        ret = mc.check(net, formula, "./" + net.getName() + "_" + formula, true);
         Assert.assertNotNull(ret);
         // check in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, formula, "./" + net.getName(), true);
         Assert.assertNotNull(ret);
-        
-         // %%%%%%%%%%%%%%%%%%%%%%%%%
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula(
                 new FlowFormula(new AtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         ret = mc.check(net, formula, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); 
+        Assert.assertNotNull(ret);
         // check in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, formula, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); 
+        Assert.assertNotNull(ret);
     }
 
     @Test(enabled = true)
