@@ -27,7 +27,12 @@ public class CounterExample {
         String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
         StringBuilder sb = new StringBuilder("Counter example " + cause + " \n");
         for (int i = 0; i < timestep.size(); i++) {
-            sb.append("----------- time step ").append(i).append(" -----------------\n");
+            CounterExampleElement elem = timestep.get(i);
+            sb.append("----------- time step ").append(i).append(" -----------------");
+            if (elem.isStartsLoop()) {
+                sb.append(" start loop ->");
+            }
+            sb.append("\n");
             sb.append(timestep.get(i).toString()).append("\n");
         }
         return sb.toString();

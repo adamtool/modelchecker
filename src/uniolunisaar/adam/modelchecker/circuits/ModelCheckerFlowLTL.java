@@ -166,6 +166,14 @@ public class ModelCheckerFlowLTL {
         this.stuttering = stuttering;
     }
 
+    public boolean isInitFirst() {
+        return initFirst;
+    }
+
+    public void setInitFirst(boolean initFirst) {
+        this.initFirst = initFirst;
+    }
+
     /**
      * Returns null iff the formula holds.
      *

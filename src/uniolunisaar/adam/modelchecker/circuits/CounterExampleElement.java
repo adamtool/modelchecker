@@ -18,6 +18,7 @@ public class CounterExampleElement {
     // only needed for SafeOutStutterRegisterRenderer
     private boolean withStuttering;
     private boolean stutter;
+    private boolean startsLoop = false;
 
     public CounterExampleElement(int timestep, boolean withStuttering) {
         this.timestep = timestep;
@@ -64,6 +65,14 @@ public class CounterExampleElement {
         this.withStuttering = withStuttering;
     }
 
+    public boolean isStartsLoop() {
+        return startsLoop;
+    }
+
+    public void setStartsLoop(boolean startsLoop) {
+        this.startsLoop = startsLoop;
+    }   
+    
     public boolean isEmpty() {
         return init && transitions.isEmpty() && marking.isEmpty();
     }

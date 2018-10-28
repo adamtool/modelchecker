@@ -1,7 +1,9 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import java.io.File;
 import java.io.IOException;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -22,6 +24,7 @@ import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
@@ -30,6 +33,16 @@ import uniolunisaar.adam.tools.ProcessNotStartedException;
  */
 @Test
 public class TestingModelcheckingFlowLTLSequential {
+
+    private static final String outputDirInCircuit = System.getProperty("testoutputfolder") + "/max_in_circuit/";
+    private static final String outputDirInFormula = System.getProperty("testoutputfolder") + "/max_in_formula/";
+
+    @BeforeClass
+    public void createFolder() {
+        Logger.getInstance().setVerbose(true);
+        (new File(outputDirInCircuit)).mkdirs();
+        (new File(outputDirInFormula)).mkdirs();
+    }
 
     @Test(enabled = true)
     public void introducingExampleTransitions() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
@@ -77,6 +90,9 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         ret = mc.check(net, formula, "./" + net.getName(), true);
+        Assert.assertNull(ret);
+        mc.setInitFirst(false);
+        ret = mc.check(net, formula, "./" + net.getName(), false);
         Assert.assertNull(ret);
         // check in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);

@@ -101,8 +101,9 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
             List<String> cropped = new ArrayList<>();
+            cexText = cexText.replaceAll("=0 ", "=0 \n").replaceAll("=1 ", "=1 \n");
             String[] lines = cexText.split(" \n");
-            // only take the inputs and registers                
+            // only take the inputs and registers and the lasso latch of MCHyper     
             // and removes the only for hyperLTL relevant _0 at each identifier
             for (int i = 0; i < lines.length; i++) {
                 if (lines[i].startsWith(AigerRenderer.INPUT_PREFIX)) {
@@ -111,6 +112,8 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
                     cropped.add(lines[i].replace("_0@", "@"));
                 } else if (lines[i].startsWith(STUTT_LATCH)) {
                     cropped.add(lines[i].replace("_0@", "@"));
+                } else if (lines[i].startsWith("entered_lasso")) {
+                    cropped.add(lines[i]);
                 } else {
                     for (Place p : net.getPlaces()) {
                         int idx = lines[i].lastIndexOf("_0@");
@@ -138,6 +141,8 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
                             cexe.setInit(val == '1');
                         } else if (elem.startsWith(STUTT_LATCH)) {
                             cexe.setStutter(val == '1');
+                        } else if (elem.startsWith("entered_lasso")) {
+                            cexe.setStartsLoop(val == '1');
                         } else {
                             String id = elem.substring(0, elem.length() - 2);
                             if (val == '1') {
