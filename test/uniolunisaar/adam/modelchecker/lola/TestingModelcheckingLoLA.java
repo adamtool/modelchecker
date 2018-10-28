@@ -183,7 +183,7 @@ public class TestingModelcheckingLoLA {
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
-        net = RedundantNetwork.getUpdatingFixedMutexNetwork();
+        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerLoLA.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);

@@ -130,7 +130,7 @@ public class TestingModelcheckingFlowLTLParallel {
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
 
-        net = RedundantNetwork.getUpdatingFixedMutexNetwork();
+        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);

@@ -361,7 +361,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 true);
         ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); // here is an error when I do the maximality before the transformation of the formula and not afterwards (it is null)
+        Assert.assertNotNull(ret);
 
         // check interleaving in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
@@ -515,41 +515,53 @@ public class TestingModelcheckingFlowLTLSequential {
 //        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
 //        ret = mc.check(net, f, "./" + net.getName(), true);
 //        Assert.assertNull(ret);
+//
+//        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+//        net = RedundantNetwork.getUpdatingNetwork();
+//        AdamTools.savePG2PDF(net.getName(), net, false);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);
+//
+//        // maximality in formula
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);
+//
+//        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+//        net = RedundantNetwork.getUpdatingMutexNetwork();
+//        AdamTools.savePG2PDF(net.getName(), net, false);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);
+//
+//        // maximality in formula
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);
+//
+//        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+//        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork();
+//        AdamTools.savePG2PDF(net.getName(), net, false);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);
+//
+//        // maximality in formula
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNotNull(ret);
 
-        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        net = RedundantNetwork.getUpdatingNetwork();
-        AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); // error mchyper creates redundant names for the inputs of the circuit
-
-        // maximality in formula
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret);
-
-        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        net = RedundantNetwork.getUpdatingMutexNetwork();
-        AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret); 
-
-        // maximality in formula
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret);
-
-        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingFixedMutexNetwork();
         AdamTools.savePG2PDF(net.getName(), net, false);
-        ret = mc.check(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret);
 
+        // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
+//        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+//        ret = mc.check(net, f, "./" + net.getName(), true);
+//        Assert.assertNull(ret);
         // maximality in formula
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, "./" + net.getName(), true);
+        ret = mc.check(net, f, "./" + net.getName(), false);
         Assert.assertNull(ret);
     }
 

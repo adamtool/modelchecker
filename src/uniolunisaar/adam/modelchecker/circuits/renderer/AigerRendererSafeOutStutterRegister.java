@@ -131,7 +131,7 @@ public class AigerRendererSafeOutStutterRegister extends AigerRenderer {
                     }
                 }
             }
-//                Logger.getInstance().addMessage(cropped.toString(), true);
+            Logger.getInstance().addMessage(cropped.toString(), true);
             // create the counter example
             int timestep = 0;
             while (timestep >= 0) {
@@ -139,7 +139,7 @@ public class AigerRendererSafeOutStutterRegister extends AigerRenderer {
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
-                    if (elem.contains("@" + timestep)) {
+                    if (elem.substring(elem.lastIndexOf('@') + 1, elem.lastIndexOf('=')).equals(String.valueOf(timestep))) {
                         elem = elem.replace("@" + timestep, "");
                         char val = elem.charAt(elem.length() - 1);
                         if (elem.startsWith(AigerRenderer.INIT_LATCH)) {
