@@ -60,7 +60,7 @@ public class ModelCheckerMCHyper {
         String inputFile = path + ".aag";
         String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), inputFile, formula, path + "_mcHyperOut"};
         Logger.getInstance().addMessage(Arrays.toString(command), true);
-        ExternalProcessHandler procMCHyper = new ExternalProcessHandler(true, command);
+        ExternalProcessHandler procMCHyper = new ExternalProcessHandler(command);
         int exitValue = procMCHyper.startAndWaitFor(true);
         if (exitValue != 0) {
             String error = "";
@@ -75,7 +75,7 @@ public class ModelCheckerMCHyper {
         // %%%%%%%%%%%%%%%% Aiger
         String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
         Logger.getInstance().addMessage(Arrays.toString(aiger_command), true);
-        ExternalProcessHandler procAiger = new ExternalProcessHandler(true, aiger_command);
+        ExternalProcessHandler procAiger = new ExternalProcessHandler(aiger_command);
         exitValue = procAiger.startAndWaitFor(true);
         if (exitValue != 0) {
             throw new ExternalToolException("Aigertools didn't finshed correctly. 'aigtoaig' couldn't produce an 'aig'-file from '" + path + "_mcHyperOut.aag'");
@@ -84,7 +84,7 @@ public class ModelCheckerMCHyper {
         // %%%%%%%%%%%%%%% Abc
         String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC), path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
         Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
-        ExternalProcessHandler procAbc = new ExternalProcessHandler(true, abc_command);
+        ExternalProcessHandler procAbc = new ExternalProcessHandler(abc_command);
         procAbc.start(true);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
         abcInput.println("read " + path + "_mcHyperOut.aig");
@@ -184,7 +184,7 @@ public class ModelCheckerMCHyper {
 //        procAiger.waitFor();
         String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.LIBRARY_FOLDER) + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete"};
         Logger.getInstance().addMessage(Arrays.toString(command), true);
-        ExternalProcessHandler proc = new ExternalProcessHandler(true, command);
+        ExternalProcessHandler proc = new ExternalProcessHandler(command);
         int exitValue = proc.startAndWaitFor(true);
 
         if (exitValue == 255) {

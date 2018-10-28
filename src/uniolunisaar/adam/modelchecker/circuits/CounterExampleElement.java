@@ -19,6 +19,8 @@ public class CounterExampleElement {
     private boolean withStuttering;
     private boolean stutter;
     private boolean startsLoop = false;
+    private boolean initLoop = false;
+    private boolean looping = false;
 
     public CounterExampleElement(int timestep, boolean withStuttering) {
         this.timestep = timestep;
@@ -71,8 +73,23 @@ public class CounterExampleElement {
 
     public void setStartsLoop(boolean startsLoop) {
         this.startsLoop = startsLoop;
-    }   
-    
+        if (startsLoop) {
+            initLoop = true;
+        }
+    }
+
+    public boolean isInitLoop() {
+        return initLoop;
+    }
+
+    public boolean isLooping() {
+        return looping;
+    }
+
+    public void setLooping(boolean looping) {
+        this.looping = looping;
+    }
+
     public boolean isEmpty() {
         return init && transitions.isEmpty() && marking.isEmpty();
     }

@@ -112,6 +112,8 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
                     cropped.add(lines[i].replace("_0@", "@"));
                 } else if (lines[i].startsWith(STUTT_LATCH)) {
                     cropped.add(lines[i].replace("_0@", "@"));
+                } else if (lines[i].startsWith("I:remember_state")) {
+                    cropped.add(lines[i]);
                 } else if (lines[i].startsWith("entered_lasso")) {
                     cropped.add(lines[i]);
                 } else {
@@ -141,8 +143,10 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
                             cexe.setInit(val == '1');
                         } else if (elem.startsWith(STUTT_LATCH)) {
                             cexe.setStutter(val == '1');
-                        } else if (elem.startsWith("entered_lasso")) {
+                        } else if (elem.startsWith("I:remember_state")) {
                             cexe.setStartsLoop(val == '1');
+                        } else if (elem.startsWith("entered_lasso")) {
+                            cexe.setLooping(val == '1');
                         } else {
                             String id = elem.substring(0, elem.length() - 2);
                             if (val == '1') {

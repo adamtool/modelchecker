@@ -29,8 +29,11 @@ public class CounterExample {
         for (int i = 0; i < timestep.size(); i++) {
             CounterExampleElement elem = timestep.get(i);
             sb.append("----------- time step ").append(i).append(" -----------------");
-            if (elem.isStartsLoop()) {
+            if (elem.isStartsLoop() && !elem.isLooping()) {
                 sb.append(" start loop ->");
+            }
+            if (elem.isInitLoop() && elem.isLooping()) {
+                sb.append(" looping");
             }
             sb.append("\n");
             sb.append(timestep.get(i).toString()).append("\n");

@@ -117,6 +117,8 @@ public class AigerRendererSafeOutStutterRegister extends AigerRenderer {
                     cropped.add(lines[i].replace("_0@", "@"));
                 } else if (lines[i].startsWith("entered_lasso")) {
                     cropped.add(lines[i]);
+                } else if (lines[i].startsWith("I:remember_state")) {
+                    cropped.add(lines[i]);
                 } else {
                     for (Place p : net.getPlaces()) {
                         int idx = lines[i].lastIndexOf("_0@");
@@ -144,8 +146,10 @@ public class AigerRendererSafeOutStutterRegister extends AigerRenderer {
                             cexe.setInit(val == '1');
                         } else if (elem.startsWith(STUTT_LATCH)) {
                             cexe.setStutter(val == '1');
-                        } else if (elem.startsWith("entered_lasso")) {
+                        } else if (elem.startsWith("I:remember_state")) {
                             cexe.setStartsLoop(val == '1');
+                        } else if (elem.startsWith("entered_lasso")) {
+                            cexe.setLooping(val == '1');
                         } else {
                             String id = elem.substring(0, elem.length() - 2);
                             if (val == '1') {
