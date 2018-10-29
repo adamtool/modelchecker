@@ -117,12 +117,12 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    private static FlowFormula replaceTransitionsInFlowFormulaSequential(PetriGame orig, PetriNet net, FlowFormula flowFormula, int nb_ff) {
+    private static FlowFormula replaceTransitionsInFlowFormulaSequential(PetriGame orig, PetriNet net, FlowFormula flowFormula, int nb_ff, boolean initFirst) {
         ILTLFormula phi = flowFormula.getPhi();
-        return new FlowFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, phi, nb_ff, false));
+        return new FlowFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, phi, nb_ff, false, initFirst));
     }
 
-    private static ILTLFormula replaceTransitionsWithinFlowFormulaSequential(PetriGame orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually) {
+    private static ILTLFormula replaceTransitionsWithinFlowFormulaSequential(PetriGame orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually, boolean initFirst) {
         if (phi instanceof Constants) {
             return phi;
         } else if (phi instanceof AtomicProposition) {
@@ -141,7 +141,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) { // todo: dependent on the sequential approach
                             elements.add(new AtomicProposition(t));
                         }
-                    } else {// if it is not dependent on the act place it could still be the initial transitions 
+                    } else if (initFirst) {// if it is not dependent on the act place it could still be the initial transitions in the init first case
                         Place act = net.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + nb_ff);
                         if (!act.getPostset().contains(t)) {
                             elements.add(new AtomicProposition(t));
@@ -166,7 +166,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             }
             return phi;
         } else if (phi instanceof LTLFormula) {
-            return new LTLFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), nb_ff, scopeEventually));
+            return new LTLFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), nb_ff, scopeEventually, initFirst));
         } else if (phi instanceof FormulaUnary) {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // since we are in the scope of a FlowFormula
             // check if it's in the scope of an eventually
@@ -175,15 +175,17 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             } else if (scopeEventually && castPhi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
                 scopeEventually = false;
             }
-            ILTLFormula substChildPhi = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi(), nb_ff, scopeEventually);
+            ILTLFormula substChildPhi = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi(), nb_ff, scopeEventually, initFirst);
             return new LTLFormula(castPhi.getOp(), substChildPhi);
         } else if (phi instanceof FormulaBinary) {
             FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula> castPhi = (FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula>) phi;
-            ILTLFormula subst1 = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi1(), nb_ff, scopeEventually);
-            ILTLFormula subst2 = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi2(), nb_ff, scopeEventually);
+            ILTLFormula subst1 = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi1(), nb_ff, scopeEventually, initFirst);
+            ILTLFormula subst2 = replaceTransitionsWithinFlowFormulaSequential(orig, net, castPhi.getPhi2(), nb_ff, scopeEventually, initFirst);
             return new LTLFormula(subst1, castPhi.getOp(), subst2);
         }
-        throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+
+        throw new RuntimeException(
+                "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
     private static IFormula replaceNextWithinRunFormulaSequential(PetriGame orig, PetriNet net, IFormula phi, boolean scopeEventually) {
@@ -386,7 +388,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
             // Replace the transitions
-            flowFormula = replaceTransitionsInFlowFormulaSequential(orig, net, flowFormula, i);
+            flowFormula = replaceTransitionsInFlowFormulaSequential(orig, net, flowFormula, i, initFirst);
             // Replace the next operator within the flow formula
             flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
@@ -402,14 +404,24 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 //                            LTLOperators.Binary.OR,
 //                            new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))));
 //                }
+                LTLFormula skipping = null;
+                if (initFirst) {
+                    // it's OK when there is no chain or the subformula decided to consider a newly created chain but this doesn't exists in this run.
+                    skipping = new LTLFormula(LTLOperators.Unary.G,
+                            new LTLFormula(new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)),
+                                    LTLOperators.Binary.OR,
+                                    new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
+                            )
+                    );
+                } else {
+                    // it's OK to consider no chain
+                    skipping = new LTLFormula(LTLOperators.Unary.G,
+                            new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
+                    );
+                }
+
                 LTLFormula flowLTL = new LTLFormula(
-                        // it's OK when there is no chain or the subformula decided to consider a newly created chain but this doesn't exists in this run.
-                        new LTLFormula(LTLOperators.Unary.G,
-                                new LTLFormula(new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)),
-                                        LTLOperators.Binary.OR,
-                                        new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
-                                )
-                        ),
+                        skipping,
                         LTLOperators.Binary.OR,
                         flowFormula.getPhi());
 
@@ -444,7 +456,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             }
 //            return new LTLFormula(init, LTLOperators.Binary.IMP, next);
         }
-        
+
         // since we don't want to stop within the subnets, omit these runs
         // this means we demand for every activation place of the subnets
         // that have to be left

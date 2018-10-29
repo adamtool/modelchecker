@@ -136,7 +136,7 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
-                    if (elem.contains("@" + timestep)) {
+                    if (elem.substring(elem.lastIndexOf('@') + 1, elem.lastIndexOf('=')).equals(String.valueOf(timestep))) {
                         elem = elem.replace("@" + timestep, "");
                         char val = elem.charAt(elem.length() - 1);
                         if (elem.startsWith(AigerRenderer.INIT_LATCH)) {

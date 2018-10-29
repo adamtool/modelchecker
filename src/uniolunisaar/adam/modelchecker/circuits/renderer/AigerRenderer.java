@@ -307,7 +307,7 @@ public class AigerRenderer {
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
             List<String> cropped = new ArrayList<>();
-            cexText = cexText.replaceAll("=0 ", "=0 \n").replaceAll("=1 ", "=1 \n"); 
+            cexText = cexText.replaceAll("=0 ", "=0 \n").replaceAll("=1 ", "=1 \n");
             String[] lines = cexText.split(" \n");
             // only take the inputs and registers and the lasso latch of MCHyper 
             // and removes the only for hyperLTL relevant _0 at each identifier
@@ -339,7 +339,7 @@ public class AigerRenderer {
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
-                    if (elem.contains("@" + timestep)) {
+                    if (elem.substring(elem.lastIndexOf('@') + 1, elem.lastIndexOf('=')).equals(String.valueOf(timestep))) {
                         elem = elem.replace("@" + timestep, "");
                         char val = elem.charAt(elem.length() - 1);
                         if (elem.startsWith(AigerRenderer.INIT_LATCH)) {
