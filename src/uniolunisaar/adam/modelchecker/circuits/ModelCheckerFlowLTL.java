@@ -70,7 +70,8 @@ public class ModelCheckerFlowLTL {
     public CounterExample check(PetriGame net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
-                + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering, true);
+                + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering
+                + " initialization first step: " + initFirst, true);
 
         ModelCheckerLTL mcLTL = new ModelCheckerLTL(semantics, maximality, stuttering);
 

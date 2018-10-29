@@ -171,14 +171,12 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     for (Transition tpost : act.getPostset()) { // transitions which take the active token
                         for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
                             if (p != act && !p.getId().startsWith("!")) { // but not the active place itself and its negation
-                                if (initFirstStep && !p.getId().equals(NEW_TOKENFLOW_ID + "-" + nb_ff)) { // also not for place for newly created chains in the initFirstCase
-                                    if (!initFirstStep && !p.getId().equals(INIT_TOKENFLOW_ID + "-" + nb_ff)) { // also not for place for newly created chains in the !initFirstCase
-                                        System.out.println(t);
-                                        Place negInput = out.getPlace("!" + p.getId());
-                                        if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
-                                            out.createFlow(negInput, tout);
-                                            out.createFlow(tout, negInput);
-                                        }
+                                if ((initFirstStep && !p.getId().equals(NEW_TOKENFLOW_ID + "-" + nb_ff)) // also not for place for newly created chains in the initFirstCase
+                                        || (!initFirstStep && !p.getId().equals(INIT_TOKENFLOW_ID + "-" + nb_ff))) { // also not for place for newly created chains in the !initFirstCase
+                                    Place negInput = out.getPlace("!" + p.getId());
+                                    if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
+                                        out.createFlow(negInput, tout);
+                                        out.createFlow(tout, negInput);
                                     }
                                 }
                             }
