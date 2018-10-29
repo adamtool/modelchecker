@@ -11,6 +11,10 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.modelchecker.circuits.AigerFile;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
+import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.ALL_TRANS_NOT_TRUE;
+import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.INIT_LATCH;
+import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.NEW_VALUE_OF_LATCH_SUFFIX;
+import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRendererSafeOutStutterRegister.STUTT_LATCH;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -85,6 +89,8 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
     }
 
     void updateStuttering(AigerFile file, PetriNet net) {
+        // old version: setting stutt =1 iff several transition are chosen or a not enable transition is chosen
+        //              not for when the input is all Zero
         String[] inputs = new String[net.getTransitions().size()];
         int i = 0;
         for (Transition t : net.getTransitions()) {
@@ -92,6 +98,7 @@ public class AigerRendererSafeOutStutterRegisterMaxInterleaving extends AigerRen
         }
         file.addGate(STUTT_LATCH + "_buf", inputs);
         file.addGate(STUTT_LATCH + NEW_VALUE_OF_LATCH_SUFFIX, ALL_TRANS_NOT_TRUE, "!" + STUTT_LATCH + "_buf");
+//        file.addGate(STUTT_LATCH + NEW_VALUE_OF_LATCH_SUFFIX, INIT_LATCH, ALL_TRANS_NOT_TRUE);
     }
 
     @Override

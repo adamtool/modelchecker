@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
+import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.modelchecker.circuits.AigerFile;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
@@ -78,15 +80,16 @@ public class AigerRenderer {
 
     private String addEnabled(AigerFile file, Transition t) {
         String outId = ENABLED_PREFIX + t.getId();
-        if (t.getPreset().size() == 1) {
-            Place p = t.getPreset().iterator().next();
-            file.copyValues(outId, p.getId());
-            return outId;
-        }
         String[] inputs = new String[t.getPreset().size()];
         int i = 0;
-        for (Place p : t.getPreset()) {
-            inputs[i++] = p.getId();
+        for (Flow e : t.getPresetEdges()) {
+            //todo: change this, when the time was there to create a net with tokenflows and extensions and so on
+            PetriGame game = new PetriGame("buf");
+            if (game.isInhibitor(e)) {
+                inputs[i++] = "!" + e.getPlace().getId();
+            } else {
+                inputs[i++] = e.getPlace().getId();
+            }
         }
         file.addGate(outId, inputs);
         return outId;

@@ -20,6 +20,7 @@ import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerPar
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerSequential;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLParallel;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
+import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequentialInhibitor;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
@@ -32,7 +33,8 @@ public class ModelCheckerFlowLTL {
 
     public enum Approach {
         PARALLEL,
-        SEQUENTIAL
+        SEQUENTIAL,
+        SEQUENTIAL_INHIBITOR
     }
 
     private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
@@ -92,24 +94,28 @@ public class ModelCheckerFlowLTL {
         }
 //        IRunFormula f = formula;
 
-        if (approach == Approach.PARALLEL) {
-            PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-            if (verbose) {
-                AdamTools.savePG2PDF(path + "_mc", gameMC, true);
-            }
-            ILTLFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, gameMC, f);
-//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
-            return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
-        } else {
-            PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f, initFirst);
-            if (verbose) {
-                // color all original places
-                for (Place p : gameMC.getPlaces()) {
-                    if (!gameMC.hasPartition(p)) {
-                        gameMC.setEnvironment(p);
+        PetriGame gameMC = null;
+        ILTLFormula formulaMC = null;
+        if (null != approach) {
+            switch (approach) {
+                case PARALLEL:
+                    gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    if (verbose) {
+                        AdamTools.savePG2PDF(path + "_mc", gameMC, true);
                     }
-                }
-                AdamTools.savePG2PDF(path + "_mc", gameMC, true, ModelCheckerTools.getFlowFormulas(formula).size());
+                    formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, gameMC, f);
+//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
+                    break;
+                case SEQUENTIAL:
+                    gameMC = PetriNetTransformerFlowLTLSequentialInhibitor.createNet4ModelCheckingSequential(net, f, initFirst);
+                    if (verbose) {
+                        // color all original places
+                        for (Place p : gameMC.getPlaces()) {
+                            if (!gameMC.hasPartition(p)) {
+                                gameMC.setEnvironment(p);
+                            }
+                        }
+                        AdamTools.savePG2PDF(path + "_mc", gameMC, true, ModelCheckerTools.getFlowFormulas(formula).size());
 //                try {
 //                    AdamTools.saveAPT(path + "_mc", gameMC, false);
 //                } catch (RenderException ex) {
@@ -117,22 +123,27 @@ public class ModelCheckerFlowLTL {
 //                } catch (FileNotFoundException ex) {
 //                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
 //                }
+                    }
+                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
+                    break;
+                case SEQUENTIAL_INHIBITOR:
+                    gameMC = PetriNetTransformerFlowLTLSequentialInhibitor.createNet4ModelCheckingSequential(net, f, initFirst);
+                    if (verbose) {
+                        // color all original places
+                        for (Place p : gameMC.getPlaces()) {
+                            if (!gameMC.hasPartition(p)) {
+                                gameMC.setEnvironment(p);
+                            }
+                        }
+                        AdamTools.savePG2PDF(path + "_mc", gameMC, true, ModelCheckerTools.getFlowFormulas(formula).size());
+                    }
+                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
+                    break;
+                default:
+                    throw new RuntimeException("Didn't provided a solution for all approches yet. Approach '" + approach + "' is missing; sry.");
             }
-            ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
-//            // Add Fairness but without the active places in the preset
-//            Collection<ILTLFormula> elements = new ArrayList<>();
-//            for (Transition t : net.getTransitions()) {
-//                if (net.isStrongFair(t)) {
-//                    elements.add(FormulaCreator.createStrongFairness(t));
-//                }
-//                if (net.isWeakFair(t)) {
-//                    elements.add(FormulaCreator.createStrongFairness(t)); // everything is strong fair in the sequential approach
-//                }
-//            }
-//            formulaMC = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, formulaMC);
-//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
-            return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
         }
+        return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
     }
 
     public TransitionSemantics getSemantics() {

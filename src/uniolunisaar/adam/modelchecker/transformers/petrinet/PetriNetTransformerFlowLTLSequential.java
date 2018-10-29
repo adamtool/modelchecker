@@ -35,14 +35,6 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
     public static PetriGame createNet4ModelCheckingSequential(PetriGame orig, IRunFormula formula, boolean initFirstStep) {
         PetriGame out = createOriginalPartOfTheNet(orig, initFirstStep);
 
-        // add for all weak fairness a strong fairness assumptions, because now transitions cannot be 
-        // enabled infinitely long since the active token is move to the subformulas
-        // and also add again the strong fairness, since we deleted them in the super method
-//        for (Transition t : orig.getTransitions()) {
-//            if (orig.isWeakFair(t) || orig.isStrongFair(t)) {
-//                out.setStrongFair(out.getTransition(t.getId()));
-//            }
-//        } todo: did it in the modelchecker but think of a better way
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
@@ -154,12 +146,14 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                     Place act = out.createPlace(id);
                     out.setPartition(act, nb_ff);
+                    
                     // Add a transition which moves (takes, move is done later)
                     // the activation token to the next token flow subnet, when no
                     // chain is active
                     Transition tout = out.createTransition(t.getId() + NEXT_ID + "-" + nb_ff);
                     tout.setLabel(t.getId());
                     tout.putExtension("subformula", nb_ff);
+                    
                     // add the activation token to every created token for the chains
                     for (Transition tflow : out.getTransitions()) {
                         if (!tflow.getId().equals(t.getId()) && tflow.getLabel().equals(t.getId())
