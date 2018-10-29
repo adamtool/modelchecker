@@ -2,8 +2,10 @@ package uniolunisaar.adam.modelchecker.circuits;
 
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
+import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
@@ -19,6 +21,10 @@ import uniolunisaar.adam.tools.ProcessNotStartedException;
  * @author Manuel Gieseking
  */
 public class ModelCheckerLTL {
+
+    CounterExample check(PetriNet net, IFormula formula, String output, boolean b) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     public enum Stuttering {
         REPLACEMENT,

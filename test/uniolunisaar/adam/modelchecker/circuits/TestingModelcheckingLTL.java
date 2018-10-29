@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import java.io.File;
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRendererSafeOutStutterRegister;
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
@@ -12,12 +13,14 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
+import uniol.apt.io.parser.impl.PnmlPNParser;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
 import uniolunisaar.adam.logic.flowltl.Constants;
+import uniolunisaar.adam.logic.flowltl.Formula;
 import uniolunisaar.adam.logic.flowltl.IAtomicProposition;
 import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
@@ -456,4 +459,35 @@ public class TestingModelcheckingLTL {
         cex = mc.check(net, f, "./" + net.getName(), true);
         Assert.assertNotNull(cex);
     }
+
+    @Test
+    void testMcCASLink() throws ParseException, IOException, NotSupportedGameException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+        String folder = System.getProperty("examplesfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
+        String output = System.getProperty("testoutputfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
+        PetriNet net = new PnmlPNParser().parseFile(folder + "aslink_01_a.pnml");
+        PetriGame game = new PetriGame(net, true);
+        game.setName("asLink01a");
+        (new File(output)).mkdirs();
+
+        ModelCheckerLTL mc = new ModelCheckerLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER);
+        ILTLFormula deadlock = FormulaCreator.deadlock(net);
+        CounterExample cex = mc.check(game, deadlock, output + game.getName() + "_deadlock", false);
+        Tools.saveFile(output + game.getName() + "_deadlock.cex", (cex == null) ? "not existend." : cex.toString());
+
+        ILTLFormula reversible = FormulaCreator.reversible(net);
+        cex = mc.check(game, reversible, output + game.getName() + "_reversible", false);
+        Tools.saveFile(output + game.getName() + "_reversible.cex", (cex == null) ? "not existend." : cex.toString());
+
+        ILTLFormula quasiLive = FormulaCreator.quasiLive(net);
+        cex = mc.check(game, quasiLive, output + game.getName() + "_quasiLive", false);        
+        Tools.saveFile(output + game.getName() + "_quasiLive.cex", (cex == null) ? "not existend." : cex.toString());
+
+        ILTLFormula live = FormulaCreator.live(net);
+        cex = mc.check(game, live, output + game.getName() + "_live", false);
+        Tools.saveFile(output + game.getName() + "_live.cex", (cex == null) ? "not existend." : cex.toString());
+    }
+
 }
