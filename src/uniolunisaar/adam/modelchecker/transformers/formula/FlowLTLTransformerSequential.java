@@ -132,34 +132,28 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 if (scopeEventually) {
                     return phi;
                 }
-                // All other transitions
+                // All other transitions then those belonging to nb_ff, apart from the next transitions
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) { // all transitions
-                    String actid = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
-                    if (net.containsPlace(actid)) { // not mine
-                        Place act = net.getPlace(actid);
-                        if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) { // todo: dependent on the sequential approach
-                            elements.add(new AtomicProposition(t));
-                        }
-                    } else if (initFirst) {// if it is not dependent on the act place it could still be the initial transitions in the init first case
-                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + nb_ff);
-                        if (!act.getPostset().contains(t)) {
-                            elements.add(new AtomicProposition(t));
-                        }
+                    if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
+                            || // not of the subformula
+                            t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
+                            ) {
+                        elements.add(new AtomicProposition(t));
                     }
                 }
                 ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
 
-                // all transitions which are dependent on my act place (but the transition which just moves the token to the next formula)
+                // all of my transitions which have the same label as the atomic proposition and are not the next transition
                 elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
-                    String actid = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
-                    if (net.containsPlace(actid)) {
-                        Place act = net.getPlace(actid);
-                        if (act.getPostset().contains(t) && !t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) {// todo: dependent on the sequential approach
-                            elements.add(new AtomicProposition(t));
-                        }
-                    } // don't want to add the initial transitions since the have to be happend before (for not initial we have to change it here!)
+                    if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
+                            && // the transitions of my subnet
+                            !t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)
+                            &&// which are not the nxt transitions
+                            t.getLabel().equals(atom.toString())) { // with the same label as the atom
+                        elements.add(new AtomicProposition(t));
+                    }
                 }
                 ILTLFormula myTransitions = FormulaCreator.bigWedgeOrVeeObject(elements, false);
                 return new LTLFormula(untilFirst, LTLOperators.Binary.U, myTransitions);
@@ -464,8 +458,10 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         for (Place p : net.getPlaces()) {
             String id = p.getId();
             if (id.startsWith(ACTIVATION_PREFIX_ID)) {
+                // this is the version when every original transition has its own activation token
                 // if it's not a orignal one (meaning the rest of the string is not a transition of the original net
-                if (!orig.containsTransition(id.substring(ACTIVATION_PREFIX_ID.length()))) {
+//                if (!orig.containsTransition(id.substring(ACTIVATION_PREFIX_ID.length()))) {
+                if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
                     LTLFormula inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(p))));
                     elements.add(inf);
                 }

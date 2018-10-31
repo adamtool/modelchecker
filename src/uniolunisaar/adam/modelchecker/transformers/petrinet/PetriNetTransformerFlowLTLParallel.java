@@ -30,6 +30,23 @@ public class PetriNetTransformerFlowLTLParallel extends PetriNetTransformerFlowL
      */
     public static PetriGame createNet4ModelCheckingParallel(PetriGame orig, IRunFormula formula, boolean initFirstStep) {
         PetriGame out = createOriginalPartOfTheNet(orig, initFirstStep);
+        
+        if (initFirstStep) { // delete the initial marking if init
+            for (Place p : out.getPlaces()) {
+                if (p.getInitialToken().getValue() > 0) {
+                    p.setInitialToken(0);
+                }
+            }
+        }
+
+        // Add to each original transition a place such that we can disable the transitions
+        for (Transition t : orig.getTransitions()) {
+            if (!orig.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows
+                Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+                act.setInitialToken(1);
+            }
+        }
+
         // for every original transition add a self dependency to the activation place
         for (Transition t : orig.getTransitions()) {
             Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId());

@@ -35,6 +35,9 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
     public static PetriGame createNet4ModelCheckingSequential(PetriGame orig, IRunFormula formula, boolean initFirstStep) {
         PetriGame out = createOriginalPartOfTheNet(orig, initFirstStep);
 
+        // create one activation place for all original transitions
+        Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
+
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
@@ -185,13 +188,14 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
 
         if (!flowFormulas.isEmpty()) {
             if (initFirstStep) {
-                // Get the original initial Marking
-                List<Place> initialMarking = new ArrayList<>();
-                for (Place p : orig.getPlaces()) {
-                    if (p.getInitialToken().getValue() > 0) {
-                        initialMarking.add(p);
-                    }
-                }
+//                   // this is the version where I removed the initial marking and added it later
+//                // Get the original initial Marking
+//                List<Place> initialMarking = new ArrayList<>();
+//                for (Place p : orig.getPlaces()) {
+//                    if (p.getInitialToken().getValue() > 0) {
+//                        initialMarking.add(p);
+//                    }
+//                }
                 // all initialization transitions of each subformula already have an active place added (each subformula one)
                 // from which they are dependent by firing they give it to the next subformula (this is done here)
                 // the last one puts the initial marking to the original net
@@ -208,9 +212,11 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                         if (initActNext != null) {
                             out.createFlow(t, initActNext);
                         } else {
-                            for (Place place : initialMarking) {
-                                out.createFlow(t, out.getPlace(place.getId()));
-                            }
+//                              // this is the version where I removed the initial marking and added it later
+//                            for (Place place : initialMarking) {
+//                                out.createFlow(t, out.getPlace(place.getId()));
+//                            }
+                            out.createFlow(t, actO);
                         }
                     }
                     // the next transition
@@ -219,23 +225,37 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     if (initActNext != null) {
                         out.createFlow(nxt, initActNext);
                     } else {
-                        for (Place place : initialMarking) {
-                            out.createFlow(nxt, out.getPlace(place.getId()));
-                        }
+//                              // this is the version where I removed the initial marking and added it later
+//                        for (Place place : initialMarking) {
+//                            out.createFlow(nxt, out.getPlace(place.getId()));
+//                        }
+                        out.createFlow(nxt, actO);
                     }
                 }
             }
             // Move the active token through the subnets of the flow formulas
             // deactivate all orginal transitions whenever an original transition fires
+            // this is the version when every original transition has its own token
+//            for (Transition t : orig.getTransitions()) {
+//                if (!orig.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows                        
+//                    for (Transition t2 : orig.getTransitions()) {
+//                        if (!orig.getTokenFlows(t2).isEmpty()) { // only for those which have tokenflows                        
+//                            out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + t2.getId()), t);
+//                        }
+//                    }
+//                    // and move the active token to the first subnet
+//                    out.createFlow(t, out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + 0));
+//                }
+//            }
             for (Transition t : orig.getTransitions()) {
-                if (!orig.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows                        
-                    for (Transition t2 : orig.getTransitions()) {
-                        if (!orig.getTokenFlows(t2).isEmpty()) { // only for those which have tokenflows                        
-                            out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + t2.getId()), t);
-                        }
-                    }
+                // take the active token
+                out.createFlow(actO, t);
+                if (!orig.getTokenFlows(t).isEmpty()) { // if this transition has a token flow
                     // and move the active token to the first subnet
                     out.createFlow(t, out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + 0));
+                } else {
+                    // directly put it back
+                    out.createFlow(t, actO);
                 }
             }
             // move the active token through the subnets
@@ -249,16 +269,26 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                 }
             }
             // give the token back to the original net (means reactivate all transitions
+            // this is the version when every original transition has its own token
+//            for (Transition tOrig : orig.getTransitions()) {
+//                String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1);
+//                if (out.containsPlace(id)) { // only if the transition has a token flow
+//                    Place actLast = out.getPlace(id);
+//                    for (Transition tr : actLast.getPostset()) {
+//                        for (Transition transition : orig.getTransitions()) {
+//                            if (out.containsPlace(ACTIVATION_PREFIX_ID + transition.getId())) { // only if it had a token flow
+//                                out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));
+//                            }
+//                        }
+//                    }
+//                }
+//            }
             for (Transition tOrig : orig.getTransitions()) {
                 String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1);
                 if (out.containsPlace(id)) { // only if the transition has a token flow
                     Place actLast = out.getPlace(id);
                     for (Transition tr : actLast.getPostset()) {
-                        for (Transition transition : orig.getTransitions()) {
-                            if (out.containsPlace(ACTIVATION_PREFIX_ID + transition.getId())) { // only if it had a token flow
-                                out.createFlow(tr, out.getPlace(ACTIVATION_PREFIX_ID + transition.getId()));
-                            }
-                        }
+                        out.createFlow(tr, actO);
                     }
                 }
             }

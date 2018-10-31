@@ -24,22 +24,6 @@ public class PetriNetTransformerFlowLTL {
         PetriGame out = new PetriGame(orig);
         out.setName(orig.getName() + "_mc");
 
-        if (initFirstStep) { // delete the initial marking if init
-            for (Place p : out.getPlaces()) {
-                if (p.getInitialToken().getValue() > 0) {
-                    p.setInitialToken(0);
-                }
-            }
-        }
-
-        // Add to each original transition a place such that we can disable the transitions
-        for (Transition t : orig.getTransitions()) {
-            if (!orig.getTokenFlows(t).isEmpty()) { // only for those which have tokenflows
-                Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
-                act.setInitialToken(1);
-            }
-        }
-
         // delete the fairness assumption of all original transitions
         for (Transition t : orig.getTransitions()) {
             out.removeStrongFair(out.getTransition(t.getId()));
@@ -75,6 +59,7 @@ public class PetriNetTransformerFlowLTL {
                 out.setOrigID(p, place.getId());
                 // create a transition which move the token for the chain to this new initial place of a token chain
                 Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId() + "-" + nb_ff);
+                t.putExtension("subformula", nb_ff);
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 todo.add(p);
@@ -90,11 +75,12 @@ public class PetriNetTransformerFlowLTL {
 //                }
 //            }
 //            if (newFlowCanBeCreated) {
-                Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
-                Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
-                out.setPartition(newTflPlace, nb_ff);
-                out.createFlow(init, newTfl);
-                out.createFlow(newTfl, newTflPlace);
+            Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
+            newTfl.putExtension("subformula", nb_ff);
+            Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+            out.setPartition(newTflPlace, nb_ff);
+            out.createFlow(init, newTfl);
+            out.createFlow(newTfl, newTflPlace);
 //            }
             // create the place and transition which states that no chain exists at all
             // is no subsumed of the above case
