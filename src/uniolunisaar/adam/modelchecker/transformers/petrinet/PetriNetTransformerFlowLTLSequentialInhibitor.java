@@ -46,6 +46,9 @@ public class PetriNetTransformerFlowLTLSequentialInhibitor extends PetriNetTrans
                 if (nb_ff == 0) {
                     act.setInitialToken(1);
                 }
+                // create the nxt transition for the initialization to allow not chosing any chain
+                Transition tout = out.createTransition(INIT_TOKENFLOW_ID + NEXT_ID + "-" + nb_ff);
+                tout.putExtension("subformula", nb_ff);
             }
 
             // for each original transition which is used create an active place 
@@ -123,6 +126,7 @@ public class PetriNetTransformerFlowLTLSequentialInhibitor extends PetriNetTrans
                     if (i + 1 < flowFormulas.size()) {
                         initActNext = out.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + (i + 1));
                     }
+                    // the transitions moving the init token, i.e., deciding on a chain or a later created new chain                  
                     for (Transition t : init.getPostset()) {
                         out.createFlow(initAct, t);
                         if (initActNext != null) {
@@ -131,6 +135,16 @@ public class PetriNetTransformerFlowLTLSequentialInhibitor extends PetriNetTrans
                             for (Place place : initialMarking) {
                                 out.createFlow(t, out.getPlace(place.getId()));
                             }
+                        }
+                    }
+                    // the next transition
+                    Transition nxt = out.getTransition(INIT_TOKENFLOW_ID + NEXT_ID + "-" + i);
+                    out.createFlow(initAct, nxt);
+                    if (initActNext != null) {
+                        out.createFlow(nxt, initActNext);
+                    } else {
+                        for (Place place : initialMarking) {
+                            out.createFlow(nxt, out.getPlace(place.getId()));
                         }
                     }
                 }

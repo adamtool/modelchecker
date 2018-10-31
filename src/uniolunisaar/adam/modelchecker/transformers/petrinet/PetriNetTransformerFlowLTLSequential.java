@@ -47,6 +47,9 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                 if (nb_ff == 0) {
                     act.setInitialToken(1);
                 }
+                // create the nxt transition for the initialization to allow not chosing any chain
+                Transition tout = out.createTransition(INIT_TOKENFLOW_ID + NEXT_ID + "-" + nb_ff);
+                tout.putExtension("subformula", nb_ff);
             }
 
             // additionally add the negations of each place and connect them accordingly
@@ -146,14 +149,14 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                     Place act = out.createPlace(id);
                     out.setPartition(act, nb_ff);
-                    
+
                     // Add a transition which moves (takes, move is done later)
                     // the activation token to the next token flow subnet, when no
                     // chain is active
                     Transition tout = out.createTransition(t.getId() + NEXT_ID + "-" + nb_ff);
                     tout.setLabel(t.getId());
                     tout.putExtension("subformula", nb_ff);
-                    
+
                     // add the activation token to every created token for the chains
                     for (Transition tflow : out.getTransitions()) {
                         if (!tflow.getId().equals(t.getId()) && tflow.getLabel().equals(t.getId())
@@ -199,6 +202,7 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                     if (i + 1 < flowFormulas.size()) {
                         initActNext = out.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + (i + 1));
                     }
+                    // the transitions moving the init token, i.e., deciding on a chain or a later created new chain
                     for (Transition t : init.getPostset()) {
                         out.createFlow(initAct, t);
                         if (initActNext != null) {
@@ -207,6 +211,16 @@ public class PetriNetTransformerFlowLTLSequential extends PetriNetTransformerFlo
                             for (Place place : initialMarking) {
                                 out.createFlow(t, out.getPlace(place.getId()));
                             }
+                        }
+                    }
+                    // the next transition
+                    Transition nxt = out.getTransition(INIT_TOKENFLOW_ID + NEXT_ID + "-" + i);
+                    out.createFlow(initAct, nxt);
+                    if (initActNext != null) {
+                        out.createFlow(nxt, initActNext);
+                    } else {
+                        for (Place place : initialMarking) {
+                            out.createFlow(nxt, out.getPlace(place.getId()));
                         }
                     }
                 }
