@@ -20,7 +20,6 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.AtomicProposition;
 import uniolunisaar.adam.logic.flowltl.Constants;
-import uniolunisaar.adam.logic.flowltl.Formula;
 import uniolunisaar.adam.logic.flowltl.IAtomicProposition;
 import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
