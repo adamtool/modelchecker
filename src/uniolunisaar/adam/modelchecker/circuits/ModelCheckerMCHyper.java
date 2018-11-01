@@ -64,6 +64,12 @@ public class ModelCheckerMCHyper {
 //        Logger.getInstance().addMessage(output, true);
 //        procAiger.waitFor();
 
+        final String timeCommand = "/usr/bin/time";
+        final String fileOutput = "-f";
+        final String fileArgument = "wall_time_(s)%e\\nCPU_time_(s)%U\\nmemory_(KB)%M\\n";
+        final String outputOption = "-o";
+        final String outputFile = path + "_stats_time_mem.txt";
+
         //%%%%%%%%%%%%%%%%%% MCHyper
         String inputFile = path + ".aag";
         String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), inputFile, formula, path + "_mcHyperOut"};
@@ -119,7 +125,7 @@ public class ModelCheckerMCHyper {
         Logger.getInstance().addMessage("", false);
 
         // %%%%%%%%%%%%%%% Abc
-        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC), path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
+        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling abc ...", false);
         Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
@@ -157,7 +163,7 @@ public class ModelCheckerMCHyper {
             Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
-        
+
         // has a counter example, ergo read it
         if (!procAbc.getOutput().contains("Counter-example is not available")) {
             String file = path + ".cex";
