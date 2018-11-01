@@ -74,7 +74,7 @@ public class ModelCheckerTools {
     public static void save2Aiger(PetriNet net, AigerRenderer renderer, String path) throws FileNotFoundException {
         String aigerFile = renderer.render(net).toString();
         // save aiger file
-        try (PrintStream out = new PrintStream(path + ".aiger")) {
+        try (PrintStream out = new PrintStream(path + ".aag")) {
             out.println(aigerFile);
         }
     }
@@ -115,7 +115,7 @@ public class ModelCheckerTools {
 //        // move to original name
 //        Files.move(new File(bufferpath + "_circuit.pdf").toPath(), new File(path + "_circuit.pdf").toPath(), REPLACE_EXISTING);
 //        Logger.getInstance().addMessage("Moved: " + bufferpath + "_circuit.pdf --> " + path + "_circuit.pdf", true);
-        Files.move(new File(bufferpath + ".aiger").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
+        Files.move(new File(bufferpath + ".aag").toPath(), new File(path + ".aag").toPath(), REPLACE_EXISTING);
 //        Logger.getInstance().addMessage("Moved: " + bufferpath + ".aiger --> " + path + ".aag", true);
     }
 }

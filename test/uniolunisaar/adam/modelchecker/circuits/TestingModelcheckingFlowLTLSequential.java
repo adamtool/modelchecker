@@ -41,6 +41,8 @@ public class TestingModelcheckingFlowLTLSequential {
     @BeforeClass
     public void createFolder() {
         Logger.getInstance().setVerbose(true);
+        Logger.getInstance().addMessageStream(ModelCheckerMCHyper.LOGGER_ABC_OUT, System.out);
+
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
     }
