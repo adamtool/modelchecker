@@ -179,8 +179,8 @@ public class Statistics {
                 .append(sys_nb_latches).append("  &  ")
                 .append(sys_nb_gates).append("  &  ")
                 .append(total_nb_latches).append("  &  ")
-                .append(total_nb_gates).append("  &  ")
-                .append(satisfied ? "\\tick" : "\\cross");
+                .append(total_nb_gates);
+        sb.append("\nsatisfied:").append(satisfied ? "\\tick" : "\\cross");
 
         return sb.toString();
     }

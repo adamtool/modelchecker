@@ -198,9 +198,6 @@ public class ModelCheckerMCHyper {
             Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
-        System.out.println("%$$$$$$$$$$$$$$$$$ ABC");
-        System.out.println(procAbc.getOutput());
-        System.out.println(procAbc.getErrors());
 
         // %% COUNTER EXAMPLE
         // has a counter example, ergo read it
@@ -229,7 +226,7 @@ public class ModelCheckerMCHyper {
             try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(path + "_mcHyperOut.aag"))) {
                 String header = mcHyperAag.readLine();
                 String[] vals = header.split(" ");
-                stats.setTotal_nb_gates(Integer.parseInt(vals[3]));
+                stats.setTotal_nb_latches(Integer.parseInt(vals[3]));
                 stats.setTotal_nb_gates(Integer.parseInt(vals[5]));
             }
             // todo: add the times and memory for the external tools.

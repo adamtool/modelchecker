@@ -179,7 +179,7 @@ public class ModelCheckerFlowLTL {
             stats.setMc_size_formula(formulaMC.getSize());
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-        return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
+        return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose, stats);
     }
 
     public TransitionSemantics getSemantics() {
