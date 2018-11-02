@@ -39,7 +39,7 @@ public class MCFlowLTLSeqGenerators {
 
     @Test(enabled = true)
     public void updatingNetworkBenchmark() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = UpdatingNetwork.create(7);
+        PetriGame net = UpdatingNetwork.create(5);
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
         outputDirInCircuit += "updatingNetwork/";
         outputDirInFormula += "updatingNetwork/";
@@ -51,7 +51,7 @@ public class MCFlowLTLSeqGenerators {
         CounterExample ret;
         String name;
 
-        formula = "A(F(p7)";
+        formula = "A(F(pOut)";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -61,7 +61,8 @@ public class MCFlowLTLSeqGenerators {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
-                ModelCheckerMCHyper.VerificationAlgo.INT,
+//                ModelCheckerMCHyper.VerificationAlgo.INT,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNull(ret);

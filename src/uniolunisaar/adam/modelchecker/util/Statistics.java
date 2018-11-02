@@ -26,6 +26,8 @@ public class Statistics {
     private long aiger_mem;
     private long abc_sec;
     private long abc_mem;
+    // output
+    private boolean satisfied;
 
     public long getIn_nb_places() {
         return in_nb_places;
@@ -153,6 +155,34 @@ public class Statistics {
 
     public void setAbc_mem(long abc_mem) {
         this.abc_mem = abc_mem;
+    }
+
+    public boolean isSatisfied() {
+        return satisfied;
+    }
+
+    public void setSatisfied(boolean satisfied) {
+        this.satisfied = satisfied;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("#P, #T, #F, #Pmc, #Tmc, #Fmc, #L, #G, #Lt, #Gt, |=\n");
+        sb.append("sizes:")
+                .append(in_nb_places).append("  &  ")
+                .append(in_nb_transitions).append("  &  ")
+                .append(in_size_formula).append("  &  ")
+                .append(mc_nb_places).append("  &  ")
+                .append(mc_nb_transitions).append("  &  ")
+                .append(mc_size_formula).append("  &  ")
+                .append(sys_nb_latches).append("  &  ")
+                .append(sys_nb_gates).append("  &  ")
+                .append(total_nb_latches).append("  &  ")
+                .append(total_nb_gates).append("  &  ")
+                .append(satisfied ? "\\tick" : "\\cross");
+
+        return sb.toString();
     }
 
 }

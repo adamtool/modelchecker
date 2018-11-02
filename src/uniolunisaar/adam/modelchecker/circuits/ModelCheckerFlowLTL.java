@@ -221,6 +221,14 @@ public class ModelCheckerFlowLTL {
         this.initFirst = initFirst;
     }
 
+    public ModelCheckerMCHyper.VerificationAlgo getVerificationAlgo() {
+        return verificationAlgo;
+    }
+
+    public void setVerificationAlgo(ModelCheckerMCHyper.VerificationAlgo verificationAlgo) {
+        this.verificationAlgo = verificationAlgo;
+    }
+
     /**
      * Returns null iff the formula holds.
      *
