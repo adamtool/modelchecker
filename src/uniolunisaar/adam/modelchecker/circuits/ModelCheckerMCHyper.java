@@ -198,6 +198,9 @@ public class ModelCheckerMCHyper {
             Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
+        System.out.println("%$$$$$$$$$$$$$$$$$ ABC");
+        System.out.println(procAbc.getOutput());
+        System.out.println(procAbc.getErrors());
 
         // %% COUNTER EXAMPLE
         // has a counter example, ergo read it

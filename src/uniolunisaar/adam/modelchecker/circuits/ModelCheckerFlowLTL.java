@@ -96,7 +96,8 @@ public class ModelCheckerFlowLTL {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering
-                + " initialization first step: " + initFirst, true);
+                + " initialization first step: " + initFirst
+                + " verification/falsification algorithm: " + verificationAlgo, true);
 
         ModelCheckerLTL mcLTL = new ModelCheckerLTL(semantics, maximality, stuttering, verificationAlgo);
 
@@ -163,7 +164,7 @@ public class ModelCheckerFlowLTL {
                     formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, gameMC, f, initFirst);
                     break;
                 default:
-                    throw new RuntimeException("Didn't provided a solution for all approches yet. Approach '" + approach + "' is missing; sry.");
+                    throw new RuntimeException("Didn't provided a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
             }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS

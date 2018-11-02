@@ -92,7 +92,8 @@ public class ModelCheckerLTL {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " semantics: " + semantics
-                + " stuttering: " + stuttering, true);
+                + " stuttering: " + stuttering
+                + " verification/falsification algorithm: " + verificationAlgo, true);
 
         // Add Fairness
         formula = FlowLTLTransformer.addFairness(net, formula);
