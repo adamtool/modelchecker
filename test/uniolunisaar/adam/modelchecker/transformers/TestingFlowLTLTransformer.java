@@ -88,7 +88,7 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        CounterExample output = ModelCheckerMCHyper.check(net, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + net.getName());
+        CounterExample output = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + net.getName());
         Assert.assertNull(output);
     }
 
@@ -137,7 +137,7 @@ public class TestingFlowLTLTransformer {
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
 
-        CounterExample output = ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName());
+        CounterExample output = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName());
         Assert.assertNotNull(output);
 
         // new version

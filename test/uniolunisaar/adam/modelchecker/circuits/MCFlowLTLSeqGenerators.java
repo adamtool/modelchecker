@@ -61,6 +61,7 @@ public class MCFlowLTLSeqGenerators {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.INT,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNull(ret);

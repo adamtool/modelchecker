@@ -48,14 +48,16 @@ public class ModelCheckerLTL {
     private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
     private Maximality maximality = Maximality.MAX_INTERLEAVING;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
+    private ModelCheckerMCHyper.VerificationAlgo verificationAlgo = ModelCheckerMCHyper.VerificationAlgo.IC3;
 
     public ModelCheckerLTL() {
     }
 
-    public ModelCheckerLTL(TransitionSemantics semantics, Maximality maximality, Stuttering stuttering) {
+    public ModelCheckerLTL(TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, ModelCheckerMCHyper.VerificationAlgo verificationAlgo) {
         this.semantics = semantics;
         this.maximality = maximality;
         this.stuttering = stuttering;
+        this.verificationAlgo = verificationAlgo;
     }
 
     /**
@@ -102,7 +104,7 @@ public class ModelCheckerLTL {
         }
 
         Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
-        return ModelCheckerMCHyper.check(net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path);
+        return ModelCheckerMCHyper.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path);
     }
 
     public TransitionSemantics getSemantics() {
@@ -120,4 +122,21 @@ public class ModelCheckerLTL {
     public void setMaximality(Maximality maximality) {
         this.maximality = maximality;
     }
+
+    public ModelCheckerMCHyper.VerificationAlgo getVerificationAlgo() {
+        return verificationAlgo;
+    }
+
+    public void setVerificationAlgo(ModelCheckerMCHyper.VerificationAlgo verificationAlgo) {
+        this.verificationAlgo = verificationAlgo;
+    }
+
+    public Stuttering getStuttering() {
+        return stuttering;
+    }
+
+    public void setStuttering(Stuttering stuttering) {
+        this.stuttering = stuttering;
+    }
+
 }

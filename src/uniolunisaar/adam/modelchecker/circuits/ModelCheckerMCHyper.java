@@ -27,6 +27,14 @@ public class ModelCheckerMCHyper {
     public static final String LOGGER_ABC_OUT = "abcOut";
     public static final String LOGGER_ABC_ERR = "abcErr";
 
+    public enum VerificationAlgo {
+        IC3,
+        INT,
+        BMC,
+        BMC2,
+        BMC3
+    }
+
     /**
      * Returns null iff the formula holds.
      *
@@ -38,7 +46,7 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static CounterExample checkSeparate(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    private static CounterExample checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         ModelCheckerTools.save2Aiger(net, circ, path);
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut");
 //
@@ -125,6 +133,26 @@ public class ModelCheckerMCHyper {
         Logger.getInstance().addMessage("", false);
 
         // %%%%%%%%%%%%%%% Abc
+        String call;
+        switch (alg) {
+            case IC3:
+                call = "pdr";
+                break;
+            case INT:
+                call = "int";
+                break;
+            case BMC:
+                call = "bmc";
+                break;
+            case BMC2:
+                call = "bmc2";
+                break;
+            case BMC3:
+                call = "bmc3";
+                break;
+            default:
+                throw new RuntimeException("Not all verifcation methods had been considered. '" + alg + "' is missing.");
+        }
         String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling abc ...", false);
@@ -143,7 +171,7 @@ public class ModelCheckerMCHyper {
         procAbc.start(outStream, errStream);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
         abcInput.println("read " + path + "_mcHyperOut.aig");
-        abcInput.println("pdr");
+        abcInput.println(call);
         abcInput.println("write_cex -f " + path + ".cex");
         abcInput.println("quit");
         abcInput.flush();
@@ -186,6 +214,7 @@ public class ModelCheckerMCHyper {
     /**
      * Returns null iff the formula holds.
      *
+     * @param alg
      * @param net
      * @param circ
      * @param formula - in MCHyper format
@@ -195,9 +224,9 @@ public class ModelCheckerMCHyper {
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
-    public static CounterExample check(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
-        return checkSeparate(net, circ, formula, path);
+        return checkSeparate(alg, net, circ, formula, path);
     }
 
     /**

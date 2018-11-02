@@ -67,15 +67,15 @@ public class TestingModelcheckingLTL {
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
 
         String formula = "Forall (G (AP \"#out#_in\" 0))";
-        CounterExample check = ModelCheckerMCHyper.check(net, renderer, formula, "./" + net.getName());
+        CounterExample check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName());
         Assert.assertNull(check);
 
         formula = "Forall (G (AP \"#out#_t1\" 0))";
-        check = ModelCheckerMCHyper.check(net, renderer, formula, "./" + net.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName());
         Assert.assertNotNull(check);
 
         formula = "Forall (AP \"#out#_in\" 0)";
-        check = ModelCheckerMCHyper.check(net, renderer, formula, "./" + net.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName());
         Assert.assertNull(check);
 
         PetriNet doublediamond = new PetriNet("doublediamond");
@@ -121,25 +121,25 @@ public class TestingModelcheckingLTL {
         // formula: in
         LTLFormula f = new LTLFormula(new AtomicProposition(doublediamond.getPlace("in")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = ModelCheckerMCHyper.check(doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
         Assert.assertNull(check);
 
         // F M
         f = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(doublediamond.getPlace("M")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = ModelCheckerMCHyper.check(doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
         Assert.assertNull(check);
 
         // F MM
         f = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(doublediamond.getPlace("MM")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = ModelCheckerMCHyper.check(doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
         Assert.assertNull(check);
 
         // Fairness
         f = new LTLFormula(FormulaCreator.createStrongFairness(l));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = ModelCheckerMCHyper.check(doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName());
         Assert.assertNull(check);
     }
 
@@ -178,10 +178,10 @@ public class TestingModelcheckingLTL {
 //        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), "./" + game.getName(), true);
 //        cex = mc.check(game, new Constants.False(), "./" + game.getName(), true);
         IFormula f = new Constants.False();
-        cex = ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName());
+        cex = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName());
         Assert.assertNotNull(cex);
         f = new LTLFormula(LTLOperators.Unary.X, stutt);
-        cex = ModelCheckerMCHyper.check(game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName());
+        cex = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName());
         Assert.assertNotNull(cex);
 
         ILTLFormula pA2 = new AtomicProposition(init2);
@@ -235,60 +235,60 @@ public class TestingModelcheckingLTL {
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         String formula = "Forall (G (AP \"#out#_inittflB\" 0))";
-        CounterExample check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        CounterExample check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
         formula = "Forall (AP \"#out#_inittfl\" 0)";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
         formula = "Forall (F (AP \"#out#_out\" 0))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNotNull(check);
         formula = "Forall (Neg (AP \"#out#_out\" 0))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
 
         ILTLFormula f = FormulaCreator.enabledObject(tstolen);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
 
         f = new LTLFormula(LTLOperators.Unary.G, f);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNotNull(check);
 
         formula = "Forall (Neg (AP \"#out#_tB\" 0))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
         formula = "Forall (Neg (AP \"#out#_tC\" 0))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
 //        formula = "Forall (Implies (AP \"#out#_tB\" 0) false)"; // syntactic 'false' ? don't now how to give it to MCHyper
 //        check = ModelCheckerMCHyper.check(game, formula, "./" + game.getName());
 //        Assert.assertFalse(check);
 
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (AP \"#out#_out\" 0))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
         formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
 
         f = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(game);
         ILTLFormula reachOut = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(out));
         f = new LTLFormula(f, LTLOperators.Binary.IMP, reachOut);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNull(check);
 
         RunFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximalityInterleavingObject(game);
         LTLFormula ftest = new LTLFormula((ILTLFormula) maxStandard.getPhi(), LTLOperators.Binary.IMP, reachOut);
         System.out.println(ftest.toSymbolString());
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(ftest);
-        check = ModelCheckerMCHyper.check(game, renderer, formula, "./" + game.getName());
+        check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName());
         Assert.assertNotNull(check);
     }
 
@@ -303,7 +303,8 @@ public class TestingModelcheckingLTL {
 
         CounterExample cex;
 
-        ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.OUTGOING, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, ModelCheckerLTL.Stuttering.PREFIX_REGISTER);
+        ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.OUTGOING, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(tloop)), "./" + game.getName(), true);
         Assert.assertEquals(cex == null, true);
     }
@@ -471,7 +472,9 @@ public class TestingModelcheckingLTL {
         ModelCheckerLTL mc = new ModelCheckerLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER);
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3
+        );
         ILTLFormula deadlock = FormulaCreator.deadlock(net);
         CounterExample cex = mc.check(game, deadlock, output + game.getName() + "_deadlock", false);
         Tools.saveFile(output + game.getName() + "_deadlock.cex", (cex == null) ? "not existend." : cex.toString());
@@ -481,7 +484,7 @@ public class TestingModelcheckingLTL {
         Tools.saveFile(output + game.getName() + "_reversible.cex", (cex == null) ? "not existend." : cex.toString());
 
         ILTLFormula quasiLive = FormulaCreator.quasiLive(net);
-        cex = mc.check(game, quasiLive, output + game.getName() + "_quasiLive", false);        
+        cex = mc.check(game, quasiLive, output + game.getName() + "_quasiLive", false);
         Tools.saveFile(output + game.getName() + "_quasiLive.cex", (cex == null) ? "not existend." : cex.toString());
 
         ILTLFormula live = FormulaCreator.live(net);

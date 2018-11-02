@@ -87,6 +87,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -200,6 +201,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
         Assert.assertNotNull(ret);
@@ -478,6 +480,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNull(ret);
@@ -514,6 +517,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNotNull(ret);
@@ -597,6 +601,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNotNull(ret);
@@ -633,6 +638,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNull(ret);
@@ -668,6 +674,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertNull(ret);
@@ -704,6 +711,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
 
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
