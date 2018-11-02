@@ -39,7 +39,7 @@ public class ModelCheckerFlowLTL {
     }
 
     private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
-    private Approach approach = Approach.SEQUENTIAL;
+    private Approach approach = Approach.SEQUENTIAL_INHIBITOR;
     private Maximality maximality = Maximality.MAX_INTERLEAVING;
     private ModelCheckerLTL.Stuttering stuttering = ModelCheckerLTL.Stuttering.PREFIX_REGISTER;
     private ModelCheckerMCHyper.VerificationAlgo verificationAlgo = ModelCheckerMCHyper.VerificationAlgo.IC3;
@@ -130,7 +130,7 @@ public class ModelCheckerFlowLTL {
 //            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
                     break;
                 case SEQUENTIAL:
-                    gameMC = PetriNetTransformerFlowLTLSequentialInhibitor.createNet4ModelCheckingSequential(net, f, initFirst);
+                    gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, f, initFirst);
                     if (verbose) {
                         // color all original places
                         for (Place p : gameMC.getPlaces()) {
