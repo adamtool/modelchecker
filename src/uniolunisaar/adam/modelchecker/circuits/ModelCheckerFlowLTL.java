@@ -22,6 +22,7 @@ import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerF
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequentialInhibitor;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
+import uniolunisaar.adam.modelchecker.util.Statistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -72,6 +73,26 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
     public CounterExample check(PetriGame net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        return check(net, formula, path, verbose, null);
+    }
+
+    /**
+     *
+     * @param net
+     * @param formula
+     * @param path
+     * @param verbose
+     * @param stats
+     * @return null iff the formula holds, otherwise a counter example violating
+     * the formula.
+     * @throws InterruptedException
+     * @throws IOException
+     * @throws uniol.apt.io.parser.ParseException
+     * @throws uniolunisaar.adam.modelchecker.exceptions.NotConvertableException
+     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
+     */
+    public CounterExample check(PetriGame net, RunFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering
@@ -145,6 +166,18 @@ public class ModelCheckerFlowLTL {
                     throw new RuntimeException("Didn't provided a solution for all approches yet. Approach '" + approach + "' is missing; sry.");
             }
         }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+        if (stats != null) {
+            // input orignal net
+            stats.setIn_nb_places(net.getPlaces().size());
+            stats.setIn_nb_transitions(net.getTransitions().size());
+            stats.setIn_size_formula(f.getSize());
+            // input model checking net
+            stats.setMc_nb_places(gameMC.getPlaces().size());
+            stats.setMc_nb_transitions(gameMC.getTransitions().size());
+            stats.setMc_size_formula(formulaMC.getSize());
+        }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
         return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose);
     }
 

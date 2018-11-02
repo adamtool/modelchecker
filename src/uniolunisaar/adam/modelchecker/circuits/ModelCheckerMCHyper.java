@@ -1,6 +1,8 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -9,10 +11,12 @@ import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
+import uniolunisaar.adam.modelchecker.util.Statistics;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
+import uniolunisaar.adam.tools.Tools;
 
 /**
  *
@@ -46,8 +50,12 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static CounterExample checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        ModelCheckerTools.save2Aiger(net, circ, path);
+    private static CounterExample checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        // Create System 
+        AigerFile circuit = circ.render(net);
+        Tools.saveFile(path + ".aag", circuit.toString());
+
+//        ModelCheckerTools.save2Aiger(net, circ, path);
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut");
 //
 //        Logger.getInstance().addMessage(procBuilder.command().toString(), true);
@@ -71,7 +79,6 @@ public class ModelCheckerMCHyper {
 //        String output = IOUtils.toString(procAiger.getInputStream());
 //        Logger.getInstance().addMessage(output, true);
 //        procAiger.waitFor();
-
         final String timeCommand = "/usr/bin/time";
         final String fileOutput = "-f";
         final String fileArgument = "wall_time_(s)%e\\nCPU_time_(s)%U\\nmemory_(KB)%M\\n";
@@ -192,14 +199,16 @@ public class ModelCheckerMCHyper {
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
 
+        // %% COUNTER EXAMPLE
         // has a counter example, ergo read it
+        CounterExample cex = null;
         if (!procAbc.getOutput().contains("Counter-example is not available")) {
             String file = path + ".cex";
             File f = new File(file);
             if (f.exists() && !f.isDirectory()) {
                 boolean safety = procAbc.getOutput().contains("Output 0 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
                 boolean liveness = procAbc.getOutput().contains("Output 1 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
-                return circ.parseCounterExample(net, file, new CounterExample(safety, liveness));
+                cex = circ.parseCounterExample(net, file, new CounterExample(safety, liveness));
             } else {
                 throw new ExternalToolException("ABC didn't finshed as expected. There should be a counter-example written to '" + file + "'"
                         + " but the file doesn't exist."
@@ -208,7 +217,22 @@ public class ModelCheckerMCHyper {
         }
         Logger.getInstance().addMessage("... finished calling abc.", false);
         Logger.getInstance().addMessage("", false);
-        return null;
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+        if (stats != null) {
+            // system size
+            stats.setSys_nb_latches(circuit.getNbOfLatches());
+            stats.setSys_nb_gates(circuit.getNbOfGates());
+            // total size 
+            try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(path + "_mcHyperOut.aag"))) {
+                String header = mcHyperAag.readLine();
+                String[] vals = header.split(" ");
+                stats.setTotal_nb_gates(Integer.parseInt(vals[3]));
+                stats.setTotal_nb_gates(Integer.parseInt(vals[5]));
+            }
+            // todo: add the times and memory for the external tools.
+        }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
+        return cex;
     }
 
     /**
@@ -225,8 +249,25 @@ public class ModelCheckerMCHyper {
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
     public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        return check(alg, net, circ, formula, path, null);
+    }
+
+    /**
+     * Returns null iff the formula holds.
+     *
+     * @param alg
+     * @param net
+     * @param circ
+     * @param formula - in MCHyper format
+     * @param path
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     */
+    public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
-        return checkSeparate(alg, net, circ, formula, path);
+        return checkSeparate(alg, net, circ, formula, path, stats);
     }
 
     /**

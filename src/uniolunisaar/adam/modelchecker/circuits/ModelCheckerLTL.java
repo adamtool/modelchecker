@@ -2,10 +2,8 @@ package uniolunisaar.adam.modelchecker.circuits;
 
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
-import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.logic.flowltl.IFormula;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.flowltl.LTLOperators;
@@ -13,6 +11,7 @@ import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformer;
 import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
+import uniolunisaar.adam.modelchecker.util.Statistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -21,10 +20,6 @@ import uniolunisaar.adam.tools.ProcessNotStartedException;
  * @author Manuel Gieseking
  */
 public class ModelCheckerLTL {
-
-    CounterExample check(PetriNet net, IFormula formula, String output, boolean b) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     public enum Stuttering {
         REPLACEMENT,
@@ -75,6 +70,25 @@ public class ModelCheckerLTL {
      * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
     public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+        return check(net, formula, path, verbose, null);
+    }
+
+    /**
+     *
+     * @param net
+     * @param formula
+     * @param path
+     * @param verbose
+     * @param stats
+     * @return null iff the formula holds, otherwise a counter example violating
+     * the formula.
+     * @throws InterruptedException
+     * @throws IOException
+     * @throws uniol.apt.io.parser.ParseException
+     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
+     */
+    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " semantics: " + semantics
@@ -104,7 +118,7 @@ public class ModelCheckerLTL {
         }
 
         Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
-        return ModelCheckerMCHyper.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path);
+        return ModelCheckerMCHyper.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, stats);
     }
 
     public TransitionSemantics getSemantics() {

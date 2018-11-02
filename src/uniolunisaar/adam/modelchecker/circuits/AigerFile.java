@@ -148,4 +148,12 @@ public class AigerFile {
         }
     }
 
+    public int getNbOfLatches() {
+        return latches.size();
+    }
+
+    public int getNbOfGates() {
+        return andGates.entrySet().size();
+    }
+
 }
