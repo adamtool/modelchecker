@@ -1,0 +1,37 @@
+package uniolunisaar.adam.sdnencoding;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import uniol.apt.adt.pn.Place;
+import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.petrigame.PetriGame;
+
+public class ConcurrentUpdate implements Update {
+	
+	Set<Update> concurrent;
+	
+	public ConcurrentUpdate(Set<Update> setOfUpdates) {
+		concurrent = setOfUpdates;
+	}
+
+	@Override
+	public Place addUpdate(PetriGame pn, Place start) {
+		// split
+		Transition split = pn.createTransition();
+		pn.createFlow(start, split);
+		Set<Place> merge = new HashSet<>();
+		for (Update update : concurrent) {
+			Place p = pn.createPlace();
+			pn.createFlow(split, p);
+			merge.add(update.addUpdate(pn, p));	
+		}
+		Transition t = pn.createTransition();
+		Place finish = pn.createPlace();
+		for (Place p : merge) {
+			pn.createFlow(p, t);
+		}
+		pn.createFlow(t, finish);
+		return finish;
+	}
+}
