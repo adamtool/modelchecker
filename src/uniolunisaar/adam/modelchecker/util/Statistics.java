@@ -1,5 +1,11 @@
 package uniolunisaar.adam.modelchecker.util;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import uniolunisaar.adam.tools.Tools;
+
 /**
  *
  * @author Manuel Gieseking
@@ -28,6 +34,18 @@ public class Statistics {
     private long abc_mem;
     // output
     private boolean satisfied;
+
+    // Write the input sizes directly into a file before the checking starts
+    // for time outs
+    private String path = null;
+
+    public Statistics() {
+
+    }
+
+    public Statistics(String path) {
+        this.path = path;
+    }
 
     public long getIn_nb_places() {
         return in_nb_places;
@@ -165,8 +183,21 @@ public class Statistics {
         this.satisfied = satisfied;
     }
 
-    @Override
-    public String toString() {
+    public void writeInputSizesToFile() throws FileNotFoundException {
+        if (path != null) {
+            Tools.saveFile(path, getInputSizes());
+        }
+    }
+
+    public void addResultToFile() throws IOException {
+        if (path != null) {
+            try (BufferedWriter wr = new BufferedWriter(new FileWriter(path, true))) {
+                wr.append("\nsatisfied:").append(satisfied ? "\\tick" : "\\cross");
+            };
+        }
+    }
+
+    public String getInputSizes() {
         StringBuilder sb = new StringBuilder();
         sb.append("#P, #T, #F, #Pmc, #Tmc, #Fmc, #L, #G, #Lt, #Gt, |=\n");
         sb.append("sizes:")
@@ -180,8 +211,14 @@ public class Statistics {
                 .append(sys_nb_gates).append("  &  ")
                 .append(total_nb_latches).append("  &  ")
                 .append(total_nb_gates);
-        sb.append("\nsatisfied:").append(satisfied ? "\\tick" : "\\cross");
+        return sb.toString();
+    }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getInputSizes());
+        sb.append("\nsatisfied:").append(satisfied ? "\\tick" : "\\cross");
         return sb.toString();
     }
 
