@@ -163,7 +163,7 @@ public class TestingModelcheckingLoLA {
 
     @Test
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException {
-        PetriGame net = RedundantNetwork.getBasis();
+        PetriGame net = RedundantNetwork.getBasis(1,1);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
         PetriGame mc = PetriNetTransformerLoLA.createNet4ModelChecking4LoLA(net);
@@ -171,19 +171,19 @@ public class TestingModelcheckingLoLA {
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
-        net = RedundantNetwork.getUpdatingNetwork();
+        net = RedundantNetwork.getUpdatingNetwork(1,1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerLoLA.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
-        net = RedundantNetwork.getUpdatingMutexNetwork();
+        net = RedundantNetwork.getUpdatingMutexNetwork(1,1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerLoLA.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
-        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork();
+        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1,1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerLoLA.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
