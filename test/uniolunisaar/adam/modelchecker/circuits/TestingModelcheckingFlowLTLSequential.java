@@ -692,7 +692,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = RedundantNetwork.getBasis();
+        PetriGame net = RedundantNetwork.getBasis(1, 1);
         AdamTools.saveAPT(outputDir + net.getName(), net, false);
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
 
@@ -701,7 +701,7 @@ public class TestingModelcheckingFlowLTLSequential {
         CounterExample ret;
         String name;
 
-        formula = "A(F(p3)";
+        formula = "A(F(out)";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -730,7 +730,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
         mc.setInitFirst(true);
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        net = RedundantNetwork.getUpdatingNetwork();
+        net = RedundantNetwork.getUpdatingNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
@@ -749,7 +749,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
         mc.setInitFirst(true);
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        net = RedundantNetwork.getUpdatingMutexNetwork();
+        net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
@@ -768,7 +768,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
         mc.setInitFirst(true);
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork();
+        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
@@ -784,7 +784,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
 //        Assert.assertNotNull(ret);
 
-        net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork();
+        net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
 
