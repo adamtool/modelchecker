@@ -20,6 +20,7 @@ public class SwitchUpdate implements Update {
 	public Place addUpdate(PetriGame pn, Place start) {
 		Place end = pn.createPlace();
 		Transition t = pn.createTransition();
+		pn.setWeakFair(t);
 		pn.createFlow(start, t);
 		pn.createFlow(t, end);
 		pn.createFlow(sw + "fwdTo" + before, t.getId());

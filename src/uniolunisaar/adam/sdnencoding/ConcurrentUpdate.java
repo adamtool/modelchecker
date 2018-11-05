@@ -19,6 +19,7 @@ public class ConcurrentUpdate implements Update {
 	public Place addUpdate(PetriGame pn, Place start) {
 		// split
 		Transition split = pn.createTransition();
+		pn.setWeakFair(split);
 		pn.createFlow(start, split);
 		Set<Place> merge = new HashSet<>();
 		for (Update update : concurrent) {
@@ -27,6 +28,7 @@ public class ConcurrentUpdate implements Update {
 			merge.add(update.addUpdate(pn, p));	
 		}
 		Transition t = pn.createTransition();
+		pn.setWeakFair(t);
 		Place finish = pn.createPlace();
 		for (Place p : merge) {
 			pn.createFlow(p, t);
