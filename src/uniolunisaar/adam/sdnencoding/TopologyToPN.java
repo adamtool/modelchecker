@@ -11,6 +11,8 @@ import uniol.apt.adt.ts.TransitionSystem;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.parser.impl.AptLTSParser;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.ds.petrigame.PetriGameExtensionHandler;
+import uniolunisaar.adam.ds.winningconditions.WinningCondition;
 
 public class TopologyToPN {
 	private final Set<Arc> edges;
@@ -32,6 +34,7 @@ public class TopologyToPN {
 	
 	public PetriGame generatePetriNet() {
 		PetriGame pn = new PetriGame("");
+		PetriGameExtensionHandler.setWinningConditionAnnotation(pn, WinningCondition.Objective.LTL);
 		for (Arc arc : edges) {
 			if (!pn.containsPlace(arc.getSourceId())) {
 				Place sw = pn.createPlace(arc.getSourceId());
