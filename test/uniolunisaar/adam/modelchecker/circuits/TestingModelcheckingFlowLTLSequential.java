@@ -691,6 +691,35 @@ public class TestingModelcheckingFlowLTLSequential {
     }
 
     @Test(enabled = true)
+    public void redundantFlowExampleFix() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriGame net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
+        RunFormula f = new RunFormula(
+                new LTLFormula(LTLOperators.Unary.NEG,
+                        new LTLFormula(LTLOperators.Unary.G,
+                                new LTLFormula(LTLOperators.Unary.F,
+                                        new LTLFormula(new AtomicProposition(net.getTransition("tupD")), LTLOperators.Binary.OR, new AtomicProposition(net.getTransition("tupU")))
+                                )
+                        )
+                ), RunOperators.Implication.IMP,
+                new FlowFormula(
+                        new LTLFormula(LTLOperators.Unary.F,
+                                new AtomicProposition(net.getPlace("out"))
+                        ))
+        );
+        System.out.println(f.toString());
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
+                true);
+
+        CounterExample ret = mc.check(net, f, outputDirInCircuit + net.getName() + "_init", true);
+        Assert.assertNull(ret);
+    }
+
+    @Test(enabled = true)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = RedundantNetwork.getBasis(1, 1);
         AdamTools.saveAPT(outputDir + net.getName(), net, false);
@@ -702,6 +731,7 @@ public class TestingModelcheckingFlowLTLSequential {
         String name;
 
         formula = "A(F(out)";
+
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
