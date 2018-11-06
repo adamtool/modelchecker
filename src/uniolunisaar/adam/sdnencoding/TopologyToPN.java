@@ -25,7 +25,6 @@ import uniolunisaar.adam.ds.winningconditions.WinningCondition;
 public class TopologyToPN {
 	TransitionSystem ts;
 	private final Set<Arc> edges;
-	private String ingress;
 
 	
 	public TopologyToPN(File file) throws ParseException, IOException {
@@ -66,7 +65,7 @@ public class TopologyToPN {
 	
 	public String setUpdate(PetriGame pn) {
 		Pair<String, String> ingressAndEgress = chooseIngressAndEgress();
-		ingress = ingressAndEgress.getFirst();
+		String ingress = ingressAndEgress.getFirst();
 		String egress = ingressAndEgress.getSecond();
 		
 		System.out.println("FROM: " + ingress + " TO: " + egress);
@@ -178,6 +177,11 @@ public class TopologyToPN {
 		pn.createFlow(transitionID, ingress);
 		pn.createInitialTokenFlow(transition, pn.getPlace(ingress));
 		pn.setWeakFair(transition);
+		
+		pn.rename(pn.getPlace(egress), "pOut");
+		if (egress.equals("sw000")) {
+			pn.rename(pn.getPlace("sw001"), "sw000");
+		}
 		return egress;
 	}
 	
