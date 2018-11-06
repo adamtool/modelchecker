@@ -90,6 +90,16 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
 
+        // %%%%%%%%%%%%%%%%%%%%%%%%%    
+        RunFormula a1 = new RunFormula(new FlowFormula(new AtomicProposition(t1)));
+        RunFormula a2 = new RunFormula(new FlowFormula(new AtomicProposition(t2)));
+        formula = new RunFormula(a1, RunOperators.Binary.OR, a2);
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        Assert.assertNull(ret);
+
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula(new AtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
         name = net.getName() + "_" + formula.toString().replace(" ", "");
@@ -832,6 +842,11 @@ public class TestingModelcheckingFlowLTLSequential {
 //        mc.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
 //        Assert.assertNotNull(ret);
+    }
+
+    @Test
+    public void testNetwork() {
+
     }
 
 }

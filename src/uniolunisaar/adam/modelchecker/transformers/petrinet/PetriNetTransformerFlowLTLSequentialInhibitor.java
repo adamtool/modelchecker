@@ -185,10 +185,12 @@ public class PetriNetTransformerFlowLTLSequentialInhibitor extends PetriNetTrans
             // move the active token through the subnets
             for (int i = 1; i < flowFormulas.size(); i++) {
                 for (Transition t : orig.getTransitions()) {
-                    Place acti = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + (i - 1));
-                    Place actii = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
-                    for (Transition tr : acti.getPostset()) {
-                        out.createFlow(tr, actii);
+                    if (!orig.getTokenFlows(t).isEmpty()) { // if this transition has a token flow
+                        Place acti = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + (i - 1));
+                        Place actii = out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + i);
+                        for (Transition tr : acti.getPostset()) {
+                            out.createFlow(tr, actii);
+                        }
                     }
                 }
             }
