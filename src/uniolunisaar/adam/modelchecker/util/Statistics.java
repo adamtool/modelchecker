@@ -33,7 +33,7 @@ public class Statistics {
     private long abc_sec;
     private long abc_mem;
     // output
-    private boolean satisfied;
+    private int satisfied = 42;
 
     // Write the input sizes directly into a file before the checking starts
     // for time outs
@@ -175,11 +175,16 @@ public class Statistics {
         this.abc_mem = abc_mem;
     }
 
-    public boolean isSatisfied() {
+    public int isSatisfied() {
         return satisfied;
     }
 
-    public void setSatisfied(boolean satisfied) {
+    /**
+     * 1 true 0 false all other don't know
+     *
+     * @param satisfied
+     */
+    public void setSatisfied(int satisfied) {
         this.satisfied = satisfied;
     }
 
@@ -192,7 +197,7 @@ public class Statistics {
     public void addResultToFile() throws IOException {
         if (path != null) {
             try (BufferedWriter wr = new BufferedWriter(new FileWriter(path, true))) {
-                wr.append("\nsatisfied:").append(satisfied ? "\\tick" : "\\cross");
+                wr.append("\nsatisfied:").append(satisfied == 1 ? "\\cmark" : satisfied == 0 ? "\\xmark" : "?");
             };
         }
     }
@@ -218,7 +223,7 @@ public class Statistics {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getInputSizes());
-        sb.append("\nsatisfied:").append(satisfied ? "\\tick" : "\\cross");
+        sb.append("\nsatisfied:").append(satisfied == 1 ? "\\cmark" : satisfied == 0 ? "\\xmark" : "?");
         return sb.toString();
     }
 
