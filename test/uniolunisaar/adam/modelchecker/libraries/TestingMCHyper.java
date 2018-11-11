@@ -59,7 +59,7 @@ public class TestingMCHyper {
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
 
-        ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), formula, "./" + game.getName());
+        ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), formula, "./" + game.getName(), "");
     }
 
 }

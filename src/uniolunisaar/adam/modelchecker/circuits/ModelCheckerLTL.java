@@ -44,6 +44,7 @@ public class ModelCheckerLTL {
     private Maximality maximality = Maximality.MAX_INTERLEAVING;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
     private ModelCheckerMCHyper.VerificationAlgo verificationAlgo = ModelCheckerMCHyper.VerificationAlgo.IC3;
+    private String abcParameters = "";
 
     public ModelCheckerLTL() {
     }
@@ -119,7 +120,7 @@ public class ModelCheckerLTL {
         }
 
         Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
-        return ModelCheckerMCHyper.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, stats);
+        return ModelCheckerMCHyper.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, stats, abcParameters);
     }
 
     public TransitionSemantics getSemantics() {
@@ -152,6 +153,14 @@ public class ModelCheckerLTL {
 
     public void setStuttering(Stuttering stuttering) {
         this.stuttering = stuttering;
+    }
+
+    public String getAbcParameters() {
+        return abcParameters;
+    }
+
+    public void setAbcParameters(String abcParameters) {
+        this.abcParameters = abcParameters;
     }
 
 }

@@ -50,7 +50,7 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static CounterExample checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    private static CounterExample checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameter) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // Create System 
         AigerFile circuit = circ.render(net);
         Tools.saveFile(path + ".aag", circuit.toString());
@@ -196,7 +196,7 @@ public class ModelCheckerMCHyper {
         procAbc.start(outStream, errStream);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
         abcInput.println("read " + path + "_mcHyperOut.aig");
-        abcInput.println(call);
+        abcInput.println(call + " " + abcParameter);
         abcInput.println("write_cex -f " + path + ".cex");
         abcInput.println("quit");
         abcInput.flush();
@@ -217,14 +217,17 @@ public class ModelCheckerMCHyper {
             Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
-        
-        //todo: hack for checking the abc output
-        Logger.getInstance().addMessage(abcOutput, false, true);
 
+        //todo: hack for checking the abc output
+//        Logger.getInstance().addMessage(abcOutput, false, true);
         // %% COUNTER EXAMPLE
-        // has a counter example, ergo read it
         CounterExample cex = null;
-        if (!abcOutput.contains("Counter-example is not available")) {
+        // for the falsifiers when they didn't finished
+        if (abcOutput.contains("No output asserted in")) {
+            throw new ExternalToolException("The bound for the falsifier was not big enough.");
+        }
+        if (!abcOutput.contains("Counter-example is not available")) { // todo: problem for the falsifiers.
+            // has a counter example, ergo read it
             String file = path + ".cex";
             File f = new File(file);
             if (f.exists() && !f.isDirectory()) {
@@ -237,6 +240,7 @@ public class ModelCheckerMCHyper {
                         + " Check the abc output for more information:\n" + procAbc.getOutput());
             }
         }
+
         Logger.getInstance().addMessage("... finished calling abc.", false);
         Logger.getInstance().addMessage("", false);
         return cex;
@@ -250,13 +254,14 @@ public class ModelCheckerMCHyper {
      * @param circ
      * @param formula - in MCHyper format
      * @param path
+     * @param abcParameters
      * @return
      * @throws InterruptedException
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
-    public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        return check(alg, net, circ, formula, path, null);
+    public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        return check(alg, net, circ, formula, path, null, abcParameters);
     }
 
     /**
@@ -267,14 +272,16 @@ public class ModelCheckerMCHyper {
      * @param circ
      * @param formula - in MCHyper format
      * @param path
+     * @param stats
+     * @param abcParameters
      * @return
      * @throws InterruptedException
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
-    public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static CounterExample check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
-        return checkSeparate(alg, net, circ, formula, path, stats);
+        return checkSeparate(alg, net, circ, formula, path, stats, abcParameters);
     }
 
     /**

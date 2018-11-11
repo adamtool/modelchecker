@@ -44,6 +44,7 @@ public class ModelCheckerFlowLTL {
     private ModelCheckerLTL.Stuttering stuttering = ModelCheckerLTL.Stuttering.PREFIX_REGISTER;
     private ModelCheckerMCHyper.VerificationAlgo verificationAlgo = ModelCheckerMCHyper.VerificationAlgo.IC3;
     private boolean initFirst = true;
+    private String abcParameters = "";
 
     public ModelCheckerFlowLTL() {
     }
@@ -100,6 +101,7 @@ public class ModelCheckerFlowLTL {
                 + " verification/falsification algorithm: " + verificationAlgo, true);
 
         ModelCheckerLTL mcLTL = new ModelCheckerLTL(semantics, maximality, stuttering, verificationAlgo);
+        mcLTL.setAbcParameters(abcParameters);
 
         // If we have the LTL fragment just use the standard LTLModelchecker
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
@@ -230,6 +232,14 @@ public class ModelCheckerFlowLTL {
         this.verificationAlgo = verificationAlgo;
     }
 
+    public String getAbcParameters() {
+        return abcParameters;
+    }
+
+    public void setAbcParameters(String abcParameters) {
+        this.abcParameters = abcParameters;
+    }
+
     /**
      * Returns null iff the formula holds.
      *
@@ -258,7 +268,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
+        return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
     }
 
     /**
@@ -288,7 +298,7 @@ public class ModelCheckerFlowLTL {
             } else {
                 renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
             }
-            return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName());
+            return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName(), "");
         }
         PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(game, formula);
         ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula, false);
@@ -299,7 +309,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName());
+        return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
     }
 
 }
