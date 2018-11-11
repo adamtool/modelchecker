@@ -176,7 +176,7 @@ public class ModelCheckerMCHyper {
                 call = "bmc3";
                 break;
             default:
-                throw new RuntimeException("Not all verifcation methods had been considered. '" + alg + "' is missing.");
+                throw new RuntimeException("Not all verification methods had been considered. '" + alg + "' is missing.");
         }
         String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
         Logger.getInstance().addMessage("", false);
@@ -204,23 +204,27 @@ public class ModelCheckerMCHyper {
         if (exitValue != 0) {
             throw new ExternalToolException("ABC didn't finshed correctly.");
         }
-        if (procAbc.getOutput().contains("Io_ReadAiger: The network check has failed.")) {
+        String abcOutput = procAbc.getOutput();
+        if (abcOutput.contains("Io_ReadAiger: The network check has failed.")) {
             throw new ExternalToolException("ABC didn't finshed correctly. The check of the aiger network '" + path + "_mcHyperOut.aig' has failed."
                     + " Check the abc output for more information:\n" + procAbc.getOutput());
         }
-        if (procAbc.getOutput().contains("There is no current network.")) {
+        if (abcOutput.contains("There is no current network.")) {
             Logger.getInstance().addMessage("[WARNING] abc says there is no current network to solve."
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
-        if (procAbc.getOutput().contains("Empty network.")) {
+        if (abcOutput.contains("Empty network.")) {
             Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
+        
+        //todo: hack for checking the abc output
+        Logger.getInstance().addMessage(abcOutput, false, true);
 
         // %% COUNTER EXAMPLE
         // has a counter example, ergo read it
         CounterExample cex = null;
-        if (!procAbc.getOutput().contains("Counter-example is not available")) {
+        if (!abcOutput.contains("Counter-example is not available")) {
             String file = path + ".cex";
             File f = new File(file);
             if (f.exists() && !f.isDirectory()) {

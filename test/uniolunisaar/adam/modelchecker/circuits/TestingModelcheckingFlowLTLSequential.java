@@ -524,7 +524,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check maximal initerleaving in the circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
-                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL_INHIBITOR,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 ModelCheckerMCHyper.VerificationAlgo.IC3,
