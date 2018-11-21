@@ -4,6 +4,9 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.logic.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.flowltl.LTLFormula;
 import uniolunisaar.adam.tools.Tools;
 
 /**
@@ -17,9 +20,11 @@ public class Statistics {
     private long in_nb_transitions;
     private long in_size_formula;
     // input model checking
-    private long mc_nb_places;
-    private long mc_nb_transitions;
-    private long mc_size_formula;
+    private PetriGame mc_net;
+    private ILTLFormula mc_formula;
+//    private long mc_nb_places;
+//    private long mc_nb_transitions;
+//    private long mc_size_formula;
     // input circuit
     private long sys_nb_latches;
     private long sys_nb_gates;
@@ -72,27 +77,40 @@ public class Statistics {
     }
 
     public long getMc_nb_places() {
-        return mc_nb_places;
+        return mc_net.getPlaces().size();
     }
 
-    public void setMc_nb_places(long mc_nb_places) {
-        this.mc_nb_places = mc_nb_places;
-    }
-
+//    public void setMc_nb_places(long mc_nb_places) {
+//        this.mc_nb_places = mc_nb_places;
+//    }
     public long getMc_nb_transitions() {
-        return mc_nb_transitions;
+        return mc_net.getTransitions().size();
     }
 
-    public void setMc_nb_transitions(long mc_nb_transitions) {
-        this.mc_nb_transitions = mc_nb_transitions;
-    }
-
+//    public void setMc_nb_transitions(long mc_nb_transitions) {
+//        this.mc_nb_transitions = mc_nb_transitions;
+//    }
     public long getMc_size_formula() {
-        return mc_size_formula;
+        return mc_formula.getSize();
     }
 
-    public void setMc_size_formula(long mc_size_formula) {
-        this.mc_size_formula = mc_size_formula;
+//    public void setMc_size_formula(long mc_size_formula) {
+//        this.mc_size_formula = mc_size_formula;
+//    }
+    public PetriGame getMc_net() {
+        return mc_net;
+    }
+
+    public void setMc_net(PetriGame mc_net) {
+        this.mc_net = mc_net;
+    }
+
+    public ILTLFormula getMc_formula() {
+        return mc_formula;
+    }
+
+    public void setMc_formula(ILTLFormula mc_formula) {
+        this.mc_formula = mc_formula;
     }
 
     public long getSys_nb_latches() {
@@ -209,9 +227,9 @@ public class Statistics {
                 .append(in_nb_places).append("  &  ")
                 .append(in_nb_transitions).append("  &  ")
                 .append(in_size_formula).append("  &  ")
-                .append(mc_nb_places).append("  &  ")
-                .append(mc_nb_transitions).append("  &  ")
-                .append(mc_size_formula).append("  &  ")
+                .append(getMc_nb_places()).append("  &  ")
+                .append(getMc_nb_transitions()).append("  &  ")
+                .append(getMc_size_formula()).append("  &  ")
                 .append(sys_nb_latches).append("  &  ")
                 .append(sys_nb_gates).append("  &  ")
                 .append(total_nb_latches).append("  &  ")

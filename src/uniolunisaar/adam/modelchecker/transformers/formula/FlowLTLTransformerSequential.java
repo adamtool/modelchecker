@@ -439,7 +439,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         ILTLFormula ret = convert(f);
 
         if (initFirst) {
-            // don't need the forcing of the firing since it is done with the activ places
+            // don't need the forcing of the firing since it is later done with the activ places
             // in the beginning all init transitions are allowed to fire until the original formula has to hold
 // to expensive better use the next            
 //            ILTLFormula init = new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(allInitPlaces, true));

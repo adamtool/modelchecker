@@ -176,9 +176,8 @@ public class ModelCheckerFlowLTL {
             stats.setIn_nb_transitions(net.getTransitions().size());
             stats.setIn_size_formula(f.getSize());
             // input model checking net
-            stats.setMc_nb_places(gameMC.getPlaces().size());
-            stats.setMc_nb_transitions(gameMC.getTransitions().size());
-            stats.setMc_size_formula(formulaMC.getSize());
+            stats.setMc_net(gameMC);
+            stats.setMc_formula(formulaMC);
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
         return mcLTL.check(gameMC, formulaMC, path + "_mc", verbose, stats);
