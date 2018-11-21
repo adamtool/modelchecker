@@ -50,7 +50,7 @@ public class ModelCheckerMCHyper {
      * @throws InterruptedException
      * @throws IOException
      */
-    private static ModelCheckingResult checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameter) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    private static ModelCheckingResult checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameter, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // Create System 
         AigerFile circuit = circ.render(net);
         Tools.saveFile(path + ".aag", circuit.toString());
@@ -103,6 +103,10 @@ public class ModelCheckerMCHyper {
             errStream = new PrintWriter(err, true);
         }
         int exitValue = procMCHyper.startAndWaitFor(outStream, errStream);
+
+        if (!verbose) { // cleanup
+            Tools.deleteFile(inputFile);
+        }
         if (exitValue != 0) {
             String error = "";
             if (procMCHyper.getErrors().contains("mchyper: Prelude.read: no parse")) {
@@ -116,7 +120,8 @@ public class ModelCheckerMCHyper {
         Logger.getInstance().addMessage("", false);
 
         // %%%%%%%%%%%%%%%% Aiger
-        String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", path + "_mcHyperOut.aag", path + "_mcHyperOut.aig"};
+        inputFile = path + "_mcHyperOut.aag";
+        String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", inputFile, path + "_mcHyperOut.aig"};
 
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling Aiger ...", false);
@@ -133,6 +138,9 @@ public class ModelCheckerMCHyper {
             errStream = new PrintWriter(err, true);
         }
         exitValue = procAiger.startAndWaitFor(outStream, errStream);
+        if (!verbose) { // cleanup
+            Tools.deleteFile(inputFile);
+        }
         if (exitValue != 0) {
             throw new ExternalToolException("Aigertools didn't finshed correctly. 'aigtoaig' couldn't produce an 'aig'-file from '" + path + "_mcHyperOut.aag'");
         }
@@ -178,6 +186,7 @@ public class ModelCheckerMCHyper {
             default:
                 throw new RuntimeException("Not all verification methods had been considered. '" + alg + "' is missing.");
         }
+        inputFile = path + "_mcHyperOut.aig";
         String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling abc ...", false);
@@ -195,12 +204,15 @@ public class ModelCheckerMCHyper {
         }
         procAbc.start(outStream, errStream);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
-        abcInput.println("read " + path + "_mcHyperOut.aig");
+        abcInput.println("read " + inputFile);
         abcInput.println(call + " " + abcParameter);
         abcInput.println("write_cex -f " + path + ".cex");
         abcInput.println("quit");
         abcInput.flush();
         procAbc.waitFor();
+        if (!verbose) { // cleanup
+            Tools.deleteFile(inputFile);
+        }
         if (exitValue != 0) {
             throw new ExternalToolException("ABC didn't finshed correctly.");
         }
@@ -236,6 +248,9 @@ public class ModelCheckerMCHyper {
                 CounterExample cex = circ.parseCounterExample(net, file, new CounterExample(safety, liveness));
                 ret.setCex(cex);
                 ret.setSat(ModelCheckingResult.Satisfied.FALSE);
+                if (!verbose) { // cleanup
+                    Tools.deleteFile(file);
+                }
             } else {
                 throw new ExternalToolException("ABC didn't finshed as expected. There should be a counter-example written to '" + file + "'"
                         + " but the file doesn't exist."
@@ -265,7 +280,7 @@ public class ModelCheckerMCHyper {
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
     public static ModelCheckingResult check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        return check(alg, net, circ, formula, path, null, abcParameters);
+        return check(alg, net, circ, formula, path, null, abcParameters, true);
     }
 
     /**
@@ -283,9 +298,9 @@ public class ModelCheckerMCHyper {
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      */
-    public static ModelCheckingResult check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static ModelCheckingResult check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameters, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
-        return checkSeparate(alg, net, circ, formula, path, stats, abcParameters);
+        return checkSeparate(alg, net, circ, formula, path, stats, abcParameters, verbose);
     }
 
     /**

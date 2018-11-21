@@ -460,7 +460,7 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
-    @Test
+    @Test(enabled=false)
     void testMcCASLink() throws ParseException, IOException, NotSupportedGameException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         String folder = System.getProperty("examplesfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
         String output = System.getProperty("testoutputfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
