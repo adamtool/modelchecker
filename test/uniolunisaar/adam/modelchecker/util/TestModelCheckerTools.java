@@ -8,9 +8,9 @@ import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
 import uniolunisaar.adam.logic.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.flowltl.RunFormula;
 import uniolunisaar.adam.logic.flowltlparser.FlowLTLParser;
-import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckerLTL;
+import uniolunisaar.adam.modelchecker.circuits.ModelCheckingResult;
 import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
@@ -38,27 +38,28 @@ public class TestModelCheckerTools {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
         mc.setMaximality(max);
 
-        CounterExample cex;
+        ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
+        ModelCheckingResult check;
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
         mc.setApproach(ModelCheckerFlowLTL.Approach.SEQUENTIAL);
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
         mc.setApproach(ModelCheckerFlowLTL.Approach.PARALLEL);
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
     }
 
     public static void testModelCheckerLTL(PetriGame net, String formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws ParseException, InterruptedException, IOException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
@@ -78,24 +79,25 @@ public class TestModelCheckerTools {
         ModelCheckerLTL mc = new ModelCheckerLTL();
         mc.setMaximality(max);
 
-        CounterExample cex;
+        ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
+        ModelCheckingResult check;
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
-        cex = mc.check(net, formula, path, true);
-        Assert.assertEquals(cex == null, result);
+        check = mc.check(net, formula, path, true);
+        Assert.assertEquals(check.getSatisfied(), sat);
     }
 }

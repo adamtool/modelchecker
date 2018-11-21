@@ -48,7 +48,7 @@ public class MCFlowLTLSeqGenerators {
 
         String formula;
         RunFormula f;
-        CounterExample ret;
+        ModelCheckingResult ret;
         String name;
 
         formula = "A(F(pOut)";
@@ -61,17 +61,17 @@ public class MCFlowLTLSeqGenerators {
                 ModelCheckerFlowLTL.Approach.SEQUENTIAL_INHIBITOR,
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
-//                ModelCheckerMCHyper.VerificationAlgo.INT,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,
                 ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
-        Assert.assertNull(ret);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
-        Assert.assertNull(ret);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
 }

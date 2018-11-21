@@ -73,7 +73,7 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
-    public CounterExample check(PetriGame net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriGame net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         return check(net, formula, path, verbose, null);
     }
 
@@ -93,7 +93,7 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
-    public CounterExample check(PetriGame net, RunFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriGame net, RunFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering
@@ -256,7 +256,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static CounterExample checkWithParallelApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static ModelCheckingResult checkWithParallelApproach(PetriGame game, IRunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
         PetriGame gameMC = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(game);
         ILTLFormula formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(game, gameMC, formula);
@@ -286,7 +286,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static CounterExample checkWithSequentialApproach(PetriGame game, RunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static ModelCheckingResult checkWithSequentialApproach(PetriGame game, RunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + game.getName() + "' for the formula '" + formula + "'.", true);
         if (ModelCheckerTools.getFlowFormulas(formula).isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula + "'. Thus, we use the standard model checking algorithm for LTL.");

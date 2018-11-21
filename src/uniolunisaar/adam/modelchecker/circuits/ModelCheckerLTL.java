@@ -70,7 +70,7 @@ public class ModelCheckerLTL {
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
-    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         return check(net, formula, path, verbose, null);
     }
 
@@ -89,7 +89,7 @@ public class ModelCheckerLTL {
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
      * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
      */
-    public CounterExample check(PetriGame net, ILTLFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriGame net, ILTLFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + maximality
                 + " semantics: " + semantics

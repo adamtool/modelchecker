@@ -48,14 +48,14 @@ public class TestingModelcheckingFlowLTLParallel {
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
         PetriGame mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
-        CounterExample ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret);
+        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = "A(F(out))";
         f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
         ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
         AdamTools.saveAPT(net.getName(), net, false);
@@ -63,7 +63,7 @@ public class TestingModelcheckingFlowLTLParallel {
         mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret); // todo: here is an error, it is not null
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE); // todo: here is an error, it is not satisfied
     }
 
     @Test(enabled = true)
@@ -76,8 +76,8 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriGame mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        CounterExample ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertNotNull(ret);
+        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test(enabled = true)
@@ -90,8 +90,8 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriGame mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        CounterExample ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertNull(ret);
+        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = false)
@@ -103,12 +103,12 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriGame mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        CounterExample ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
     }
 
     @Test(enabled = false)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = RedundantNetwork.getBasis(1,1);
+        PetriGame net = RedundantNetwork.getBasis(1, 1);
         AdamTools.saveAPT(net.getName(), net, false);
         AdamTools.savePG2PDF(net.getName(), net, false);
         String formula = "A(F(out)";
@@ -116,21 +116,21 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriGame mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        CounterExample ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
 
-        net = RedundantNetwork.getUpdatingNetwork(1,1);
+        net = RedundantNetwork.getUpdatingNetwork(1, 1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
 
-        net = RedundantNetwork.getUpdatingMutexNetwork(1,1);
+        net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
         ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
 
-        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1,1);
+        net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         mc = PetriNetTransformerFlowLTLParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
