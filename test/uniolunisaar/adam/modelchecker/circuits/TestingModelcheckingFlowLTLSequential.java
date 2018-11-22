@@ -47,6 +47,40 @@ public class TestingModelcheckingFlowLTLSequential {
         (new File(outputDirInFormula)).mkdirs();
     }
 
+    public void testNewlyFlowCreation() throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriGame net = new PetriGame("infFlows");
+        Transition tin = net.createTransition("createFlows");
+        Place init = net.createPlace("pIn");
+        init.setInitialToken(1);
+        net.createFlow(tin, init);
+        net.createFlow(init, tin);
+        net.createTokenFlow(init, tin, init);
+        net.createInitialTokenFlow(tin, init);
+        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+
+        RunFormula formula;
+        String name;
+        ModelCheckingResult ret;
+
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL_INHIBITOR,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
+                true);
+
+        formula = new RunFormula(new FlowFormula(new AtomicProposition(init))); // should be true since the first place of each chain is pIn
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        formula = new RunFormula(new FlowFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(init))));  //should still be true
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+    }
+
     @Test(enabled = true)
     public void introducingExampleTransitions() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = new PetriGame("introduction");
@@ -84,8 +118,8 @@ public class TestingModelcheckingFlowLTLSequential {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 ModelCheckerLTL.TransitionSemantics.OUTGOING,
-                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL_INHIBITOR,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
@@ -93,10 +127,24 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%%%%%%    
         RunFormula a1 = new RunFormula(new FlowFormula(new AtomicProposition(t1)));
         RunFormula a2 = new RunFormula(new FlowFormula(new AtomicProposition(t2)));
-        formula = new RunFormula(a1, RunOperators.Binary.OR, a2);
+        formula = new RunFormula(a1, RunOperators.Binary.OR, a2); // should not hold since the newly created flow does not start with a transition, but a place
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        // %%%%%%% newly added (not done for all cases)
+        formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new AtomicProposition(f))); // should not hold because each case has the other case as counter example
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        // %%%%%%%% newly added (not done for all cases)
+        formula = new RunFormula(new FlowFormula(new LTLFormula(new AtomicProposition(t1), LTLOperators.Binary.OR, new AtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        // check in circuit
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
@@ -666,7 +714,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = UpdatingNetwork.create(3, 2);
+        PetriGame net = UpdatingNetwork.create(3, 1);
         AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -674,7 +722,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(p3)";
+        formula = "A(F(pOut)";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -700,7 +748,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertNull(ret);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void redundantFlowExampleFix() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         RunFormula f = new RunFormula(
@@ -729,7 +777,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = RedundantNetwork.getBasis(1, 1);
         AdamTools.saveAPT(outputDir + net.getName(), net, false);

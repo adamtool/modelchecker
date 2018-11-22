@@ -350,7 +350,6 @@ public class TestingModelcheckingLTL {
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
-        Assert.assertNull(check);
     }
 
     @Test(enabled = true)

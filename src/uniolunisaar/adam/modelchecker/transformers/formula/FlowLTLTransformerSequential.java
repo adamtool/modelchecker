@@ -27,7 +27,6 @@ import uniolunisaar.adam.logic.util.FormulaCreator;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL;
 import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.ACTIVATION_PREFIX_ID;
-import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID;
 import static uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTL.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
@@ -65,36 +64,29 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     return substChildPhi;
                 }
                 // if it's not in the last scope of an eventually, then replace it according to the document
-                // all transitions apart from those which are dependent of some of my act place (but the transition which just moves the token to the next formula)
+                // All other transitions then those belonging to nb_ff, apart from the next transitions
                 Collection<ILTLFormula> elements = new ArrayList<>();
-                for (Transition t : net.getTransitions()) {
-                    String actid = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
-                    if (net.containsPlace(actid)) {
-                        Place act = net.getPlace(actid);
-                        if (!act.getPostset().contains(t) || t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) { // todo: dependent on the sequential approach
-                            elements.add(new AtomicProposition(t));
-                        }
-                    } else {// if it is not dependent on the act place it could still be the initial transitions 
-                        Place act = net.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + nb_ff);
-                        if (!act.getPostset().contains(t)) {
-                            elements.add(new AtomicProposition(t));
-                        }
+                for (Transition t : net.getTransitions()) { // all transitions
+                    if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
+                            || // not of the subformula
+                            t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
+                            ) {
+                        elements.add(new AtomicProposition(t));
                     }
                 }
 
                 ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
 
-                // all transitions which are dependent on my act place (but the transition which just moves the token to the next formula)
+                // All of the transitions belonging to nb_ff, apart from the next transitions
                 elements = new ArrayList<>();
-                for (Transition t : net.getTransitions()) {
-                    String actid = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
-                    if (net.containsPlace(actid)) {
-                        Place act = net.getPlace(actid);
-                        if (act.getPostset().contains(t) && !t.getId().equals(t.getLabel() + PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)) {// todo: dependent on the sequential approach
-                            elements.add(new AtomicProposition(t));
-                        }
-                    } // don't want to add the initial transitions since the have to be happend before (for not initial we have to change it here!)
+                for (Transition t : net.getTransitions()) { // all transitions
+                    if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff)) //  of the subformula
+                            && !t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff) // not the nxt transitions
+                            ) {
+                        elements.add(new AtomicProposition(t));
+                    }
                 }
+
                 ILTLFormula myTransitions = FormulaCreator.bigWedgeOrVeeObject(elements, false);
                 LTLFormula untilSecond = new LTLFormula(myTransitions, LTLOperators.Binary.AND, substPhi);
                 LTLFormula until = new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond);
@@ -357,15 +349,17 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
      * @throws uniolunisaar.adam.modelchecker.exceptions.NotConvertableException
      */
     public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriGame orig, PetriNet net, RunFormula formula, boolean initFirst) throws NotConvertableException {
-        // replace the transitions
+        // %%%%%%%%%%%%%%%%%  RUN REPLACE TRANSITIONS
         RunFormula runF = replaceTransitionsWithinRunFormulaSequential(orig, net, formula);
-        // replace the next operator in the run-part
+        // %%%%%%%%%%%%%%%%%  RUN REPLACE NEXT 
         IFormula f = replaceNextWithinRunFormulaSequential(orig, net, runF);
 
+        // %%%%%%%%%%%%%%%%% FLOW PART
 //        List<AtomicProposition> allInitTransitions = new ArrayList<>();
 //        List<LTLFormula> allInitPlaces = new ArrayList<>();
         List<FlowFormula> flowFormulas = ModelCheckerTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
+            // %%%%%%%%%%%%%%%%%%% FLOW REPLACE PLACES
             FlowFormula flowFormula = flowFormulas.get(i);
             try {
                 // replace the places within the flow formula accordingly                 
@@ -381,11 +375,13 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
             }
-            // Replace the transitions
+            // %%%%%%%%%%%%% FLOW REPLACE TRANSITIONS
             flowFormula = replaceTransitionsInFlowFormulaSequential(orig, net, flowFormula, i, initFirst);
-            // Replace the next operator within the flow formula
+            // %%%%%%%%%%%%% FLOW REPLACE NEXT
             flowFormula = replaceNextInFlowFormulaSequential(orig, net, flowFormula, i);
 
+            // %%%%%%%%%%%%%% REPLACEMENT OF FLOW FORMULA
+            // %%%%%%%% NEWLY CREATED CHAINS CASE
             try {
                 // this is replaced by the stuff below since the no_chain case is subsumed by the new_tokenflow
 //                LTLFormula flowLTL = new LTLFormula(
@@ -398,6 +394,41 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 //                            LTLOperators.Binary.OR,
 //                            new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i))));
 //                }
+
+                // is the first operator an eventually? Then do nothing.
+                boolean eventually = false;
+                if (flowFormulas.get(i).getPhi() instanceof LTLFormula) {
+                    ILTLFormula phi = ((LTLFormula) flowFormulas.get(i).getPhi()).getPhi();
+                    if (phi instanceof FormulaUnary && (((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi).getOp() == LTLOperators.Unary.F)) {
+                        eventually = true;
+                    }
+                }
+                ILTLFormula newlyCreatedChains = null;
+                if (!eventually) { // the whole flowformula is not in the scope of an eventually
+                    // all transition starting a flow
+                    Place newChains = net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i);
+                    List<ILTLFormula> elements = new ArrayList<>();
+                    for (Transition t : newChains.getPostset()) {
+                        elements.add(new AtomicProposition(t));
+                    }
+                    if (!elements.isEmpty()) { // only when new chains are created during the game
+                        List<ILTLFormula> others = new ArrayList<>();
+                        // All other transitions then those belonging to i, apart from the next transitions
+                        for (Transition t : net.getTransitions()) { // all transitions
+                            if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(i))
+                                    || // not of the subformula
+                                    t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + i) // or its one of the nxt transitions
+                                    ) {
+                                others.add(new AtomicProposition(t));
+                            }
+                        }
+                        newlyCreatedChains = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(others, false), LTLOperators.Binary.U,
+                                new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND,
+                                        new LTLFormula(LTLOperators.Unary.X, flowFormula.getPhi())));
+                    }
+                }
+
+                // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NO CHAIN, OR WRONGLY DECIDED FOR NEW CHAIN
                 LTLFormula skipping = null;
                 if (initFirst) {
                     // it's OK when there is no chain or the subformula decided to consider a newly created chain but this doesn't exists in this run.
@@ -414,11 +445,16 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     );
                 }
 
+                // %%%%% PUT TOGETHER FLOW FORMULA
                 LTLFormula flowLTL = new LTLFormula(
                         skipping,
                         LTLOperators.Binary.OR,
                         flowFormula.getPhi());
+                if (newlyCreatedChains != null) {
+                    flowLTL = new LTLFormula(newlyCreatedChains, LTLOperators.Binary.OR, flowLTL);
+                }
 
+                // %%%%% REPLACE THE FLOW FORMULA
                 f = f.substitute(flowFormulas.get(i), new RunFormula(flowLTL));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
@@ -438,19 +474,20 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 
         ILTLFormula ret = convert(f);
 
+        // %%%%%%%%%%%%%%%% JUMP OVER INITIALIZATION
         if (initFirst) {
-            // don't need the forcing of the firing since it is later done with the activ places
-            // in the beginning all init transitions are allowed to fire until the original formula has to hold
-// to expensive better use the next            
-//            ILTLFormula init = new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(allInitPlaces, true));
-//            return new LTLFormula(init, LTLOperators.Binary.IMP, new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(allInitTransitions, false), LTLOperators.Binary.U, ret));
-            ILTLFormula next = ret;
+//            // don't need the forcing of the firing since it is later done with the activ places
+//            // in the beginning all init transitions are allowed to fire until the original formula has to hold
+//// to expensive better use the next            
+////            ILTLFormula init = new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(allInitPlaces, true));
+////            return new LTLFormula(init, LTLOperators.Binary.IMP, new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(allInitTransitions, false), LTLOperators.Binary.U, ret));
             for (int i = 0; i < flowFormulas.size(); i++) {
-                next = new LTLFormula(LTLOperators.Unary.X, next);
+                ret = new LTLFormula(LTLOperators.Unary.X, ret);
             }
 //            return new LTLFormula(init, LTLOperators.Binary.IMP, next);
         }
 
+        // %%%%%%%%%%%%%%%%%%%%%%%  ACTIVATION PART
         // since we don't want to stop within the subnets, omit these runs
         // this means we demand for every activation place of the subnets
         // that have to be left

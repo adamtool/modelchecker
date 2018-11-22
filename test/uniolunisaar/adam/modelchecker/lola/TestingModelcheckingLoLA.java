@@ -153,7 +153,7 @@ public class TestingModelcheckingLoLA {
 
     @Test
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException {
-        PetriGame net = UpdatingNetwork.create(3, 2);
+        PetriGame net = UpdatingNetwork.create(3, 1);
         AdamTools.savePG2PDF(net.getName(), net, false);
         PetriGame mc = PetriNetTransformerLoLA.createNet4ModelChecking4LoLA(net);
         AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
