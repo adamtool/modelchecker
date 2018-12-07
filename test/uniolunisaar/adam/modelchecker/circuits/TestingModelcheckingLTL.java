@@ -18,11 +18,11 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
-import uniolunisaar.adam.logic.logics.AtomicProposition;
 import uniolunisaar.adam.logic.logics.Constants;
-import uniolunisaar.adam.logic.logics.IAtomicProposition;
 import uniolunisaar.adam.logic.logics.IFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLConstants;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -119,19 +119,19 @@ public class TestingModelcheckingLTL {
         AdamTools.savePG2PDF(doublediamond.getName(), new PetriGame(doublediamond), false);
 
         // formula: in
-        LTLFormula f = new LTLFormula(new AtomicProposition(doublediamond.getPlace("in")));
+        LTLFormula f = new LTLFormula(new LTLAtomicProposition(doublediamond.getPlace("in")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
         check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // F M
-        f = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(doublediamond.getPlace("M")));
+        f = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(doublediamond.getPlace("M")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
         check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // F MM
-        f = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(doublediamond.getPlace("MM")));
+        f = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(doublediamond.getPlace("MM")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
         check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
@@ -163,13 +163,13 @@ public class TestingModelcheckingLTL {
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
 
         // initially the initial place
-        ILTLFormula pA = new AtomicProposition(init);
+        ILTLFormula pA = new LTLAtomicProposition(init);
         ModelCheckingResult cex = mc.check(game, pA, "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         //// but not the other one
         // first test the stuttering formula         
 //        IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
-        IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+        ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
         ILTLFormula stutt = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
                 LTLOperators.Binary.IMP,
                 new LTLFormula(LTLOperators.Unary.G, stutterReg)))
@@ -184,12 +184,12 @@ public class TestingModelcheckingLTL {
         cex = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
-        ILTLFormula pA2 = new AtomicProposition(init2);
+        ILTLFormula pA2 = new LTLAtomicProposition(init2);
         cex = mc.check(game, pA2, "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // not the transition is force to leave the state since we  can stay in the initial marking
-        ILTLFormula propT = new AtomicProposition(t);
+        ILTLFormula propT = new LTLAtomicProposition(t);
         cex = mc.check(game, propT, "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // but not when we demand maximality
@@ -197,7 +197,7 @@ public class TestingModelcheckingLTL {
         cex = mc.check(game, propT, "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         // Not all runs should be maximal
-        cex = mc.check(game, new Constants.False(), "./" + game.getName(), true);
+        cex = mc.check(game, new LTLConstants.False(), "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         AdamTools.savePG2PDF(game.getName(), game, true);
         // but not globally since the net is finite
@@ -278,7 +278,7 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(game);
-        ILTLFormula reachOut = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(out));
+        ILTLFormula reachOut = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(out));
         f = new LTLFormula(f, LTLOperators.Binary.IMP, reachOut);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
         check = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
@@ -305,7 +305,7 @@ public class TestingModelcheckingLTL {
 
         ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.OUTGOING, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 ModelCheckerMCHyper.VerificationAlgo.IC3);
-        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(tloop)), "./" + game.getName(), true);
+        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)), "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -319,27 +319,27 @@ public class TestingModelcheckingLTL {
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since it is done by hand
         mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
 
-        LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new AtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new AtomicProposition(pn.getPlace("B"))));
+        LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
         ModelCheckingResult check = mc.check(pn, f, "./" + pn.getName(), true);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbad"))));
+        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbad"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
         check = mc.check(pn, f, "./" + pn.getName(), true);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         LTLFormula bothA = new LTLFormula(
-                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("A"))),
+                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("A"))),
                 LTLOperators.Binary.AND,
-                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("A_")))
+                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("A_")))
         );
         LTLFormula bothB = new LTLFormula(
-                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("B"))),
+                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("B"))),
                 LTLOperators.Binary.AND,
-                new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(pn.getPlace("B_")))
+                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("B_")))
         );
-        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbad"))));
+        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbad"))));
         f = new LTLFormula(new LTLFormula(bothA, LTLOperators.Binary.OR, bothB), LTLOperators.Binary.IMP, f);
 
         // test previous
@@ -360,9 +360,9 @@ public class TestingModelcheckingLTL {
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.G,
                 new LTLFormula(
-                        new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbadA"))),
+                        new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbadA"))),
                         LTLOperators.Binary.AND,
-                        new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(pn.getPlace("qbadB")))
+                        new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbadB")))
                 ));
         ModelCheckerLTL mc = new ModelCheckerLTL();
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since it is done by hand
@@ -409,8 +409,8 @@ public class TestingModelcheckingLTL {
         ILTLFormula maxReisig = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(net);
         ILTLFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net);
 
-        LTLFormula evA2 = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(A2));
-        LTLFormula evB2 = new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(B2));
+        LTLFormula evA2 = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(A2));
+        LTLFormula evB2 = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(B2));
 
         LTLFormula f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
 

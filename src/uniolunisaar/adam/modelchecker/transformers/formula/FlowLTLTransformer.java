@@ -6,15 +6,14 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.logic.logics.AtomicProposition;
-import uniolunisaar.adam.logic.logics.Constants;
 import uniolunisaar.adam.logic.logics.FormulaBinary;
-import uniolunisaar.adam.logic.logics.IAtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IFlowFormula;
 import uniolunisaar.adam.logic.logics.IFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.IOperatorBinary;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLConstants;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -85,7 +84,7 @@ public class FlowLTLTransformer {
             case REPLACEMENT: {
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
-                    elements.add(new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(t)));
+                    elements.add(new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(t)));
                 }
                 ILTLFormula allNotTrue = FormulaCreator.bigWedgeOrVeeObject(elements, true);
 //        // does not work since we need simulatanous replacement
@@ -103,7 +102,7 @@ public class FlowLTLTransformer {
                 }
                 // now replace all step by step
                 for (Transition t : net.getTransitions()) {
-                    ILTLFormula tProp = new AtomicProposition(t);
+                    ILTLFormula tProp = new LTLAtomicProposition(t);
                     f = f.replace("'~#@" + t.getId() + "@#~'", new LTLFormula(allNotTrue, LTLOperators.Binary.U, tProp).toString());
                 }
                 // clean up
@@ -113,15 +112,15 @@ public class FlowLTLTransformer {
                 return FlowLTLParser.parse(net, f).toLTLFormula();
             }
             case REPLACEMENT_REGISTER: {
-                IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
-                IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+                ILTLFormula initReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
                 String f = formula.toReplacableString();
                 for (Transition t : net.getTransitions()) {
                     f = f.replace("'" + t.getId() + "'", "'~#@" + t.getId() + "@#~'");
                 }
                 // now replace all step by step
                 for (Transition t : net.getTransitions()) {
-                    ILTLFormula tProp = new AtomicProposition(t);
+                    ILTLFormula tProp = new LTLAtomicProposition(t);
                     f = f.replace("'~#@" + t.getId() + "@#~'", new LTLFormula(stutterReg, LTLOperators.Binary.U, tProp).toString());
                 }
                 // clean up
@@ -133,7 +132,7 @@ public class FlowLTLTransformer {
             case PREFIX: {
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
-                    elements.add(new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(t)));
+                    elements.add(new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(t)));
                 }
                 ILTLFormula allNotTrue = FormulaCreator.bigWedgeOrVeeObject(elements, true);
 //        return new LTLFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, allNotTrue),
@@ -151,7 +150,7 @@ public class FlowLTLTransformer {
             }
             case PREFIX_REGISTER: {
 //                IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
-                IAtomicProposition stutterReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
 //                return new LTLFormula(initReg, LTLOperators.Binary.IMP, new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
 //                        LTLOperators.Binary.IMP,
 //                        new LTLFormula(LTLOperators.Unary.G, stutterReg))),

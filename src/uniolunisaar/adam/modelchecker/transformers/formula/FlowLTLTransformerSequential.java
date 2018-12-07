@@ -19,6 +19,7 @@ import uniolunisaar.adam.logic.logics.IFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.IOperatorBinary;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -71,7 +72,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                             || // not of the subformula
                             t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
                             ) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
 
@@ -83,7 +84,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff)) //  of the subformula
                             && !t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff) // not the nxt transitions
                             ) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
 
@@ -131,7 +132,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                             || // not of the subformula
                             t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
                             ) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
                 ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
@@ -144,7 +145,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                             !t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + nb_ff)
                             &&// which are not the nxt transitions
                             t.getLabel().equals(atom.toString())) { // with the same label as the atom
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
                 ILTLFormula myTransitions = FormulaCreator.bigWedgeOrVeeObject(elements, false);
@@ -207,14 +208,14 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     if (!orig.containsTransition(t.getId())) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
                 ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
                 // all original transitions
                 elements = new ArrayList<>();
                 for (Transition t : orig.getTransitions()) {
-                    elements.add(new AtomicProposition(t));
+                    elements.add(new LTLAtomicProposition(t));
                 }
                 ILTLFormula origTrans = FormulaCreator.bigWedgeOrVeeObject(elements, false);
                 LTLFormula untilSecond = new LTLFormula(origTrans, LTLOperators.Binary.AND, substPhi);
@@ -278,8 +279,8 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     private static IFormula replaceTransitionsWithinRunFormulaSequential(PetriGame orig, PetriNet net, IFormula phi, boolean scopeEventually) {
         if (phi instanceof Constants) {
             return phi;
-        } else if (phi instanceof AtomicProposition) {
-            AtomicProposition atom = (AtomicProposition) phi;
+        } else if (phi instanceof LTLAtomicProposition) {
+            LTLAtomicProposition atom = (LTLAtomicProposition) phi;
             if (atom.isTransition()) {
                 // if it's in the direct scope of an eventually we don't need the until
                 if (scopeEventually) {
@@ -290,7 +291,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     if (!orig.containsTransition(t.getId())) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
                 ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
@@ -409,7 +410,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     Place newChains = net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i);
                     List<ILTLFormula> elements = new ArrayList<>();
                     for (Transition t : newChains.getPostset()) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                     if (!elements.isEmpty()) { // only when new chains are created during the game
                         List<ILTLFormula> others = new ArrayList<>();
@@ -419,7 +420,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                                     || // not of the subformula
                                     t.getId().endsWith(PetriNetTransformerFlowLTLSequential.NEXT_ID + "-" + i) // or its one of the nxt transitions
                                     ) {
-                                others.add(new AtomicProposition(t));
+                                others.add(new LTLAtomicProposition(t));
                             }
                         }
                         newlyCreatedChains = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(others, false), LTLOperators.Binary.U,
@@ -433,15 +434,15 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 if (initFirst) {
                     // it's OK when there is no chain or the subformula decided to consider a newly created chain but this doesn't exists in this run.
                     skipping = new LTLFormula(LTLOperators.Unary.G,
-                            new LTLFormula(new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)),
+                            new LTLFormula(new LTLAtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.NEW_TOKENFLOW_ID + "-" + i)),
                                     LTLOperators.Binary.OR,
-                                    new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
+                                    new LTLAtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
                             )
                     );
                 } else {
                     // it's OK to consider no chain
                     skipping = new LTLFormula(LTLOperators.Unary.G,
-                            new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
+                            new LTLAtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID + "-" + i))
                     );
                 }
 
@@ -499,7 +500,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 // if it's not a orignal one (meaning the rest of the string is not a transition of the original net
 //                if (!orig.containsTransition(id.substring(ACTIVATION_PREFIX_ID.length()))) {
                 if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
-                    LTLFormula inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new AtomicProposition(p))));
+                    LTLFormula inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p))));
                     elements.add(inf);
                 }
             }
