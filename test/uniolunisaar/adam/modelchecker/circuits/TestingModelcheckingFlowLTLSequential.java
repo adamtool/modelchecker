@@ -16,6 +16,7 @@ import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.logic.logics.AtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -70,12 +71,12 @@ public class TestingModelcheckingFlowLTLSequential {
                 ModelCheckerMCHyper.VerificationAlgo.IC3,
                 true);
 
-        formula = new RunFormula(new FlowFormula(new AtomicProposition(init))); // should be true since the first place of each chain is pIn
+        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(init))); // should be true since the first place of each chain is pIn
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = new RunFormula(new FlowFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(init))));  //should still be true
+        formula = new RunFormula(new FlowFormula(new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(init))));  //should still be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
@@ -125,8 +126,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 true);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%    
-        RunFormula a1 = new RunFormula(new FlowFormula(new AtomicProposition(t1)));
-        RunFormula a2 = new RunFormula(new FlowFormula(new AtomicProposition(t2)));
+        RunFormula a1 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1)));
+        RunFormula a2 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t2)));
         formula = new RunFormula(a1, RunOperators.Binary.OR, a2); // should not hold since the newly created flow does not start with a transition, but a place
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
@@ -134,14 +135,14 @@ public class TestingModelcheckingFlowLTLSequential {
         ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // %%%%%%% newly added (not done for all cases)
-        formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new AtomicProposition(f))); // should not hold because each case has the other case as counter example
+        formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // %%%%%%%% newly added (not done for all cases)
-        formula = new RunFormula(new FlowFormula(new LTLFormula(new AtomicProposition(t1), LTLOperators.Binary.OR, new AtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
+        formula = new RunFormula(new FlowFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
@@ -192,7 +193,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertNotNull(ret);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new FlowFormula(new AtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
+        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
         mc.setInitFirst(true);
@@ -250,7 +251,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
 
         //%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new FlowFormula(new AtomicProposition(e))); // should not be true
+        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(e))); // should not be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 
         // check in circuit
@@ -278,11 +279,11 @@ public class TestingModelcheckingFlowLTLSequential {
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
 //        Assert.assertNotNull(ret);
 
-        ILTLFormula ltlE = new AtomicProposition(e);
+        ILTLFormula ltlE = new LTLAtomicProposition(e);
         ILTLFormula finallyE = new LTLFormula(LTLOperators.Unary.F, ltlE);
-        ILTLFormula ltlF = new AtomicProposition(f);
+        ILTLFormula ltlF = new LTLAtomicProposition(f);
         ILTLFormula finallyF = new LTLFormula(LTLOperators.Unary.F, ltlF);
-        ILTLFormula ltlB = new AtomicProposition(b);
+        ILTLFormula ltlB = new LTLAtomicProposition(b);
         ILTLFormula inifintelyB = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlB));
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -387,7 +388,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertNull(ret);// todo: it's a problem since when not init in the first step we could chose to consider the given chain, after the chain has started.
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        AtomicProposition ltlD = new AtomicProposition(d);
+        LTLAtomicProposition ltlD = new LTLAtomicProposition(d);
         formula = new RunFormula( // should not be true since the net is finite and D is not a place of all final markings
                 new FlowFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
@@ -755,13 +756,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new LTLFormula(LTLOperators.Unary.NEG,
                         new LTLFormula(LTLOperators.Unary.G,
                                 new LTLFormula(LTLOperators.Unary.F,
-                                        new LTLFormula(new AtomicProposition(net.getTransition("tupD")), LTLOperators.Binary.OR, new AtomicProposition(net.getTransition("tupU")))
+                                        new LTLFormula(new LTLAtomicProposition(net.getTransition("tupD")), LTLOperators.Binary.OR, new LTLAtomicProposition(net.getTransition("tupU")))
                                 )
                         )
                 ), RunOperators.Implication.IMP,
                 new FlowFormula(
                         new LTLFormula(LTLOperators.Unary.F,
-                                new AtomicProposition(net.getPlace("out"))
+                                new LTLAtomicProposition(net.getPlace("out"))
                         ))
         );
         System.out.println(f.toString());

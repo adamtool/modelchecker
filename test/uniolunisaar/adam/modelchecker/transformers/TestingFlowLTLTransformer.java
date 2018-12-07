@@ -9,10 +9,10 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.logic.logics.AtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -67,7 +67,7 @@ public class TestingFlowLTLTransformer {
         AdamTools.savePG2PDF(net.getName(), net, false);
 
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
-        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
+        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new LTLAtomicProposition(f)));
 
         PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, formula, true);
         AdamTools.savePG2PDF(mc.getName() + "mc", mc, true);

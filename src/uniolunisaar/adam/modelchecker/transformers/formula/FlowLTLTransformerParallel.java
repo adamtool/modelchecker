@@ -17,6 +17,7 @@ import uniolunisaar.adam.logic.logics.IFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.IOperatorBinary;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -62,11 +63,11 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                     // all original transitions
                     Collection<ILTLFormula> elements = new ArrayList<>();
                     for (Transition t : orig.getTransitions()) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                     // and the new transitions
                     for (Transition t : newTransitions) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
 
                     ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
@@ -74,7 +75,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                     // all transitions which are not original or the new ones
                     for (Transition t : net.getTransitions()) {
                         if (!orig.containsTransition(t.getId()) || !newTransitions.contains(t)) {
-                            elements.add(new AtomicProposition(t));
+                            elements.add(new LTLAtomicProposition(t));
                         }
                     }
                     LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
@@ -109,7 +110,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     if (t.getId().startsWith(INIT_TOKENFLOW_ID)) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
 
@@ -117,7 +118,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 elements = new ArrayList<>();
                 // all transitions which are original
                 for (Transition t : orig.getTransitions()) {
-                    elements.add(new AtomicProposition(t));
+                    elements.add(new LTLAtomicProposition(t));
                 }
                 LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
 //                ILTLFormula untilSecond =  castPhi.getPhi();
@@ -158,11 +159,11 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         // Replace the transitions with the big-or of all accordingly labelled transitions
         for (Transition transition : orig.getTransitions()) {
             try {
-                AtomicProposition trans = new AtomicProposition(transition);
+                AtomicProposition trans = new LTLAtomicProposition(transition);
                 Collection<ILTLFormula> elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     if (t.getLabel().equals(transition.getId())) {
-                        elements.add(new AtomicProposition(t));
+                        elements.add(new LTLAtomicProposition(t));
                     }
                 }
                 f = f.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
@@ -193,7 +194,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 flowF = replaceNextInFlowFormulaParallel(orig, net, flowF);
                 
                 f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
-                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID))),
+                        new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(net.getPlace(PetriNetTransformerFlowLTL.INIT_TOKENFLOW_ID))),
                         LTLOperators.Binary.OR,
                         flowF.getPhi())));
                 return convert(f);
