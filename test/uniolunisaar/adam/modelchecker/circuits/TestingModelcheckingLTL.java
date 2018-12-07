@@ -332,12 +332,12 @@ public class TestingModelcheckingLTL {
         LTLFormula bothA = new LTLFormula(
                 new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("A"))),
                 LTLOperators.Binary.AND,
-                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("A_")))
+                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("AA")))
         );
         LTLFormula bothB = new LTLFormula(
                 new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("B"))),
                 LTLOperators.Binary.AND,
-                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("B_")))
+                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("BB")))
         );
         f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbad"))));
         f = new LTLFormula(new LTLFormula(bothA, LTLOperators.Binary.OR, bothB), LTLOperators.Binary.IMP, f);

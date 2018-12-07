@@ -185,8 +185,8 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
-                    AtomicProposition p = new AtomicProposition(place);
-                    AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID));
+                    AtomicProposition p = new LTLAtomicProposition(place);
+                    AtomicProposition psub = new LTLAtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID));
                     flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                 }
 

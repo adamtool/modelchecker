@@ -368,8 +368,8 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
                     if (net.containsNode(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i)) { // only if the place is part of the subnet
-                        AtomicProposition p = new AtomicProposition(place);
-                        AtomicProposition psub = new AtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i));
+                        LTLAtomicProposition p = new LTLAtomicProposition(place);
+                        LTLAtomicProposition psub = new LTLAtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i));
                         flowFormula = (FlowFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                     }
                 }

@@ -13,7 +13,6 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
-import uniolunisaar.adam.logic.logics.AtomicProposition;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
@@ -150,7 +149,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new AtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
+        formula = new RunFormula(new LTLAtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
         mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
@@ -171,7 +170,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertNull(ret);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new AtomicProposition(t2)); // should not hold since the flows starting in A and B
+        formula = new RunFormula(new LTLAtomicProposition(t2)); // should not hold since the flows starting in A and B
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         // check in circuit
         mc.setInitFirst(true);
