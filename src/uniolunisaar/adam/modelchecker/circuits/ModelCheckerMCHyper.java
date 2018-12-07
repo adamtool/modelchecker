@@ -248,6 +248,11 @@ public class ModelCheckerMCHyper {
                 CounterExample cex = circ.parseCounterExample(net, file, new CounterExample(safety, liveness));
                 ret.setCex(cex);
                 ret.setSat(ModelCheckingResult.Satisfied.FALSE);
+                // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+                if (stats != null) {
+                    stats.setSatisfied(0);
+                }
+                // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
                 if (!verbose) { // cleanup
                     Tools.deleteFile(file);
                 }
@@ -258,6 +263,11 @@ public class ModelCheckerMCHyper {
             }
         } else {
             ret.setSat(ModelCheckingResult.Satisfied.TRUE);
+            // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+            if (stats != null) {
+                stats.setSatisfied(1);
+            }
+            // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
         }
 
         Logger.getInstance().addMessage("... finished calling abc.", false);

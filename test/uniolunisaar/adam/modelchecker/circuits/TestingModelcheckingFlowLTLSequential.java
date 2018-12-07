@@ -24,6 +24,7 @@ import uniolunisaar.adam.logic.logics.ltl.flowltlparser.FlowLTLParser;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
+import uniolunisaar.adam.modelchecker.util.Statistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -45,6 +46,42 @@ public class TestingModelcheckingFlowLTLSequential {
 
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
+    }
+
+    public void testMaxInCircuitVsFormula() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriGame net = UpdatingNetwork.create(3, 1);
+
+        String formula;
+        RunFormula f;
+        ModelCheckingResult ret;
+        String name;
+
+        formula = "A(F(pOut)";
+        f = FlowLTLParser.parse(net, formula);
+        name = net.getName() + "_" + f.toString().replace(" ", "");
+
+        // maximality in circuit
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                ModelCheckerLTL.TransitionSemantics.OUTGOING,
+                ModelCheckerFlowLTL.Approach.SEQUENTIAL,
+                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                ModelCheckerMCHyper.VerificationAlgo.IC3,
+                true);
+        Statistics statsInCircuit = new Statistics();
+        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true, statsInCircuit);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        // maximality in formula        
+        Statistics statsInFormula = new Statistics();
+        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        ret = mc.check(net, f, outputDirInFormula + name + "_init", true, statsInFormula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        
+        System.out.println(statsInCircuit.toString());
+        System.out.println("-------");
+        System.out.println(statsInFormula.toString());
+
     }
 
     public void testNewlyFlowCreation() throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
