@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.logic.flowltl.ILTLFormula;
-import uniolunisaar.adam.logic.flowltl.LTLFormula;
+import uniolunisaar.adam.logic.ltl.flowltl.ILTLFormula;
+import uniolunisaar.adam.logic.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.tools.Tools;
 
 /**
