@@ -119,6 +119,25 @@ public class ModelCheckerMCHyper {
         Logger.getInstance().addMessage("... finished calling MCHyper", false);
         Logger.getInstance().addMessage("", false);
 
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+        if (stats != null) {
+            // system size
+            stats.setSys_nb_latches(circuit.getNbOfLatches());
+            stats.setSys_nb_gates(circuit.getNbOfGates());
+            // total size 
+            try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(path + "_mcHyperOut.aag"))) {
+                String header = mcHyperAag.readLine();
+                String[] vals = header.split(" ");
+                stats.setTotal_nb_latches(Integer.parseInt(vals[3]));
+                stats.setTotal_nb_gates(Integer.parseInt(vals[5]));
+            }
+            Logger.getInstance().addMessage(stats.getInputSizes(), true);
+            // if a file is given already write them to the file
+            stats.writeInputSizesToFile();
+        }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
+
+        
         // %%%%%%%%%%%%%%%% Aiger
         inputFile = path + "_mcHyperOut.aag";
         String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", inputFile, path + "_mcHyperOut.aig"};
@@ -146,25 +165,7 @@ public class ModelCheckerMCHyper {
         }
         Logger.getInstance().addMessage("... finished calling Aiger.", false);
         Logger.getInstance().addMessage("", false);
-
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
-        if (stats != null) {
-            // system size
-            stats.setSys_nb_latches(circuit.getNbOfLatches());
-            stats.setSys_nb_gates(circuit.getNbOfGates());
-            // total size 
-            try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(path + "_mcHyperOut.aag"))) {
-                String header = mcHyperAag.readLine();
-                String[] vals = header.split(" ");
-                stats.setTotal_nb_latches(Integer.parseInt(vals[3]));
-                stats.setTotal_nb_gates(Integer.parseInt(vals[5]));
-            }
-            Logger.getInstance().addMessage(stats.getInputSizes(), true);
-            // if a file is given already write them to the file
-            stats.writeInputSizesToFile();
-        }
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-
+        
         // %%%%%%%%%%%%%%% Abc
         String call;
         switch (alg) {

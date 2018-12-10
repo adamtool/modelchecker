@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.tools.Tools;
 
 /**
