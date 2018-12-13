@@ -9,6 +9,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
@@ -88,7 +89,7 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        ModelCheckingResult output = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + net.getName(), "");
+        ModelCheckingResult output = ModelCheckerMCHyper.check(VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + net.getName(), "");
         Assert.assertEquals(output.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -137,7 +138,7 @@ public class TestingFlowLTLTransformer {
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
 
-        ModelCheckingResult output = ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName(), "");
+        ModelCheckingResult output = ModelCheckerMCHyper.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING), formula, "./" + game.getName(), "");
         Assert.assertEquals(output.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // new version

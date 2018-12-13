@@ -4,6 +4,7 @@ import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
@@ -43,13 +44,13 @@ public class ModelCheckerLTL {
     private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
     private Maximality maximality = Maximality.MAX_INTERLEAVING;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
-    private ModelCheckerMCHyper.VerificationAlgo verificationAlgo = ModelCheckerMCHyper.VerificationAlgo.IC3;
+    private VerificationAlgo verificationAlgo = VerificationAlgo.IC3;
     private String abcParameters = "";
 
     public ModelCheckerLTL() {
     }
 
-    public ModelCheckerLTL(TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, ModelCheckerMCHyper.VerificationAlgo verificationAlgo) {
+    public ModelCheckerLTL(TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, VerificationAlgo verificationAlgo) {
         this.semantics = semantics;
         this.maximality = maximality;
         this.stuttering = stuttering;
@@ -139,11 +140,11 @@ public class ModelCheckerLTL {
         this.maximality = maximality;
     }
 
-    public ModelCheckerMCHyper.VerificationAlgo getVerificationAlgo() {
+    public VerificationAlgo getVerificationAlgo() {
         return verificationAlgo;
     }
 
-    public void setVerificationAlgo(ModelCheckerMCHyper.VerificationAlgo verificationAlgo) {
+    public void setVerificationAlgo(VerificationAlgo verificationAlgo) {
         this.verificationAlgo = verificationAlgo;
     }
 

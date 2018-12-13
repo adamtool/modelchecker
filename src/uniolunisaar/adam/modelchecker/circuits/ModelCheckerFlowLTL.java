@@ -5,6 +5,7 @@ import java.io.IOException;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
@@ -42,14 +43,14 @@ public class ModelCheckerFlowLTL {
     private Approach approach = Approach.SEQUENTIAL_INHIBITOR;
     private Maximality maximality = Maximality.MAX_INTERLEAVING;
     private ModelCheckerLTL.Stuttering stuttering = ModelCheckerLTL.Stuttering.PREFIX_REGISTER;
-    private ModelCheckerMCHyper.VerificationAlgo verificationAlgo = ModelCheckerMCHyper.VerificationAlgo.IC3;
+    private VerificationAlgo verificationAlgo = VerificationAlgo.IC3;
     private boolean initFirst = true;
     private String abcParameters = "";
 
     public ModelCheckerFlowLTL() {
     }
 
-    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, ModelCheckerLTL.Stuttering stuttering, ModelCheckerMCHyper.VerificationAlgo verificationAlgo, boolean initFirst) {
+    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, ModelCheckerLTL.Stuttering stuttering, VerificationAlgo verificationAlgo, boolean initFirst) {
         this.semantics = semantics;
         this.approach = approach;
         this.maximality = maximality;
@@ -223,11 +224,11 @@ public class ModelCheckerFlowLTL {
         this.initFirst = initFirst;
     }
 
-    public ModelCheckerMCHyper.VerificationAlgo getVerificationAlgo() {
+    public VerificationAlgo getVerificationAlgo() {
         return verificationAlgo;
     }
 
-    public void setVerificationAlgo(ModelCheckerMCHyper.VerificationAlgo verificationAlgo) {
+    public void setVerificationAlgo(VerificationAlgo verificationAlgo) {
         this.verificationAlgo = verificationAlgo;
     }
 
@@ -267,7 +268,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
+        return ModelCheckerMCHyper.check(VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
     }
 
     /**
@@ -297,7 +298,7 @@ public class ModelCheckerFlowLTL {
             } else {
                 renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
             }
-            return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName(), "");
+            return ModelCheckerMCHyper.check(VerificationAlgo.IC3, game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName(), "");
         }
         PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(game, formula);
         ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula, false);
@@ -308,7 +309,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        return ModelCheckerMCHyper.check(ModelCheckerMCHyper.VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
+        return ModelCheckerMCHyper.check(VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
     }
 
 }

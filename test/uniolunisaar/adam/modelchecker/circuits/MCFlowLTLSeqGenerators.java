@@ -8,6 +8,8 @@ import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
+import static uniolunisaar.adam.externaltools.Abc.LOGGER_ABC_OUT;
+import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.logic.logics.ltl.flowltlparser.FlowLTLParser;
@@ -31,7 +33,7 @@ public class MCFlowLTLSeqGenerators {
     @BeforeClass
     public void createFolder() {
         Logger.getInstance().setVerbose(true);
-        Logger.getInstance().addMessageStream(ModelCheckerMCHyper.LOGGER_ABC_OUT, System.out);
+        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
 
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
@@ -62,7 +64,7 @@ public class MCFlowLTLSeqGenerators {
                 ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
                 //                ModelCheckerMCHyper.VerificationAlgo.INT,
-                ModelCheckerMCHyper.VerificationAlgo.IC3,
+                VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);

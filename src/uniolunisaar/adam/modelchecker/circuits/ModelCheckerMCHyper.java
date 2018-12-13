@@ -2,14 +2,15 @@ package uniolunisaar.adam.modelchecker.circuits;
 
 import uniolunisaar.adam.ds.circuits.AigerFile;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
+import uniolunisaar.adam.externaltools.Abc;
+import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.externaltools.AigToAig;
+import uniolunisaar.adam.externaltools.McHyper;
 import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
 import uniolunisaar.adam.modelchecker.util.Statistics;
@@ -24,21 +25,6 @@ import uniolunisaar.adam.tools.Tools;
  * @author Manuel Gieseking
  */
 public class ModelCheckerMCHyper {
-
-    public static final String LOGGER_MCHYPER_OUT = "mcHyperOut";
-    public static final String LOGGER_MCHYPER_ERR = "mcHyperErr";
-    public static final String LOGGER_AIGER_OUT = "aigerOut";
-    public static final String LOGGER_AIGER_ERR = "aigerErr";
-    public static final String LOGGER_ABC_OUT = "abcOut";
-    public static final String LOGGER_ABC_ERR = "abcErr";
-
-    public enum VerificationAlgo {
-        IC3,
-        INT,
-        BMC,
-        BMC2,
-        BMC3
-    }
 
     /**
      * Returns null iff the formula holds.
@@ -88,37 +74,8 @@ public class ModelCheckerMCHyper {
 
         //%%%%%%%%%%%%%%%%%% MCHyper
         String inputFile = path + ".aag";
-        String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), inputFile, formula, path + "_mcHyperOut"};
-        Logger.getInstance().addMessage("", false);
-        Logger.getInstance().addMessage("Calling MCHyper ...", false);
-        Logger.getInstance().addMessage(Arrays.toString(command), true);
-        ExternalProcessHandler procMCHyper = new ExternalProcessHandler(true, command);
-        PrintStream out = Logger.getInstance().getMessageStream(LOGGER_MCHYPER_OUT);
-        PrintStream err = Logger.getInstance().getMessageStream(LOGGER_MCHYPER_ERR);
-        PrintWriter outStream = null;
-        if (out != null) {
-            outStream = new PrintWriter(out, true);
-        }
-        PrintWriter errStream = null;
-        if (err != null) {
-            errStream = new PrintWriter(err, true);
-        }
-        int exitValue = procMCHyper.startAndWaitFor(outStream, errStream);
-
-        if (!verbose) { // cleanup
-            Tools.deleteFile(inputFile);
-        }
-        if (exitValue != 0) {
-            String error = "";
-            if (procMCHyper.getErrors().contains("mchyper: Prelude.read: no parse")) {
-                error = " Error parsing formula: " + formula;
-            } else if (procMCHyper.getErrors().contains("mchyper: " + inputFile + ": openFile: does not exist (No such file or directory)")) {
-                error = " File '" + inputFile + "' does not exist (No such file or directory).";
-            }
-            throw new ExternalToolException("MCHyper didn't finshed correctly." + error);
-        }
-        Logger.getInstance().addMessage("... finished calling MCHyper", false);
-        Logger.getInstance().addMessage("", false);
+        String outputPath = path + "_mcHyperOut";
+        McHyper.call(inputFile, formula, outputPath, verbose);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
@@ -126,7 +83,7 @@ public class ModelCheckerMCHyper {
             stats.setSys_nb_latches(circuit.getNbOfLatches());
             stats.setSys_nb_gates(circuit.getNbOfGates());
             // total size 
-            try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(path + "_mcHyperOut.aag"))) {
+            try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(outputPath + ".aag"))) {
                 String header = mcHyperAag.readLine();
                 String[] vals = header.split(" ");
                 stats.setTotal_nb_latches(Integer.parseInt(vals[3]));
@@ -138,142 +95,26 @@ public class ModelCheckerMCHyper {
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
 
-        
         // %%%%%%%%%%%%%%%% Aiger
         inputFile = path + "_mcHyperOut.aag";
-        String[] aiger_command = {AdamProperties.getInstance().getProperty(AdamProperties.AIGER_TOOLS) + "aigtoaig", inputFile, path + "_mcHyperOut.aig"};
+        outputPath = path + "_mcHyperOut.aig";
+        AigToAig.call(inputFile, outputPath, verbose);
 
-        Logger.getInstance().addMessage("", false);
-        Logger.getInstance().addMessage("Calling Aiger ...", false);
-        Logger.getInstance().addMessage(Arrays.toString(aiger_command), true);
-        ExternalProcessHandler procAiger = new ExternalProcessHandler(aiger_command);
-        out = Logger.getInstance().getMessageStream(LOGGER_AIGER_OUT);
-        err = Logger.getInstance().getMessageStream(LOGGER_AIGER_ERR);
-        outStream = null;
-        if (out != null) {
-            outStream = new PrintWriter(out, true);
-        }
-        errStream = null;
-        if (err != null) {
-            errStream = new PrintWriter(err, true);
-        }
-        exitValue = procAiger.startAndWaitFor(outStream, errStream);
-        if (!verbose) { // cleanup
-            Tools.deleteFile(inputFile);
-        }
-        if (exitValue != 0) {
-            throw new ExternalToolException("Aigertools didn't finshed correctly. 'aigtoaig' couldn't produce an 'aig'-file from '" + path + "_mcHyperOut.aag'");
-        }
-        Logger.getInstance().addMessage("... finished calling Aiger.", false);
-        Logger.getInstance().addMessage("", false);
-        
         // %%%%%%%%%%%%%%% Abc
-        String call;
-        switch (alg) {
-            case IC3:
-                call = "pdr";
-                break;
-            case INT:
-                call = "int";
-                break;
-            case BMC:
-                call = "bmc";
-                break;
-            case BMC2:
-                call = "bmc2";
-                break;
-            case BMC3:
-                call = "bmc3";
-                break;
-            default:
-                throw new RuntimeException("Not all verification methods had been considered. '" + alg + "' is missing.");
-        }
         inputFile = path + "_mcHyperOut.aig";
-        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
-        Logger.getInstance().addMessage("", false);
-        Logger.getInstance().addMessage("Calling abc ...", false);
-        Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
-        ExternalProcessHandler procAbc = new ExternalProcessHandler(true, abc_command);
-        out = Logger.getInstance().getMessageStream(LOGGER_ABC_OUT);
-        err = Logger.getInstance().getMessageStream(LOGGER_ABC_ERR);
-        outStream = null;
-        if (out != null) {
-            outStream = new PrintWriter(out, true);
-        }
-        errStream = null;
-        if (err != null) {
-            errStream = new PrintWriter(err, true);
-        }
-        procAbc.start(outStream, errStream);
-        PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
-        abcInput.println("read " + inputFile);
-        abcInput.println(call + " " + abcParameter);
-        abcInput.println("write_cex -f " + path + ".cex");
-        abcInput.println("quit");
-        abcInput.flush();
-        procAbc.waitFor();
-        if (!verbose) { // cleanup
-            Tools.deleteFile(inputFile);
-        }
-        if (exitValue != 0) {
-            throw new ExternalToolException("ABC didn't finshed correctly.");
-        }
-        String abcOutput = procAbc.getOutput();
-        if (abcOutput.contains("Io_ReadAiger: The network check has failed.")) {
-            throw new ExternalToolException("ABC didn't finshed correctly. The check of the aiger network '" + path + "_mcHyperOut.aig' has failed."
-                    + " Check the abc output for more information:\n" + procAbc.getOutput());
-        }
-        if (abcOutput.contains("There is no current network.")) {
-            Logger.getInstance().addMessage("[WARNING] abc says there is no current network to solve."
-                    + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
-        }
-        if (abcOutput.contains("Empty network.")) {
-            Logger.getInstance().addMessage("[WARNING] abc says the current network is empty."
-                    + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
-        }
-
-        //todo: hack for checking the abc output
-//        Logger.getInstance().addMessage(abcOutput, false, true);
-        // Parse the output the know the result of the model checking
-        ModelCheckingResult ret = new ModelCheckingResult();
-        // for the falsifiers when they didn't finished
-        if (abcOutput.contains("No output asserted in")) {
-            Logger.getInstance().addWarning("The bound for the falsifier was not big enough.");
-            ret.setSat(ModelCheckingResult.Satisfied.UNKNOWN);
-        } else if (!abcOutput.contains("Counter-example is not available")) {
-            // has a counter example, ergo read it
-            String file = path + ".cex";
-            File f = new File(file);
-            if (f.exists() && !f.isDirectory()) {
-                boolean safety = procAbc.getOutput().contains("Output 0 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
-                boolean liveness = procAbc.getOutput().contains("Output 1 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
-                CounterExample cex = circ.parseCounterExample(net, file, new CounterExample(safety, liveness));
-                ret.setCex(cex);
-                ret.setSat(ModelCheckingResult.Satisfied.FALSE);
-                // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
-                if (stats != null) {
-                    stats.setSatisfied(0);
-                }
-                // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-                if (!verbose) { // cleanup
-                    Tools.deleteFile(file);
-                }
-            } else {
-                throw new ExternalToolException("ABC didn't finshed as expected. There should be a counter-example written to '" + file + "'"
-                        + " but the file doesn't exist."
-                        + " Check the abc output for more information:\n" + procAbc.getOutput());
-            }
-        } else {
-            ret.setSat(ModelCheckingResult.Satisfied.TRUE);
-            // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
-            if (stats != null) {
+        outputPath = path + ".cex";
+        String abcOutput = Abc.call(inputFile, abcParameter, outputPath, alg, verbose);
+        ModelCheckingResult ret = Abc.parseOutput(path, abcOutput, net, circ, outputPath, verbose);
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+        if (stats != null) {
+            if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.FALSE)) {
+                stats.setSatisfied(0);
+            } else if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.TRUE)) {
                 stats.setSatisfied(1);
             }
-            // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
         }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
 
-        Logger.getInstance().addMessage("... finished calling abc.", false);
-        Logger.getInstance().addMessage("", false);
         return ret;
     }
 
