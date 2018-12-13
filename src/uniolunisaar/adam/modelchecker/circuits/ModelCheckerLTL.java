@@ -121,7 +121,7 @@ public class ModelCheckerLTL {
         }
 
         Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
-        return ModelCheckerMCHyper.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, stats, abcParameters, verbose);
+        return PetriNetModelChecker.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, stats, abcParameters, verbose);
     }
 
     public TransitionSemantics getSemantics() {

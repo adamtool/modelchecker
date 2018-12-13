@@ -9,7 +9,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.util.AdamTools;
 import uniolunisaar.adam.modelchecker.circuits.Circuit;
-import uniolunisaar.adam.modelchecker.circuits.ModelCheckerMCHyper;
+import uniolunisaar.adam.modelchecker.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -60,7 +60,7 @@ public class TestingMCHyper {
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
 
-        ModelCheckerMCHyper.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), formula, "./" + game.getName(), "");
+        PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), formula, "./" + game.getName(), "");
     }
 
 }

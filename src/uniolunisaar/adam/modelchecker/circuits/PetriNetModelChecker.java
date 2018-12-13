@@ -24,7 +24,7 @@ import uniolunisaar.adam.tools.Tools;
  *
  * @author Manuel Gieseking
  */
-public class ModelCheckerMCHyper {
+public class PetriNetModelChecker {
 
     /**
      * Returns null iff the formula holds.

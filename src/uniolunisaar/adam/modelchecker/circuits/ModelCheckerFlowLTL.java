@@ -268,7 +268,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        return ModelCheckerMCHyper.check(VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
+        return PetriNetModelChecker.check(VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
     }
 
     /**
@@ -298,7 +298,7 @@ public class ModelCheckerFlowLTL {
             } else {
                 renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
             }
-            return ModelCheckerMCHyper.check(VerificationAlgo.IC3, game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName(), "");
+            return PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), "./" + game.getName(), "");
         }
         PetriGame gameMC = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(game, formula);
         ILTLFormula formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(game, gameMC, formula, false);
@@ -309,7 +309,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        return ModelCheckerMCHyper.check(VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
+        return PetriNetModelChecker.check(VerificationAlgo.IC3, gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), "");
     }
 
 }
