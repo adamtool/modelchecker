@@ -1,8 +1,9 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import java.io.File;
-import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRendererSafeOutStutterRegister;
-import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 
 import org.testng.Assert;
@@ -17,22 +18,25 @@ import uniol.apt.io.parser.impl.PnmlPNParser;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
-import uniolunisaar.adam.logic.logics.Constants;
-import uniolunisaar.adam.logic.logics.IFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLConstants;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.Constants;
+import uniolunisaar.adam.ds.logics.IFormula;
+import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
+import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreator;
-import uniolunisaar.adam.logic.util.FormulaCreatorOutgoingSemantics;
-import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
-import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.util.logics.FormulaCreator;
+import uniolunisaar.adam.util.logics.FormulaCreatorOutgoingSemantics;
+import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 import uniolunisaar.adam.tools.Tools;
@@ -160,8 +164,8 @@ public class TestingModelcheckingLTL {
 //        game.createFlow(init2, t2);
 //        game.createFlow(t2, init2);
         ModelCheckerLTL mc = new ModelCheckerLTL();
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE);
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+        mc.setMaximality(Maximality.MAX_NONE);
+        mc.setSemantics(TransitionSemantics.OUTGOING);
 
         // initially the initial place
         ILTLFormula pA = new LTLAtomicProposition(init);
@@ -194,7 +198,7 @@ public class TestingModelcheckingLTL {
         cex = mc.check(game, propT, "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // but not when we demand maximality
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        mc.setMaximality(Maximality.MAX_INTERLEAVING);
         cex = mc.check(game, propT, "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         // Not all runs should be maximal
@@ -304,7 +308,7 @@ public class TestingModelcheckingLTL {
 
         ModelCheckingResult cex;
 
-        ModelCheckerLTL mc = new ModelCheckerLTL(ModelCheckerLTL.TransitionSemantics.OUTGOING, ModelCheckerLTL.Maximality.MAX_INTERLEAVING, ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+        ModelCheckerLTL mc = new ModelCheckerLTL(TransitionSemantics.OUTGOING, Maximality.MAX_INTERLEAVING, Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)), "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
@@ -317,8 +321,8 @@ public class TestingModelcheckingLTL {
         AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
 
         ModelCheckerLTL mc = new ModelCheckerLTL();
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since it is done by hand
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
+        mc.setMaximality(Maximality.MAX_NONE); // since it is done by hand
+        mc.setSemantics(TransitionSemantics.INGOING);
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
@@ -348,7 +352,7 @@ public class TestingModelcheckingLTL {
         check = mc.check(pn, maxf, "./" + pn.getName(), true);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         // test next
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+        mc.setSemantics(TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
@@ -366,8 +370,8 @@ public class TestingModelcheckingLTL {
                         new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbadB")))
                 ));
         ModelCheckerLTL mc = new ModelCheckerLTL();
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since it is done by hand
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
+        mc.setMaximality(Maximality.MAX_NONE); // since it is done by hand
+        mc.setSemantics(TransitionSemantics.INGOING);
         // test previous
         LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
 //        CounterExample cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), true);
@@ -375,7 +379,7 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         //test next
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+        mc.setSemantics(TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
 //        cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), false);
         check = mc.check(pn, maxf, "./" + pn.getName(), false);
@@ -405,8 +409,8 @@ public class TestingModelcheckingLTL {
 
         // Check previous semantics
         ModelCheckerLTL mc = new ModelCheckerLTL();
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_NONE); // since we do it by hand
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.INGOING);
+        mc.setMaximality(Maximality.MAX_NONE); // since we do it by hand
+        mc.setSemantics(TransitionSemantics.INGOING);
         ILTLFormula maxReisig = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(net);
         ILTLFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net);
 
@@ -435,7 +439,7 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // Check next semantics
-        mc.setSemantics(ModelCheckerLTL.TransitionSemantics.OUTGOING);
+        mc.setSemantics(TransitionSemantics.OUTGOING);
         maxReisig = FormulaCreatorOutgoingSemantics.getMaximalityConcurrentDirectAsObject(net);
         maxStandard = FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(net);
 
@@ -470,9 +474,9 @@ public class TestingModelcheckingLTL {
         (new File(output)).mkdirs();
 
         ModelCheckerLTL mc = new ModelCheckerLTL(
-                ModelCheckerLTL.TransitionSemantics.OUTGOING,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3
         );
         ILTLFormula deadlock = FormulaCreator.deadlock(net);

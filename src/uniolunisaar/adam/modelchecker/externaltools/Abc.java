@@ -1,4 +1,4 @@
-package uniolunisaar.adam.externaltools;
+package uniolunisaar.adam.modelchecker.externaltools;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +8,9 @@ import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckingResult;
-import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.modelchecker.util.CounterExampleParser;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
@@ -117,7 +118,7 @@ public class Abc {
             if (f.exists() && !f.isDirectory()) {
                 boolean safety = output.contains("Output 0 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
                 boolean liveness = output.contains("Output 1 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
-                CounterExample cex = circ.parseCounterExample(net, cexFile, new CounterExample(safety, liveness));
+                CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(net, cexFile, new CounterExample(safety, liveness));
                 ret.setCex(cex);
                 ret.setSat(ModelCheckingResult.Satisfied.FALSE);
                 if (!verbose) { // cleanup

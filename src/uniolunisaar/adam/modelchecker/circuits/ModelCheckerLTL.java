@@ -1,18 +1,17 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
 import java.io.IOException;
 import uniol.apt.io.parser.ParseException;
+import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
-import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformer;
-import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
-import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
-import uniolunisaar.adam.modelchecker.util.Statistics;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
+import uniolunisaar.adam.modelchecker.util.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -22,38 +21,16 @@ import uniolunisaar.adam.tools.ProcessNotStartedException;
  */
 public class ModelCheckerLTL {
 
-    public enum Stuttering {
-        REPLACEMENT,
-        REPLACEMENT_REGISTER,
-        PREFIX,
-        PREFIX_REGISTER
-    }
-
-    public enum TransitionSemantics {
-        INGOING,
-        OUTGOING
-    }
-
-    public enum Maximality {
-        MAX_CONCURRENT,
-        MAX_INTERLEAVING,
-        MAX_INTERLEAVING_IN_CIRCUIT,
-        MAX_NONE
-    }
-
-    private TransitionSemantics semantics = TransitionSemantics.OUTGOING;
-    private Maximality maximality = Maximality.MAX_INTERLEAVING;
-    private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
+    private final PnAndLTLtoCircuit circuitTransformer;
     private VerificationAlgo verificationAlgo = VerificationAlgo.IC3;
     private String abcParameters = "";
 
     public ModelCheckerLTL() {
+        circuitTransformer = new PnAndLTLtoCircuit();
     }
 
     public ModelCheckerLTL(TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, VerificationAlgo verificationAlgo) {
-        this.semantics = semantics;
-        this.maximality = maximality;
-        this.stuttering = stuttering;
+        circuitTransformer = new PnAndLTLtoCircuit(semantics, maximality, stuttering);
         this.verificationAlgo = verificationAlgo;
     }
 
@@ -69,7 +46,7 @@ public class ModelCheckerLTL {
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
-     * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
+     * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
     public ModelCheckingResult check(PetriGame net, ILTLFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         return check(net, formula, path, verbose, null);
@@ -88,56 +65,17 @@ public class ModelCheckerLTL {
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
-     * @throws uniolunisaar.adam.modelchecker.exceptions.ExternalToolException
+     * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriGame net, ILTLFormula formula, String path, boolean verbose, Statistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriGame net, ILTLFormula formula, String path, boolean verbose, ModelcheckingStatistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
-                + " With maximality term: " + maximality
-                + " semantics: " + semantics
-                + " stuttering: " + stuttering
+                + " With maximality term: " + circuitTransformer.getMaximality()
+                + " semantics: " + circuitTransformer.getSemantics()
+                + " stuttering: " + circuitTransformer.getStuttering()
                 + " verification/falsification algorithm: " + verificationAlgo, true);
 
-        // Add Fairness
-        formula = FlowLTLTransformer.addFairness(net, formula);
-
-        // Add Maximality
-        ILTLFormula max = ModelCheckerTools.getMaximality(maximality, semantics, net);
-        if (max != null) {
-            formula = new LTLFormula(max, LTLOperators.Binary.IMP, formula);
-        }
-
-        // Choose renderer and add the corresponding stuttering
-        AigerRenderer renderer;
-        if (semantics == TransitionSemantics.INGOING) {
-            // todo: do the stuttering here
-            renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
-        } else {
-            formula = FlowLTLTransformer.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
-            if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
-                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING);
-            } else {
-                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
-            }
-        }
-
-        Logger.getInstance().addMessage("This means we check F='" + formula.toSymbolString() + "'.");
-        return PetriNetModelChecker.check(verificationAlgo, net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), path, stats, abcParameters, verbose);
-    }
-
-    public TransitionSemantics getSemantics() {
-        return semantics;
-    }
-
-    public void setSemantics(TransitionSemantics semantics) {
-        this.semantics = semantics;
-    }
-
-    public Maximality getMaximality() {
-        return maximality;
-    }
-
-    public void setMaximality(Maximality maximality) {
-        this.maximality = maximality;
+        AigerRenderer renderer = circuitTransformer.createCircuit(net, formula, path, verbose, stats);
+        return PetriNetModelChecker.check(path + ".aig", verificationAlgo, net, renderer, path, stats, abcParameters, verbose);
     }
 
     public VerificationAlgo getVerificationAlgo() {
@@ -148,20 +86,36 @@ public class ModelCheckerLTL {
         this.verificationAlgo = verificationAlgo;
     }
 
-    public Stuttering getStuttering() {
-        return stuttering;
-    }
-
-    public void setStuttering(Stuttering stuttering) {
-        this.stuttering = stuttering;
-    }
-
     public String getAbcParameters() {
         return abcParameters;
     }
 
     public void setAbcParameters(String abcParameters) {
         this.abcParameters = abcParameters;
+    }
+
+    public TransitionSemantics getSemantics() {
+        return circuitTransformer.getSemantics();
+    }
+
+    public void setSemantics(TransitionSemantics semantics) {
+        circuitTransformer.setSemantics(semantics);
+    }
+
+    public Maximality getMaximality() {
+        return circuitTransformer.getMaximality();
+    }
+
+    public void setMaximality(Maximality maximality) {
+        circuitTransformer.setMaximality(maximality);
+    }
+
+    public Stuttering getStuttering() {
+        return circuitTransformer.getStuttering();
+    }
+
+    public void setStuttering(Stuttering stuttering) {
+        circuitTransformer.setStuttering(stuttering);
     }
 
 }

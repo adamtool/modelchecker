@@ -1,24 +1,20 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.ds.circuits.AigerFile;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
-import uniolunisaar.adam.externaltools.Abc;
-import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
-import uniolunisaar.adam.externaltools.AigToAig;
-import uniolunisaar.adam.externaltools.McHyper;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
-import uniolunisaar.adam.modelchecker.util.ModelCheckerTools;
-import uniolunisaar.adam.modelchecker.util.Statistics;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
+import uniolunisaar.adam.modelchecker.externaltools.Abc;
+import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.modelchecker.util.CounterExampleParser;
+import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
+import uniolunisaar.adam.modelchecker.util.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
-import uniolunisaar.adam.tools.Tools;
 
 /**
  *
@@ -31,78 +27,14 @@ public class PetriNetModelChecker {
      *
      * @param net
      * @param circ
-     * @param formula - in MCHyper format
      * @param path
      * @return
      * @throws InterruptedException
      * @throws IOException
      */
-    private static ModelCheckingResult checkSeparate(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameter, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        // Create System 
-        AigerFile circuit = circ.render(net);
-        Tools.saveFile(path + ".aag", circuit.toString());
-
-//        ModelCheckerTools.save2Aiger(net, circ, path);
-//        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), path + ".aag", formula, path + "_mcHyperOut");
-//
-//        Logger.getInstance().addMessage(procBuilder.command().toString(), true);
-//        Process procAiger = procBuilder.start();
-//        // buffering the output and error as it comes
-//        try (BufferedReader is = new BufferedReader(new InputStreamReader(procAiger.getInputStream()))) {
-//            String line;
-//            while ((line = is.readLine()) != null) {
-//                Logger.getInstance().addMessage("[MCHyper-Out]: " + line, true);
-//            }
-//        }
-//        try (BufferedReader is = new BufferedReader(new InputStreamReader(procAiger.getErrorStream()))) {
-//            String line;
-//            while ((line = is.readLine()) != null) {
-//                Logger.getInstance().addMessage("[MCHyper-ERROR]: " + line, true);
-//            }
-//        }
-        // buffering in total
-//        String error = IOUtils.toString(procAiger.getErrorStream());
-//        Logger.getInstance().addMessage(error, true); // todo: print it as error and a proper exception
-//        String output = IOUtils.toString(procAiger.getInputStream());
-//        Logger.getInstance().addMessage(output, true);
-//        procAiger.waitFor();
-        final String timeCommand = "/usr/bin/time";
-        final String fileOutput = "-f";
-        final String fileArgument = "wall_time_(s)%e\\nCPU_time_(s)%U\\nmemory_(KB)%M\\n";
-        final String outputOption = "-o";
-        final String outputFile = path + "_stats_time_mem.txt";
-
-        //%%%%%%%%%%%%%%%%%% MCHyper
-        String inputFile = path + ".aag";
-        String outputPath = path + "_mcHyperOut";
-        McHyper.call(inputFile, formula, outputPath, verbose);
-
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
-        if (stats != null) {
-            // system size
-            stats.setSys_nb_latches(circuit.getNbOfLatches());
-            stats.setSys_nb_gates(circuit.getNbOfGates());
-            // total size 
-            try (BufferedReader mcHyperAag = new BufferedReader(new FileReader(outputPath + ".aag"))) {
-                String header = mcHyperAag.readLine();
-                String[] vals = header.split(" ");
-                stats.setTotal_nb_latches(Integer.parseInt(vals[3]));
-                stats.setTotal_nb_gates(Integer.parseInt(vals[5]));
-            }
-            Logger.getInstance().addMessage(stats.getInputSizes(), true);
-            // if a file is given already write them to the file
-            stats.writeInputSizesToFile();
-        }
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-
-        // %%%%%%%%%%%%%%%% Aiger
-        inputFile = path + "_mcHyperOut.aag";
-        outputPath = path + "_mcHyperOut.aig";
-        AigToAig.call(inputFile, outputPath, verbose);
-
+    private static ModelCheckingResult checkSeparate(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, ModelcheckingStatistics stats, String abcParameter, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // %%%%%%%%%%%%%%% Abc
-        inputFile = path + "_mcHyperOut.aig";
-        outputPath = path + ".cex";
+        String outputPath = path + ".cex";
         String abcOutput = Abc.call(inputFile, abcParameter, outputPath, alg, verbose);
         ModelCheckingResult ret = Abc.parseOutput(path, abcOutput, net, circ, outputPath, verbose);
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
@@ -121,39 +53,42 @@ public class PetriNetModelChecker {
     /**
      * Returns null iff the formula holds.
      *
+     * @param inputFile
      * @param alg
      * @param net
      * @param circ
-     * @param formula - in MCHyper format
      * @param path
      * @param abcParameters
      * @return
      * @throws InterruptedException
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public static ModelCheckingResult check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        return check(alg, net, circ, formula, path, null, abcParameters, true);
+    public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        return check(inputFile, alg, net, circ, path, null, abcParameters, true);
     }
 
     /**
      * Returns null iff the formula holds.
      *
+     * @param inputFile
      * @param alg
      * @param net
      * @param circ
-     * @param formula - in MCHyper format
      * @param path
      * @param stats
      * @param abcParameters
+     * @param verbose
      * @return
      * @throws InterruptedException
      * @throws IOException
      * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public static ModelCheckingResult check(VerificationAlgo alg, PetriNet net, AigerRenderer circ, String formula, String path, Statistics stats, String abcParameters, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, ModelcheckingStatistics stats, String abcParameters, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
-        return checkSeparate(alg, net, circ, formula, path, stats, abcParameters, verbose);
+        return checkSeparate(inputFile, alg, net, circ, path, stats, abcParameters, verbose);
     }
 
     /**
@@ -173,7 +108,7 @@ public class PetriNetModelChecker {
      */
     @Deprecated
     private static CounterExample checkWithPythonScript(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ExternalToolException {
-        ModelCheckerTools.save2AigerAndPdf(net, circ, path);
+        TransformerTools.save2AigerAndPdf(net, circ, path);
         // version without threads
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
@@ -211,10 +146,17 @@ public class PetriNetModelChecker {
         }
 
         if (exitValue == 42) { // has a counter example, ergo read it
-            return circ.parseCounterExample(net, path + "_complete.cex", new CounterExample(false, false));
+            return CounterExampleParser.parseCounterExampleWithStutteringLatch(net, path + "_complete.cex", new CounterExample(false, false));
         }
 
         return null;
+    }
+
+    @Deprecated
+    public static ModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, "./" + net.getName(), null, false);
+        String inputFile = "./" + net.getName() + ".aig";
+        return check(inputFile, verificationAlgo, net, renderer, path, abcParameters);
     }
 
 }

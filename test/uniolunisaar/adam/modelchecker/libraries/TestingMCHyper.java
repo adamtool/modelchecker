@@ -6,11 +6,13 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.modelchecker.circuits.Circuit;
+import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.modelchecker.circuits.PetriNetModelChecker;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
+import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
@@ -59,8 +61,11 @@ public class TestingMCHyper {
 //        String formula = "Forall (F (Eq (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // correkt
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
+        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
+        CircuitAndLTLtoCircuit.createCircuit(game, renderer, formula, "./" + game.getName(), null, false);
 
-        PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), formula, "./" + game.getName(), "");
+        String inputFile = "./" + game.getName() + ".aig";
+        PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, game, renderer, "./" + game.getName(), "");
     }
 
 }

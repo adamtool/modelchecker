@@ -8,14 +8,18 @@ import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import static uniolunisaar.adam.externaltools.Abc.LOGGER_ABC_OUT;
-import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
+import static uniolunisaar.adam.modelchecker.externaltools.Abc.LOGGER_ABC_OUT;
+import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltlparser.FlowLTLParser;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
-import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
+import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.exception.logics.NotConvertableException;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
@@ -59,10 +63,10 @@ public class MCFlowLTLSeqGenerators {
 
         // maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
-                ModelCheckerLTL.TransitionSemantics.OUTGOING,
-                ModelCheckerFlowLTL.Approach.SEQUENTIAL_INHIBITOR,
-                ModelCheckerLTL.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                ModelCheckerLTL.Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
                 //                ModelCheckerMCHyper.VerificationAlgo.INT,
                 VerificationAlgo.IC3,
                 true);
@@ -71,7 +75,7 @@ public class MCFlowLTLSeqGenerators {
 
         // maximality in formula
         mc.setInitFirst(true);
-        mc.setMaximality(ModelCheckerLTL.Maximality.MAX_INTERLEAVING);
+        mc.setMaximality(Maximality.MAX_INTERLEAVING);
         ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }

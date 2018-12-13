@@ -1,6 +1,6 @@
 package uniolunisaar.adam.modelchecker.transformers;
 
-import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerHyperLTL;
+import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -8,25 +8,25 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.externaltools.Abc.VerificationAlgo;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.ILTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.IRunFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLAtomicProposition;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.LTLOperators;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.logic.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
 import uniolunisaar.adam.logic.util.AdamTools;
-import uniolunisaar.adam.logic.util.FormulaCreatorIngoingSemantics;
-import uniolunisaar.adam.modelchecker.circuits.Circuit;
+import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
+import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.modelchecker.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.modelchecker.circuits.ModelCheckingResult;
-import uniolunisaar.adam.modelchecker.exceptions.ExternalToolException;
-import uniolunisaar.adam.modelchecker.exceptions.NotConvertableException;
-import uniolunisaar.adam.modelchecker.transformers.formula.FlowLTLTransformerSequential;
-import uniolunisaar.adam.modelchecker.transformers.petrinet.PetriNetTransformerFlowLTLSequential;
+import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.exception.logics.NotConvertableException;
+import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerSequential;
+import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 
 /**
@@ -70,7 +70,7 @@ public class TestingFlowLTLTransformer {
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
         RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new LTLAtomicProposition(f)));
 
-        PetriGame mc = PetriNetTransformerFlowLTLSequential.createNet4ModelCheckingSequential(net, formula, true);
+        PetriGame mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
         AdamTools.savePG2PDF(mc.getName() + "mc", mc, true);
         ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, true);
         System.out.println(f_mc);
