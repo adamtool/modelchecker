@@ -8,7 +8,7 @@ import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.modelchecker.circuits.AigerFile;
+import uniolunisaar.adam.ds.circuits.AigerFile;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
 import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.ALL_TRANS_NOT_TRUE;

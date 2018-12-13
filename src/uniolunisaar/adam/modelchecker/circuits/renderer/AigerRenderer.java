@@ -10,7 +10,7 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.modelchecker.circuits.AigerFile;
+import uniolunisaar.adam.ds.circuits.AigerFile;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
 import uniolunisaar.adam.tools.Logger;

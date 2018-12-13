@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.ds.circuits.AigerFile;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
