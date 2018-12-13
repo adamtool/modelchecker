@@ -11,6 +11,7 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.ds.circuits.AigerFile;
+import static uniolunisaar.adam.ds.circuits.AigerFile.NEW_VALUE_OF_LATCH_SUFFIX;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
 import uniolunisaar.adam.tools.Logger;
@@ -24,7 +25,6 @@ public class AigerRenderer {
     public static final String INIT_LATCH = "#initLatch#";
     public static final String INPUT_PREFIX = "#in#_";
     public static final String OUTPUT_PREFIX = "#out#_";
-    public static final String NEW_VALUE_OF_LATCH_SUFFIX = "_#new#";
     public static final String ENABLED_PREFIX = "#enabled#_";
     public static final String VALID_TRANSITION_PREFIX = "#chosen#_";
     public static final String ALL_TRANS_NOT_TRUE = "#allTransitionsNotTrue#";

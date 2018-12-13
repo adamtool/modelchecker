@@ -9,12 +9,11 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.circuits.AigerFile;
+import static uniolunisaar.adam.ds.circuits.AigerFile.NEW_VALUE_OF_LATCH_SUFFIX;
 import uniolunisaar.adam.modelchecker.circuits.CounterExample;
 import uniolunisaar.adam.modelchecker.circuits.CounterExampleElement;
 import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.ALL_TRANS_NOT_TRUE;
 import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.INIT_LATCH;
-import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRenderer.NEW_VALUE_OF_LATCH_SUFFIX;
-import static uniolunisaar.adam.modelchecker.circuits.renderer.AigerRendererSafeOutStutterRegister.STUTT_LATCH;
 import uniolunisaar.adam.tools.Logger;
 
 /**
