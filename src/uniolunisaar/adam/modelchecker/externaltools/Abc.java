@@ -116,8 +116,8 @@ public class Abc {
             // has a counter example, ergo read it
             File f = new File(cexFile);
             if (f.exists() && !f.isDirectory()) {
-                boolean safety = output.contains("Output 0 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
-                boolean liveness = output.contains("Output 1 of miter \"" + path + "_mcHyperOut\"" + " was asserted in frame");
+                boolean safety = output.contains("Output 0 of miter \"" + path + "\"" + " was asserted in frame");
+                boolean liveness = output.contains("Output 1 of miter \"" + path + "\"" + " was asserted in frame");
                 CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(net, cexFile, new CounterExample(safety, liveness));
                 ret.setCex(cex);
                 ret.setSat(ModelCheckingResult.Satisfied.FALSE);
