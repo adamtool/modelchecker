@@ -172,7 +172,7 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        CircuitAndLTLtoCircuit.createCircuit(game, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), null, false);
+        CircuitAndLTLtoCircuit.createCircuit(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), null, false);
 
         String inputFile = "./" + gameMC.getName() + ".aig";
         return PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, gameMC, renderer, "./" + gameMC.getName(), "");
