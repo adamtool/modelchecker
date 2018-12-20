@@ -11,7 +11,7 @@ import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
 import uniolunisaar.adam.tools.Tools;
@@ -42,7 +42,7 @@ public class TestingAiger {
     void testAigerRenderer() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        AdamTools.savePG2PDF("example", new PetriGame(pn), false);
+        PNWTTools.savePnwt2PDF("example", new PetriGame(pn), false);
         testAiger(pn);
     }
 
@@ -70,7 +70,7 @@ public class TestingAiger {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        AdamTools.savePG2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         testAiger(game);
     }

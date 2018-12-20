@@ -8,7 +8,7 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.modelchecker.circuits.PetriNetModelChecker;
@@ -46,7 +46,7 @@ public class TestingMCHyper {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        AdamTools.savePG2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
 //        String formula = "Forall (F (AP \"#out#_out\" 0))";
 //        String formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";

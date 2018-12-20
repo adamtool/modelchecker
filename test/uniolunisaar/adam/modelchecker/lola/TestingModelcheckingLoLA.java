@@ -12,7 +12,7 @@ import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import static uniolunisaar.adam.modelchecker.lola.ModelCheckerLoLA.check;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerLoLA;
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
@@ -50,7 +50,7 @@ public class TestingModelcheckingLoLA {
         game.createFlow(t2, init3);
         check(game, "(F out > 0)", "./testing");
 
-        AdamTools.savePG2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
 
     }
@@ -67,7 +67,7 @@ public class TestingModelcheckingLoLA {
         game.createFlow(tstolen, out);
 
         // test finite        
-        AdamTools.savePG2PDF(game.getName() + "_finite", game, true);
+        PNWTTools.savePnwt2PDF(game.getName() + "_finite", game, true);
         boolean ret = check(game, "A(inA > 0)", "./testing");
         Assert.assertEquals(ret, true);
         ret = check(game, "A(X(out > 0))", "./testing");
@@ -95,7 +95,7 @@ public class TestingModelcheckingLoLA {
 //        game.createFlow(t2, init3);
 //        check(game, "(F out > 0)", "./testing");
 //
-//        AdamTools.savePG2PDF(game.getName(), game, true);
+//        PNWTTools.savePnwt2PDF(game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
     }
 
@@ -110,19 +110,19 @@ public class TestingModelcheckingLoLA {
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException {
         PetriGame net = ToyExamples.createFirstExample(true);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
         Assert.assertFalse(ret);
 
         net = ToyExamples.createFirstExample(false);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
         Assert.assertTrue(ret);
     }
@@ -130,10 +130,10 @@ public class TestingModelcheckingLoLA {
     @Test
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException {
         PetriGame net = ToyExamples.createFirstExampleExtended(true);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
         Assert.assertFalse(ret);
@@ -142,10 +142,10 @@ public class TestingModelcheckingLoLA {
     @Test
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException {
         PetriGame net = ToyExamples.createFirstExampleExtended(false);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
         Assert.assertTrue(ret);
@@ -154,9 +154,9 @@ public class TestingModelcheckingLoLA {
     @Test
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException {
         PetriGame net = UpdatingNetwork.create(3, 1);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
     }
@@ -164,29 +164,29 @@ public class TestingModelcheckingLoLA {
     @Test
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException {
         PetriGame net = RedundantNetwork.getBasis(1,1);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingNetwork(1,1);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingMutexNetwork(1,1);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1,1);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
-        AdamTools.savePG2PDF(net.getName() + "_mc", mc, true);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
     }
 

@@ -18,7 +18,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.modelchecker.circuits.PetriNetModelChecker;
@@ -60,18 +60,18 @@ public class TestingFlowLTLTransformer {
         net.createFlow(t2, e);
         net.createFlow(t2, f);
         net.createFlow(t2, b);
-        net.createTokenFlow(a, t1, d);
-        net.createTokenFlow(b, t1, d);
-        net.createTokenFlow(d, t2, e, b);
-        net.createInitialTokenFlow(t2, f);
-        AdamTools.saveAPT(net.getName(), net, false);
-        AdamTools.savePG2PDF(net.getName(), net, false);
+        net.createTransit(a, t1, d);
+        net.createTransit(b, t1, d);
+        net.createTransit(d, t2, e, b);
+        net.createInitialTransit(t2, f);
+        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(net.getName(), net, false);
 
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
         RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new LTLAtomicProposition(f)));
 
         PetriGame mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
-        AdamTools.savePG2PDF(mc.getName() + "mc", mc, true);
+        PNWTTools.savePnwt2PDF(mc.getName() + "mc", mc, true);
         ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, true);
         System.out.println(f_mc);
 
@@ -117,7 +117,7 @@ public class TestingFlowLTLTransformer {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        AdamTools.savePG2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(game.getName(), game, true);
 
         // test maximality
         // standard

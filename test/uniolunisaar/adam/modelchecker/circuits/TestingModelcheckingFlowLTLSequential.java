@@ -27,7 +27,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCir
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exception.logics.NotConvertableException;
 import uniolunisaar.adam.modelchecker.util.ModelcheckingStatistics;
@@ -97,9 +97,9 @@ public class TestingModelcheckingFlowLTLSequential {
         init.setInitialToken(1);
         net.createFlow(tin, init);
         net.createFlow(init, tin);
-        net.createTokenFlow(init, tin, init);
-        net.createInitialTokenFlow(tin, init);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        net.createTransit(init, tin, init);
+        net.createInitialTransit(tin, init);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunFormula formula;
         String name;
@@ -148,12 +148,12 @@ public class TestingModelcheckingFlowLTLSequential {
         net.createFlow(t2, e);
         net.createFlow(t2, f);
         net.createFlow(t2, b);
-        net.createTokenFlow(a, t1, d);
-        net.createTokenFlow(b, t1, d);
-        net.createTokenFlow(d, t2, e, b);
-        net.createInitialTokenFlow(t2, f);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        net.createTransit(a, t1, d);
+        net.createTransit(b, t1, d);
+        net.createTransit(d, t2, e, b);
+        net.createInitialTransit(t2, f);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunFormula formula;
         String name;
@@ -281,12 +281,12 @@ public class TestingModelcheckingFlowLTLSequential {
         net.createFlow(t2, e);
         net.createFlow(t2, f);
         net.createFlow(t2, b);
-        net.createTokenFlow(a, t1, d);
-        net.createTokenFlow(b, t1, d);
-        net.createTokenFlow(d, t2, e, b);
-        net.createInitialTokenFlow(t2, f);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        net.createTransit(a, t1, d);
+        net.createTransit(b, t1, d);
+        net.createTransit(d, t2, e, b);
+        net.createInitialTransit(t2, f);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunFormula formula;
         String name;
@@ -463,8 +463,8 @@ public class TestingModelcheckingFlowLTLSequential {
         net.createFlow(restart, c);
         net.createFlow(e, restart);
         net.createFlow(f, restart);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula( // should still be true, since the chains end in B
@@ -519,9 +519,9 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         // let the flows be alive
         net.setName(net.getName() + "_alive");
-        net.createTokenFlow(e, restart, a);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        net.createTransit(e, restart, a);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula( // should be true since now all apart of the newly created chain in F will be alive in each round
@@ -559,12 +559,12 @@ public class TestingModelcheckingFlowLTLSequential {
         Transition create = net.createTransition("createFlows");
         net.createFlow(in, create);
         net.createFlow(create, in);
-        net.createTokenFlow(in, create, in);
-        net.createInitialTokenFlow(create, in);
+        net.createTransit(in, create, in);
+        net.createInitialTransit(create, in);
         net.setWeakFair(net.getTransition("t"));
 
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
         String name;
@@ -600,8 +600,8 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = ToyExamples.createFirstExample(true);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
         RunFormula f;
@@ -643,8 +643,8 @@ public class TestingModelcheckingFlowLTLSequential {
 //        mc.setSemantics(TransitionSemantics.OUTGOING);
         net = ToyExamples.createFirstExample(false);
         name = net.getName() + "_" + f.toString().replace(" ", "");
-        AdamTools.saveAPT(outputDir + net.getName() + "_" + formula, net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName() + "_" + formula, net, false);
+        PNWTTools.saveAPT(outputDir + net.getName() + "_" + formula, net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName() + "_" + formula, net, false);
 
         // Check maximality in circuit
         mc.setInitFirst(true);
@@ -684,8 +684,8 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = ToyExamples.createFirstExampleExtended(true);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
         String name;
@@ -721,8 +721,8 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = ToyExamples.createFirstExampleExtended(false);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
         RunFormula f;
@@ -758,7 +758,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = UpdatingNetwork.create(3, 1);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
         RunFormula f;
@@ -823,8 +823,8 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = false)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = RedundantNetwork.getBasis(1, 1);
-        AdamTools.saveAPT(outputDir + net.getName(), net, false);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
         RunFormula f;
@@ -863,7 +863,7 @@ public class TestingModelcheckingFlowLTLSequential {
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
@@ -882,7 +882,7 @@ public class TestingModelcheckingFlowLTLSequential {
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
@@ -901,7 +901,7 @@ public class TestingModelcheckingFlowLTLSequential {
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
@@ -917,7 +917,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
         mc.setInitFirst(true);

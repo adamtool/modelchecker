@@ -28,7 +28,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.FormulaCreatorOutgoingSemantics;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
@@ -67,7 +67,7 @@ public class TestingModelcheckingLTL {
         net.createFlow(init, t2);
         net.createFlow(t2, init);
 
-        AdamTools.savePG2PDF(net.getName(), new PetriGame(net), false);
+        PNWTTools.savePnwt2PDF(net.getName(), new PetriGame(net), false);
 
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
 
@@ -121,7 +121,7 @@ public class TestingModelcheckingLTL {
         doublediamond.createFlow(RR, rrrr);
         doublediamond.createFlow(rrrr, MM);
 
-        AdamTools.savePG2PDF(doublediamond.getName(), new PetriGame(doublediamond), false);
+        PNWTTools.savePnwt2PDF(doublediamond.getName(), new PetriGame(doublediamond), false);
 
         // formula: in
         LTLFormula f = new LTLFormula(new LTLAtomicProposition(doublediamond.getPlace("in")));
@@ -204,7 +204,7 @@ public class TestingModelcheckingLTL {
         // Not all runs should be maximal
         cex = mc.check(game, new LTLConstants.False(), "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-        AdamTools.savePG2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(game.getName(), game, true);
         // but not globally since the net is finite
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, propT), "./" + game.getName(), true);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
@@ -235,7 +235,7 @@ public class TestingModelcheckingLTL {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        AdamTools.savePG2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(game.getName(), game, true);
 
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
@@ -318,7 +318,7 @@ public class TestingModelcheckingLTL {
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
+        PNWTTools.savePnwt2PDF(pn.getName(), new PetriGame(pn), false);
 
         ModelCheckerLTL mc = new ModelCheckerLTL();
         mc.setMaximality(Maximality.MAX_NONE); // since it is done by hand
@@ -361,7 +361,7 @@ public class TestingModelcheckingLTL {
     public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
-        AdamTools.savePG2PDF(pn.getName(), new PetriGame(pn), false);
+        PNWTTools.savePnwt2PDF(pn.getName(), new PetriGame(pn), false);
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.G,
                 new LTLFormula(
@@ -405,7 +405,7 @@ public class TestingModelcheckingLTL {
         Transition tloop = net.createTransition("tl");
         net.createFlow(B, tloop);
         net.createFlow(tloop, B);
-        AdamTools.savePG2PDF(net.getName(), new PetriGame(net), false);
+        PNWTTools.savePnwt2PDF(net.getName(), new PetriGame(net), false);
 
         // Check previous semantics
         ModelCheckerLTL mc = new ModelCheckerLTL();

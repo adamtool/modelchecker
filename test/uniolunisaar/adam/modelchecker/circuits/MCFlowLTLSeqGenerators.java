@@ -17,7 +17,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCir
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
-import uniolunisaar.adam.logic.util.AdamTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exception.logics.NotConvertableException;
 import uniolunisaar.adam.tools.Logger;
@@ -46,7 +46,7 @@ public class MCFlowLTLSeqGenerators {
     @Test(enabled = true)
     public void updatingNetworkBenchmark() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriGame net = UpdatingNetwork.create(5);
-        AdamTools.savePG2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         outputDirInCircuit += "updatingNetwork/";
         outputDirInFormula += "updatingNetwork/";
         (new File(outputDirInCircuit)).mkdirs();
