@@ -8,7 +8,7 @@ import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniol.apt.io.renderer.impl.LoLAPNRenderer;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -17,7 +17,7 @@ import uniolunisaar.adam.tools.Logger;
  */
 public class ModelCheckerLoLA {
 
-    public static boolean check(PetriGame pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException {
+    public static boolean check(PetriNetWithTransits pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException {
         String file = new LoLAPNRenderer().render(pn);
 
         for (Transition t : pn.getTransitions()) {
