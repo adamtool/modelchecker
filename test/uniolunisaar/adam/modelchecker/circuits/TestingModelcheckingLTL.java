@@ -19,7 +19,7 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
-import uniolunisaar.adam.logic.exceptions.NotSubstitutableException;
+import uniolunisaar.adam.exception.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.Constants;
 import uniolunisaar.adam.ds.logics.IFormula;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
