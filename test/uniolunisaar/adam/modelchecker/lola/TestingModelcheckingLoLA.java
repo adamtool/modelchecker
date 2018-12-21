@@ -8,7 +8,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
@@ -27,7 +27,7 @@ public class TestingModelcheckingLoLA {
 
     @Test
     void testLoLa2() throws RenderException, InterruptedException, IOException {
-        PetriGame game = new PetriGame("testing");
+        PetriNetWithTransits game = new PetriNetWithTransits("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
 //        Transition t = game.createTransition("tA");
@@ -57,7 +57,7 @@ public class TestingModelcheckingLoLA {
 
     @Test
     void testSemantics() throws RenderException, InterruptedException, IOException {
-        PetriGame game = new PetriGame("testSemantics");
+        PetriNetWithTransits game = new PetriNetWithTransits("testSemantics");
         Place init = game.createPlace("inA");
         init.setInitialToken(1);
 
@@ -102,17 +102,17 @@ public class TestingModelcheckingLoLA {
     @Test
     public void testLoLa() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
-        PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
+        PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
         final String formula = "EF qbadA > 0 OR qbadB > 0";
         check(pn, formula, path + "burglar");
     }
 
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException {
-        PetriGame net = ToyExamples.createFirstExample(true);
+        PetriNetWithTransits net = ToyExamples.createFirstExample(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -129,10 +129,10 @@ public class TestingModelcheckingLoLA {
 
     @Test
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException {
-        PetriGame net = ToyExamples.createFirstExampleExtended(true);
+        PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -141,10 +141,10 @@ public class TestingModelcheckingLoLA {
 
     @Test
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException {
-        PetriGame net = ToyExamples.createFirstExampleExtended(false);
+        PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         boolean ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -153,9 +153,9 @@ public class TestingModelcheckingLoLA {
 
     @Test
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException {
-        PetriGame net = UpdatingNetwork.create(3, 1);
+        PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -163,10 +163,10 @@ public class TestingModelcheckingLoLA {
 
     @Test
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException {
-        PetriGame net = RedundantNetwork.getBasis(1,1);
+        PetriNetWithTransits net = RedundantNetwork.getBasis(1,1);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriGame mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F p3 > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());

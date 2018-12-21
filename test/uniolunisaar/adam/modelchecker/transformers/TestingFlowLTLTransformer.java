@@ -9,7 +9,6 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
@@ -18,6 +17,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
@@ -38,7 +38,7 @@ public class TestingFlowLTLTransformer {
 
     @Test
     public void transitionReplacement() throws RenderException, IOException, InterruptedException, NotConvertableException {
-        PetriGame net = new PetriGame("introduction");
+        PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
         a.setInitialToken(1);
         net.setInitialTokenflow(a);
@@ -70,7 +70,7 @@ public class TestingFlowLTLTransformer {
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
         RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new LTLAtomicProposition(f)));
 
-        PetriGame mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
+        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
         PNWTTools.savePnwt2PDF(mc.getName() + "mc", mc, true);
         ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, true);
         System.out.println(f_mc);
@@ -79,7 +79,7 @@ public class TestingFlowLTLTransformer {
 
     @Test
     public void testMCHyperTransformation() throws ParseException, InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = new PetriGame("testing");
+        PetriNetWithTransits net = new PetriNetWithTransits("testing");
         Place init = net.createPlace("a");
         Place end = net.createPlace("b");
         Transition t = net.createTransition();
@@ -95,7 +95,7 @@ public class TestingFlowLTLTransformer {
 
     @Test
     void testToyExample() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
-        PetriGame game = new PetriGame("testing");
+        PetriNetWithTransits game = new PetriNetWithTransits("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
 //        Transition t = game.createTransition("tA");

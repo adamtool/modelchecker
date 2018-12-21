@@ -10,7 +10,6 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
 import static uniolunisaar.adam.modelchecker.externaltools.Abc.LOGGER_ABC_OUT;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
@@ -22,6 +21,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
@@ -55,7 +55,7 @@ public class TestingModelcheckingFlowLTLSequential {
     }
 
     public void testMaxInCircuitVsFormula() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = UpdatingNetwork.create(3, 1);
+        PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
 
         String formula;
         RunFormula f;
@@ -91,7 +91,7 @@ public class TestingModelcheckingFlowLTLSequential {
     }
 
     public void testNewlyFlowCreation() throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = new PetriGame("infFlows");
+        PetriNetWithTransits net = new PetriNetWithTransits("infFlows");
         Transition tin = net.createTransition("createFlows");
         Place init = net.createPlace("pIn");
         init.setInitialToken(1);
@@ -126,7 +126,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void introducingExampleTransitions() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = new PetriGame("introduction");
+        PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
         a.setInitialToken(1);
         net.setInitialTokenflow(a);
@@ -259,7 +259,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void introducingExamplePlaces() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = new PetriGame("introduction");
+        PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
         a.setInitialToken(1);
         net.setInitialTokenflow(a);
@@ -551,7 +551,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void checkToyExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = ToyExamples.createFirstExample(false);
+        PetriNetWithTransits net = ToyExamples.createFirstExample(false);
         net.setName(net.getName() + "_infinite");
         //add creation of flows
         Place in = net.getPlace("in");
@@ -599,7 +599,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = ToyExamples.createFirstExample(true);
+        PetriNetWithTransits net = ToyExamples.createFirstExample(true);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
@@ -683,7 +683,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = ToyExamples.createFirstExampleExtended(true);
+        PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
@@ -720,7 +720,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = ToyExamples.createFirstExampleExtended(false);
+        PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
@@ -757,7 +757,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = UpdatingNetwork.create(3, 1);
+        PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -793,7 +793,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = false)
     public void redundantFlowExampleFix() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
+        PetriNetWithTransits net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         RunFormula f = new RunFormula(
                 new LTLFormula(LTLOperators.Unary.NEG,
                         new LTLFormula(LTLOperators.Unary.G,
@@ -822,7 +822,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = false)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = RedundantNetwork.getBasis(1, 1);
+        PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 

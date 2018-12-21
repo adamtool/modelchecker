@@ -7,11 +7,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
 import static uniolunisaar.adam.modelchecker.externaltools.Abc.LOGGER_ABC_OUT;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
@@ -45,7 +45,7 @@ public class MCFlowLTLSeqGenerators {
 
     @Test(enabled = true)
     public void updatingNetworkBenchmark() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = UpdatingNetwork.create(5);
+        PetriNetWithTransits net = UpdatingNetwork.create(5);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         outputDirInCircuit += "updatingNetwork/";
         outputDirInFormula += "updatingNetwork/";

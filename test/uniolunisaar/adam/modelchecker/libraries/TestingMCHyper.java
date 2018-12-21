@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.util.PNWTTools;
@@ -24,7 +24,7 @@ public class TestingMCHyper {
 
     @Test
     void testFormulaParser() throws RenderException, InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        PetriGame game = new PetriGame("testing");
+        PetriNetWithTransits game = new PetriNetWithTransits("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
 //        Transition t = game.createTransition("tA");

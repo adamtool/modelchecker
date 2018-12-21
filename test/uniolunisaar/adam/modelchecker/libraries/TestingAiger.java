@@ -10,7 +10,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
@@ -41,14 +41,14 @@ public class TestingAiger {
     @Test(enabled = true)
     void testAigerRenderer() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
-        PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        PNWTTools.savePnwt2PDF("example", new PetriGame(pn), false);
+        PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
+        PNWTTools.savePnwt2PDF("example", new PetriNetWithTransits(pn), false);
         testAiger(pn);
     }
 
     @Test
     void testToyExample() throws RenderException, InterruptedException, IOException {
-        PetriGame game = new PetriGame("testing");
+        PetriNetWithTransits game = new PetriNetWithTransits("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
 //        Transition t = game.createTransition("tA");

@@ -17,7 +17,6 @@ import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.parser.impl.PnmlPNParser;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
-import uniolunisaar.adam.ds.petrigame.PetriGame;
 import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
 import uniolunisaar.adam.exception.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.Constants;
@@ -28,6 +27,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.FormulaCreatorOutgoingSemantics;
@@ -67,7 +67,7 @@ public class TestingModelcheckingLTL {
         net.createFlow(init, t2);
         net.createFlow(t2, init);
 
-        PNWTTools.savePnwt2PDF(net.getName(), new PetriGame(net), false);
+        PNWTTools.savePnwt2PDF(net.getName(), new PetriNetWithTransits(net), false);
 
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
 
@@ -121,7 +121,7 @@ public class TestingModelcheckingLTL {
         doublediamond.createFlow(RR, rrrr);
         doublediamond.createFlow(rrrr, MM);
 
-        PNWTTools.savePnwt2PDF(doublediamond.getName(), new PetriGame(doublediamond), false);
+        PNWTTools.savePnwt2PDF(doublediamond.getName(), new PetriNetWithTransits(doublediamond), false);
 
         // formula: in
         LTLFormula f = new LTLFormula(new LTLAtomicProposition(doublediamond.getPlace("in")));
@@ -150,7 +150,7 @@ public class TestingModelcheckingLTL {
 
     @Test
     void testOutgoingSemantics() throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
-        PetriGame game = new PetriGame("testNext");
+        PetriNetWithTransits game = new PetriNetWithTransits("testNext");
         Place init = game.createPlace("pA");
         init.setInitialToken(1);
         Place init2 = game.createPlace("pA2");
@@ -213,7 +213,7 @@ public class TestingModelcheckingLTL {
 
     @Test
     void testToyExample() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
-        PetriGame game = new PetriGame("testing");
+        PetriNetWithTransits game = new PetriNetWithTransits("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);
 //        Transition t = game.createTransition("tA");
@@ -299,7 +299,7 @@ public class TestingModelcheckingLTL {
 
     @Test
     void testStuttering() throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
-        PetriGame game = new PetriGame("testStuttering");
+        PetriNetWithTransits game = new PetriNetWithTransits("testStuttering");
         Place init = game.createPlace("a");
         init.setInitialToken(1);
         Transition tloop = game.createTransition("t");
@@ -317,8 +317,8 @@ public class TestingModelcheckingLTL {
     @Test(enabled = true)
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
-        PetriGame pn = new PetriGame(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        PNWTTools.savePnwt2PDF(pn.getName(), new PetriGame(pn), false);
+        PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
+        PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
 
         ModelCheckerLTL mc = new ModelCheckerLTL();
         mc.setMaximality(Maximality.MAX_NONE); // since it is done by hand
@@ -360,8 +360,8 @@ public class TestingModelcheckingLTL {
     @Test(enabled = true)
     public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
-        PetriGame pn = new PetriGame(Tools.getPetriNet(path + "burglar.apt"));
-        PNWTTools.savePnwt2PDF(pn.getName(), new PetriGame(pn), false);
+        PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
+        PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.G,
                 new LTLFormula(
@@ -388,7 +388,7 @@ public class TestingModelcheckingLTL {
 
     @Test
     void testMaximality() throws RenderException, InterruptedException, IOException, ParseException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
-        PetriGame net = new PetriGame("testMaximalityA");
+        PetriNetWithTransits net = new PetriNetWithTransits("testMaximalityA");
         Place A = net.createPlace("A");
         A.setInitialToken(1);
         Place A2 = net.createPlace("A2");
@@ -405,7 +405,7 @@ public class TestingModelcheckingLTL {
         Transition tloop = net.createTransition("tl");
         net.createFlow(B, tloop);
         net.createFlow(tloop, B);
-        PNWTTools.savePnwt2PDF(net.getName(), new PetriGame(net), false);
+        PNWTTools.savePnwt2PDF(net.getName(), new PetriNetWithTransits(net), false);
 
         // Check previous semantics
         ModelCheckerLTL mc = new ModelCheckerLTL();
@@ -464,12 +464,12 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
-    @Test(enabled=false)
+    @Test(enabled = false)
     void testMcCASLink() throws ParseException, IOException, NotSupportedGameException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         String folder = System.getProperty("examplesfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
         String output = System.getProperty("testoutputfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
         PetriNet net = new PnmlPNParser().parseFile(folder + "aslink_01_a.pnml");
-        PetriGame game = new PetriGame(net, true);
+        PetriNetWithTransits game = new PetriNetWithTransits(net);
         game.setName("asLink01a");
         (new File(output)).mkdirs();
 
