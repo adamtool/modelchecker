@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.lola;
+package uniolunisaar.adam.logic.modelchecking.lola;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

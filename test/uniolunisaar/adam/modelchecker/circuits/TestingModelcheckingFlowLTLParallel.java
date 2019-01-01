@@ -1,5 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;

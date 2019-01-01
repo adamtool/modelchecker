@@ -1,5 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.File;
 import java.io.IOException;
 import org.testng.Assert;
@@ -10,8 +12,8 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import static uniolunisaar.adam.modelchecker.externaltools.Abc.LOGGER_ABC_OUT;
-import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
@@ -30,7 +32,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exception.logics.NotConvertableException;
-import uniolunisaar.adam.modelchecker.util.ModelcheckingStatistics;
+import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
 

@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.util;
+package uniolunisaar.adam.ds.modelchecking;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

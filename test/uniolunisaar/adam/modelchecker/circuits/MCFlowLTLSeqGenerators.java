@@ -1,5 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.File;
 import java.io.IOException;
 import org.testng.Assert;
@@ -7,8 +9,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import static uniolunisaar.adam.modelchecker.externaltools.Abc.LOGGER_ABC_OUT;
-import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;

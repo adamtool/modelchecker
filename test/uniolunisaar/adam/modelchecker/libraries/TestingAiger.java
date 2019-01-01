@@ -9,7 +9,6 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
@@ -39,7 +38,7 @@ public class TestingAiger {
     }
 
     @Test(enabled = true)
-    void testAigerRenderer() throws ParseException, IOException, InterruptedException, NotSupportedGameException {
+    void testAigerRenderer() throws ParseException, IOException, InterruptedException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF("example", new PetriNetWithTransits(pn), false);

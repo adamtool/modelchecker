@@ -7,13 +7,12 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
 import uniolunisaar.adam.generators.modelchecking.ToyExamples;
 import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
 import uniolunisaar.adam.util.PNWTTools;
-import static uniolunisaar.adam.modelchecker.lola.ModelCheckerLoLA.check;
+import static uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA.check;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerLoLA;
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
 import uniolunisaar.adam.tools.Tools;
@@ -100,7 +99,7 @@ public class TestingModelcheckingLoLA {
     }
 
     @Test
-    public void testLoLa() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException {
+    public void testLoLa() throws ParseException, IOException, RenderException, InterruptedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
         final String formula = "EF qbadA > 0 OR qbadB > 0";

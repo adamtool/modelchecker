@@ -1,4 +1,6 @@
-package uniolunisaar.adam.modelchecker.circuits;
+package uniolunisaar.adam.ds.modelchecking;
+
+import uniolunisaar.adam.ds.modelchecking.CounterExample;
 
 /**
  *

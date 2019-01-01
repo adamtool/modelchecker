@@ -1,5 +1,8 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
+import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerLTL;
+import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import java.io.File;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister;
@@ -16,8 +19,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.parser.impl.PnmlPNParser;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.exceptions.NotSupportedGameException;
-import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.exception.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.Constants;
 import uniolunisaar.adam.ds.logics.IFormula;
@@ -56,7 +58,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, NotSupportedGameException, ProcessNotStartedException, ExternalToolException {
+    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException,  ProcessNotStartedException, ExternalToolException {
         PetriNet net = new PetriNet("jesko");
         Place init = net.createPlace("in");
         init.setInitialToken(1);
@@ -315,7 +317,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = true)
-    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
+    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException,  NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
@@ -358,7 +360,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = true)
-    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSupportedGameException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
+    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException,  NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
         PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
@@ -465,7 +467,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = false)
-    void testMcCASLink() throws ParseException, IOException, NotSupportedGameException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+    void testMcCASLink() throws ParseException, IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         String folder = System.getProperty("examplesfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
         String output = System.getProperty("testoutputfolder") + "/modelchecking/ltl/mcc/ASLink/PT/";
         PetriNet net = new PnmlPNParser().parseFile(folder + "aslink_01_a.pnml");

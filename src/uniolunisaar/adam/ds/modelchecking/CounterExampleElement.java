@@ -1,4 +1,4 @@
-package uniolunisaar.adam.modelchecker.circuits;
+package uniolunisaar.adam.ds.modelchecking;
 
 import java.util.ArrayList;
 import java.util.List;

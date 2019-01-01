@@ -1,16 +1,17 @@
-package uniolunisaar.adam.modelchecker.circuits;
+package uniolunisaar.adam.logic.modelchecking.circuits;
 
+import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.CounterExample;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
-import uniolunisaar.adam.modelchecker.externaltools.Abc;
-import uniolunisaar.adam.modelchecker.externaltools.Abc.VerificationAlgo;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.modelchecker.util.CounterExampleParser;
 import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
-import uniolunisaar.adam.modelchecker.util.ModelcheckingStatistics;
+import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
