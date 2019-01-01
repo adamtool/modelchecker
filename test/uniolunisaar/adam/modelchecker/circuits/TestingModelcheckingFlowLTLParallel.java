@@ -9,9 +9,9 @@ import org.testng.annotations.Test;
 
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.generators.modelchecking.RedundantNetwork;
-import uniolunisaar.adam.generators.modelchecking.ToyExamples;
-import uniolunisaar.adam.generators.modelchecking.UpdatingNetwork;
+import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
+import uniolunisaar.adam.generators.pnwt.ToyExamples;
+import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
