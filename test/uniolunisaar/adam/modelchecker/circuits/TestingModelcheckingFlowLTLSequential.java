@@ -35,6 +35,7 @@ import uniolunisaar.adam.exception.logics.NotConvertableException;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.ProcessNotStartedException;
+import uniolunisaar.adam.tools.Tools;
 
 /**
  *
@@ -942,4 +943,20 @@ public class TestingModelcheckingFlowLTLSequential {
 
     }
 
+    @Test
+    public void testNoChains() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                VerificationAlgo.IC3,
+                true);
+        RunFormula f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
+        ModelCheckingResult ret = mc.check(net, f, outputDirInCircuit + net.getName(), true);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+    }
 }
