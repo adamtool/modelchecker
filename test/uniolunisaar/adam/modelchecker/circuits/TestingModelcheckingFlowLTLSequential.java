@@ -956,7 +956,9 @@ public class TestingModelcheckingFlowLTLSequential {
                 VerificationAlgo.IC3,
                 true);
         RunFormula f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
-        ModelCheckingResult ret = mc.check(net, f, outputDirInCircuit + net.getName(), true);
+        ModelcheckingStatistics stats = new ModelcheckingStatistics();
+        ModelCheckingResult ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 }
