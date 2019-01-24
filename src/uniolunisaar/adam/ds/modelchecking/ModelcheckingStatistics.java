@@ -17,16 +17,11 @@ public class ModelcheckingStatistics extends PnAndLTLtoCircuitStatistics {
     // output
     private int satisfied = 42;
 
-    // Write the input sizes directly into a file before the checking starts
-    // for time outs
-    private String path = null;
-
     public ModelcheckingStatistics() {
-
     }
 
     public ModelcheckingStatistics(String path) {
-        this.path = path;
+        super(path);
     }
 
     public long getAbc_sec() {
@@ -59,8 +54,8 @@ public class ModelcheckingStatistics extends PnAndLTLtoCircuitStatistics {
     }
 
     public void addResultToFile() throws IOException {
-        if (path != null) {
-            try (BufferedWriter wr = new BufferedWriter(new FileWriter(path, true))) {
+        if (super.getPath() != null) {
+            try (BufferedWriter wr = new BufferedWriter(new FileWriter(super.getPath(), true))) {
                 wr.append("\nsatisfied:").append(satisfied == 1 ? "\\cmark" : satisfied == 0 ? "\\xmark" : "?");
             };
         }
