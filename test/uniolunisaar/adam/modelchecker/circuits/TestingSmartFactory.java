@@ -119,7 +119,7 @@ public class TestingSmartFactory {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 PnAndLTLtoCircuit.TransitionSemantics.OUTGOING,
                 PnAndFlowLTLtoCircuit.Approach.SEQUENTIAL,
-                PnAndLTLtoCircuit.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                PnAndLTLtoCircuit.Maximality.MAX_NONE,
                 PnAndLTLtoCircuit.Stuttering.PREFIX_REGISTER,
                 Abc.VerificationAlgo.IC3,
                 true);
