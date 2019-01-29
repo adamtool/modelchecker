@@ -946,18 +946,28 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test
     public void testNoChains() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false, false);
+//        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet("/home/thewn/Downloads/accessControl.apt"), false, false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+//        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL,
+                Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
+        ModelCheckingResult ret;
         RunFormula f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
         ModelcheckingStatistics stats = new ModelcheckingStatistics();
-        ModelCheckingResult ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        System.out.println(stats.toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        mc.setMaximality(Maximality.MAX_NONE);
+        stats = new ModelcheckingStatistics();
+        f = FlowLTLParser.parse(net, "A( ( (F(meetingroom) AND G(corridor -> X (G(NEG corridor)))) AND G(bureau -> X (G(NEG bureau)))) AND G(lobby -> X (G(NEG lobby))))");
+        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
 //        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
