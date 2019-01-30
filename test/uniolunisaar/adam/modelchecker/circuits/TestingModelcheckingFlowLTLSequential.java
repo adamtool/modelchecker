@@ -971,4 +971,24 @@ public class TestingModelcheckingFlowLTLSequential {
 //        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
+
+    @Test
+    public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+//        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                VerificationAlgo.IC3,
+                true);
+        ModelCheckingResult ret;
+        RunFormula f = FlowLTLParser.parse(net, "𝔸 (◇ pOut ⋏ ⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000))");
+        ModelcheckingStatistics stats = new ModelcheckingStatistics();
+        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+    }
 }
