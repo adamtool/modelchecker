@@ -986,8 +986,36 @@ public class TestingModelcheckingFlowLTLSequential {
                 VerificationAlgo.IC3,
                 true);
         ModelCheckingResult ret;
-        RunFormula f = FlowLTLParser.parse(net, "𝔸 (◇ pOut ⋏ ⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000))");
-        ModelcheckingStatistics stats = new ModelcheckingStatistics();
+        RunFormula f;
+        ModelcheckingStatistics stats;
+
+        f = FlowLTLParser.parse(net, "𝔸 (◇ pOut)");
+        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        f = FlowLTLParser.parse(net, "𝔸 (⬜ (pOut))");
+        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        f = FlowLTLParser.parse(net, "𝔸 (⬜ (sw002fwdTosw000))");
+        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        f = FlowLTLParser.parse(net, "𝔸 (⬜ (sw000fwdTosw001))");
+        stats = new ModelcheckingStatistics();
+        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        f = FlowLTLParser.parse(net, "𝔸 (⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000)))");
+        stats = new ModelcheckingStatistics();
+        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        f = FlowLTLParser.parse(net, "𝔸 (◇ pOut ⋏ ⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000))");
+        stats = new ModelcheckingStatistics();
         ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
