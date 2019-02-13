@@ -17,6 +17,7 @@ import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.ProcessPool;
+import uniolunisaar.adam.util.logics.benchmarks.mc.BenchmarksMC;
 
 /**
  *
@@ -45,6 +46,9 @@ public class PetriNetModelChecker {
                 stats.setSatisfied(0);
             } else if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.TRUE)) {
                 stats.setSatisfied(1);
+            }
+            if (BenchmarksMC.EDACC) {
+                Logger.getInstance().addMessage("Result: " + stats.isSatisfied(), "edacc");
             }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
