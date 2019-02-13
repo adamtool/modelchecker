@@ -23,7 +23,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.tools.ProcessNotStartedException;
+import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 
 /**
  *
@@ -55,7 +55,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
      * @throws uniolunisaar.adam.exception.logics.NotConvertableException
-     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
     public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
@@ -75,7 +75,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
      * @throws uniolunisaar.adam.exception.logics.NotConvertableException
-     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
     public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, String path, boolean verbose, ModelcheckingStatistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {

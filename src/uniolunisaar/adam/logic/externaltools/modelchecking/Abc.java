@@ -14,7 +14,8 @@ import uniolunisaar.adam.logic.modelchecking.circuits.CounterExampleParser;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.tools.ProcessNotStartedException;
+import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.tools.ProcessPool;
 import uniolunisaar.adam.tools.Tools;
 
 /**
@@ -34,7 +35,7 @@ public class Abc {
         BMC3
     }
 
-    public static String call(String inputFile, String parameters, String output, VerificationAlgo alg, boolean verbose) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+    public static String call(String inputFile, String parameters, String output, VerificationAlgo alg, boolean verbose, String procFamilyID) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         String call;
         switch (alg) {
             case IC3:
@@ -61,6 +62,7 @@ public class Abc {
         Logger.getInstance().addMessage("Calling abc ...", false);
         Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
         ExternalProcessHandler procAbc = new ExternalProcessHandler(true, abc_command);
+        ProcessPool.getInstance().putProcess(procFamilyID + "#abc", procAbc);
         PrintStream out = Logger.getInstance().getMessageStream(LOGGER_ABC_OUT);
         PrintStream err = Logger.getInstance().getMessageStream(LOGGER_ABC_ERR);
         PrintWriter outStream = null;

@@ -15,7 +15,8 @@ import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.tools.ProcessNotStartedException;
+import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.tools.ProcessPool;
 
 /**
  *
@@ -36,7 +37,7 @@ public class PetriNetModelChecker {
     private static ModelCheckingResult checkSeparate(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, ModelcheckingStatistics stats, String abcParameter, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // %%%%%%%%%%%%%%% Abc
         String outputPath = path + ".cex";
-        String abcOutput = Abc.call(inputFile, abcParameter, outputPath, alg, verbose);
+        String abcOutput = Abc.call(inputFile, abcParameter, outputPath, alg, verbose, net.getName());
         ModelCheckingResult ret = Abc.parseOutput(path, abcOutput, net, circ, outputPath, verbose);
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
@@ -63,7 +64,7 @@ public class PetriNetModelChecker {
      * @return
      * @throws InterruptedException
      * @throws IOException
-     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
     public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
@@ -84,7 +85,7 @@ public class PetriNetModelChecker {
      * @return
      * @throws InterruptedException
      * @throws IOException
-     * @throws uniolunisaar.adam.tools.ProcessNotStartedException
+     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
     public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, ModelcheckingStatistics stats, String abcParameters, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
@@ -140,6 +141,7 @@ public class PetriNetModelChecker {
         String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.LIBRARY_FOLDER) + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete"};
         Logger.getInstance().addMessage(Arrays.toString(command), true);
         ExternalProcessHandler proc = new ExternalProcessHandler(command);
+        ProcessPool.getInstance().putProcess(net.getName() + "#mchyper", proc);
         int exitValue = proc.startAndWaitFor();
 
         if (exitValue == 255) {
