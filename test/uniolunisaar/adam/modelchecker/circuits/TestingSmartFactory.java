@@ -14,7 +14,7 @@ import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import uniolunisaar.adam.exception.logics.NotConvertableException;
+import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.generators.pnwt.SmartFactory;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;

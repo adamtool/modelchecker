@@ -20,7 +20,7 @@ import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.exception.logics.NotConvertableException;
+import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 

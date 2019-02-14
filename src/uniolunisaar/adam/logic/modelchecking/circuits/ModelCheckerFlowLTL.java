@@ -11,7 +11,7 @@ import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.exception.logics.NotConvertableException;
+import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerParallel;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
@@ -54,7 +54,7 @@ public class ModelCheckerFlowLTL {
      * @throws InterruptedException
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
-     * @throws uniolunisaar.adam.exception.logics.NotConvertableException
+     * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
@@ -74,7 +74,7 @@ public class ModelCheckerFlowLTL {
      * @throws InterruptedException
      * @throws IOException
      * @throws uniol.apt.io.parser.ParseException
-     * @throws uniolunisaar.adam.exception.logics.NotConvertableException
+     * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
