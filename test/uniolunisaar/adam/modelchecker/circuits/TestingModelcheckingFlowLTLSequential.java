@@ -1028,7 +1028,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test
     public void testNoChains() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false, false);
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
@@ -1043,6 +1043,17 @@ public class TestingModelcheckingFlowLTLSequential {
 
         ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + net.getName(), false, false, true);
         ModelCheckingResult ret = mc.check(net, f, dataInCircuit, stats);
+//        System.out.println(stats.toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        mc = new ModelCheckerFlowLTL(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_NONE,
+                Stuttering.PREFIX_REGISTER,
+                VerificationAlgo.IC3,
+                true);
+        ret = mc.check(net, f, dataInCircuit, stats);
 //        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
