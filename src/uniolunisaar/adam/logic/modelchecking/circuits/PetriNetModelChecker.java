@@ -48,11 +48,11 @@ public class PetriNetModelChecker {
                 stats.setSatisfied(1);
             }
             if (BenchmarksMC.EDACC) {
-                Logger.getInstance().addMessage("Result: " + stats.isSatisfied(), "edacc");
+                String out = stats.isSatisfied() == 0 ? "unsat" : stats.isSatisfied() == 1 ? "sat" : "unknown";
+                Logger.getInstance().addMessage("Result: " + out, "edacc");
             }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-
         return ret;
     }
 
