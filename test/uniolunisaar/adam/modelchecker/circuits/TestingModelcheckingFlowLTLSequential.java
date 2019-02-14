@@ -66,7 +66,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(pOut)";
+        formula = "A F pOut";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -621,7 +621,7 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         ModelCheckingResult ret;
 
-        formula = "A(F(out))";
+        formula = "A F out";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -661,7 +661,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(out))";
+        formula = "A F out";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -752,7 +752,7 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula f;
         ModelCheckingResult ret;
 
-        formula = "A(F(out)";
+        formula = "A F out ";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -792,7 +792,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(out)";
+        formula = "A F out";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -831,7 +831,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(pOut)";
+        formula = "A F pOut";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
@@ -902,7 +902,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(out)";
+        formula = "A F out";
 
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");

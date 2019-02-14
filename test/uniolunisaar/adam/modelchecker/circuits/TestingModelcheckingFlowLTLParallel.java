@@ -53,7 +53,7 @@ public class TestingModelcheckingFlowLTLParallel {
         ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = "A(F(out))";
+        formula = "A F out";
         f = FlowLTLParser.parse(net, formula);
         f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
         ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
@@ -73,7 +73,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        String formula = "A(F(out)";
+        String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -87,7 +87,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        String formula = "A(F(out)";
+        String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -100,7 +100,7 @@ public class TestingModelcheckingFlowLTLParallel {
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 2);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        String formula = "A(F(p3)";
+        String formula = "A F p3";
         RunFormula f = FlowLTLParser.parse(net, formula);
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -113,7 +113,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        String formula = "A(F(out)";
+        String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);

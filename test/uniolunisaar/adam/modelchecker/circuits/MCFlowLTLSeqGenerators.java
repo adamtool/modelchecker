@@ -60,7 +60,7 @@ public class MCFlowLTLSeqGenerators {
         ModelCheckingResult ret;
         String name;
 
-        formula = "A(F(pOut)";
+        formula = "A F pOut";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
