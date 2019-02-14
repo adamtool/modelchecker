@@ -10,6 +10,7 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
@@ -29,16 +30,17 @@ public class TestingAiger {
         }
     }
 
-    private void testAiger(PetriNet pn) throws IOException, InterruptedException {
+    private void testAiger(PetriNet pn) throws IOException, InterruptedException, ExternalToolException {
 //        final String outputFolder = AdamProperties.getInstance().getLibFolder();
         // save aiger file
         final String outputFolder = ".";
 //        TransformerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
-        TransformerTools.save2AigerAndPdf(pn, Circuit.getRenderer(Circuit.Renderer.INGOING), outputFolder + "/" + pn.getName());
+        TransformerTools.save2Aiger(pn, Circuit.getRenderer(Circuit.Renderer.INGOING), outputFolder + "/" + pn.getName());
+        TransformerTools.saveAiger2PDF(outputFolder + "/" + pn.getName() + ".aag", outputFolder + "/" + pn.getName(), pn.getName());
     }
 
     @Test(enabled = true)
-    void testAigerRenderer() throws ParseException, IOException, InterruptedException {
+    void testAigerRenderer() throws ParseException, IOException, InterruptedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF("example", new PetriNetWithTransits(pn), false);
@@ -46,7 +48,7 @@ public class TestingAiger {
     }
 
     @Test
-    void testToyExample() throws RenderException, InterruptedException, IOException {
+    void testToyExample() throws RenderException, InterruptedException, IOException, ExternalToolException {
         PetriNetWithTransits game = new PetriNetWithTransits("testing");
         Place init = game.createPlace("inittfl");
         init.setInitialToken(1);

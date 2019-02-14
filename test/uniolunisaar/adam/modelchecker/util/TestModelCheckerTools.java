@@ -6,6 +6,7 @@ import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
@@ -43,25 +44,27 @@ public class TestModelCheckerTools {
 
         ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
         ModelCheckingResult check;
+        ModelCheckingOutputData data = new ModelCheckingOutputData(path, false, false, true);
+
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
         mc.setApproach(Approach.SEQUENTIAL);
         mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
         mc.setApproach(Approach.PARALLEL);
         mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
     }
 
@@ -84,23 +87,24 @@ public class TestModelCheckerTools {
 
         ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
         ModelCheckingResult check;
+        ModelCheckingOutputData data = new ModelCheckingOutputData(path, false, false, true);
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
         mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
         mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
         mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, path, true);
+        check = mc.check(net, formula, data);
         Assert.assertEquals(check.getSatisfied(), sat);
     }
 }

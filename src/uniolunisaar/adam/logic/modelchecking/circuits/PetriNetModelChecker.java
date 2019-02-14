@@ -6,6 +6,7 @@ import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
@@ -114,7 +115,7 @@ public class PetriNetModelChecker {
      */
     @Deprecated
     private static CounterExample checkWithPythonScript(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ExternalToolException {
-        TransformerTools.save2AigerAndPdf(net, circ, path);
+        TransformerTools.save2Aiger(net, circ, path);
         // version without threads
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
@@ -161,7 +162,8 @@ public class PetriNetModelChecker {
 
     @Deprecated
     public static ModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, "./" + net.getName(), null, false);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + net.getName(), false, false, false);
+        CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null);
         String inputFile = "./" + net.getName() + ".aig";
         return check(inputFile, verificationAlgo, net, renderer, path, abcParameters);
     }

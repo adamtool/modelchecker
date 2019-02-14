@@ -11,6 +11,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
@@ -124,7 +125,9 @@ public class TestingSmartFactory {
                 Abc.VerificationAlgo.IC3,
                 true);
         ModelcheckingStatistics stats = new ModelcheckingStatistics();
-        ret = mc.check(net, f, outputDirInCircuit + name, true, stats);
+        ModelCheckingOutputData data = new ModelCheckingOutputData(outputDirInCircuit + name, false, false, true);
+
+        ret = mc.check(net, f, data, stats);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         System.out.println(stats.toString());

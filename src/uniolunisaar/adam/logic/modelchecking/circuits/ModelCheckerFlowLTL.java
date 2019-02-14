@@ -9,6 +9,7 @@ import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
@@ -47,8 +48,7 @@ public class ModelCheckerFlowLTL {
      *
      * @param net
      * @param formula
-     * @param path
-     * @param verbose
+     * @param data
      * @return null iff the formula holds, otherwise a counter example violating
      * the formula.
      * @throws InterruptedException
@@ -58,16 +58,15 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, String path, boolean verbose) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        return check(net, formula, path, verbose, null);
+    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, ModelCheckingOutputData data) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        return check(net, formula, data, null);
     }
 
     /**
      *
      * @param net
      * @param formula
-     * @param path
-     * @param verbose
+     * @param data
      * @param stats
      * @return null iff the formula holds, otherwise a counter example violating
      * the formula.
@@ -78,15 +77,15 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, String path, boolean verbose, ModelcheckingStatistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, ModelCheckingOutputData data, ModelcheckingStatistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
                 + " With maximality term: " + circuitTransformer.getMaximality()
                 + " approach: " + circuitTransformer.getApproach() + " semantics: " + circuitTransformer.getSemantics() + " stuttering: " + circuitTransformer.getStuttering()
                 + " initialization first step: " + circuitTransformer.isInitFirst()
                 + " verification/falsification algorithm: " + verificationAlgo, true);
 
-        AigerRenderer renderer = circuitTransformer.createCircuit(net, formula, path, verbose, stats);
-        return PetriNetModelChecker.check(path + ".aig", verificationAlgo, net, renderer, path, stats, abcParameters, verbose);
+        AigerRenderer renderer = circuitTransformer.createCircuit(net, formula, data, stats);
+        return PetriNetModelChecker.check(data.getPath() + ".aig", verificationAlgo, net, renderer, data.getPath(), stats, abcParameters, data.isVerbose());
     }
 
     public VerificationAlgo getVerificationAlgo() {
@@ -173,7 +172,9 @@ public class ModelCheckerFlowLTL {
         } else {
             renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
         }
-        CircuitAndLTLtoCircuit.createCircuit(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), "./" + gameMC.getName(), null, false);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + net.getName(), false, false, false);
+
+        CircuitAndLTLtoCircuit.createCircuit(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), data, null);
 
         String inputFile = "./" + gameMC.getName() + ".aig";
         return PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, gameMC, renderer, "./" + gameMC.getName(), "");

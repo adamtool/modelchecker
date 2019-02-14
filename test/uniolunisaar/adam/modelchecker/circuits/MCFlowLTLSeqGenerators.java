@@ -13,6 +13,7 @@ import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
@@ -72,13 +73,16 @@ public class MCFlowLTLSeqGenerators {
                 //                ModelCheckerMCHyper.VerificationAlgo.INT,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 

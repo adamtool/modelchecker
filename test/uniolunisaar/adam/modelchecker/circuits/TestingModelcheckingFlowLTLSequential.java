@@ -23,6 +23,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
@@ -78,13 +79,16 @@ public class TestingModelcheckingFlowLTLSequential {
                 VerificationAlgo.IC3,
                 true);
         ModelcheckingStatistics statsInCircuit = new ModelcheckingStatistics();
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true, statsInCircuit);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+        ret = mc.check(net, f, dataInCircuit, statsInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula        
         ModelcheckingStatistics statsInFormula = new ModelcheckingStatistics();
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true, statsInFormula);
+
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ret = mc.check(net, f, dataInFormula, statsInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         System.out.println(statsInCircuit.toString());
@@ -118,12 +122,18 @@ public class TestingModelcheckingFlowLTLSequential {
 
         formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(init))); // should be true since the first place of each chain is pIn
         name = net.getName() + "_" + formula.toString().replace(" ", "");
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = new RunFormula(new FlowFormula(new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(init))));  //should still be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -175,31 +185,43 @@ public class TestingModelcheckingFlowLTLSequential {
         RunFormula a2 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t2)));
         formula = new RunFormula(a1, RunOperators.Binary.OR, a2); // should not hold since the newly created flow does not start with a transition, but a place
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check in circuit
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // %%%%%%% newly added (not done for all cases)
         formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
         // check in circuit
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // %%%%%%%% newly added (not done for all cases)
         formula = new RunFormula(new FlowFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check in circuit
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula(new LTLAtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check in circuit
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -208,7 +230,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -218,10 +240,13 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula(new LTLAtomicProposition(t2)); // should not hold since the flows starting in A and B
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -230,7 +255,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -240,10 +265,13 @@ public class TestingModelcheckingFlowLTLSequential {
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -252,7 +280,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -299,6 +327,9 @@ public class TestingModelcheckingFlowLTLSequential {
         formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(e))); // should not be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
@@ -307,7 +338,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -317,7 +348,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check interleaving in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -336,11 +367,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, ltlB))); // should not be true since the new chain in F exists
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -350,7 +383,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -362,11 +395,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, ltlB))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -375,7 +410,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -387,11 +422,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, ltlB)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -400,7 +437,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -412,11 +449,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, inifintelyB))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -425,7 +464,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -438,11 +477,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -451,7 +492,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -474,11 +515,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, inifintelyB))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -487,7 +530,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -499,11 +542,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -512,7 +557,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -531,11 +576,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 new FlowFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
         name = net.getName() + formula.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // check in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, formula, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, formula, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -544,7 +591,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // check in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, formula, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, formula, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -578,6 +625,9 @@ public class TestingModelcheckingFlowLTLSequential {
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check interleaving in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
@@ -586,13 +636,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // check interleaving in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -615,6 +665,9 @@ public class TestingModelcheckingFlowLTLSequential {
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // check maximal initerleaving in the circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
@@ -623,13 +676,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // check interleaving in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -648,17 +701,19 @@ public class TestingModelcheckingFlowLTLSequential {
         name = net.getName() + "_" + f.toString().replace(" ", "");
         PNWTTools.saveAPT(outputDir + net.getName() + "_" + formula, net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName() + "_" + formula, net, false);
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         // Check maximality in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // check it outside
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -673,9 +728,11 @@ public class TestingModelcheckingFlowLTLSequential {
 //        mc.setSemantics(TransitionSemantics.OUTGOING);
         f = new RunFormula(f, RunOperators.Binary.OR, f);
         name = net.getName() + "_" + f.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
         mc.setInitFirst(true);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -699,6 +756,9 @@ public class TestingModelcheckingFlowLTLSequential {
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // in maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
@@ -707,13 +767,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -736,6 +796,9 @@ public class TestingModelcheckingFlowLTLSequential {
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
@@ -744,13 +807,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -772,6 +835,9 @@ public class TestingModelcheckingFlowLTLSequential {
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         // maximality in circuit
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
@@ -780,13 +846,13 @@ public class TestingModelcheckingFlowLTLSequential {
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -819,7 +885,9 @@ public class TestingModelcheckingFlowLTLSequential {
                 VerificationAlgo.IC3,
                 true);
 
-        ModelCheckingResult ret = mc.check(net, f, outputDirInCircuit + net.getName() + "_init", true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + net.getName() + "_init", false, false, true);
+
+        ModelCheckingResult ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -848,13 +916,16 @@ public class TestingModelcheckingFlowLTLSequential {
                 VerificationAlgo.IC3,
                 true);
 
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ModelCheckingOutputData dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -866,14 +937,17 @@ public class TestingModelcheckingFlowLTLSequential {
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -885,14 +959,17 @@ public class TestingModelcheckingFlowLTLSequential {
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -904,14 +981,17 @@ public class TestingModelcheckingFlowLTLSequential {
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, true);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", true);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -920,17 +1000,20 @@ public class TestingModelcheckingFlowLTLSequential {
 
         net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         name = net.getName() + "_" + f.toString().replace(" ", "");
+        dataInFormula = new ModelCheckingOutputData(outputDirInFormula + name + "_init", false, false, false);
+        dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + name + "_init", false, false, true);
+
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%% new net maximality in circuit
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        ret = mc.check(net, f, outputDirInCircuit + name + "_init", true);
+        ret = mc.check(net, f, dataInCircuit);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // maximality in formula
         mc.setInitFirst(true);
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        ret = mc.check(net, f, outputDirInFormula + name + "_init", false);
+        ret = mc.check(net, f, dataInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        mc.setInitFirst(false);
@@ -957,7 +1040,9 @@ public class TestingModelcheckingFlowLTLSequential {
                 true);
         RunFormula f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
         ModelcheckingStatistics stats = new ModelcheckingStatistics();
-        ModelCheckingResult ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+
+        ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + net.getName(), false, false, true);
+        ModelCheckingResult ret = mc.check(net, f, dataInCircuit, stats);
 //        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }

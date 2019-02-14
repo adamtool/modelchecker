@@ -29,6 +29,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreator;
@@ -58,7 +59,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test
-    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException,  ProcessNotStartedException, ExternalToolException {
+    void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         PetriNet net = new PetriNet("jesko");
         Place init = net.createPlace("in");
         init.setInitialToken(1);
@@ -171,7 +172,8 @@ public class TestingModelcheckingLTL {
 
         // initially the initial place
         ILTLFormula pA = new LTLAtomicProposition(init);
-        ModelCheckingResult cex = mc.check(game, pA, "./" + game.getName(), true);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + game.getName(), false, false, true);
+        ModelCheckingResult cex = mc.check(game, pA, data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         //// but not the other one
         // first test the stuttering formula         
@@ -181,9 +183,9 @@ public class TestingModelcheckingLTL {
                 LTLOperators.Binary.IMP,
                 new LTLFormula(LTLOperators.Unary.G, stutterReg)))
         );
-//        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutt), "./" + game.getName(), true);
-//        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), "./" + game.getName(), true);
-//        cex = mc.check(game, new Constants.False(), "./" + game.getName(), true);
+//        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutt), data);
+//        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), data);
+//        cex = mc.check(game, new Constants.False(), data);
         IFormula f = new Constants.False();
         cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
@@ -192,23 +194,23 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         ILTLFormula pA2 = new LTLAtomicProposition(init2);
-        cex = mc.check(game, pA2, "./" + game.getName(), true);
+        cex = mc.check(game, pA2, data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // not the transition is force to leave the state since we  can stay in the initial marking
         ILTLFormula propT = new LTLAtomicProposition(t);
-        cex = mc.check(game, propT, "./" + game.getName(), true);
+        cex = mc.check(game, propT, data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         // but not when we demand maximality
         mc.setMaximality(Maximality.MAX_INTERLEAVING);
-        cex = mc.check(game, propT, "./" + game.getName(), true);
+        cex = mc.check(game, propT, data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         // Not all runs should be maximal
-        cex = mc.check(game, new LTLConstants.False(), "./" + game.getName(), true);
+        cex = mc.check(game, new LTLConstants.False(), data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         PNWTTools.savePnwt2PDF(game.getName(), game, true);
         // but not globally since the net is finite
-        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, propT), "./" + game.getName(), true);
+        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, propT), data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
     }
@@ -312,12 +314,13 @@ public class TestingModelcheckingLTL {
 
         ModelCheckerLTL mc = new ModelCheckerLTL(TransitionSemantics.OUTGOING, Maximality.MAX_INTERLEAVING, Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3);
-        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)), "./" + game.getName(), true);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + game.getName(), false, false, false);
+        cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)), data);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = true)
-    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException,  NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
+    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
@@ -328,12 +331,14 @@ public class TestingModelcheckingLTL {
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        ModelCheckingResult check = mc.check(pn, f, "./" + pn.getName(), true);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + pn.getName(), false, false, false);
+
+        ModelCheckingResult check = mc.check(pn, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbad"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        check = mc.check(pn, f, "./" + pn.getName(), true);
+        check = mc.check(pn, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         LTLFormula bothA = new LTLFormula(
@@ -351,7 +356,7 @@ public class TestingModelcheckingLTL {
 
         // test previous
         LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        check = mc.check(pn, maxf, "./" + pn.getName(), true);
+        check = mc.check(pn, maxf, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         // test next
         mc.setSemantics(TransitionSemantics.OUTGOING);
@@ -360,7 +365,7 @@ public class TestingModelcheckingLTL {
     }
 
     @Test(enabled = true)
-    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException,  NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
+    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
         PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
@@ -376,15 +381,17 @@ public class TestingModelcheckingLTL {
         mc.setSemantics(TransitionSemantics.INGOING);
         // test previous
         LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-//        CounterExample cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), true);
-        ModelCheckingResult check = mc.check(pn, maxf, "./" + pn.getName(), true);
+//        CounterExample cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), data);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + pn.getName(), false, false, false);
+
+        ModelCheckingResult check = mc.check(pn, maxf, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         //test next
         mc.setSemantics(TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-//        cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), false);
-        check = mc.check(pn, maxf, "./" + pn.getName(), false);
+//        cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), false);    
+        check = mc.check(pn, maxf, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
@@ -420,24 +427,25 @@ public class TestingModelcheckingLTL {
         LTLFormula evB2 = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(B2));
 
         LTLFormula f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + net.getName(), false, false, true);
 
-//        CounterExample cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
-        ModelCheckingResult check = mc.check(net, f, "./" + net.getName(), true);
+//        CounterExample cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), data);
+        ModelCheckingResult check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evB2);
-//        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true); 
-        check = mc.check(net, f, "./" + net.getName(), true);
+//        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), data); 
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evA2);
-//        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
-        check = mc.check(net, f, "./" + net.getName(), true);
+//        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), data);
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evB2);
-//        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), true);
-        check = mc.check(net, f, "./" + net.getName(), true);
+//        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), data);
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // Check next semantics
@@ -447,22 +455,22 @@ public class TestingModelcheckingLTL {
 
         f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
 //        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
-        check = mc.check(net, f, "./" + net.getName(), true);
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evB2);
 //        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
-        check = mc.check(net, f, "./" + net.getName(), true);
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evA2);
 //        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
-        check = mc.check(net, f, "./" + net.getName(), true);
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = new LTLFormula(maxReisig, LTLOperators.Binary.IMP, evB2);
 //        cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), false);
-        check = mc.check(net, f, "./" + net.getName(), true);
+        check = mc.check(net, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
@@ -482,19 +490,23 @@ public class TestingModelcheckingLTL {
                 VerificationAlgo.IC3
         );
         ILTLFormula deadlock = FormulaCreator.deadlock(net);
-        ModelCheckingResult check = mc.check(game, deadlock, output + game.getName() + "_deadlock", false);
+        ModelCheckingOutputData data = new ModelCheckingOutputData(output + game.getName() + "_deadlock", false, false, false);
+        ModelCheckingResult check = mc.check(game, deadlock, data);
         Tools.saveFile(output + game.getName() + "_deadlock.cex", (check == null) ? "not existend." : check.toString());
 
         ILTLFormula reversible = FormulaCreator.reversible(net);
-        check = mc.check(game, reversible, output + game.getName() + "_reversible", false);
+        data = new ModelCheckingOutputData(output + game.getName() + "_reversible", false, false, false);
+        check = mc.check(game, reversible, data);
         Tools.saveFile(output + game.getName() + "_reversible.cex", (check == null) ? "not existend." : check.toString());
 
         ILTLFormula quasiLive = FormulaCreator.quasiLive(net);
-        check = mc.check(game, quasiLive, output + game.getName() + "_quasiLive", false);
+        data = new ModelCheckingOutputData(output + game.getName() + "_quasiLive", false, false, false);
+        check = mc.check(game, quasiLive, data);
         Tools.saveFile(output + game.getName() + "_quasiLive.cex", (check == null) ? "not existend." : check.toString());
 
         ILTLFormula live = FormulaCreator.live(net);
-        check = mc.check(game, live, output + game.getName() + "_live", false);
+        data = new ModelCheckingOutputData(output + game.getName() + "_live", false, false, false);
+        check = mc.check(game, live, data);
         Tools.saveFile(output + game.getName() + "_live.cex", (check == null) ? "not existend." : check.toString());
     }
 
