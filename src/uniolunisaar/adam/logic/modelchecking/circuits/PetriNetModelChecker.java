@@ -50,7 +50,7 @@ public class PetriNetModelChecker {
             }
             if (BenchmarksMC.EDACC) {
                 String out = stats.isSatisfied() == 0 ? "unsat" : stats.isSatisfied() == 1 ? "sat" : "unknown";
-                Logger.getInstance().addMessage("Result: " + out, "edacc");
+                Logger.getInstance().addMessage("" + out, "edacc");
             }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
