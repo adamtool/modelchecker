@@ -45,7 +45,7 @@ public class TestingSmartFactory {
         (new File(outputDirInFormula)).mkdirs();
     }
 
-    @Test
+    @Test(enabled=false)
     public void testSmartFactoryFixed() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = SmartFactory.createMillingDrillingDeburringValidationExample(false);
 

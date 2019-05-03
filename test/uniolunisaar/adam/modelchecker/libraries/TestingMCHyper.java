@@ -1,6 +1,7 @@
 package uniolunisaar.adam.modelchecker.libraries;
 
 import java.io.IOException;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -15,6 +16,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCi
 import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -22,6 +24,14 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
  */
 @Test
 public class TestingMCHyper {
+
+    @BeforeClass
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+    }
 
     @Test
     void testFormulaParser() throws RenderException, InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {

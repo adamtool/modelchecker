@@ -41,8 +41,10 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.tools.Logger;
 
 import uniolunisaar.adam.tools.Tools;
+import uniolunisaar.adam.util.PNTools;
 
 /**
  *
@@ -50,6 +52,14 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingModelcheckingLTL {
+
+    @BeforeClass
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+    }
 
     @BeforeClass
     public void setProperties() {
@@ -60,7 +70,7 @@ public class TestingModelcheckingLTL {
 
     @Test
     void testByJesko() throws RenderException, InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
-        PetriNet net = new PetriNet("jesko");
+        PetriNet net = PNTools.createPetriNet("jesko");
         Place init = net.createPlace("in");
         init.setInitialToken(1);
         Transition t1 = net.createTransition("t1");
@@ -86,7 +96,7 @@ public class TestingModelcheckingLTL {
         check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        PetriNet doublediamond = new PetriNet("doublediamond");
+        PetriNet doublediamond = PNTools.createPetriNet("doublediamond");
         Place in = doublediamond.createPlace("in");
         in.setInitialToken(1);
 
@@ -295,7 +305,7 @@ public class TestingModelcheckingLTL {
 
         RunFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximalityInterleavingObject(game);
         LTLFormula ftest = new LTLFormula((ILTLFormula) maxStandard.getPhi(), LTLOperators.Binary.IMP, reachOut);
-        System.out.println(ftest.toSymbolString());
+//        System.out.println(ftest.toSymbolString());
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(ftest);
         check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);

@@ -38,10 +38,17 @@ public class MCFlowLTLSeqGenerators {
     private static String outputDirInFormula = outputDir + "sequential/generators/max_in_formula/";
 
     @BeforeClass
-    public void createFolder() {
-        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);        
+//        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+    }
 
+    @BeforeClass
+    public void createFolder() {
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
     }

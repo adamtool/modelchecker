@@ -23,6 +23,7 @@ import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -30,6 +31,14 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
  */
 @Test
 public class TestingModelcheckingFlowLTLParallel {
+
+    @BeforeClass
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+    }
 
     @BeforeClass
     public void setProperties() {

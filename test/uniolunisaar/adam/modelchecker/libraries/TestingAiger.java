@@ -13,6 +13,8 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
+import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.tools.PetriNetExtensionHandler;
 import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
 import uniolunisaar.adam.tools.Tools;
 
@@ -22,6 +24,14 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingAiger {
+
+    @BeforeClass
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+    }
 
     @BeforeClass
     public void setProperties() {
@@ -36,7 +46,7 @@ public class TestingAiger {
         final String outputFolder = ".";
 //        TransformerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
         TransformerTools.save2Aiger(pn, Circuit.getRenderer(Circuit.Renderer.INGOING), outputFolder + "/" + pn.getName());
-        TransformerTools.saveAiger2PDF(outputFolder + "/" + pn.getName() + ".aag", outputFolder + "/" + pn.getName(), pn.getName());
+        TransformerTools.saveAiger2PDF(outputFolder + "/" + pn.getName() + ".aag", outputFolder + "/" + pn.getName(), PetriNetExtensionHandler.getProcessFamilyID(pn));
     }
 
     @Test(enabled = true)

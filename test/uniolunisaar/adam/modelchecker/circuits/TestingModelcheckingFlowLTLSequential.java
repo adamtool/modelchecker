@@ -12,7 +12,6 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
@@ -50,10 +49,17 @@ public class TestingModelcheckingFlowLTLSequential {
     private static final String outputDirInFormula = outputDir + "sequential/max_in_formula/";
 
     @BeforeClass
-    public void createFolder() {
-        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+//               Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+    }
 
+    @BeforeClass
+    public void createFolder() {
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
     }
@@ -91,9 +97,9 @@ public class TestingModelcheckingFlowLTLSequential {
         ret = mc.check(net, f, dataInFormula, statsInFormula);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        System.out.println(statsInCircuit.toString());
-        System.out.println("-------");
-        System.out.println(statsInFormula.toString());
+//        System.out.println(statsInCircuit.toString());
+//        System.out.println("-------");
+//        System.out.println(statsInFormula.toString());
 
     }
 
@@ -876,7 +882,7 @@ public class TestingModelcheckingFlowLTLSequential {
                                 new LTLAtomicProposition(net.getPlace("out"))
                         ))
         );
-        System.out.println(f.toString());
+//        System.out.println(f.toString());
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
                 Approach.SEQUENTIAL,
@@ -891,7 +897,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);

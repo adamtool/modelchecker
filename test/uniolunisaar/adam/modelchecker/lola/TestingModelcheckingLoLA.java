@@ -2,6 +2,7 @@ package uniolunisaar.adam.modelchecker.lola;
 
 import java.io.IOException;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -15,6 +16,7 @@ import uniolunisaar.adam.util.PNWTTools;
 import static uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA.check;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerLoLA;
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 
 /**
@@ -23,6 +25,14 @@ import uniolunisaar.adam.tools.Tools;
  */
 @Test
 public class TestingModelcheckingLoLA {
+    
+    @BeforeClass
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+    }
 
     @Test
     void testLoLa2() throws RenderException, InterruptedException, IOException {

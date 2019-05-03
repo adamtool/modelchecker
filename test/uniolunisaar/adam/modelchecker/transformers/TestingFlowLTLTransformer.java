@@ -3,6 +3,7 @@ package uniolunisaar.adam.modelchecker.transformers;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
 import java.io.IOException;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -28,6 +29,7 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerSequential;
 import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -35,6 +37,14 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
  */
 @Test
 public class TestingFlowLTLTransformer {
+
+    @BeforeClass
+    public void silence() {
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+    }
 
     @Test
     public void transitionReplacement() throws RenderException, IOException, InterruptedException, NotConvertableException {
@@ -73,7 +83,7 @@ public class TestingFlowLTLTransformer {
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
         PNWTTools.savePnwt2PDF(mc.getName() + "mc", mc, true);
         ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, true);
-        System.out.println(f_mc);
+//        System.out.println(f_mc);
 
     }
 
