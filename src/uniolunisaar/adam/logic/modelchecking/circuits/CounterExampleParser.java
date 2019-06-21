@@ -4,13 +4,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import static uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister.STUTT_LATCH;
 import uniolunisaar.adam.ds.modelchecking.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.CounterExampleElement;
+import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -21,7 +21,7 @@ public class CounterExampleParser {
 
     public static CounterExample parseCounterExampleStandard(PetriNet net, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
-            String cexText = IOUtils.toString(inputStream);
+            String cexText = IOUtils.streamToString(inputStream);
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
             List<String> cropped = new ArrayList<>();
@@ -93,7 +93,7 @@ public class CounterExampleParser {
 
     public static CounterExample parseCounterExampleWithStutteringLatch(PetriNet net, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
-            String cexText = IOUtils.toString(inputStream);
+            String cexText = IOUtils.streamToString(inputStream);
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
             List<String> cropped = new ArrayList<>();

@@ -4,11 +4,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import org.apache.commons.io.IOUtils;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniol.apt.io.renderer.impl.LoLAPNRenderer;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -61,13 +61,13 @@ public class ModelCheckerLoLA {
         Process proc = procBuilder.start();
         proc.waitFor();
 
-        String error = IOUtils.toString(proc.getErrorStream());
+        String error = IOUtils.streamToString(proc.getErrorStream());
 //        Logger.getInstance().addMessage(procBuilder.command().toString().replaceAll(",|a|l", ""), true);
         Logger.getInstance().addMessage(error, true);
 
         String result;
         try (FileInputStream inputStream = new FileInputStream(json)) {
-            String output = IOUtils.toString(inputStream);
+            String output = IOUtils.streamToString(inputStream);
             int start_idx = output.indexOf("result");
             int endA_idx = output.indexOf('}', start_idx);
             int endB_idx = output.indexOf(',', start_idx);
@@ -78,10 +78,10 @@ public class ModelCheckerLoLA {
 //            System.out.println(output);
         }
         try (FileInputStream inputStream = new FileInputStream(state)) {
-            Logger.getInstance().addMessage("Witness state: " + IOUtils.toString(inputStream), true);
+            Logger.getInstance().addMessage("Witness state: " + IOUtils.streamToString(inputStream), true);
         }
         try (FileInputStream inputStream = new FileInputStream(witness_path)) {
-            Logger.getInstance().addMessage("Witness path: " + IOUtils.toString(inputStream), true);
+            Logger.getInstance().addMessage("Witness path: " + IOUtils.streamToString(inputStream), true);
         }
 
         //        System.out.println(builder.toString());
