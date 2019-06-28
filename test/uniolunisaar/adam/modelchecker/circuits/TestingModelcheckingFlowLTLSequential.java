@@ -64,6 +64,7 @@ public class TestingModelcheckingFlowLTLSequential {
         (new File(outputDirInFormula)).mkdirs();
     }
 
+    @Test
     public void testMaxInCircuitVsFormula() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
 
@@ -103,6 +104,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     }
 
+    @Test
     public void testNewlyFlowCreation() throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = new PetriNetWithTransits("infFlows");
         Transition tin = net.createTransition("createFlows");
