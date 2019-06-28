@@ -1039,18 +1039,20 @@ public class TestingModelcheckingFlowLTLSequential {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+//        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
                 TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL,
+                Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
                 VerificationAlgo.IC3,
                 true);
+        ModelCheckingResult ret;
         RunFormula f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
         ModelcheckingStatistics stats = new ModelcheckingStatistics();
 
         ModelCheckingOutputData dataInCircuit = new ModelCheckingOutputData(outputDirInCircuit + net.getName(), false, false, true);
-        ModelCheckingResult ret = mc.check(net, f, dataInCircuit, stats);
+        ret = mc.check(net, f, dataInCircuit, stats);
 //        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
@@ -1064,5 +1066,53 @@ public class TestingModelcheckingFlowLTLSequential {
         ret = mc.check(net, f, dataInCircuit, stats);
 //        System.out.println(stats.toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+    }
+
+    @Test
+    public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+//        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                VerificationAlgo.IC3,
+                true);
+        ModelCheckingResult ret;
+        RunFormula f;
+        ModelcheckingStatistics stats;
+
+        f = FlowLTLParser.parse(net, "𝔸 ◇ pOut");
+        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        f = FlowLTLParser.parse(net, "𝔸 ⬜ pOut");
+        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        f = FlowLTLParser.parse(net, "𝔸 ⬜ sw002fwdTosw000");
+        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+//        f = FlowLTLParser.parse(net, "𝔸 (⬜ (sw000fwdTosw001))");
+//        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(),  stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+//
+//        f = FlowLTLParser.parse(net, "𝔸 (⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000)))");
+//        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+//
+//        f = FlowLTLParser.parse(net, "𝔸 (◇ pOut ⋏ ⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000))");
+//        stats = new ModelcheckingStatistics();
+//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 }
