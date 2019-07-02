@@ -25,6 +25,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCir
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
 
 /**
  *
@@ -122,6 +123,7 @@ public class TestingSmartFactory {
                 PnAndFlowLTLtoCircuit.Approach.SEQUENTIAL,
                 PnAndLTLtoCircuit.Maximality.MAX_NONE,
                 PnAndLTLtoCircuit.Stuttering.PREFIX_REGISTER,
+                Optimizations.NONE,
                 Abc.VerificationAlgo.IC3,
                 true);
         ModelcheckingStatistics stats = new ModelcheckingStatistics();

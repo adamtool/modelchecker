@@ -25,6 +25,8 @@ import uniolunisaar.adam.tools.Tools;
 @Test
 public class TestingAiger {
 
+    private static final String outputDir = System.getProperty("testoutputfolder");
+
     @BeforeClass
     public void silence() {
         Logger.getInstance().setVerbose(false);
@@ -43,7 +45,7 @@ public class TestingAiger {
     private void testAiger(PetriNet pn) throws IOException, InterruptedException, ExternalToolException {
 //        final String outputFolder = AdamProperties.getInstance().getLibFolder();
         // save aiger file
-        final String outputFolder = ".";
+        final String outputFolder = outputDir;
 //        TransformerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
         TransformerTools.save2Aiger(pn, Circuit.getRenderer(Circuit.Renderer.INGOING), outputFolder + "/" + pn.getName());
         TransformerTools.saveAiger2PDF(outputFolder + "/" + pn.getName() + ".aag", outputFolder + "/" + pn.getName(), PetriNetExtensionHandler.getProcessFamilyID(pn));
@@ -53,7 +55,7 @@ public class TestingAiger {
     void testAigerRenderer() throws ParseException, IOException, InterruptedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        PNWTTools.savePnwt2PDF("example", new PetriNetWithTransits(pn), false);
+//        PNWTTools.savePnwt2PDF(outputDir + "/example", new PetriNetWithTransits(pn), false);
         testAiger(pn);
     }
 
@@ -81,7 +83,7 @@ public class TestingAiger {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        PNWTTools.savePnwt2PDF(game.getName(), game, true);
+//        PNWTTools.savePnwt2PDF(outputDir + "/" + game.getName(), game, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         testAiger(game);
     }

@@ -41,6 +41,8 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
+import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.tools.Logger;
 
 import uniolunisaar.adam.tools.Tools;
@@ -323,6 +325,7 @@ public class TestingModelcheckingLTL {
         ModelCheckingResult cex;
 
         ModelCheckerLTL mc = new ModelCheckerLTL(TransitionSemantics.OUTGOING, Maximality.MAX_INTERLEAVING, Stuttering.PREFIX_REGISTER,
+                Optimizations.NONE,
                 VerificationAlgo.IC3);
         ModelCheckingOutputData data = new ModelCheckingOutputData("./" + game.getName(), false, false, false);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)), data);
@@ -341,7 +344,7 @@ public class TestingModelcheckingLTL {
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + pn.getName(), false, false, false);
+        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + pn.getName(), true, true, true);
 
         ModelCheckingResult check = mc.check(pn, f, data);
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
@@ -497,6 +500,7 @@ public class TestingModelcheckingLTL {
                 TransitionSemantics.OUTGOING,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
+                Optimizations.NONE,
                 VerificationAlgo.IC3
         );
         ILTLFormula deadlock = FormulaCreator.deadlock(net);
@@ -520,4 +524,35 @@ public class TestingModelcheckingLTL {
         Tools.saveFile(output + game.getName() + "_live.cex", (check == null) ? "not existend." : check.toString());
     }
 
+    @Test
+    public void testOptimizations() throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+        PetriNet net = PNTools.createPetriNet("jesko");
+        Place init = net.createPlace("in");
+        init.setInitialToken(1);
+        Transition t1 = net.createTransition("t1");
+        net.createFlow(init, t1);
+        net.createFlow(t1, init);
+        Transition t2 = net.createTransition("t2");
+        net.createFlow(init, t2);
+        net.createFlow(t2, init);
+
+        String output = System.getProperty("testoutputfolder") + "/modelchecking/ltl/";
+        (new File(output)).mkdirs();
+
+        PNWTTools.savePnwt2PDF(output + net.getName(), new PetriNetWithTransits(net), false);
+
+        ModelCheckerLTL mc = new ModelCheckerLTL(
+                TransitionSemantics.INGOING,
+                Maximality.MAX_NONE,
+                Stuttering.PREFIX_REGISTER,
+                Optimizations.NONE,
+                VerificationAlgo.IC3
+        );
+        ILTLFormula f = new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(init));
+
+        ModelCheckingOutputData data = new ModelCheckingOutputData(output + net.getName(), true, true, true);
+        ModelCheckingResult check = mc.check(new PetriNetWithTransits(net), f, data);
+        Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Tools.saveFile(output + net.getName() + ".cex", (check == null) ? "not existend." : check.toString());
+    }
 }

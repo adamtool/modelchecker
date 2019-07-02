@@ -25,6 +25,7 @@ import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
 
 /**
  *
@@ -40,8 +41,12 @@ public class ModelCheckerFlowLTL {
         circuitTransformer = new PnAndFlowLTLtoCircuit();
     }
 
-    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, VerificationAlgo verificationAlgo, boolean initFirst) {
-        circuitTransformer = new PnAndFlowLTLtoCircuit(semantics, approach, maximality, stuttering, initFirst);
+    public ModelCheckerFlowLTL(Optimizations optimizations) {
+        circuitTransformer = new PnAndFlowLTLtoCircuit(optimizations);
+    }
+
+    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, Optimizations optimizations, VerificationAlgo verificationAlgo, boolean initFirst) {
+        circuitTransformer = new PnAndFlowLTLtoCircuit(semantics, approach, maximality, stuttering, optimizations, initFirst);
     }
 
     /**

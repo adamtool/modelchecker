@@ -9,7 +9,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
@@ -25,6 +24,7 @@ import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
 
 /**
  *
@@ -77,6 +77,7 @@ public class MCFlowLTLSeqGenerators {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
+                Optimizations.NONE,
                 //                ModelCheckerMCHyper.VerificationAlgo.INT,
                 VerificationAlgo.IC3,
                 true);
