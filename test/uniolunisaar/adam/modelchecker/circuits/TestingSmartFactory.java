@@ -25,7 +25,8 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCir
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 
 /**
  *
@@ -36,6 +37,10 @@ public class TestingSmartFactory {
     private static final String outputDir = System.getProperty("testoutputfolder") + "/";
     private static final String outputDirInCircuit = outputDir + "sequential/max_in_circuit/smartFactory/";
     private static final String outputDirInFormula = outputDir + "sequential/max_in_formula/smartFactory/";
+    
+    
+    private static final OptimizationsSystem optSys = OptimizationsSystem.NONE;
+    private static final AigerRenderer.OptimizationsComplete optCom = AigerRenderer.OptimizationsComplete.NONE;
 
     @BeforeClass
     public void createFolder() {
@@ -123,7 +128,8 @@ public class TestingSmartFactory {
                 PnAndFlowLTLtoCircuit.Approach.SEQUENTIAL,
                 PnAndLTLtoCircuit.Maximality.MAX_NONE,
                 PnAndLTLtoCircuit.Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 Abc.VerificationAlgo.IC3,
                 true);
         ModelcheckingStatistics stats = new ModelcheckingStatistics();

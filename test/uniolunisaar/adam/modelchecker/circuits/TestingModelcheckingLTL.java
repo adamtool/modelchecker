@@ -41,8 +41,7 @@ import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Stuttering;
 import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.tools.Logger;
 
 import uniolunisaar.adam.tools.Tools;
@@ -325,7 +324,8 @@ public class TestingModelcheckingLTL {
         ModelCheckingResult cex;
 
         ModelCheckerLTL mc = new ModelCheckerLTL(TransitionSemantics.OUTGOING, Maximality.MAX_INTERLEAVING, Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
                 VerificationAlgo.IC3);
         ModelCheckingOutputData data = new ModelCheckingOutputData("./" + game.getName(), false, false, false);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)), data);
@@ -500,7 +500,8 @@ public class TestingModelcheckingLTL {
                 TransitionSemantics.OUTGOING,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
                 VerificationAlgo.IC3
         );
         ILTLFormula deadlock = FormulaCreator.deadlock(net);
@@ -545,7 +546,8 @@ public class TestingModelcheckingLTL {
                 TransitionSemantics.INGOING,
                 Maximality.MAX_NONE,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
                 VerificationAlgo.IC3
         );
         ILTLFormula f = new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(init));

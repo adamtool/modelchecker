@@ -25,7 +25,7 @@ import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 
 /**
  *
@@ -41,12 +41,12 @@ public class ModelCheckerFlowLTL {
         circuitTransformer = new PnAndFlowLTLtoCircuit();
     }
 
-    public ModelCheckerFlowLTL(Optimizations optimizations) {
-        circuitTransformer = new PnAndFlowLTLtoCircuit(optimizations);
+    public ModelCheckerFlowLTL(OptimizationsSystem opsSys, AigerRenderer.OptimizationsComplete optsComp) {
+        circuitTransformer = new PnAndFlowLTLtoCircuit(opsSys, optsComp);
     }
 
-    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, Optimizations optimizations, VerificationAlgo verificationAlgo, boolean initFirst) {
-        circuitTransformer = new PnAndFlowLTLtoCircuit(semantics, approach, maximality, stuttering, optimizations, initFirst);
+    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, VerificationAlgo verificationAlgo, boolean initFirst) {
+        circuitTransformer = new PnAndFlowLTLtoCircuit(semantics, approach, maximality, stuttering, optsSys, optsComp, initFirst);
     }
 
     /**

@@ -35,7 +35,8 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.Optimizations;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsComplete;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.tools.Tools;
 
 /**
@@ -48,6 +49,9 @@ public class TestingModelcheckingFlowLTLSequential {
     private static final String outputDir = System.getProperty("testoutputfolder") + "/";
     private static final String outputDirInCircuit = outputDir + "sequential/max_in_circuit/";
     private static final String outputDirInFormula = outputDir + "sequential/max_in_formula/";
+
+    private static final OptimizationsSystem optSys = OptimizationsSystem.NONE;
+    private static final OptimizationsComplete optCom = OptimizationsComplete.NONE;
 
     @BeforeClass
     public void silence() {
@@ -84,7 +88,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ModelcheckingStatistics statsInCircuit = new ModelcheckingStatistics();
@@ -103,7 +108,6 @@ public class TestingModelcheckingFlowLTLSequential {
 //        System.out.println(statsInCircuit.toString());
 //        System.out.println("-------");
 //        System.out.println(statsInFormula.toString());
-
     }
 
     @Test
@@ -127,7 +131,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
 
@@ -188,7 +193,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
 
@@ -348,7 +354,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, formula, dataInCircuit);
@@ -647,7 +654,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, dataInCircuit);
@@ -688,7 +696,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, dataInCircuit);
@@ -780,7 +789,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, dataInCircuit);
@@ -821,7 +831,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, dataInCircuit);
@@ -861,7 +872,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, dataInCircuit);
@@ -900,7 +912,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
 
@@ -932,7 +945,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
 
@@ -1057,7 +1071,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ModelCheckingResult ret;
@@ -1074,7 +1089,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_NONE,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ret = mc.check(net, f, dataInCircuit, stats);
@@ -1093,7 +1109,8 @@ public class TestingModelcheckingFlowLTLSequential {
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
-                Optimizations.NONE,
+                optSys,
+                optCom,
                 VerificationAlgo.IC3,
                 true);
         ModelCheckingResult ret;
@@ -1111,7 +1128,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         f = FlowLTLParser.parse(net, "𝔸 ⬜ sw002fwdTosw000");
-        
+
         stats = new ModelcheckingStatistics();
 //        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
