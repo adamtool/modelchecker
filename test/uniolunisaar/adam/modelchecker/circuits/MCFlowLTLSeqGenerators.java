@@ -40,9 +40,9 @@ public class MCFlowLTLSeqGenerators {
     private static String outputDirInCircuit = outputDir + "sequential/generators/max_in_circuit/";
     private static String outputDirInFormula = outputDir + "sequential/generators/max_in_formula/";
 
-    private static final OptimizationsSystem optSys = OptimizationsSystem.NB_GATES_AND_INDICES;
+    private static final OptimizationsSystem optSys = OptimizationsSystem.NONE;
 //    private static final AigerRenderer.OptimizationsComplete optCom = AigerRenderer.OptimizationsComplete.NB_GATES_BY_DS_WITH_IDX_SQUEEZING_AND_EXTRA_LIST;
-    private static final AigerRenderer.OptimizationsComplete optCom = AigerRenderer.OptimizationsComplete.NONE;
+    private static final AigerRenderer.OptimizationsComplete optCom = AigerRenderer.OptimizationsComplete.NB_GATES_BY_REGEX_WITH_IDX_SQUEEZING;
 
     @BeforeClass
     public void silence() {
