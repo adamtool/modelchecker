@@ -24,8 +24,6 @@ import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.externaltools.logics.AigToAig;
-import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 
@@ -46,14 +44,14 @@ public class MCFlowLTLSeqGenerators {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(false);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
 //        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
-        Logger.getInstance().addMessageStream(AigToAig.LOGGER_AIGER_OUT, System.out);
-        Logger.getInstance().addMessageStream(AigToAig.LOGGER_AIGER_ERR, System.err);
+//        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+//        Logger.getInstance().addMessageStream(AigToAig.LOGGER_AIGER_OUT, System.out);
+//        Logger.getInstance().addMessageStream(AigToAig.LOGGER_AIGER_ERR, System.err);
     }
 
     @BeforeClass

@@ -1,6 +1,8 @@
 package uniolunisaar.adam.modelchecker.libraries;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
@@ -79,6 +81,59 @@ public class TestingMCHyper {
 
         String inputFile = "./" + net.getName() + ".aig";
         PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, "./" + net.getName(), "");
+    }
+
+    @Test
+    public void regEx() {
+//           StringBuilder pat = new StringBuilder("(?:^|" + linSep + "| )(?:");
+////            System.out.println("%%%%%%%%%%%%%%%%%%%%%%% ASDF");
+//            for (String search : replacement.keySet()) {
+////                System.out.println(search);
+//                pat.append(search).append("|");
+//            }
+////            System.out.println("%%%%%%%%%%%%%%%%%%%%%%% ASDF");
+//            pat.replace(pat.length() - 1, pat.length(), ")");
+////            pat.append("(?: |$)");
+////            pat.append("(?: |" + linSep + ")");
+//            pat.append("(?:$| |").append(linSep).append(")");
+////            System.out.println(pat.toString());
+
+        String linSep = System.lineSeparator();
+        if (linSep.equals("\n")) {
+//            System.out.println("asdfasfd");
+        }
+//        System.out.println("\\" + linSep);
+        String test = "\\" + linSep;
+//        System.out.println(test);
+        String test1 = new String("\\" + linSep);
+//        System.out.println(test1);
+
+//        Pattern pattern = Pattern.compile("(?:^|\\s|" + System.lineSeparator() + ")(12|13|14)(?:$|\\" + System.lineSeparator() + ")");
+//        Pattern pattern = Pattern.compile("(?:^|\\s)(12|13|14)(?:$|\\s)");
+        Pattern pattern = Pattern.compile("(^|\\s|\\G)(12|13|14)($|\\s)");
+//        System.out.println(pattern);
+//        String check = "13" + linSep;
+//        check += "12" + linSep;
+        String check = "13\n";
+        check += "12\n";
+        StringBuffer sub = new StringBuffer();
+        Matcher matcher = pattern.matcher(check);
+//        System.out.println("check: '"+check+"'");
+        while (matcher.find()) {
+//            System.out.println("found");
+//            System.out.println("'"+matcher.group()+"'");
+//            System.out.println("finished");
+//                String match = matcher.group();
+//                String matchTrimmed = match.trim();
+//                String pre = match.substring(0, match.indexOf(matchTrimmed));
+//                String post = match.substring(pre.length() + matchTrimmed.length());
+//                matcher.appendReplacement(sub, pre + replacement.get(matchTrimmed) + ((post == null) ? "" : post));
+////                System.out.println(replacement.get(matchTrimmed));
+////                System.out.println("for " + matchTrimmed);
+//                matcher.appendReplacement(newLatches, matcher.group("A" + match + "Start") + replacement.get(match.trim()) + matcher.group("A" + match + "End"));
+        }
+//            matcher.appendTail(sub);
+//            latches = sub.toString();
     }
 
 }

@@ -51,7 +51,7 @@ public class TestingModelcheckingFlowLTLSequential {
     private static final String outputDirInFormula = outputDir + "sequential/max_in_formula/";
 
     private static final OptimizationsSystem optSys = OptimizationsSystem.NONE;
-    private static final OptimizationsComplete optCom = OptimizationsComplete.NONE;
+    private static final OptimizationsComplete optCom = OptimizationsComplete.NB_GATES_BY_REGEX_WITH_IDX_SQUEEZING;
 
     @BeforeClass
     public void silence() {
