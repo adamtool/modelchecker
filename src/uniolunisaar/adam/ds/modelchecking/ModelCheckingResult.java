@@ -1,7 +1,5 @@
 package uniolunisaar.adam.ds.modelchecking;
 
-import uniolunisaar.adam.ds.modelchecking.CounterExample;
-
 /**
  *
  * @author Manuel Gieseking

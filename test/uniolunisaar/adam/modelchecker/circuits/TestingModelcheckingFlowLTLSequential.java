@@ -61,6 +61,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Logger.getInstance().setWarningStream(null);
 //               Logger.getInstance().setVerbose(true);
 //        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+//        Logger.getInstance().addMessageStream(LOGGER_ABC_ERR, System.err);
     }
 
     @BeforeClass
@@ -835,7 +836,11 @@ public class TestingModelcheckingFlowLTLSequential {
                 optCom,
                 VerificationAlgo.IC3,
                 true);
-        ret = mc.check(net, f, dataInCircuit);
+        ModelcheckingStatistics stats = new ModelcheckingStatistics();
+        ret = mc.check(net, f, dataInCircuit, stats);
+//        System.out.println(stats.toString());
+//        System.out.println(stats.getAbc_mem());
+//        System.out.println(stats.getAbc_sec());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula

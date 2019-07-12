@@ -8,6 +8,7 @@ import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.modelchecking.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.logic.modelchecking.circuits.CounterExampleParser;
@@ -17,6 +18,7 @@ import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.ProcessPool;
 import uniolunisaar.adam.tools.Tools;
+import uniolunisaar.adam.util.logics.benchmarks.mc.BenchmarksMC;
 
 /**
  *
@@ -54,10 +56,11 @@ public class Abc {
                 call = "bmc3";
                 break;
             default:
-                throw new RuntimeException("Not all verification methods had been considered. '" + alg + "' is missing.");
+                throw new RuntimeException("Not all verification methods had been considered: '" + alg + "' is missing.");
         }
 
-        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
+        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.TIME), "-f", "wall_time_(s)%e;CPU_time_(s)%U;memory_(KB)%M;",
+            AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling abc ...", false);
         Logger.getInstance().addMessage(Arrays.toString(abc_command), true);
@@ -101,10 +104,10 @@ public class Abc {
                     + " Check the abc output for more information:\n" + procAbc.getOutput(), false);
         }
         Logger.getInstance().addMessage("... finished calling abc.", false);
-        return abcOutput;
+        return abcOutput + "\nERRORS: " + procAbc.getErrors();
     }
 
-    public static ModelCheckingResult parseOutput(String path, String output, PetriNet net, AigerRenderer circ, String cexFile, boolean verbose) throws ExternalToolException, IOException {
+    public static ModelCheckingResult parseOutput(String path, String output, PetriNet net, AigerRenderer circ, String cexFile, boolean verbose, ModelcheckingStatistics stats) throws ExternalToolException, IOException {
         Logger.getInstance().addMessage("Parsing abc output ...", false);
         //todo: hack for checking the abc output
 //        Logger.getInstance().addMessage(abcOutput, false, true);
@@ -134,6 +137,26 @@ public class Abc {
         } else {
             ret.setSat(ModelCheckingResult.Satisfied.TRUE);
         }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
+        if (stats != null) {
+            if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.FALSE)) {
+                stats.setSatisfied(0);
+            } else if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.TRUE)) {
+                stats.setSatisfied(1);
+            }
+            if (BenchmarksMC.EDACC) {
+                String out = stats.isSatisfied() == 0 ? "unsat" : stats.isSatisfied() == 1 ? "sat" : "unknown";
+                Logger.getInstance().addMessage("" + out, "edacc");
+            }
+            // get the time data
+            String key = "CPU_time_(s)";
+            int idx = output.indexOf(key) + key.length();
+            stats.setAbc_sec(Double.parseDouble(output.substring(idx, output.indexOf(';', idx))));
+            key = "memory_(KB)";
+            idx = output.indexOf(key) + key.length();
+            stats.setAbc_mem(Long.parseLong(output.substring(idx, output.indexOf(';', idx))));
+        }
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
         Logger.getInstance().addMessage("... finished parsing abc output.", false);
         Logger.getInstance().addMessage("", false);
         return ret;

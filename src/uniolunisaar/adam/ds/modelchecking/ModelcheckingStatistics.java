@@ -12,7 +12,7 @@ import uniolunisaar.adam.util.logics.transformers.logics.PnAndLTLtoCircuitStatis
 public class ModelcheckingStatistics extends PnAndLTLtoCircuitStatistics {
 
     // data sub tools
-    private long abc_sec;
+    private double abc_sec;
     private long abc_mem;
     // output
     private int satisfied = 42;
@@ -24,11 +24,11 @@ public class ModelcheckingStatistics extends PnAndLTLtoCircuitStatistics {
         super(path);
     }
 
-    public long getAbc_sec() {
+    public double getAbc_sec() {
         return abc_sec;
     }
 
-    public void setAbc_sec(long abc_sec) {
+    public void setAbc_sec(double abc_sec) {
         this.abc_sec = abc_sec;
     }
 
@@ -57,7 +57,7 @@ public class ModelcheckingStatistics extends PnAndLTLtoCircuitStatistics {
         if (super.getPath() != null) {
             try (BufferedWriter wr = new BufferedWriter(new FileWriter(super.getPath(), true))) {
                 wr.append("\nsatisfied:").append(satisfied == 1 ? "\\cmark" : satisfied == 0 ? "\\xmark" : "?");
-            };
+            }
         }
     }
 

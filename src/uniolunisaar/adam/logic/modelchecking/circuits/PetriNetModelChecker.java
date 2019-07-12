@@ -19,7 +19,6 @@ import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.PetriNetExtensionHandler;
 import uniolunisaar.adam.tools.ProcessPool;
-import uniolunisaar.adam.util.logics.benchmarks.mc.BenchmarksMC;
 
 /**
  *
@@ -41,21 +40,7 @@ public class PetriNetModelChecker {
         // %%%%%%%%%%%%%%% Abc
         String outputPath = path + ".cex";
         String abcOutput = Abc.call(inputFile, abcParameter, outputPath, alg, verbose, PetriNetExtensionHandler.getProcessFamilyID(net));
-        ModelCheckingResult ret = Abc.parseOutput(path, abcOutput, net, circ, outputPath, verbose);
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
-        if (stats != null) {
-            if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.FALSE)) {
-                stats.setSatisfied(0);
-            } else if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.TRUE)) {
-                stats.setSatisfied(1);
-            }
-            if (BenchmarksMC.EDACC) {
-                String out = stats.isSatisfied() == 0 ? "unsat" : stats.isSatisfied() == 1 ? "sat" : "unknown";
-                Logger.getInstance().addMessage("" + out, "edacc");
-            }
-        }
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-        return ret;
+        return Abc.parseOutput(path, abcOutput, net, circ, outputPath, verbose, stats);
     }
 
     /**
