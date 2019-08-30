@@ -11,22 +11,25 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
-import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Approach;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Stuttering;
+import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.generators.pnwt.SmartFactory;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
+import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -37,8 +40,7 @@ public class TestingSmartFactory {
     private static final String outputDir = System.getProperty("testoutputfolder") + "/";
     private static final String outputDirInCircuit = outputDir + "sequential/max_in_circuit/smartFactory/";
     private static final String outputDirInFormula = outputDir + "sequential/max_in_formula/smartFactory/";
-    
-    
+
     private static final OptimizationsSystem optSys = OptimizationsSystem.NONE;
     private static final AigerRenderer.OptimizationsComplete optCom = AigerRenderer.OptimizationsComplete.NONE;
 
@@ -51,7 +53,7 @@ public class TestingSmartFactory {
         (new File(outputDirInFormula)).mkdirs();
     }
 
-    @Test(enabled=false)
+    @Test(enabled = false)
     public void testSmartFactoryFixed() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = SmartFactory.createMillingDrillingDeburringValidationExample(false);
 
@@ -123,19 +125,22 @@ public class TestingSmartFactory {
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
         // maximality in circuit
-        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(
-                PnAndLTLtoCircuit.TransitionSemantics.OUTGOING,
-                PnAndFlowLTLtoCircuit.Approach.SEQUENTIAL,
-                PnAndLTLtoCircuit.Maximality.MAX_NONE,
-                PnAndLTLtoCircuit.Stuttering.PREFIX_REGISTER,
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL,
+                Maximality.MAX_NONE,
+                Stuttering.PREFIX_REGISTER,
                 optSys,
                 optCom,
-                Abc.VerificationAlgo.IC3,
-                true);
-        ModelcheckingStatistics stats = new ModelcheckingStatistics();
-        ModelCheckingOutputData data = new ModelCheckingOutputData(outputDirInCircuit + name, false, false, true);
+                true,
+                Abc.VerificationAlgo.IC3);
+        AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name, false, false, true);
+        settings.setOutputData(data);
+        settings.setStatistics(stats);
 
-        ret = mc.check(net, f, data, stats);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         System.out.println(stats.toString());

@@ -14,8 +14,8 @@ import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.util.PNWTTools;
 import static uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA.check;
-import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerLoLA;
-import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
+import uniolunisaar.adam.logic.transformers.modelchecking.lola.FlowLTLTransformerLoLA;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 

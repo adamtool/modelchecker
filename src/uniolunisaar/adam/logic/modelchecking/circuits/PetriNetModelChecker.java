@@ -6,46 +6,34 @@ import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
-import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.util.logics.transformers.logics.TransformerTools;
-import uniolunisaar.adam.ds.modelchecking.ModelcheckingStatistics;
+import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.tools.AdamProperties;
-import uniolunisaar.adam.tools.ExternalProcessHandler;
+import uniolunisaar.adam.tools.processHandling.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
 import uniolunisaar.adam.tools.PetriNetExtensionHandler;
-import uniolunisaar.adam.tools.ProcessPool;
+import uniolunisaar.adam.tools.processHandling.ProcessPool;
+import uniolunisaar.adam.util.AigerTools;
 
 /**
  *
  * @author Manuel Gieseking
  */
+@Deprecated
 public class PetriNetModelChecker {
 
-    /**
-     * Returns null iff the formula holds.
-     *
-     * @param net
-     * @param circ
-     * @param path
-     * @return
-     * @throws InterruptedException
-     * @throws IOException
-     */
-    private static ModelCheckingResult checkSeparate(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, ModelcheckingStatistics stats, String abcParameter, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        // %%%%%%%%%%%%%%% Abc
-        String outputPath = path + ".cex";
-        String abcOutput = Abc.call(inputFile, abcParameter, outputPath, alg, verbose, PetriNetExtensionHandler.getProcessFamilyID(net));
-        return Abc.parseOutput(path, abcOutput, net, circ, outputPath, verbose, stats);
+    @Deprecated
+    private static ModelCheckingResult checkSeparate(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        return Abc.call(settings, outputData, net, stats);
     }
 
     /**
-     * Returns null iff the formula holds.
-     *
      * @param inputFile
      * @param alg
      * @param net
@@ -58,30 +46,16 @@ public class PetriNetModelChecker {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        return check(inputFile, alg, net, circ, path, null, abcParameters, true);
+    @Deprecated
+    public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+        AbcSettings settings = new AbcSettings(inputFile, abcParameters, true, null, new VerificationAlgo[]{alg});
+        return check(settings, data, net, null);
     }
 
-    /**
-     * Returns null iff the formula holds.
-     *
-     * @param inputFile
-     * @param alg
-     * @param net
-     * @param circ
-     * @param path
-     * @param stats
-     * @param abcParameters
-     * @param verbose
-     * @return
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
-     * @throws uniolunisaar.adam.exceptions.ExternalToolException
-     */
-    public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, ModelcheckingStatistics stats, String abcParameters, boolean verbose) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    @Deprecated
+    public static ModelCheckingResult check(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
-        return checkSeparate(inputFile, alg, net, circ, path, stats, abcParameters, verbose);
+        return checkSeparate(settings, outputData, net, stats);
     }
 
     /**
@@ -101,7 +75,7 @@ public class PetriNetModelChecker {
      */
     @Deprecated
     private static CounterExample checkWithPythonScript(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ExternalToolException {
-        TransformerTools.save2Aiger(net, circ, path);
+        AigerTools.save2Aiger(net, circ, path);
         // version without threads
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));
@@ -148,10 +122,10 @@ public class PetriNetModelChecker {
 
     @Deprecated
     public static ModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + net.getName(), false, false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
         CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null);
         String inputFile = "./" + net.getName() + ".aig";
-        return check(inputFile, verificationAlgo, net, renderer, path, abcParameters);
+        return check(inputFile, verificationAlgo, net, renderer, path, abcParameters, data);
     }
 
 }

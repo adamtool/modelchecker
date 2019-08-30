@@ -6,18 +6,19 @@ import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndFlowLTLtoCircuit.Approach;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.Maximality;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.PnAndLTLtoCircuit.TransitionSemantics;
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerLTL;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Approach;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -39,32 +40,35 @@ public class TestModelCheckerTools {
     }
 
     public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunFormula formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
-        mc.setMaximality(max);
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings();
+        settings.setMaximality(max);
 
         ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
         ModelCheckingResult check;
-        ModelCheckingOutputData data = new ModelCheckingOutputData(path, false, false, true);
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(path, false, false, true);
+
+        settings.setOutputData(data);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
 
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
-        mc.setApproach(Approach.SEQUENTIAL);
-        mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, data);
+        settings.setApproach(Approach.SEQUENTIAL);
+        settings.setSemantics(TransitionSemantics.OUTGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
-        mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, data);
+        settings.setSemantics(TransitionSemantics.INGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
-        mc.setApproach(Approach.PARALLEL);
-        mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, data);
+        settings.setApproach(Approach.PARALLEL);
+        settings.setSemantics(TransitionSemantics.OUTGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
-        mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, data);
+        settings.setSemantics(TransitionSemantics.INGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
     }
 
@@ -82,29 +86,31 @@ public class TestModelCheckerTools {
     }
 
     public static void testModelCheckerLTL(PetriNetWithTransits net, ILTLFormula formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
-        ModelCheckerLTL mc = new ModelCheckerLTL();
-        mc.setMaximality(max);
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings();
+        ModelCheckerLTL mc = new ModelCheckerLTL(settings);
+        settings.setMaximality(max);
 
         ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
         ModelCheckingResult check;
-        ModelCheckingOutputData data = new ModelCheckingOutputData(path, false, false, true);
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(path, false, false, true);
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics
-        mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, data);
+        settings.setSemantics(TransitionSemantics.OUTGOING);
+        settings.setOutputData(data);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
-        mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, data);
+        settings.setSemantics(TransitionSemantics.INGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%%%%%%%%%% parallel
         //%%%%% next semantics
-        mc.setSemantics(TransitionSemantics.OUTGOING);
-        check = mc.check(net, formula, data);
+        settings.setSemantics(TransitionSemantics.OUTGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
         //%%%% previous semantics
-        mc.setSemantics(TransitionSemantics.INGOING);
-        check = mc.check(net, formula, data);
+        settings.setSemantics(TransitionSemantics.INGOING);
+        check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
     }
 }

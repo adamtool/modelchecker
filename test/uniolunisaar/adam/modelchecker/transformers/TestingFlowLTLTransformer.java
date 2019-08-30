@@ -26,8 +26,8 @@ import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerSequential;
-import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.FlowLTLTransformerSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.Logger;
 

@@ -1,5 +1,7 @@
 package uniolunisaar.adam.ds.modelchecking;
 
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
+
 /**
  *
  * @author Manuel Gieseking
@@ -14,6 +16,7 @@ public class ModelCheckingResult {
 
     private CounterExample cex = null;
     private Satisfied sat;
+    private Abc.VerificationAlgo algo;
 
     public CounterExample getCex() {
         return cex;
@@ -33,4 +36,13 @@ public class ModelCheckingResult {
     public Satisfied getSatisfied() {
         return sat;
     }
+
+    public Abc.VerificationAlgo getAlgo() {
+        return algo;
+    }
+
+    public void setAlgo(Abc.VerificationAlgo algo) {
+        this.algo = algo;
+    }
+
 }

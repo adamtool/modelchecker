@@ -21,7 +21,7 @@ import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.Logger;
 

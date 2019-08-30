@@ -8,13 +8,13 @@ import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.util.logics.transformers.logics.ModelCheckingOutputData;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
-import uniolunisaar.adam.logic.transformers.pnandformula2aiger.CircuitAndLTLtoCircuit;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
@@ -75,12 +75,12 @@ public class TestingMCHyper {
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
-        ModelCheckingOutputData data = new ModelCheckingOutputData("./" + net.getName(), false, false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
 
         CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null);
 
         String inputFile = "./" + net.getName() + ".aig";
-        PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, "./" + net.getName(), "");
+        PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, "./" + net.getName(), "", data);
     }
 
     @Test
