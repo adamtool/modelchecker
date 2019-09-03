@@ -17,6 +17,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Approach;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Stuttering;
+import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.util.PNWTTools;
@@ -107,10 +108,10 @@ public class MCFlowLTLSeqGenerators {
         ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
-    
+
     @Test
     public void testParallelChecking() throws ParseException, FileNotFoundException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 TransitionSemantics.OUTGOING,
                 Approach.SEQUENTIAL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
@@ -119,8 +120,11 @@ public class MCFlowLTLSeqGenerators {
                 optCom,
                 //                ModelCheckerMCHyper.VerificationAlgo.INT,
                 true,
-                VerificationAlgo.IC3, VerificationAlgo.BMC2);
-        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(1, 1);
+                //                VerificationAlgo.IC3, VerificationAlgo.BMC, VerificationAlgo.BMC2, VerificationAlgo.BMC3, VerificationAlgo.INT);
+                                VerificationAlgo.IC3, VerificationAlgo.BMC3);
+//                VerificationAlgo.IC3, VerificationAlgo.BMC3, VerificationAlgo.BMC2);
+//                VerificationAlgo.BMC3);
+        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
         String formula = "A F out";
 
         RunFormula f = FlowLTLParser.parse(net, formula);
@@ -129,10 +133,13 @@ public class MCFlowLTLSeqGenerators {
 
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
         settings.setOutputData(dataInCircuit);
+        AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
+        settings.setStatistics(stats);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ModelCheckingResult ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         System.out.println(ret.getAlgo());
+        System.out.println("ABC sec: " + stats.getAbc_sec());
     }
 
 }

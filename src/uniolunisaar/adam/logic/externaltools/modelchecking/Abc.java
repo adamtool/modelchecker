@@ -54,6 +54,7 @@ public class Abc {
         // Start all given verifier and falsifier in parallel, return when the first finished with a real result        
         final CountDownLatch latch = new CountDownLatch(1);
         final ModelCheckingResult result = new ModelCheckingResult();
+        final int finished = 0;
         for (VerificationAlgo verificationAlgo : settings.getVerificationAlgos()) {
             new Thread(new Runnable() {
                 @Override
@@ -69,11 +70,18 @@ public class Abc {
                             latch.countDown();
                         }
                     } catch (IOException | InterruptedException | ProcessNotStartedException | ExternalToolException ex) {
+                        // todo: should here be some handling? For example the killed processes will send an ABC didn't finished correctly...
                     }
                 }
             }).start();
         }
-        latch.await();
+        latch.await(); // todo: problem that it blocks when no processes returns a proper result
+        // Kill all the other parallel algos
+        for (VerificationAlgo verificationAlgo : settings.getVerificationAlgos()) {
+            if (!verificationAlgo.equals(result.getAlgo())) {
+                ProcessPool.getInstance().destroyForciblyProcessAndChilds(settings.getProcessFamilyID() + "#abc" + verificationAlgo.name());
+            }
+        }
         return result;
     }
 
