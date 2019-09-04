@@ -217,7 +217,7 @@ public class AdamCircuitLTLMCStatistics {
         if (printSysCircuitSizes) {
             sb.append(" #L, #G,");
         }
-        sb.append(" #Lt, #Gt, |=\\n");
+        sb.append(" #Lt, #Gt, |=\n");
         sb.append("sizes:")
                 .append(in_nb_places).append("  &  ")
                 .append(in_nb_transitions).append("  &  ")
