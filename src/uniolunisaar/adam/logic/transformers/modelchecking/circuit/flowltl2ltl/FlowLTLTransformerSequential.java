@@ -452,16 +452,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     skipping = new LTLFormula(LTLOperators.Unary.G, init);
                 }
 
-                // %%%%% PUT TOGETHER FLOW FORMULA
-                // %%%%% OLD VERSION TACAS VERSION WITH ERROR ! Belongs to the old calculation of newlyCreatedChains
-//                LTLFormula flowLTL = new LTLFormula(
-//                        skipping,
-//                        LTLOperators.Binary.OR,
-//                        flowFormula.getPhi()); // <- here error. should not be there anymore in the newlyCreatedChains!=null case
-//                if (newlyCreatedChains != null) {
-//                    flowLTL = new LTLFormula(newlyCreatedChains, LTLOperators.Binary.OR, flowLTL);
-//                }
-                // %%%%% END OLD VERSION TACAS VERSION WITH ERROR !
+                // %%%%% PUT TOGETHER FLOW FORMULA                
                 ILTLFormula chainFormula = (newlyCreatedChains == null) ? flowFormula.getPhi() : newlyCreatedChains;
                 LTLFormula flowLTL = new LTLFormula(
                         skipping,
@@ -469,6 +460,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         chainFormula);
                 // %%%%% REPLACE THE FLOW FORMULA
                 f = f.substitute(flowFormulas.get(i), new RunFormula(flowLTL));
+
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
             }

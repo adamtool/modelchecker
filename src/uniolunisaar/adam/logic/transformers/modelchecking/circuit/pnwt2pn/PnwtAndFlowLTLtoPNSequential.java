@@ -317,7 +317,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
      * Adds maximally a new copy for each place and each sub flow formula. Thus,
      * each sub flow formula yields one new block, where we check each flow
      * chain by creating a run for each chain. The succeeding of the flow chains
-     * is done sequentially. The original net choses a transition and this
+     * is done sequentially. The original net chooses a transition and this
      * choice is sequentially given to each sub net concerning the belonging
      * flow subformula.
      *
@@ -574,7 +574,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
         // and the initial token flow markers
         for (Place place : net.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
-                out.removeInitialTokenflow(out.getPlace(place.getId()));
+                out.removeInitialTransit(out.getPlace(place.getId()));
             }
         }
         return out;
@@ -858,7 +858,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
         // and the initial token flow markers
         for (Place place : net.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
-                out.removeInitialTokenflow(out.getPlace(place.getId()));
+                out.removeInitialTransit(out.getPlace(place.getId()));
             }
         }
         return out;

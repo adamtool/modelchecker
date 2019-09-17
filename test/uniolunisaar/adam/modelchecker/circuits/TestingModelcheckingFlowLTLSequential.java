@@ -177,10 +177,10 @@ public class TestingModelcheckingFlowLTLSequential {
         PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
         a.setInitialToken(1);
-        net.setInitialTokenflow(a);
+        net.setInitialTransit(a);
         Place b = net.createPlace("B");
         b.setInitialToken(1);
-        net.setInitialTokenflow(b);
+        net.setInitialTransit(b);
         Place c = net.createPlace("C");
         c.setInitialToken(1);
         Place d = net.createPlace("D");
@@ -354,10 +354,10 @@ public class TestingModelcheckingFlowLTLSequential {
         PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
         a.setInitialToken(1);
-        net.setInitialTokenflow(a);
+        net.setInitialTransit(a);
         Place b = net.createPlace("B");
         b.setInitialToken(1);
-        net.setInitialTokenflow(b);
+        net.setInitialTransit(b);
         Place c = net.createPlace("C");
         c.setInitialToken(1);
         Place d = net.createPlace("D");
@@ -705,7 +705,7 @@ public class TestingModelcheckingFlowLTLSequential {
         net.setName(net.getName() + "_infinite");
         //add creation of flows
         Place in = net.getPlace("in");
-        net.removeInitialTokenflow(in);
+        net.removeInitialTransit(in);
         Transition create = net.createTransition("createFlows");
         net.createFlow(in, create);
         net.createFlow(create, in);
@@ -960,7 +960,7 @@ public class TestingModelcheckingFlowLTLSequential {
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
-
+        
         String formula;
         RunFormula f;
         ModelCheckingResult ret;

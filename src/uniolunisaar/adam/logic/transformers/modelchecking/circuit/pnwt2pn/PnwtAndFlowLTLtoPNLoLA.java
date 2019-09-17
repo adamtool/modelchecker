@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 
@@ -14,15 +15,74 @@ import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 public class PnwtAndFlowLTLtoPNLoLA {
 
     /**
-     * Only allows for checking one FlowFormula
+     * Uses the standard sequential method (without inhibitor arcs) and adds the
+     * fairness assumptions of the original transitions
+     * (not to the instances because the fairness is only stated to the transition 
+     * not to the transits). Weak fairness results in strong fairness because of
+     * the sequential passing.
+     *
+     * @param net
+     * @param formula
+     * @return
+     */
+    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits net, IRunFormula formula) {
+        PetriNetWithTransits out = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
+        // add the fairness assumptions to all instances of the corresponding transitions
+        // Because of the sequential passing of the token is a weak fairness of a transition going to be a strong fairness assumption
+        for (Transition transition : net.getTransitions()) {
+            /// WEAK FAIR
+            if (net.isWeakFair(transition)) {
+                // original transition (strong because of the sequential passing)
+                out.setStrongFair(out.getTransition(transition.getId()));
+                // THE FAIRNESS ONLY SAYS S.TH. ABOUT THE TRANSITION NOT ABOUT THE TRANSITS
+//                // search for all corresponding transitions in the subnet
+//                // they have the form: t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-" + (count++)
+//                for (Transition tmc : out.getTransitions()) {
+//                    if (tmc.getId().startsWith(transition.getId() + PnwtAndFlowLTLtoPNSequential.TOKENFLOW_SUFFIX_ID + "-")) {
+//                        out.setWeakFair(tmc);
+//                    }
+//                }
+            }
+            // STRONG FAIR
+            if (net.isStrongFair(transition)) {
+                // original transition
+                out.setStrongFair(out.getTransition(transition.getId()));                
+                // THE FAIRNESS ONLY SAYS S.TH. ABOUT THE TRANSITION NOT ABOUT THE TRANSITS
+//                // search for all corresponding transitions in the subnet
+//                // they have the form: t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-" + (count++)
+//                for (Transition tmc : out.getTransitions()) {
+//                    if (tmc.getId().startsWith(transition.getId() + PnwtAndFlowLTLtoPNSequential.TOKENFLOW_SUFFIX_ID + "-")) {
+//                        out.setStrongFair(tmc);
+//                    }
+//                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Attention: Only allows for checking one FlowFormula
      *
      * First version with transforming fairness assumptions given at the
      * original transitions to subnets with fairness annotations to the
      * transitions.
      *
+     * This version deactivates the transitions in the original which could
+     * would transit the current investigated flow. This is the parallel
+     * approach.
+     *
+     * Currently, the handling of the fairness constraints let LoLA crash
+     * (hopefully just because transitions are marked fair, which never fulfill
+     * the if clause)
+     *
+     * For fairness (only strong so far) of transitions with more than one
+     * outgoing transition a buffer transition is introduced which is strong
+     * fair. Currently I don't see the point for this extra transition anymore.
+     *
      * @param net
      * @return
      */
+    @Deprecated
     public static PetriNetWithTransits createNet4ModelChecking4LoLA(PetriNetWithTransits net) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
         out.setName(net.getName() + "_mc");

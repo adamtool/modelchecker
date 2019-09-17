@@ -21,7 +21,7 @@ public class PnwtAndFlowLTLtoPNSequentialInhibitor extends PnwtAndFlowLTLtoPN {
      * Adds maximally a new copy for each place and each sub flow formula. Thus,
      * each sub flow formula yields one new block, where we check each flow
      * chain by creating a run for each chain. The succeeding of the flow chains
-     * is done sequentially. The original net choses a transition and this
+     * is done sequentially. The original net chooses a transition and this
      * choice is sequentially given to each sub net concerning the belonging
      * flow subformula.
      *

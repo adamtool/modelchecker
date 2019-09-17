@@ -184,7 +184,7 @@ public class PnwtAndFlowLTLtoPN {
         // and the initial token flow markers
         for (Place place : orig.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && orig.isInitialTransit(place)) {
-                out.removeInitialTokenflow(out.getPlace(place.getId()));
+                out.removeInitialTransit(out.getPlace(place.getId()));
             }
         }
         return out;

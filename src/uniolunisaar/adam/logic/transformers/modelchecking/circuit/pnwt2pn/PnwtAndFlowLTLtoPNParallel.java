@@ -113,10 +113,10 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
     /**
      * Only allows for checking one FlowFormula.
      *
-     * Fairness assumptions must be put into the formula. Here wir only check
+     * Fairness assumptions must be put into the formula. Here we only check
      * one flow formula by checking all runs and a run considers one chain.
      *
-     * Deprecated since there is a version which handels more then one
+     * Deprecated since there is a version which handles more then one
      * FlowFormula and handles the other initialization approach.
      *
      * This version is from 19.10.2018 and should be identically to the
@@ -279,7 +279,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
         // and the initial token flow markers
         for (Place place : net.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
-                out.removeInitialTokenflow(out.getPlace(place.getId()));
+                out.removeInitialTransit(out.getPlace(place.getId()));
             }
         }
         return out;

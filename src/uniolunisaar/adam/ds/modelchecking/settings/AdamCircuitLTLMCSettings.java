@@ -30,7 +30,7 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
     }
 
     private LogicsTools.TransitionSemantics semantics = LogicsTools.TransitionSemantics.OUTGOING;
-    private Maximality maximality = Maximality.MAX_NONE;
+    private Maximality maximality = Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
     private AigerRenderer.OptimizationsSystem optsSys = AigerRenderer.OptimizationsSystem.NONE;
     private AigerRenderer.OptimizationsComplete optsComp = AigerRenderer.OptimizationsComplete.NONE;

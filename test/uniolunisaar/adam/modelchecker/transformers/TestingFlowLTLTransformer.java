@@ -51,10 +51,10 @@ public class TestingFlowLTLTransformer {
         PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
         a.setInitialToken(1);
-        net.setInitialTokenflow(a);
+        net.setInitialTransit(a);
         Place b = net.createPlace("B");
         b.setInitialToken(1);
-        net.setInitialTokenflow(b);
+        net.setInitialTransit(b);
         Place c = net.createPlace("C");
         c.setInitialToken(1);
         Place d = net.createPlace("D");
