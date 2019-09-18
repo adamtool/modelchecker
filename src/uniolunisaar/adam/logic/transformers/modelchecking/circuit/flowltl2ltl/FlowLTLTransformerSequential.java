@@ -505,6 +505,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     // this is the version when every original transition has its own activation token
                     // if it's not a orignal one (meaning the rest of the string is not a transition of the original net
 //                if (!orig.containsTransition(id.substring(ACTIVATION_PREFIX_ID.length()))) {
+                    // this is the version where there is only one activation token for all original transitions together
                     if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
                         LTLFormula inf;
                         if (notStuckingByActSubPlaceSeveralGFs) {
@@ -524,7 +525,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         } else {
             // %%%%% NEW VERSION:
             // smaller is to just asked that again and again the activation token of the original net has to be occupied
-            // Also in the final setting this work since then it is an globally
+            // Also in the final setting this works since then it is an globally
             ret = new LTLFormula(
                     new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
                     LTLOperators.Binary.IMP, ret);

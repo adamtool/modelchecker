@@ -12,6 +12,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  * @param <D>
+ * @param <S>
  */
 public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S extends AdamCircuitLTLMCStatistics> extends ModelCheckingSettings {
 
@@ -119,4 +120,9 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
     public void setStatistics(S stats) {
         statistics = stats;
     }
+
+    public void setStuttering(Stuttering stuttering) {
+        this.stuttering = stuttering;
+    }
+
 }

@@ -14,9 +14,9 @@ import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Approach;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Stuttering;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
@@ -124,7 +124,8 @@ public class MCFlowLTLSeqGenerators {
                                 VerificationAlgo.IC3, VerificationAlgo.BMC3);
 //                VerificationAlgo.IC3, VerificationAlgo.BMC3, VerificationAlgo.BMC2);
 //                VerificationAlgo.BMC3);
-        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
+//        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
+        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(1, 1);
         String formula = "A F out";
 
         RunFormula f = FlowLTLParser.parse(net, formula);
@@ -138,8 +139,8 @@ public class MCFlowLTLSeqGenerators {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ModelCheckingResult ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-        System.out.println(ret.getAlgo());
-        System.out.println("ABC sec: " + stats.getAbc_sec());
+//        System.out.println(ret.getAlgo());
+//        System.out.println("ABC sec: " + stats.getAbc_sec());
     }
 
 }

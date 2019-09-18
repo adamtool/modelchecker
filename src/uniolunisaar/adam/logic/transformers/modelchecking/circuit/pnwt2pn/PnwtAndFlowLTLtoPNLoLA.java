@@ -7,6 +7,8 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
+import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.PNWTTools;
 
 /**
  *
@@ -32,6 +34,7 @@ public class PnwtAndFlowLTLtoPNLoLA {
         for (Transition transition : net.getTransitions()) {
             /// WEAK FAIR
             if (net.isWeakFair(transition)) {
+                Logger.getInstance().addWarning("The sequential approach cannot handle weak fairness. We changed it to strong fairness.");
                 // original transition (strong because of the sequential passing)
                 out.setStrongFair(out.getTransition(transition.getId()));
                 // THE FAIRNESS ONLY SAYS S.TH. ABOUT THE TRANSITION NOT ABOUT THE TRANSITS
@@ -84,6 +87,13 @@ public class PnwtAndFlowLTLtoPNLoLA {
      */
     @Deprecated
     public static PetriNetWithTransits createNet4ModelChecking4LoLA(PetriNetWithTransits net) {
+        for (Transition transition : net.getTransitions()) {
+            if(net.isWeakFair(transition)) {                
+                Logger.getInstance().addWarning("The sequential approach cannot handle weak fairness. We changed it to strong fairness.");
+                net.removeWeakFair(transition);
+                net.setStrongFair(transition);
+            }
+        }
         PetriNetWithTransits out = new PetriNetWithTransits(net);
         out.setName(net.getName() + "_mc");
         // Add to each original transition a place such that we can disable these transitions

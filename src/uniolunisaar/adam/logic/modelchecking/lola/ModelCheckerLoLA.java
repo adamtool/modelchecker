@@ -7,17 +7,18 @@ import java.io.PrintStream;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniol.apt.io.renderer.impl.LoLAPNRenderer;
+import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
 /**
- *
  * @author Manuel Gieseking
  */
 public class ModelCheckerLoLA {
 
-    public static boolean check(PetriNetWithTransits pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException {
+    public static ModelCheckingResult check(PetriNetWithTransits pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException, ExternalToolException {
         String file = new LoLAPNRenderer().render(pn);
 
         for (Transition t : pn.getTransitions()) {
@@ -47,6 +48,9 @@ public class ModelCheckerLoLA {
         final String state = path + "_witness_state.txt";
         final String witness_path = path + "_witness_path.txt";
         final String lola = "lola";
+        // the following version doesn't care about fairness assumptions, cp:
+        //  ./src/Exploration/LTLExploration.h:class LTLExploration // In this version, we do not care about fairness!!!!!!!
+//        final String lola = "/home/thewn/tools/mcc2019/lola-tool/lola_bin_mcc"; 
         final String argFile = path + ".lola";
         final String argFormula = "--formula=" + formula;
         final String argOutput = "--json=" + json;
@@ -68,31 +72,60 @@ public class ModelCheckerLoLA {
 //        Logger.getInstance().addMessage(procBuilder.command().toString().replaceAll(",|a|l", ""), true);
         Logger.getInstance().addMessage(error, true);
 
-        String result;
+//        String result;
+        ModelCheckingResult mc = new ModelCheckingResult();
         try (FileInputStream inputStream = new FileInputStream(json)) {
             String output = IOUtils.streamToString(inputStream);
+//            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
+//            System.out.println(output);
+//            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
+            // %%% START OLD LoLA format parsing
             int start_idx = output.indexOf("result");
             int endA_idx = output.indexOf('}', start_idx);
             int endB_idx = output.indexOf(',', start_idx);
             int end_idx = (endA_idx < endB_idx) ? endA_idx : endB_idx;
+            if (start_idx == -1) { // no result found
+                int idx = output.indexOf("error");
+                if (idx != -1) {
+                    throw new ExternalToolException("LoLA: \"" + output.substring(idx, output.indexOf(",", idx)));
+                }
+                throw new ExternalToolException("LoLA ended unexpectedly");
+            }
+            String line = output.substring(start_idx, end_idx);
+            // %% END OLD LoLA format            
 
-            result = output.substring(start_idx + 9, end_idx);
-            Logger.getInstance().addMessage("LoLA says: " + result);
-//            System.out.println(output);
-        }
-        try (FileInputStream inputStream = new FileInputStream(state)) {
-            Logger.getInstance().addMessage("Witness state: " + IOUtils.streamToString(inputStream), true);
-        }
-        try (FileInputStream inputStream = new FileInputStream(witness_path)) {
-            Logger.getInstance().addMessage("Witness path: " + IOUtils.streamToString(inputStream), true);
+            // %% NEW LoLA format (mcc2019 version)
+//            int result_idx = output.indexOf("result");
+//            int value_idx = output.indexOf("value", result_idx);
+//            int end_line = output.indexOf("\n", value_idx);
+//            String line = output.substring(value_idx, end_line);
+            // %% END LoLA format (mcc2019 version)
+            if (line.contains("true")) {
+                mc.setSat(ModelCheckingResult.Satisfied.TRUE);
+            } else if (line.contains("false")) {
+                mc.setSat(ModelCheckingResult.Satisfied.FALSE);
+            } else {
+                mc.setSat(ModelCheckingResult.Satisfied.UNKNOWN);
+            }
+            if (output.contains("witness state")) {
+                try (FileInputStream is = new FileInputStream(state)) {
+                    Logger.getInstance().addMessage("Witness state: " + IOUtils.streamToString(is), true);
+                }
+            }
+            if (output.contains("witness path")) {
+                try (FileInputStream is = new FileInputStream(witness_path)) {
+                    Logger.getInstance().addMessage("Witness path: " + IOUtils.streamToString(is), true);
+                }
+            }
         }
 
         //        System.out.println(builder.toString());
-        System.out.println("return " + proc.exitValue());
+//        System.out.println("return " + proc.exitValue());
         ProcessBuilder rm = new ProcessBuilder("rm", json, state, witness_path);
-        rm.start();
+//        rm.start();
         Logger.getInstance().addMessage(rm.command().toString(), true);
-        return result.equals("true");
+//        return result.equals("true");
 //        Logger.getInstance().addMessage(file);
+        return mc;
     }
 }

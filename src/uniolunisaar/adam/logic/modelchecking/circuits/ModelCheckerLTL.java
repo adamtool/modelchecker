@@ -1,18 +1,24 @@
 package uniolunisaar.adam.logic.modelchecking.circuits;
 
+import java.io.FileNotFoundException;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.IOException;
 import uniol.apt.io.parser.ParseException;
+import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.LoLASettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
+import uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  *
@@ -45,6 +51,14 @@ public class ModelCheckerLTL {
                 PnAndLTLtoCircuit.createCircuit(net, formula, props, false);
                 props.fillAbcData(net);
                 return Abc.call(props.getAbcSettings(), props.getOutputData(), net, props.getStatistics());
+            case LOLA:
+                try {
+                    Logger.getInstance().addWarning("You would like to use LoLA for the standard LTL model checking of Petri nets."
+                            + "We would recommend to do so by directly calling LoLA, to exploit all of her power.");
+                    return ModelCheckerLoLA.check(net, formula.toLoLA(), ((LoLASettings) settings).getOutputPath());
+                } catch (RenderException | FileNotFoundException | NotConvertableException ex) {
+                    throw new ExternalToolException("LoLA didn't finish correctly.", ex);
+                }
             default:
                 throw new UnsupportedOperationException("Solver " + settings.getSolver() + " is not supported yet.");
         }

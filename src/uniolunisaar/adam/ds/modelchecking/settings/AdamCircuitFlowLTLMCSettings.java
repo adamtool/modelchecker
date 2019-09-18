@@ -12,12 +12,6 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamCircuitFlowLTLMCOutputData, AdamCircuitFlowLTLMCStatistics> {
 
-    public enum Approach {
-        PARALLEL,
-        SEQUENTIAL,
-        SEQUENTIAL_INHIBITOR
-    }
-
     private Approach approach = Approach.SEQUENTIAL_INHIBITOR;
 
     private boolean initFirst = true;

@@ -5,7 +5,6 @@ import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
-import java.util.logging.Level;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
@@ -23,6 +22,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAn
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.LoLASettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA;
@@ -67,21 +67,10 @@ public class ModelCheckerFlowLTL {
             case LOLA:
                 PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
                 String f = FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mcNet, formula);
-                Boolean sat = null;
                 try {
-                    sat = ModelCheckerLoLA.check(mcNet, f, "./");
-                } catch (RenderException ex) {
-                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    java.util.logging.Logger.getLogger(ModelCheckerFlowLTL.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                ModelCheckingResult res = new ModelCheckingResult();
-                if (sat == null) {
-                    res.setSat(ModelCheckingResult.Satisfied.UNKNOWN);
-                } else if (sat) {
-                    res.setSat(ModelCheckingResult.Satisfied.TRUE);
-                } else {
-                    res.setSat(ModelCheckingResult.Satisfied.FALSE);
+                    return ModelCheckerLoLA.check(mcNet, f, ((LoLASettings) settings).getOutputPath());
+                } catch (RenderException | FileNotFoundException ex) {
+                    throw new ExternalToolException("LoLA didn't finish correctly.", ex);
                 }
             default:
                 throw new UnsupportedOperationException("Solver " + settings.getSolver() + " is not supported yet.");

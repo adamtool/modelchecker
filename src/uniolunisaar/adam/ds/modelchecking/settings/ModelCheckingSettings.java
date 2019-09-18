@@ -11,6 +11,12 @@ public class ModelCheckingSettings {
         LOLA
     }
 
+    public enum Approach {
+        PARALLEL,
+        SEQUENTIAL,
+        SEQUENTIAL_INHIBITOR
+    }
+
     private Solver solver = Solver.ADAM_CIRCUIT;
 
     ModelCheckingSettings(Solver solver) {
