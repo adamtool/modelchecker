@@ -41,7 +41,7 @@ public class CircuitAndLTLtoCircuit {
         // Create System 
         String output = data.getPath();
         String input = output + "_system.aag";
-        AigerFile circuit = circ.render(net);
+        AigerFile circuit = circ.render();
         Tools.saveFile(input, circuit.toString());
 
         if (data.isOutputCircuit()) { // save as circuit

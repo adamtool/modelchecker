@@ -38,9 +38,6 @@ public class ModelCheckerFlowLTL {
 
     private final ModelCheckingSettings settings;
 
-//    public ModelCheckerFlowLTL() {
-//        settings = new AdamCircuitFlowLTLMCSettings();
-//    }
     public ModelCheckerFlowLTL(ModelCheckingSettings settings) {
         this.settings = settings;
     }
@@ -78,120 +75,13 @@ public class ModelCheckerFlowLTL {
 
     }
 
-//
-//    public ModelCheckerFlowLTL(OptimizationsSystem opsSys, AigerRenderer.OptimizationsComplete optsComp) {
-//        settings = new AdamCircuitFlowLTLMCSettings(opsSys, optsComp);
-//    }
-//
-//    public ModelCheckerFlowLTL(TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, VerificationAlgo verificationAlgo, boolean initFirst) {
-//        settings = new AdamCircuitFlowLTLMCSettings(approach, semantics, maximality, stuttering, optsSys, optsComp, initFirst);
-//    }
-//    /**
-//     *
-//     * @param net
-//     * @param formula
-//     * @param data
-//     * @return null iff the formula holds, otherwise a counter example violating
-//     * the formula.
-//     * @throws InterruptedException
-//     * @throws IOException
-//     * @throws uniol.apt.io.parser.ParseException
-//     * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
-//     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
-//     * @throws uniolunisaar.adam.exceptions.ExternalToolException
-//     */
-//    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-//        return check(net, formula, data, null);
-//    }
-//
-//    /**
-//     *
-//     * @param net
-//     * @param formula
-//     * @param data
-//     * @param stats
-//     * @return null iff the formula holds, otherwise a counter example violating
-//     * the formula.
-//     * @throws InterruptedException
-//     * @throws IOException
-//     * @throws uniol.apt.io.parser.ParseException
-//     * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
-//     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
-//     * @throws uniolunisaar.adam.exceptions.ExternalToolException
-//     */
-//    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula, AdamCircuitLTLMCOutputData data, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-//        Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
-//                + " With maximality term: " + circuitTransformer.getMaximality()
-//                + " approach: " + circuitTransformer.getApproach() + " semantics: " + circuitTransformer.getSemantics() + " stuttering: " + circuitTransformer.getStuttering()
-//                + " initialization first step: " + circuitTransformer.isInitFirst()
-//                + " verification/falsification algorithm: " + verificationAlgo, true);
-//
-//        PnAndFlowLTLtoCircuit.createCircuit(net, formula, data, stats);
-//        AbcSettings settings = new ABCSettings(data.getPath() + ".aig", abcParameters, data.isVerbose(), PetriNetExtensionHandler.getProcessFamilyID(net), verificationAlgos)
-//        return PetriNetModelChecker.check(data.getPath() + ".aig", verificationAlgo, net, data.getPath(), stats, abcParameters, data.isVerbose());
-//    }
-//    public VerificationAlgo getVerificationAlgo() {
-//        return verificationAlgo;
-//    }
-//
-//    public void setVerificationAlgo(VerificationAlgo verificationAlgo) {
-//        settings.
-//    }
-//
-//    public String getAbcParameters() {
-//        return abcParameters;
-//    }
-//
-//    public void setAbcParameters(String abcParameters) {
-//        this.abcParameters = abcParameters;
-//    }
-//
-//    public Approach getApproach() {
-//        return circuitTransformer.getApproach();
-//    }
-//
-//    public void setApproach(Approach approach) {
-//        circuitTransformer.setApproach(approach);
-//    }
-//
-//    public boolean isInitFirst() {
-//        return circuitTransformer.isInitFirst();
-//    }
-//
-//    public void setInitFirst(boolean initFirst) {
-//        circuitTransformer.setInitFirst(initFirst);
-//    }
-//
-//    public TransitionSemantics getSemantics() {
-//        return circuitTransformer.getSemantics();
-//    }
-//
-//    public void setSemantics(TransitionSemantics semantics) {
-//        circuitTransformer.setSemantics(semantics);
-//    }
-//
-//    public Maximality getMaximality() {
-//        return circuitTransformer.getMaximality();
-//    }
-//
-//    public void setMaximality(Maximality maximality) {
-//        circuitTransformer.setMaximality(maximality);
-//    }
-//
-//    public Stuttering getStuttering() {
-//        return circuitTransformer.getStuttering();
-//    }
-//
-//    public void setStuttering(Stuttering stuttering) {
-//        circuitTransformer.setStuttering(stuttering);
-//    }
     /**
      * Returns null iff the formula holds.
      *
      * This only works for formulas with at most one flow formula.
      *
      * It uses the MAX_PARALLEL approach (the first idea), where the flow and
-     * the orignal net are succeed simulaneously.
+     * the original net are succeed simultaneously.
      *
      * @param net
      * @param formula
@@ -209,9 +99,9 @@ public class ModelCheckerFlowLTL {
         Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC + "'.", false);
         AigerRenderer renderer;
         if (previousSemantics) {
-            renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
+            renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, gameMC);
         } else {
-            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
+            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, gameMC);
         }
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData("./" + net.getName(), false, false, false);
 

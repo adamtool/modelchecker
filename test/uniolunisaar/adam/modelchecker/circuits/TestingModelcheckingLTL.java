@@ -85,7 +85,7 @@ public class TestingModelcheckingLTL {
 
         PNWTTools.savePnwt2PDF(net.getName(), new PetriNetWithTransits(net), false);
 
-        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
+        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, net); // MCHyper should not directly be used anymore
 
         String formula = "Forall (G (AP \"#out#_in\" 0))";
         ModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName(), "");
@@ -99,7 +99,10 @@ public class TestingModelcheckingLTL {
         check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
+        
         PetriNet doublediamond = PNTools.createPetriNet("doublediamond");
+        
+         renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, doublediamond); // the renderer are dependent of the net now 
         Place in = doublediamond.createPlace("in");
         in.setInitialToken(1);
 
@@ -202,10 +205,10 @@ public class TestingModelcheckingLTL {
 //        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), data);
 //        cex = mc.check(game, new Constants.False(), data);
         IFormula f = new Constants.False();
-        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
+        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         f = new LTLFormula(LTLOperators.Unary.X, stutt);
-        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
+        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         ILTLFormula pA2 = new LTLAtomicProposition(init2);
@@ -256,7 +259,7 @@ public class TestingModelcheckingLTL {
 
         PNWTTools.savePnwt2PDF(game.getName(), game, true);
 
-        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING); // MCHyper should not directly be used anymore
+        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, game); // MCHyper should not directly be used anymore
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         String formula = "Forall (G (AP \"#out#_inittflB\" 0))";
         ModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");

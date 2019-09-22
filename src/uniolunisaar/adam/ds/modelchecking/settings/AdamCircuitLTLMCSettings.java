@@ -16,6 +16,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S extends AdamCircuitLTLMCStatistics> extends ModelCheckingSettings {
 
+    
     public enum Stuttering {
         REPLACEMENT,
         REPLACEMENT_REGISTER,
@@ -38,6 +39,7 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
     private final AbcSettings abcSettings = new AbcSettings();
     private D outputData = null;
     private S statistics = null;
+    private boolean codeInputTransitionsBinary = false;
 
     public AdamCircuitLTLMCSettings() {
         super(Solver.ADAM_CIRCUIT);
@@ -124,5 +126,15 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
     public void setStuttering(Stuttering stuttering) {
         this.stuttering = stuttering;
     }
+
+    public boolean isCodeInputTransitionsBinary() {
+        return codeInputTransitionsBinary;
+    }
+
+    public void setCodeInputTransitionsBinary(boolean codeInputTransitionsBinary) {
+        this.codeInputTransitionsBinary = codeInputTransitionsBinary;
+    }
+    
+    
 
 }

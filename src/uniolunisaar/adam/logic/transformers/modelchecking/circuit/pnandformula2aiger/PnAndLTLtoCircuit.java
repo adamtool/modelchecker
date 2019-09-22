@@ -110,13 +110,17 @@ public class PnAndLTLtoCircuit {
         AigerRenderer renderer;
         if (semantics == TransitionSemantics.INGOING) {
             // todo: do the stuttering here
-            renderer = Circuit.getRenderer(Circuit.Renderer.INGOING);
+            renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, net);
         } else {
             formula = LTL2CircuitFormula.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
             if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
-                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING);
+                if (settings.isCodeInputTransitionsBinary()) {
+                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
+                } else {
+                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
+                }
             } else {
-                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
+                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
             }
         }
         renderer.setSystemOptimizations(optsSys);

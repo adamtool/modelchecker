@@ -46,7 +46,7 @@ public class TestingAiger {
         // save aiger file
         final String outputFolder = outputDir;
 //        TransformerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
-        AigerTools.save2Aiger(pn, Circuit.getRenderer(Circuit.Renderer.INGOING), outputFolder + "/" + pn.getName());
+        AigerTools.save2Aiger(Circuit.getRenderer(Circuit.Renderer.INGOING, pn), outputFolder + "/" + pn.getName());
         AigerTools.saveAiger2PDF(outputFolder + "/" + pn.getName() + ".aag", outputFolder + "/" + pn.getName(), PetriNetExtensionHandler.getProcessFamilyID(pn));
     }
 

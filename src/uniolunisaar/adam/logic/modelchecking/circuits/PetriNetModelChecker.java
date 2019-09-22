@@ -75,7 +75,7 @@ public class PetriNetModelChecker {
      */
     @Deprecated
     private static CounterExample checkWithPythonScript(PetriNet net, AigerRenderer circ, String formula, String path) throws InterruptedException, IOException, ExternalToolException {
-        AigerTools.save2Aiger(net, circ, path);
+        AigerTools.save2Aiger(circ, path);
         // version without threads
 //        ProcessBuilder procBuilder = new ProcessBuilder(AdamProperties.getInstance().getLibFolder() + "/mchyper.py", "-f", formula, path + ".aag", "-pdr", "-cex", "-v", "1", "-o", path + "_complete");
 //        procBuilder.directory(new File(AdamProperties.getInstance().getLibFolder() + "/../logic/"));

@@ -74,7 +74,7 @@ public class TestingMCHyper {
 //        String formula = "Forall (F (Eq (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // correkt
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
-        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER);
+        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
 
         CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null);
