@@ -10,6 +10,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
+import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
@@ -128,7 +129,7 @@ public class PnAndLTLtoCircuit {
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
-            if (stats instanceof AdamCircuitLTLMCStatistics) {
+            if (!(stats instanceof AdamCircuitFlowLTLMCStatistics)) {
                 // input model checking net
                 stats.setIn_nb_places(net.getPlaces().size());
                 stats.setIn_nb_transitions(net.getTransitions().size());
