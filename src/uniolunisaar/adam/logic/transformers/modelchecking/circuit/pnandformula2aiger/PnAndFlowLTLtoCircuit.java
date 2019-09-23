@@ -134,7 +134,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         }
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size());
                     }
-                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, netMC, f, initFirst);
+                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     break;
                 case SEQUENTIAL_INHIBITOR:
                     netMC = PnwtAndFlowLTLtoPNSequentialInhibitor.createNet4ModelCheckingSequential(net, f, initFirst);
@@ -151,7 +151,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         }
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size());
                     }
-                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, netMC, f, initFirst);
+                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     break;
                 default:
                     throw new RuntimeException("Didn't provided a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");

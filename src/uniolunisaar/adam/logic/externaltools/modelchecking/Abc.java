@@ -54,7 +54,6 @@ public class Abc {
         // Start all given verifier and falsifier in parallel, return when the first finished with a real result        
         final CountDownLatch latch = new CountDownLatch(1);
         final ModelCheckingResult result = new ModelCheckingResult();
-        final int finished = 0;
         for (VerificationAlgo verificationAlgo : settings.getVerificationAlgos()) {
             new Thread(new Runnable() {
                 @Override

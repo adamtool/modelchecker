@@ -23,6 +23,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformer;
@@ -37,10 +38,6 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  * @author Manuel Gieseking
  */
 public class FlowLTLTransformerSequential extends FlowLTLTransformer {
-
-    private static final boolean newChainsBySkippingTransitions = false;
-    private static final boolean notStuckingInSubnetByActOPlace = false;
-    private static final boolean notStuckingByActSubPlaceSeveralGFs = false;
 
     private static FlowFormula replaceNextInFlowFormulaSequential(PetriNet orig, PetriNet net, FlowFormula flowFormula, int nb_ff) {
         ILTLFormula phi = flowFormula.getPhi();
@@ -348,11 +345,12 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
      * @param orig
      * @param net
      * @param formula
-     * @param initFirst
+     * @param settings
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunFormula formula, boolean initFirst) throws NotConvertableException {
+    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
+        boolean initFirst = settings.isInitFirst();
         // %%%%%%%%%%%%%%%%%  RUN REPLACE TRANSITIONS
         RunFormula runF = replaceTransitionsWithinRunFormulaSequential(orig, net, formula);
         // %%%%%%%%%%%%%%%%%  RUN REPLACE NEXT 
@@ -412,7 +410,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 if (!eventually) { // the whole flowformula is not in the scope of an eventually, we have to skip as long as the new chain is created
                     // all transition starting a flow
                     if (!net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i).getPostset().isEmpty()) { // only if new chains are created during the game
-                        if (newChainsBySkippingTransitions) {
+                        if (settings.isNewChainsBySkippingTransitions()) {
                             // %%%%%%%%%%%%%%% OLD AND MORE EXPENSIVE VERSION: we skip all other transition than those which newly starts a chain, only in the next state the formula must hold
                             List<ILTLFormula> elements = new ArrayList<>();
                             Place p = net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i);
@@ -494,7 +492,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 
         // %%%%%%%%%%%%%%%%%%%%%%%  ACTIVATION PART
         // since we don't want to stop within the subnets, omit these runs
-        if (!notStuckingInSubnetByActOPlace) {
+        if (!settings.isNotStuckingInSubnetByActOPlace()) {
             // %%%%% OLD VERSION: 
             // this means we demand for every activation place of the subnets
             // that it has to be left
@@ -508,7 +506,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     // this is the version where there is only one activation token for all original transitions together
                     if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
                         LTLFormula inf;
-                        if (notStuckingByActSubPlaceSeveralGFs) {
+                        if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
                             inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p))));
                         } else {
                             inf = new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p));
@@ -517,7 +515,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                     }
                 }
             }
-            if (notStuckingByActSubPlaceSeveralGFs) {
+            if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
                 ret = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, ret);
             } else {
                 ret = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(elements, true))), LTLOperators.Binary.IMP, ret);

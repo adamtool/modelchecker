@@ -15,6 +15,9 @@ public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamC
     private Approach approach = Approach.SEQUENTIAL_INHIBITOR;
 
     private boolean initFirst = true;
+    private boolean newChainsBySkippingTransitions = false;
+    private boolean notStuckingInSubnetByActOPlace = true;
+    private boolean notStuckingByActSubPlaceSeveralGFs = false;
 
     public AdamCircuitFlowLTLMCSettings() {
     }
@@ -43,6 +46,30 @@ public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamC
 
     public void setInitFirst(boolean initFirst) {
         this.initFirst = initFirst;
+    }
+
+    public boolean isNewChainsBySkippingTransitions() {
+        return newChainsBySkippingTransitions;
+    }
+
+    public void setNewChainsBySkippingTransitions(boolean newChainsBySkippingTransitions) {
+        this.newChainsBySkippingTransitions = newChainsBySkippingTransitions;
+    }
+
+    public boolean isNotStuckingInSubnetByActOPlace() {
+        return notStuckingInSubnetByActOPlace;
+    }
+
+    public void setNotStuckingInSubnetByActOPlace(boolean notStuckingInSubnetByActOPlace) {
+        this.notStuckingInSubnetByActOPlace = notStuckingInSubnetByActOPlace;
+    }
+
+    public boolean isNotStuckingByActSubPlaceSeveralGFs() {
+        return notStuckingByActSubPlaceSeveralGFs;
+    }
+
+    public void setNotStuckingByActSubPlaceSeveralGFs(boolean notStuckingByActSubPlaceSeveralGFs) {
+        this.notStuckingByActSubPlaceSeveralGFs = notStuckingByActSubPlaceSeveralGFs;
     }
 
 }

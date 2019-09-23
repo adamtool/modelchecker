@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
+import java.io.File;
 import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.IOException;
@@ -12,9 +13,12 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.util.PNWTTools;
@@ -23,7 +27,10 @@ import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -32,12 +39,16 @@ import uniolunisaar.adam.tools.Logger;
 @Test
 public class TestingModelcheckingFlowLTLParallel {
 
+    private static final String outputDir = System.getProperty("testoutputfolder") + "/";
+    private static final String outDir = outputDir + "parallel/";
+
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(false);
-        Logger.getInstance().setShortMessageStream(null);
-        Logger.getInstance().setVerboseMessageStream(null);
-        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().setVerbose(false);
+//        Logger.getInstance().setShortMessageStream(null);
+//        Logger.getInstance().setVerboseMessageStream(null);
+//        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -47,6 +58,11 @@ public class TestingModelcheckingFlowLTLParallel {
         }
     }
 
+    @BeforeClass
+    public void createFolder() {
+        (new File(outDir)).mkdirs();
+    }
+
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
@@ -54,27 +70,40 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
 
         String formula = "F out";
-        IRunFormula f = FlowLTLParser.parse(net, formula);
+        RunFormula f = FlowLTLParser.parse(net, formula);
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
 
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,// todo: here is an error, for MAX_INTERLEAVING
+                AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+        settings.setOutputData(data);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+
+        PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ModelCheckingResult ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = "A F out";
         f = FlowLTLParser.parse(net, formula);
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        ret = mc.check(net, f);
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE); // todo: here is an error, it is not satisfied
+        mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE); 
     }
 
     @Test(enabled = true)
@@ -84,11 +113,27 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
+
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+        settings.setOutputData(data);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+
+        PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+
+        ModelCheckingResult ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); // todo: error results true
     }
 
     @Test(enabled = true)
@@ -98,23 +143,53 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE); // todo: here is an error, it is not satisfied
+
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
+
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
+                AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+        settings.setOutputData(data);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+
+        PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ModelCheckingResult ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriNetWithTransits net = UpdatingNetwork.create(3, 2);
+        PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        String formula = "A F p3";
+        String formula = "A F pOut";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
+
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
+                AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+        settings.setOutputData(data);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+
+        PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ModelCheckingResult ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = false)
@@ -124,28 +199,42 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        f = new RunFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net), RunOperators.Implication.IMP, f);
-        ModelCheckingResult ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
+
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
+                AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+        settings.setOutputData(data);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+
+        PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ModelCheckingResult ret = mc.check(net, f);
 
         net = RedundantNetwork.getUpdatingNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ret = mc.check(net, f);
 
         net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ret = mc.check(net, f);
 
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ret = ModelCheckerFlowLTL.checkWithParallelApproach(net, f, "./" + net.getName(), true);
+        mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        ret = mc.check(net, f);
     }
 
 }

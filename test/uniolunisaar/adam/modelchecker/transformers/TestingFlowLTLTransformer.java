@@ -24,6 +24,7 @@ import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.FlowLTLTransformerSequential;
@@ -82,7 +83,7 @@ public class TestingFlowLTLTransformer {
 
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
         PNWTTools.savePnwt2PDF(mc.getName() + "mc", mc, true);
-        ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, true);
+        ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings());
 //        System.out.println(f_mc);
 
     }
