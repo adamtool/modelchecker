@@ -128,10 +128,12 @@ public class PnAndLTLtoCircuit {
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
-            // input model checking net
-            stats.setIn_nb_places(net.getPlaces().size());
-            stats.setIn_nb_transitions(net.getTransitions().size());
-            stats.setIn_size_formula(f_size);
+            if (stats instanceof AdamCircuitLTLMCStatistics) {
+                // input model checking net
+                stats.setIn_nb_places(net.getPlaces().size());
+                stats.setIn_nb_transitions(net.getTransitions().size());
+                stats.setIn_size_formula(f_size);
+            }
             stats.setFormulaToCheck(formula);
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS

@@ -23,7 +23,7 @@ public class AdamCircuitLTLMCStatistics {
     private long total_nb_latches;
     private long total_nb_gates;
     // the final formula which is really checked
-    private ILTLFormula formula;
+    private ILTLFormula formula = null;
     // data sub tools
     private long mcHyper_sec;
     private long mcHyper_mem;
