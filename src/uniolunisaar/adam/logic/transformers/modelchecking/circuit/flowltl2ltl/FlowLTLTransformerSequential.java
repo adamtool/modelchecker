@@ -24,6 +24,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformer;
@@ -492,41 +493,44 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 
         // %%%%%%%%%%%%%%%%%%%%%%%  ACTIVATION PART
         // since we don't want to stop within the subnets, omit these runs
-        if (!settings.isNotStuckingInSubnetByActOPlace()) {
-            // %%%%% OLD VERSION: 
-            // this means we demand for every activation place of the subnets
-            // that it has to be left
-            List<LTLFormula> elements = new ArrayList<>();
-            for (Place p : net.getPlaces()) {
-                String id = p.getId();
-                if (id.startsWith(ACTIVATION_PREFIX_ID)) {
-                    // this is the version when every original transition has its own activation token
-                    // if it's not a orignal one (meaning the rest of the string is not a transition of the original net
+        // this is not necessary when we have MAX_IN_CIRCUIT
+        if (settings.getMaximality() != AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
+            if (!settings.isNotStuckingInSubnetByActOPlace()) {
+                // %%%%% OLD VERSION: 
+                // this means we demand for every activation place of the subnets
+                // that it has to be left
+                List<LTLFormula> elements = new ArrayList<>();
+                for (Place p : net.getPlaces()) {
+                    String id = p.getId();
+                    if (id.startsWith(ACTIVATION_PREFIX_ID)) {
+                        // this is the version when every original transition has its own activation token
+                        // if it's not a orignal one (meaning the rest of the string is not a transition of the original net
 //                if (!orig.containsTransition(id.substring(ACTIVATION_PREFIX_ID.length()))) {
-                    // this is the version where there is only one activation token for all original transitions together
-                    if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
-                        LTLFormula inf;
-                        if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
-                            inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p))));
-                        } else {
-                            inf = new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p));
+                        // this is the version where there is only one activation token for all original transitions together
+                        if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
+                            LTLFormula inf;
+                            if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
+                                inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p))));
+                            } else {
+                                inf = new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p));
+                            }
+                            elements.add(inf);
                         }
-                        elements.add(inf);
                     }
                 }
-            }
-            if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
-                ret = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, ret);
+                if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
+                    ret = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, ret);
+                } else {
+                    ret = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(elements, true))), LTLOperators.Binary.IMP, ret);
+                }
             } else {
-                ret = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(elements, true))), LTLOperators.Binary.IMP, ret);
+                // %%%%% NEW VERSION:
+                // smaller is to just asked that again and again the activation token of the original net has to be occupied
+                // Also in the final setting this works since then it is an globally
+                ret = new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
+                        LTLOperators.Binary.IMP, ret);
             }
-        } else {
-            // %%%%% NEW VERSION:
-            // smaller is to just asked that again and again the activation token of the original net has to be occupied
-            // Also in the final setting this works since then it is an globally
-            ret = new LTLFormula(
-                    new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
-                    LTLOperators.Binary.IMP, ret);
         }
         return ret;
     }
