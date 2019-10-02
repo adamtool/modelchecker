@@ -37,7 +37,7 @@ public class CircuitAndLTLtoCircuit {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public static void createCircuit(PetriNet net, AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static void createCircuit(PetriNet net, AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats, boolean formulaToFile) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // Create System 
         String output = data.getPath();
         String input = output + "_system.aag";
@@ -57,7 +57,7 @@ public class CircuitAndLTLtoCircuit {
         //%%%%%%%%%%%%%%%%%% MCHyper
         String inputFile = input;
         String outputPath = output;
-        McHyper.call(inputFile, formula, outputPath, data.isVerbose(), PetriNetExtensionHandler.getProcessFamilyID(net), circ.getMCHyperResultOptimizations());
+        McHyper.call(inputFile, formula, outputPath, data.isVerbose(), PetriNetExtensionHandler.getProcessFamilyID(net), circ.getMCHyperResultOptimizations(), formulaToFile);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
@@ -105,19 +105,18 @@ public class CircuitAndLTLtoCircuit {
         AigToAig.call(inputFile, outputPath, data.isVerbose(), PetriNetExtensionHandler.getProcessFamilyID(net));
     }
 
-    /**
-     *
-     * @param net
-     * @param circ
-     * @param data
-     * @param formula - in MCHyper format
-     * @throws InterruptedException
-     * @throws IOException
-     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
-     * @throws uniolunisaar.adam.exceptions.ExternalToolException
-     */
-    public static void createCircuit(PetriNet net, AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        createCircuit(net, circ, formula, data, null);
-    }
-
+//    /**
+//     *
+//     * @param net
+//     * @param circ
+//     * @param data
+//     * @param formula - in MCHyper format
+//     * @throws InterruptedException
+//     * @throws IOException
+//     * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
+//     * @throws uniolunisaar.adam.exceptions.ExternalToolException
+//     */
+//    public static void createCircuit(PetriNet net, AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+//        createCircuit(net, circ, formula, data, null);
+//    }
 }

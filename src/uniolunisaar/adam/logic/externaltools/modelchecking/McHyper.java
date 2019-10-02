@@ -25,8 +25,15 @@ public class McHyper {
     public static final String LOGGER_MCHYPER_OUT = "mcHyperOut";
     public static final String LOGGER_MCHYPER_ERR = "mcHyperErr";
 
-    public static void call(String inputFile, String formula, String output, boolean verbose, String procFamilyID, OptimizationsComplete opt) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
-        String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), inputFile, formula, output};
+    public static void call(String inputFile, String formula, String output, boolean verbose, String procFamilyID, OptimizationsComplete opt, boolean formulaToFile) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+        String callFormula = formula;
+        if (formulaToFile) {
+            String formulaFilePath = output + "_formula.txt";
+            Tools.saveFile(formulaFilePath, formula);
+            callFormula = formulaFilePath;
+        }
+
+        String[] command = {AdamProperties.getInstance().getProperty(AdamProperties.MC_HYPER), inputFile, callFormula, output};
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling MCHyper ...", false);
         Logger.getInstance().addMessage(Arrays.toString(command), true);
@@ -46,6 +53,9 @@ public class McHyper {
 
         if (!verbose) { // cleanup
             Tools.deleteFile(inputFile);
+            if (formulaToFile) {
+                Tools.deleteFile(callFormula);
+            }
         }
         if (exitValue != 0) {
             String error = "";

@@ -77,7 +77,7 @@ public class TestingMCHyper {
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
 
-        CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null);
+        CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null, false);
 
         String inputFile = "./" + net.getName() + ".aig";
         PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, "./" + net.getName(), "", data);

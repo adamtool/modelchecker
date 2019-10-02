@@ -105,7 +105,7 @@ public class ModelCheckerFlowLTL {
         }
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData("./" + net.getName(), false, false, false);
 
-        CircuitAndLTLtoCircuit.createCircuit(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), data, null);
+        CircuitAndLTLtoCircuit.createCircuit(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), data, null, false);
 
         String inputFile = "./" + gameMC.getName() + ".aig";
         return PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, gameMC, renderer, "./" + gameMC.getName(), "", data);

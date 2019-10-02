@@ -144,7 +144,7 @@ public class PnAndLTLtoCircuit {
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
 
         Logger.getInstance().addMessage("This means we create the product for F='" + formula.toSymbolString() + "'.");
-        CircuitAndLTLtoCircuit.createCircuit(net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), data, stats);
+        CircuitAndLTLtoCircuit.createCircuit(net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), data, stats, settings.isUseFormulaFileForMcHyper());
         return renderer;
     }
 
