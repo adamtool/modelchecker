@@ -121,7 +121,11 @@ public class PnAndLTLtoCircuit {
                     renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
                 }
             } else {
-                renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
+                if (settings.isCodeInputTransitionsBinary()) {
+                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS, net);
+                } else {
+                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
+                }
             }
         }
         renderer.setSystemOptimizations(optsSys);
