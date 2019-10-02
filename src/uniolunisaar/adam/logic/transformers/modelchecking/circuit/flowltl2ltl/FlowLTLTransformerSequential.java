@@ -24,6 +24,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Stucking;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
@@ -494,8 +495,8 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         // %%%%%%%%%%%%%%%%%%%%%%%  ACTIVATION PART
         // since we don't want to stop within the subnets, omit these runs
         // this is not necessary when we have MAX_IN_CIRCUIT
-        if (settings.getMaximality() != AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
-            if (!settings.isNotStuckingInSubnetByActOPlace()) {
+        if (settings.getMaximality() != AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT || settings.isNotStuckingAlsoByMaxInCircuit()) {
+            if (settings.getStucking() != Stucking.GFo) {
                 // %%%%% OLD VERSION: 
                 // this means we demand for every activation place of the subnets
                 // that it has to be left
@@ -509,7 +510,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         // this is the version where there is only one activation token for all original transitions together
                         if (!id.equals(ACTIVATION_PREFIX_ID + "orig")) { // not the activation place of the original transitions
                             LTLFormula inf;
-                            if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
+                            if (settings.getStucking() == Stucking.ANDGFNpi) {
                                 inf = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p))));
                             } else {
                                 inf = new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(p));
@@ -518,10 +519,16 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         }
                     }
                 }
-                if (settings.isNotStuckingByActSubPlaceSeveralGFs()) {
+                if (settings.getStucking() == Stucking.ANDGFNpi) {
                     ret = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, true), LTLOperators.Binary.IMP, ret);
                 } else {
-                    ret = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(elements, true))), LTLOperators.Binary.IMP, ret);
+                    ILTLFormula and = FormulaCreator.bigWedgeOrVeeObject(elements, true);
+                    if (settings.getStucking() == Stucking.GFANDNpiAndo) {
+                        and = new LTLFormula(and, LTLOperators.Binary.AND, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")));
+
+                    }
+                    ret = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, and)), LTLOperators.Binary.IMP, ret);
+
                 }
             } else {
                 // %%%%% NEW VERSION:

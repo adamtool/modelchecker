@@ -12,12 +12,19 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamCircuitFlowLTLMCOutputData, AdamCircuitFlowLTLMCStatistics> {
 
+    public enum Stucking {
+        GFo,
+        GFANDNpi,
+        ANDGFNpi,
+        GFANDNpiAndo
+    }
+
     private Approach approach = Approach.SEQUENTIAL_INHIBITOR;
 
     private boolean initFirst = true;
+    private Stucking stucking = Stucking.GFANDNpi;
     private boolean newChainsBySkippingTransitions = false;
-    private boolean notStuckingInSubnetByActOPlace = true;
-    private boolean notStuckingByActSubPlaceSeveralGFs = false;
+    private boolean notStuckingAlsoByMaxInCircuit = false;
 
     public AdamCircuitFlowLTLMCSettings() {
     }
@@ -56,20 +63,20 @@ public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamC
         this.newChainsBySkippingTransitions = newChainsBySkippingTransitions;
     }
 
-    public boolean isNotStuckingInSubnetByActOPlace() {
-        return notStuckingInSubnetByActOPlace;
+    public Stucking getStucking() {
+        return stucking;
     }
 
-    public void setNotStuckingInSubnetByActOPlace(boolean notStuckingInSubnetByActOPlace) {
-        this.notStuckingInSubnetByActOPlace = notStuckingInSubnetByActOPlace;
+    public void setStucking(Stucking stucking) {
+        this.stucking = stucking;
     }
 
-    public boolean isNotStuckingByActSubPlaceSeveralGFs() {
-        return notStuckingByActSubPlaceSeveralGFs;
+    public boolean isNotStuckingAlsoByMaxInCircuit() {
+        return notStuckingAlsoByMaxInCircuit;
     }
 
-    public void setNotStuckingByActSubPlaceSeveralGFs(boolean notStuckingByActSubPlaceSeveralGFs) {
-        this.notStuckingByActSubPlaceSeveralGFs = notStuckingByActSubPlaceSeveralGFs;
+    public void setNotStuckingAlsoByMaxInCircuit(boolean notStuckingAlsoByMaxInCircuit) {
+        this.notStuckingAlsoByMaxInCircuit = notStuckingAlsoByMaxInCircuit;
     }
 
 }

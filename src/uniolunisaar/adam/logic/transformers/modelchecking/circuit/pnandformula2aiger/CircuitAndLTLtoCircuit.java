@@ -83,6 +83,8 @@ public class CircuitAndLTLtoCircuit {
                 Logger.getInstance().addMessage("nb_places: " + stats.getIn_nb_places(), "edacc");
                 Logger.getInstance().addMessage("nb_transitions: " + stats.getIn_nb_transitions(), "edacc");
                 Logger.getInstance().addMessage("size_f: " + stats.getIn_size_formula(), "edacc");
+                Logger.getInstance().addMessage("nb_sys_latches: " + nb_latches, "edacc");
+                Logger.getInstance().addMessage("nb_sys_gates: " + nb_gates, "edacc");
                 Logger.getInstance().addMessage("nb_total_latches: " + nb_total_latches, "edacc");
                 Logger.getInstance().addMessage("nb_total_gates: " + nb_total_gates, "edacc");
             } else {
