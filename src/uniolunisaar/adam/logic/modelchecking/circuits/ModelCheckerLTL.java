@@ -3,6 +3,7 @@ package uniolunisaar.adam.logic.modelchecking.circuits;
 import java.io.FileNotFoundException;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.IOException;
+import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
@@ -11,7 +12,6 @@ import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.LoLASettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
-import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
@@ -44,7 +44,7 @@ public class ModelCheckerLTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriNetWithTransits net, ILTLFormula formula) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriNet net, ILTLFormula formula) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         switch (settings.getSolver()) {
             case ADAM_CIRCUIT:
                 AdamCircuitLTLMCSettings<AdamCircuitLTLMCOutputData, AdamCircuitLTLMCStatistics> props = (AdamCircuitLTLMCSettings<AdamCircuitLTLMCOutputData, AdamCircuitLTLMCStatistics>) settings;

@@ -46,7 +46,7 @@ public class Abc {
         }
         if (settings.getVerificationAlgos().length == 1) {
             String outputFile = outputData.getPath() + ".cex";
-            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID());
+            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats.isMeasure_abc());
             ModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
             result.setAlgo(settings.getVerificationAlgos()[0]);
             return result;
@@ -60,7 +60,7 @@ public class Abc {
                 public void run() {
                     try {
                         String outputFile = outputData.getPath() + ".cex";
-                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID());
+                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats.isMeasure_abc());
                         ModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
                         if (out.getSatisfied() != ModelCheckingResult.Satisfied.UNKNOWN) {
                             result.setCex(out.getCex());
@@ -84,7 +84,7 @@ public class Abc {
         return result;
     }
 
-    private static String call(String inputFile, String parameters, String outputFile, VerificationAlgo alg, boolean verbose, String procFamilyID) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+    private static String call(String inputFile, String parameters, String outputFile, VerificationAlgo alg, boolean verbose, String procFamilyID, boolean measure) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         String call;
         switch (alg) {
             case IC3:
@@ -106,8 +106,15 @@ public class Abc {
                 throw new RuntimeException("Not all verification methods had been considered: '" + alg + "' is missing.");
         }
 
-        String[] abc_command = {AdamProperties.getInstance().getProperty(AdamProperties.TIME), "-f", "wall_time_(s)%e;CPU_time_(s)%U;memory_(KB)%M;",
-            AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
+        String[] abc_command;
+        if (measure) {
+            String[] abcCommand = {AdamProperties.getInstance().getProperty(AdamProperties.TIME), "-f", "wall_time_(s)%e;CPU_time_(s)%U;memory_(KB)%M;",
+                AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
+            abc_command = abcCommand;
+        } else {
+            String[] abcCommand = {AdamProperties.getInstance().getProperty(AdamProperties.ABC)};
+            abc_command = abcCommand;
+        }
         Logger.getInstance().addMessage("", false);
         Logger.getInstance().addMessage("Calling abc ...", false);
         Logger.getInstance().addMessage(Arrays.toString(abc_command), true);

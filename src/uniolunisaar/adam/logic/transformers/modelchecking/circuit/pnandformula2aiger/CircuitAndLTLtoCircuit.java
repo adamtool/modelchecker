@@ -12,10 +12,10 @@ import uniolunisaar.adam.logic.externaltools.modelchecking.McHyper;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.tools.PetriNetExtensionHandler;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.util.AigerTools;
 
 /**

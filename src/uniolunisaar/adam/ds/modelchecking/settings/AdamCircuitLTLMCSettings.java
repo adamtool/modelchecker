@@ -3,9 +3,9 @@ package uniolunisaar.adam.ds.modelchecking.settings;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import uniolunisaar.adam.tools.PetriNetExtensionHandler;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**

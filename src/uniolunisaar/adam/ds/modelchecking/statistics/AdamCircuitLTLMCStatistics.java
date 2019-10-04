@@ -29,6 +29,7 @@ public class AdamCircuitLTLMCStatistics {
     private long mcHyper_mem;
     private long aiger_sec;
     private long aiger_mem;
+    private boolean measure_abc = true;
     private double abc_sec;
     private long abc_mem;
     // output
@@ -74,6 +75,14 @@ public class AdamCircuitLTLMCStatistics {
 
     public void setIn_size_formula(long in_size_formula) {
         this.in_size_formula = in_size_formula;
+    }
+
+    public boolean isMeasure_abc() {
+        return measure_abc;
+    }
+
+    public void setMeasure_abc(boolean measure_abc) {
+        this.measure_abc = measure_abc;
     }
 
     public double getAbc_sec() {

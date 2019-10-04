@@ -4,11 +4,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniol.apt.io.renderer.impl.LoLAPNRenderer;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
-import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
@@ -18,14 +19,14 @@ import uniolunisaar.adam.tools.Logger;
  */
 public class ModelCheckerLoLA {
 
-    public static ModelCheckingResult check(PetriNetWithTransits pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException, ExternalToolException {
+    public static ModelCheckingResult check(PetriNet pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException, ExternalToolException {
         String file = new LoLAPNRenderer().render(pn);
 
         for (Transition t : pn.getTransitions()) {
-            if (pn.isWeakFair(t)) {
+            if (PetriNetExtensionHandler.isWeakFair(t)) {
                 file = file.replaceAll("TRANSITION " + t.getId() + "\n", "TRANSITION " + t.getId() + " WEAK FAIR\n");
             }
-            if (pn.isStrongFair(t)) {
+            if (PetriNetExtensionHandler.isStrongFair(t)) {
                 file = file.replaceAll("TRANSITION " + t.getId() + "\n", "TRANSITION " + t.getId() + " STRONG FAIR\n");
             }
         }

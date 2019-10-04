@@ -17,7 +17,7 @@ import uniolunisaar.adam.tools.processHandling.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
-import uniolunisaar.adam.tools.PetriNetExtensionHandler;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.tools.processHandling.ProcessPool;
 import uniolunisaar.adam.util.AigerTools;
 
