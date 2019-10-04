@@ -8,7 +8,7 @@ public class AdamCircuitLTLMCOutputData {
 
     private String outputPath;
     private boolean outputCircuit;
-    private boolean verbose;
+    private boolean verbose = false;
 
     public AdamCircuitLTLMCOutputData(String path, boolean outputCircuit, boolean verbose) {
         this.outputPath = path;

@@ -46,7 +46,7 @@ public class Abc {
         }
         if (settings.getVerificationAlgos().length == 1) {
             String outputFile = outputData.getPath() + ".cex";
-            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats.isMeasure_abc());
+            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc());
             ModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
             result.setAlgo(settings.getVerificationAlgos()[0]);
             return result;
@@ -60,7 +60,7 @@ public class Abc {
                 public void run() {
                     try {
                         String outputFile = outputData.getPath() + ".cex";
-                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats.isMeasure_abc());
+                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc());
                         ModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
                         if (out.getSatisfied() != ModelCheckingResult.Satisfied.UNKNOWN) {
                             result.setCex(out.getCex());
