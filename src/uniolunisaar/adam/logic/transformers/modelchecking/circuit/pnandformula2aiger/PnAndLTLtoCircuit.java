@@ -116,11 +116,20 @@ public class PnAndLTLtoCircuit {
 
         // Choose renderer and add the corresponding stuttering
         AigerRenderer renderer;
+        String mcHyperFormula;
         if (semantics == TransitionSemantics.INGOING) {
             // todo: do the stuttering here
             renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, net);
+            mcHyperFormula = FlowLTLTransformerHyperLTL.toMCHyperFormat(formula);
         } else {
             formula = LTL2CircuitFormula.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
+            try {
+                mcHyperFormula = FlowLTLTransformerHyperLTL.toMCHyperFormat(formula);
+            } catch (StackOverflowError exp) { // formula size is too huge
+                // todo: maybe we can add here a little smarter algo which uses the fallback to inCircuit, when the reason for the too huge
+                //      formula is due to the maximality in formula approach
+                throw exp;
+            }
             if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
                 if (settings.isCodeInputTransitionsBinary()) {
                     renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
@@ -151,7 +160,7 @@ public class PnAndLTLtoCircuit {
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
 
         Logger.getInstance().addMessage("This means we create the product for F='" + formula.toSymbolString() + "'.");
-        CircuitAndLTLtoCircuit.createCircuit(net, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formula), data, stats, settings.isUseFormulaFileForMcHyper());
+        CircuitAndLTLtoCircuit.createCircuit(net, renderer, mcHyperFormula, data, stats, settings.isUseFormulaFileForMcHyper());
         return renderer;
     }
 

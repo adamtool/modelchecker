@@ -203,12 +203,14 @@ public class Abc {
                 Logger.getInstance().addMessage("" + out, "edacc");
             }
             // get the time data
-            String key = "CPU_time_(s)";
-            int idx = abcOutput.indexOf(key) + key.length();
-            stats.setAbc_sec(Double.parseDouble(abcOutput.substring(idx, abcOutput.indexOf(';', idx))));
-            key = "memory_(KB)";
-            idx = abcOutput.indexOf(key) + key.length();
-            stats.setAbc_mem(Long.parseLong(abcOutput.substring(idx, abcOutput.indexOf(';', idx))));
+            if (stats.isMeasure_abc()) {
+                String key = "CPU_time_(s)";
+                int idx = abcOutput.indexOf(key) + key.length();
+                stats.setAbc_sec(Double.parseDouble(abcOutput.substring(idx, abcOutput.indexOf(';', idx))));
+                key = "memory_(KB)";
+                idx = abcOutput.indexOf(key) + key.length();
+                stats.setAbc_mem(Long.parseLong(abcOutput.substring(idx, abcOutput.indexOf(';', idx))));
+            }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
         Logger.getInstance().addMessage("... finished parsing abc output.", false);
