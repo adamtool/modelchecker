@@ -84,14 +84,13 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
         List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
         if (flowFormulas.isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula.toSymbolString() + "'. Thus, we use the standard model checking algorithm for LTL.");
-            return PnAndLTLtoCircuit.createCircuit(net, formula.toLTLFormula(), settings, false);
+            return PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, formula.toLTLFormula(), settings);
         }
 
         // Add Fairness
         RunFormula f = FlowLTLTransformer.addFairness(net, formula);
 
         // Get the formula for the maximality (null if MAX_NONE)
-        boolean skipMax = false;
         ILTLFormula max = null;
         switch (maximality) {
             case MAX_INTERLEAVING:
@@ -103,7 +102,6 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
         }
         if (max != null) {
             f = new RunFormula(max, RunOperators.Implication.IMP, f);
-            skipMax = true; // already done the maximality here
         }
 //        IRunFormula f = formula;
 
@@ -177,7 +175,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
             }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
-        return PnAndLTLtoCircuit.createCircuit(netMC, formulaMC, settings, skipMax);
+        return PnAndLTLtoCircuit.createCircuitWithoutFairnessAndMaximality(netMC, formulaMC, settings);
     }
 
 }

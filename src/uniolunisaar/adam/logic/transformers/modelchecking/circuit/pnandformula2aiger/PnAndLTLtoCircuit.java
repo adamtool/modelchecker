@@ -60,13 +60,38 @@ public class PnAndLTLtoCircuit {
 //    public AigerRenderer createCircuit(PetriNetWithTransits net, ILTLFormula formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
 //        return createCircuit(net, formula, data, stats, false);
 //    }
+    public static AigerRenderer createCircuitWithFairnessAndMaximality(PetriNetWithTransits net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+        AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
+        TransitionSemantics semantics = settings.getSemantics();
+
+        // Add Fairness
+        formula = FlowLTLTransformer.addFairness(net, formula);
+
+        // Add Maximality
+        ILTLFormula max = null;
+        switch (maximality) {
+            case MAX_INTERLEAVING:
+                max = FormulaCreator.getInterleavingMaximality(semantics, net);
+                break;
+            case MAX_CONCURRENT:
+                max = FormulaCreator.getConcurrentMaximality(semantics, net);
+                break;
+        }
+        if (max != null) {
+            formula = new LTLFormula(max, LTLOperators.Binary.IMP, formula);
+        }
+        return createCircuit(net, formula, settings);
+    }
+
+    public static AigerRenderer createCircuitWithoutFairnessAndMaximality(PetriNetWithTransits net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+        return createCircuit(net, formula, settings);
+    }
+
     /**
      *
      * @param net
      * @param formula
      * @param settings
-     * @param skipMax - used if this method is called from the FlowLTL-Part and
-     * the maximality is already handled there.
      * @return
      * @throws InterruptedException
      * @throws IOException
@@ -74,7 +99,7 @@ public class PnAndLTLtoCircuit {
      * @throws ProcessNotStartedException
      * @throws ExternalToolException
      */
-    public static AigerRenderer createCircuit(PetriNetWithTransits net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings, boolean skipMax) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    private static AigerRenderer createCircuit(PetriNetWithTransits net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
         TransitionSemantics semantics = settings.getSemantics();
         AdamCircuitLTLMCSettings.Stuttering stuttering = settings.getStuttering();
@@ -87,24 +112,6 @@ public class PnAndLTLtoCircuit {
                 + " semantics: " + semantics
                 + " stuttering: " + stuttering, true);
 
-        // Add Fairness
-        formula = FlowLTLTransformer.addFairness(net, formula);
-
-        // Add Maximality
-        if (!skipMax) {
-            ILTLFormula max = null;
-            switch (maximality) {
-                case MAX_INTERLEAVING:
-                    max = FormulaCreator.getInterleavingMaximality(semantics, net);
-                    break;
-                case MAX_CONCURRENT:
-                    max = FormulaCreator.getConcurrentMaximality(semantics, net);
-                    break;
-            }
-            if (max != null) {
-                formula = new LTLFormula(max, LTLOperators.Binary.IMP, formula);
-            }
-        }
         int f_size = formula.getSize();
 
         // Choose renderer and add the corresponding stuttering

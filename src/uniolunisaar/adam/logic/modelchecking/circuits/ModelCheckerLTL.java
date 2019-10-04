@@ -48,7 +48,7 @@ public class ModelCheckerLTL {
         switch (settings.getSolver()) {
             case ADAM_CIRCUIT:
                 AdamCircuitLTLMCSettings<AdamCircuitLTLMCOutputData, AdamCircuitLTLMCStatistics> props = (AdamCircuitLTLMCSettings<AdamCircuitLTLMCOutputData, AdamCircuitLTLMCStatistics>) settings;
-                PnAndLTLtoCircuit.createCircuit(net, formula, props, false);
+                PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, formula, props);
                 props.fillAbcData(net);
                 return Abc.call(props.getAbcSettings(), props.getOutputData(), net, props.getStatistics());
             case LOLA:

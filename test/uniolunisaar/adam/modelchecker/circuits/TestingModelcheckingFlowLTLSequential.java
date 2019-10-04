@@ -960,7 +960,7 @@ public class TestingModelcheckingFlowLTLSequential {
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
-        
+
         String formula;
         RunFormula f;
         ModelCheckingResult ret;
@@ -1288,5 +1288,49 @@ public class TestingModelcheckingFlowLTLSequential {
 //        stats = new ModelcheckingStatistics();
 //        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+    }
+
+    @Test
+    public void testWeakfairness() throws Exception {
+        PetriNetWithTransits pnwt = new PetriNetWithTransits("simpleWeakFairness");
+        Place in = pnwt.createPlace("in");
+        in.setInitialToken(1);
+        Place out = pnwt.createPlace("out");
+        out.setInitialToken(1);
+        Transition init = pnwt.createTransition("init");
+        pnwt.createFlow(in, init);
+        pnwt.createFlow(init, in);
+        pnwt.createTransit(in, init, in);
+        pnwt.createInitialTransit(init, in);
+        Transition t = pnwt.createTransition("t");
+        pnwt.setWeakFair(t);
+        pnwt.createFlow(in, t);
+        pnwt.createFlow(t, in);
+        pnwt.createFlow(out, t);
+        pnwt.createFlow(t, out);
+        pnwt.createTransit(in, t, out);
+        pnwt.createTransit(out, t, out);
+//        PNWTTools.savePnwt2PDF(outputDir+pnwt.getName(), pnwt, false);
+        
+        
+        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(out)));
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                OptimizationsSystem.NONE,
+                OptimizationsComplete.NONE,
+                true, VerificationAlgo.IC3);
+
+        AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
+        settings.setStatistics(stats);
+        settings.setOutputData(new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, false)); // Todo: error when this is not added.
+
+        ModelCheckerFlowLTL checker = new ModelCheckerFlowLTL(settings);
+        ModelCheckingResult res = checker.check(pnwt, formula);
+//        System.out.println(stats.getMc_formula());
+        Assert.assertEquals(res.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 }
