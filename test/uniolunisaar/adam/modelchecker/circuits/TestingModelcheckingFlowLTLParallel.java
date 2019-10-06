@@ -192,7 +192,7 @@ public class TestingModelcheckingFlowLTLParallel {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(net.getName(), net, false);
@@ -228,7 +228,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
-        ret = mc.check(net, f);
+        ret = mc.check(mcNet, f);
 
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
