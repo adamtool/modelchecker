@@ -13,6 +13,8 @@ public class AbcSettings {
     private VerificationAlgo[] verificationAlgos;
     private boolean verbose = false;
     private String processFamilyID = "";
+    private boolean circuitReduction = false;
+    private String preProcessing = null;
 
     public AbcSettings() {
         verificationAlgos = new VerificationAlgo[]{VerificationAlgo.IC3};
@@ -64,6 +66,22 @@ public class AbcSettings {
 
     public void setProcessFamilyID(String processFamilyID) {
         this.processFamilyID = processFamilyID;
+    }
+
+    public boolean isCircuitReduction() {
+        return circuitReduction;
+    }
+
+    public void setCircuitReduction(boolean circuitReduction) {
+        this.circuitReduction = circuitReduction;
+    }
+
+    public String getPreProcessing() {
+        return preProcessing;
+    }
+
+    public void setPreProcessing(String preProcessing) {
+        this.preProcessing = preProcessing;
     }
 
 }

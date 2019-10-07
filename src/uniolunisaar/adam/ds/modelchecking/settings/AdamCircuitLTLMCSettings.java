@@ -143,4 +143,16 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
         this.useFormulaFileForMcHyper = useFormulaFileForMcHyper;
     }
 
+    public boolean isCircuitReductionABC() {
+        return abcSettings.isCircuitReduction();
+    }
+
+    public void setCircuitReductionABC(boolean circuitReductionABC) {
+        abcSettings.setCircuitReduction(circuitReductionABC);
+    }
+
+    public void setABCPreprocessingCommands(String cmds) {
+        abcSettings.setPreProcessing(cmds);
+    }
+
 }

@@ -46,7 +46,8 @@ public class Abc {
         }
         if (settings.getVerificationAlgos().length == 1) {
             String outputFile = outputData.getPath() + ".cex";
-            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc());
+            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
+                    settings.isCircuitReduction(), settings.getPreProcessing());
             ModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
             result.setAlgo(settings.getVerificationAlgos()[0]);
             return result;
@@ -60,7 +61,8 @@ public class Abc {
                 public void run() {
                     try {
                         String outputFile = outputData.getPath() + ".cex";
-                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc());
+                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
+                                settings.isCircuitReduction(), settings.getPreProcessing());
                         ModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
                         if (out.getSatisfied() != ModelCheckingResult.Satisfied.UNKNOWN) {
                             result.setCex(out.getCex());
@@ -84,7 +86,7 @@ public class Abc {
         return result;
     }
 
-    private static String call(String inputFile, String parameters, String outputFile, VerificationAlgo alg, boolean verbose, String procFamilyID, boolean measure) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+    private static String call(String inputFile, String parameters, String outputFile, VerificationAlgo alg, boolean verbose, String procFamilyID, boolean measure, boolean reduceCircuit, String preProcessing) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         String call;
         switch (alg) {
             case IC3:
@@ -133,6 +135,12 @@ public class Abc {
         procAbc.start(outStream, errStream);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
         abcInput.println("read " + inputFile);
+        if (preProcessing != null) {
+            abcInput.println(preProcessing);
+        }
+        if (reduceCircuit) {
+            abcInput.println("dfraig");
+        }
         abcInput.println(call + " " + parameters);
         abcInput.println("write_cex -f " + outputFile);
         abcInput.println("quit");
