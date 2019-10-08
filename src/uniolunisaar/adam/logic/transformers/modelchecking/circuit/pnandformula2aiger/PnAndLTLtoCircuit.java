@@ -10,7 +10,8 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.exceptions.ExternalToolException;
@@ -60,7 +61,7 @@ public class PnAndLTLtoCircuit {
 //    public AigerRenderer createCircuit(PetriNetWithTransits net, ILTLFormula formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
 //        return createCircuit(net, formula, data, stats, false);
 //    }
-    public static AigerRenderer createCircuitWithFairnessAndMaximality(PetriNet net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public static AigerRenderer createCircuitWithFairnessAndMaximality(PetriNet net, ILTLFormula formula, AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
         TransitionSemantics semantics = settings.getSemantics();
 
@@ -83,7 +84,7 @@ public class PnAndLTLtoCircuit {
         return createCircuit(net, formula, settings);
     }
 
-    public static AigerRenderer createCircuitWithoutFairnessAndMaximality(PetriNet net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public static AigerRenderer createCircuitWithoutFairnessAndMaximality(PetriNet net, ILTLFormula formula, AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         return createCircuit(net, formula, settings);
     }
 
@@ -99,7 +100,7 @@ public class PnAndLTLtoCircuit {
      * @throws ProcessNotStartedException
      * @throws ExternalToolException
      */
-    private static AigerRenderer createCircuit(PetriNet net, ILTLFormula formula, AdamCircuitLTLMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    private static AigerRenderer createCircuit(PetriNet net, ILTLFormula formula, AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
         TransitionSemantics semantics = settings.getSemantics();
         AdamCircuitLTLMCSettings.Stuttering stuttering = settings.getStuttering();

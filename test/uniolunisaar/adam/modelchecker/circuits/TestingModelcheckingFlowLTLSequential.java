@@ -24,11 +24,11 @@ import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality;
-import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING;
-import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Stuttering;
-import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
+import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING;
+import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering;
+import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
 import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL;
 import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR;
@@ -1259,9 +1259,10 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamCircuitFlowLTLMCStatistics stats;
 
         f = FlowLTLParser.parse(net, "𝔸 ◇ pOut");
-        stats = new AdamCircuitFlowLTLMCStatistics();
-//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
-//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        stats = new AdamCircuitFlowLTLMCStatistics();        
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = FlowLTLParser.parse(net, "𝔸 ⬜ pOut");
         stats = new AdamCircuitFlowLTLMCStatistics();

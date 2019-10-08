@@ -32,6 +32,7 @@ public class CircuitAndLTLtoCircuit {
      * @param formula - in MCHyper format
      * @param data
      * @param stats
+     * @param formulaToFile
      * @throws InterruptedException
      * @throws IOException
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException

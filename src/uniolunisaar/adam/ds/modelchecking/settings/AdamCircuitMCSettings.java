@@ -14,7 +14,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  * @param <D>
  * @param <S>
  */
-public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S extends AdamCircuitLTLMCStatistics> extends ModelCheckingSettings {
+public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S extends AdamCircuitLTLMCStatistics> extends ModelCheckingSettings {
 
     public enum Stuttering {
         REPLACEMENT,
@@ -36,22 +36,24 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
     private AigerRenderer.OptimizationsSystem optsSys = AigerRenderer.OptimizationsSystem.NONE;
     private AigerRenderer.OptimizationsComplete optsComp = AigerRenderer.OptimizationsComplete.NONE;
     private final AbcSettings abcSettings = new AbcSettings();
-    private D outputData = null;
+    private D outputData;
     private S statistics = null;
     private boolean codeInputTransitionsBinary = true;
     private boolean useFormulaFileForMcHyper = true;
 
-    public AdamCircuitLTLMCSettings() {
+    public AdamCircuitMCSettings(D outputData) {
         super(Solver.ADAM_CIRCUIT);
+        this.outputData = outputData;
     }
 
-    public AdamCircuitLTLMCSettings(AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp) {
+    public AdamCircuitMCSettings(D outputData, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp) {
         super(Solver.ADAM_CIRCUIT);
         this.optsSys = optsSys;
         this.optsComp = optsComp;
+        this.outputData = outputData;
     }
 
-    public AdamCircuitLTLMCSettings(LogicsTools.TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, Abc.VerificationAlgo... algos) {
+    public AdamCircuitMCSettings(D outputData, LogicsTools.TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, Abc.VerificationAlgo... algos) {
         super(Solver.ADAM_CIRCUIT);
         this.semantics = semantics;
         this.maximality = maximality;
@@ -59,6 +61,7 @@ public class AdamCircuitLTLMCSettings<D extends AdamCircuitLTLMCOutputData, S ex
         this.optsSys = optsSys;
         this.optsComp = optsComp;
         this.abcSettings.setVerificationAlgos(algos);
+        this.outputData = outputData;
     }
 
     public void fillAbcData(PetriNet net) {

@@ -10,7 +10,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  */
-public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamCircuitFlowLTLMCOutputData, AdamCircuitFlowLTLMCStatistics> {
+public class AdamCircuitFlowLTLMCSettings extends AdamCircuitMCSettings<AdamCircuitFlowLTLMCOutputData, AdamCircuitFlowLTLMCStatistics> {
 
     public enum Stucking {
         GFo,
@@ -27,14 +27,15 @@ public class AdamCircuitFlowLTLMCSettings extends AdamCircuitLTLMCSettings<AdamC
     private boolean notStuckingAlsoByMaxInCircuit = false;
 
     public AdamCircuitFlowLTLMCSettings() {
+        super(new AdamCircuitFlowLTLMCOutputData("./", false, false, false));
     }
 
     public AdamCircuitFlowLTLMCSettings(AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp) {
-        super(optsSys, optsComp);
+        super(new AdamCircuitFlowLTLMCOutputData("./", false, false, false), optsSys, optsComp);
     }
 
     public AdamCircuitFlowLTLMCSettings(LogicsTools.TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, boolean initFirst, Abc.VerificationAlgo... algo) {
-        super(semantics, maximality, stuttering, optsSys, optsComp, algo);
+        super(new AdamCircuitFlowLTLMCOutputData("./", false, false, false), semantics, maximality, stuttering, optsSys, optsComp, algo);
         this.approach = approach;
         this.initFirst = initFirst;
     }

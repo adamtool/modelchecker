@@ -6,8 +6,8 @@ package uniolunisaar.adam.ds.modelchecking.output;
  */
 public class AdamCircuitLTLMCOutputData {
 
-    private String outputPath;
-    private boolean outputCircuit;
+    private String outputPath = "./";
+    private boolean outputCircuit = false;
     private boolean verbose = false;
 
     public AdamCircuitLTLMCOutputData(String path, boolean outputCircuit, boolean verbose) {

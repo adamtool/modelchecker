@@ -113,8 +113,8 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
     /**
      * Only allows for checking one FlowFormula.
      *
-     * Fairness assumptions must be put into the formula. Here we only check
-     * one flow formula by checking all runs and a run considers one chain.
+     * Fairness assumptions must be put into the formula. Here we only check one
+     * flow formula by checking all runs and a run considers one chain.
      *
      * Deprecated since there is a version which handles more then one
      * FlowFormula and handles the other initialization approach.
@@ -263,12 +263,12 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                 }
             }
         }
-        for (Transition t : net.getTransitions()) { // delete the fairness assumption of all original transitions
+        // cleanup
+        for (Transition t : net.getTransitions()) {
+            // delete the fairness assumption of all original transitions            
             out.removeStrongFair(out.getTransition(t.getId()));
             out.removeWeakFair(out.getTransition(t.getId()));
-        }
-        // delete all token flows
-        for (Transition t : net.getTransitions()) {
+            // delete all token flows
             for (Place p : t.getPreset()) {
                 out.removeTransit(p, t);
             }
