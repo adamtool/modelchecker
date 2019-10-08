@@ -11,6 +11,8 @@ import uniol.apt.adt.pn.Transition;
  */
 public class CounterExampleElement {
 
+    public static final String PLACEHOLDER_FOR_BINTRAN = "#binID#";
+
     private final List<Transition> transitions = new ArrayList<>();
     private final List<Place> marking = new ArrayList<>();
     private boolean init;
@@ -22,9 +24,26 @@ public class CounterExampleElement {
     private boolean initLoop = false;
     private boolean looping = false;
 
+    // both only for the case that it is binary coded
+    private char[] binID = null;
+    private int digits;
+
     public CounterExampleElement(int timestep, boolean withStuttering) {
         this.timestep = timestep;
         this.withStuttering = withStuttering;
+    }
+
+    public CounterExampleElement(int timestep, boolean withStuttering, int digits) {
+        this.timestep = timestep;
+        this.withStuttering = withStuttering;
+        this.digits = digits;
+    }
+
+    public void add(int binIDChar, char val) {
+        if (binID == null) {
+            binID = new char[digits];
+        }
+        binID[binIDChar] += val;
     }
 
     public void add(Transition transition) {
@@ -102,11 +121,15 @@ public class CounterExampleElement {
             sb.append(", stutt:").append(stutter);
         }
         sb.append("\n[");
-        for (Transition t : transitions) {
-            sb.append(t.getId()).append(", ");
-        }
-        if (!transitions.isEmpty()) {
-            sb.setLength(sb.length() - 2);
+        if (binID == null) {
+            for (Transition t : transitions) {
+                sb.append(t.getId()).append(", ");
+            }
+            if (!transitions.isEmpty()) {
+                sb.setLength(sb.length() - 2);
+            }
+        } else {
+            sb.append(PLACEHOLDER_FOR_BINTRAN);
         }
         sb.append("] -> M={");
         for (Place place : marking) {
@@ -118,4 +141,9 @@ public class CounterExampleElement {
         sb.append("}");
         return sb.toString();
     }
+
+    public char[] getBinID() {
+        return binID;
+    }
+
 }

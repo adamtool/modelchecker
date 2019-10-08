@@ -40,6 +40,8 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_ERR;
+import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsComplete;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.tools.Tools;
@@ -100,7 +102,7 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 TransitionSemantics.OUTGOING,
                 Approach.SEQUENTIAL_INHIBITOR,
-                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Maximality.MAX_INTERLEAVING,
                 Stuttering.PREFIX_REGISTER,
                 optSys,
                 optCom,

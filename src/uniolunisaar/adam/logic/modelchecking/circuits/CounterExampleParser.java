@@ -3,7 +3,9 @@ package uniolunisaar.adam.logic.modelchecking.circuits;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -13,6 +15,7 @@ import uniolunisaar.adam.ds.modelchecking.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.CounterExampleElement;
 import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegisterLogTrans;
 import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
@@ -98,6 +101,19 @@ public class CounterExampleParser {
     public static CounterExample parseCounterExampleWithStutteringLatch(AbcSettings settings, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
             PetriNet net = settings.getNet();
+            cex.setIsDetailed(settings.isDetailedCEX());
+            // start binary coding
+            // if it is binary coded get the number of digits
+            int digits = Integer.toBinaryString(net.getTransitions().size() - 1).length();
+            // create a map of binID -> transition
+            Map<String, Transition> codingMap = new HashMap<>();
+            for (Transition transition : net.getTransitions()) {
+                if (PetriNetExtensionHandler.hasBinID(transition)) {
+                    codingMap.put(PetriNetExtensionHandler.getBinID(transition), transition);
+                }
+            }
+            cex.setCodingMap(codingMap);
+            // end for binary coding
             String cexText = IOUtils.streamToString(inputStream);
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
@@ -129,11 +145,11 @@ public class CounterExampleParser {
                     }
                 }
             }
-//            Logger.getInstance().addMessage(cropped.toString(), true);
+//            Logger.getInstance().addMessage(cropped.toString(), false);
             // create the counter example
             int timestep = 0;
             while (timestep >= 0) {
-                CounterExampleElement cexe = new CounterExampleElement(timestep, true);
+                CounterExampleElement cexe = new CounterExampleElement(timestep, true, digits);
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
@@ -149,17 +165,23 @@ public class CounterExampleParser {
                         } else if (elem.startsWith("entered_lasso")) {
                             cexe.setLooping(val == '1');
                         } else {
-                            String id = elem.substring(0, elem.length() - 2);
-                            if (val == '1') {
-                                if (net.containsPlace(id)) {
-                                    Place place = net.getPlace(id);
-                                    if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(place)) {
-                                        cexe.add(place);
-                                    }
-                                } else if (net.containsTransition(id)) {
-                                    Transition t = net.getTransition(id);
-                                    if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t)) {
-                                        cexe.add(t);
+                            if (timestep != 0) { // for outgoing jump over the first step
+                                String id = elem.substring(0, elem.length() - 2);
+                                if (id.startsWith(AigerRendererSafeOutStutterRegisterLogTrans.BIN_COD_ID)) {
+                                    String binIDChar = id.substring((AigerRendererSafeOutStutterRegisterLogTrans.BIN_COD_ID).length());
+                                    cexe.add(Integer.parseInt(binIDChar), val);
+                                }
+                                if (val == '1') {
+                                    if (net.containsPlace(id)) {
+                                        Place place = net.getPlace(id);
+                                        if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(place)) {
+                                            cexe.add(place);
+                                        }
+                                    } else if (net.containsTransition(id)) {
+                                        Transition t = net.getTransition(id);
+                                        if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t)) {
+                                            cexe.add(t);
+                                        }
                                     }
                                 }
                             }
