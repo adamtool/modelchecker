@@ -52,9 +52,10 @@ public class TestSDNFormulaCreator {
             + "s1.fwd(s2)\n"
             + "s2.fwd(s4)";
 
-    private static final String updateChangePipeLineParallel = "[upd(s1.fwd(s3/s2)) || upd(s3.fwd(s5))]";
+    private static final String updateChangePipeLineParallel = "[[upd(s1.fwd(s3/s2)) >> upd(s2.fwd(-/s4))] || upd(s3.fwd(s5))]";
+//    private static final String updateChangePipeLineParallel = "[upd(s1.fwd(s3/s2)) || upd(s3.fwd(s5))]";
     private static final String updateChangePipeLineSequential = "[upd(s1.fwd(s3/s2)) >> upd(s3.fwd(s5))]";
-    private static final String updateJumpOver = "upd(s1.fwd(s4/s2))";
+    private static final String updateJumpOver = "[upd(s1.fwd(s4/s2)) >> upd(s2.fwd(-/s4))]";
     private static final String updateSwitchFromUpperToLower = "[upd(s2.fwd(s3/s4)) >> upd(s3.fwd(s5))]";
 
     @Test
@@ -191,13 +192,12 @@ public class TestSDNFormulaCreator {
         Assert.assertFalse(pfad1.contains("s3"));
         Assert.assertFalse(pfad1.contains("s5"));
         String pfad2 = formula.substring(formula.lastIndexOf("G"));
+//        System.out.println(pfad2);
         Assert.assertTrue(pfad2.contains("s1"));
         Assert.assertTrue(pfad2.contains("s3"));
         Assert.assertTrue(pfad2.contains("s5"));
-        // todo: this would only be right, when I can deactivate the s2->s4
-        // connection. Currently this is within the forwarding
-//        Assert.assertFalse(pfad2.contains("s2"));
-//        Assert.assertFalse(pfad2.contains("s4"));
+        Assert.assertFalse(pfad2.contains("s2"));
+        Assert.assertFalse(pfad2.contains("s4"));
 
         // unoptimized
         pnwt = SDNCreator.parse(topologyA, updateChangePipeLineParallel, false);
@@ -215,10 +215,8 @@ public class TestSDNFormulaCreator {
         Assert.assertTrue(pfad2.contains("s1"));
         Assert.assertTrue(pfad2.contains("s3"));
         Assert.assertTrue(pfad2.contains("s5"));
-        // todo: this would only be right, when I can deactivate the s2->s4
-        // connection. Currently this is within the forwarding
-//        Assert.assertFalse(pfad2.contains("s2"));
-//        Assert.assertFalse(pfad2.contains("s4"));
+        Assert.assertFalse(pfad2.contains("s2"));
+        Assert.assertFalse(pfad2.contains("s4"));
 
         // jump over
         // optimized
@@ -236,9 +234,7 @@ public class TestSDNFormulaCreator {
         pfad2 = formula.substring(formula.lastIndexOf("G"));
         Assert.assertTrue(pfad2.contains("s1"));
         Assert.assertTrue(pfad2.contains("s4"));
-        // todo: this would only be right, when I can deactivate the s2->s4
-        // connection. Currently this is within the forwarding
-//        Assert.assertFalse(pfad2.contains("s2"));
+        Assert.assertFalse(pfad2.contains("s2"));
         Assert.assertFalse(pfad2.contains("s3"));
         Assert.assertFalse(pfad2.contains("s5"));
 
@@ -257,9 +253,7 @@ public class TestSDNFormulaCreator {
         pfad2 = formula.substring(formula.lastIndexOf("G"));
         Assert.assertTrue(pfad2.contains("s1"));
         Assert.assertTrue(pfad2.contains("s4"));
-        // todo: this would only be right, when I can deactivate the s2->s4
-        // connection. Currently this is within the forwarding
-//        Assert.assertFalse(pfad2.contains("s2"));
+        Assert.assertFalse(pfad2.contains("s2"));
         Assert.assertFalse(pfad2.contains("s5"));
 
         // switch from upper to lower
