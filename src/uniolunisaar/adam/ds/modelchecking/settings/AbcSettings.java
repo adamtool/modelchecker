@@ -1,5 +1,6 @@
 package uniolunisaar.adam.ds.modelchecking.settings;
 
+import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 
 /**
@@ -15,6 +16,8 @@ public class AbcSettings {
     private String processFamilyID = "";
     private boolean circuitReduction = false;
     private String preProcessing = null;
+    private PetriNet net; // only for parsing the CEX
+    private boolean detailedCEX = true;
 
     public AbcSettings() {
         verificationAlgos = new VerificationAlgo[]{VerificationAlgo.IC3};
@@ -82,6 +85,22 @@ public class AbcSettings {
 
     public void setPreProcessing(String preProcessing) {
         this.preProcessing = preProcessing;
+    }
+
+    public PetriNet getNet() {
+        return net;
+    }
+
+    public void setNet(PetriNet net) {
+        this.net = net;
+    }
+
+    public boolean isDetailedCEX() {
+        return detailedCEX;
+    }
+
+    public void setDetailedCEX(boolean detailedCEX) {
+        this.detailedCEX = detailedCEX;
     }
 
 }

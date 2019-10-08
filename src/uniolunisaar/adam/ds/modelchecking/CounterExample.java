@@ -28,15 +28,21 @@ public class CounterExample {
         StringBuilder sb = new StringBuilder("Counter example " + cause + " \n");
         for (int i = 0; i < timestep.size(); i++) {
             CounterExampleElement elem = timestep.get(i);
-            sb.append("----------- time step ").append(i).append(" -----------------");
-            if (elem.isStartsLoop()) {
-                sb.append(" start loop ->");
+            if (!elem.getTransitions().isEmpty()) { // prunes the detailed steps in the not detailed case and the last one for looping
+                sb.append("----------- time step ").append(i).append(" -----------------");
+                if (elem.isStartsLoop()) {
+                    sb.append(" start loop ->");
+                }
+//                if (elem.isInitLoop() && elem.isLooping()) { // todo: check if it is really meaningfully usable
+//                    sb.append(" looping");
+//                }
+                sb.append("\n");
+                sb.append(elem.toString()).append("\n");
+            } else { // check if it is looping
+                if (elem.isStartsLoop()) {
+                    sb.append("%%%%%%% Loop started with this step.");
+                }
             }
-            if (elem.isInitLoop() && elem.isLooping()) {
-                sb.append(" looping");
-            }
-            sb.append("\n");
-            sb.append(timestep.get(i).toString()).append("\n");
         }
         return sb.toString();
     }

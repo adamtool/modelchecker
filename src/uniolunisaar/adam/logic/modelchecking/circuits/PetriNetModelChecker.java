@@ -30,7 +30,7 @@ public class PetriNetModelChecker {
 
     @Deprecated
     private static ModelCheckingResult checkSeparate(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        return Abc.call(settings, outputData, net, stats);
+        return Abc.call(settings, outputData, stats);
     }
 
     /**
@@ -114,7 +114,9 @@ public class PetriNetModelChecker {
         }
 
         if (exitValue == 42) { // has a counter example, ergo read it
-            return CounterExampleParser.parseCounterExampleWithStutteringLatch(net, path + "_complete.cex", new CounterExample(false, false));
+            AbcSettings settings = new AbcSettings();
+            settings.setNet(net);
+            return CounterExampleParser.parseCounterExampleWithStutteringLatch(settings, path + "_complete.cex", new CounterExample(false, false));
         }
 
         return null;
@@ -123,7 +125,7 @@ public class PetriNetModelChecker {
     @Deprecated
     public static ModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
-        CircuitAndLTLtoCircuit.createCircuit(net, renderer, formula, data, null, false);
+        CircuitAndLTLtoCircuit.createCircuit(renderer, formula, data, null, false, PetriNetExtensionHandler.getProcessFamilyID(net));
         String inputFile = "./" + net.getName() + ".aig";
         return check(inputFile, verificationAlgo, net, renderer, path, abcParameters, data);
     }

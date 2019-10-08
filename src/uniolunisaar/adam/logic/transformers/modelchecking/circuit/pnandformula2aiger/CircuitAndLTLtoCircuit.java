@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
-import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.logic.externaltools.pnwt.AigToAig;
 import uniolunisaar.adam.logic.externaltools.modelchecking.McHyper;
@@ -15,7 +14,6 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
-import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.util.AigerTools;
 
 /**
@@ -27,18 +25,18 @@ public class CircuitAndLTLtoCircuit {
     /**
      *
      *
-     * @param net
      * @param circ
      * @param formula - in MCHyper format
      * @param data
      * @param stats
      * @param formulaToFile
+     * @param procFamilyID
      * @throws InterruptedException
      * @throws IOException
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public static void createCircuit(PetriNet net, AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats, boolean formulaToFile) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static void createCircuit(AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats, boolean formulaToFile, String procFamilyID) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // Create System 
         String output = data.getPath();
         String input = output + "_system.aag";
@@ -46,7 +44,7 @@ public class CircuitAndLTLtoCircuit {
         Tools.saveFile(input, circuit.toString());
 
         if (data.isOutputCircuit()) { // save as circuit
-            AigerTools.saveAiger2DotAndPDF(input, output + "_circ_system", PetriNetExtensionHandler.getProcessFamilyID(net));
+            AigerTools.saveAiger2DotAndPDF(input, output + "_circ_system", procFamilyID);
         }
 
         final String timeCommand = "/usr/bin/time";
@@ -58,7 +56,7 @@ public class CircuitAndLTLtoCircuit {
         //%%%%%%%%%%%%%%%%%% MCHyper
         String inputFile = input;
         String outputPath = output;
-        McHyper.call(inputFile, formula, outputPath, data.isVerbose(), PetriNetExtensionHandler.getProcessFamilyID(net), circ.getMCHyperResultOptimizations(), formulaToFile);
+        McHyper.call(inputFile, formula, outputPath, data.isVerbose(), procFamilyID, circ.getMCHyperResultOptimizations(), formulaToFile);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
@@ -97,13 +95,13 @@ public class CircuitAndLTLtoCircuit {
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
 
         if (data.isOutputCircuit()) { // save as circuit
-            AigerTools.saveAiger2DotAndPDF(outputPath + ".aag", output + "_circ_all", PetriNetExtensionHandler.getProcessFamilyID(net));
+            AigerTools.saveAiger2DotAndPDF(outputPath + ".aag", output + "_circ_all", procFamilyID);
         }
 
         // %%%%%%%%%%%%%%%% Aiger
         inputFile = outputPath + ".aag";
         outputPath = output + ".aig";
-        AigToAig.call(inputFile, outputPath, data.isVerbose(), PetriNetExtensionHandler.getProcessFamilyID(net));
+        AigToAig.call(inputFile, outputPath, data.isVerbose(), procFamilyID);
     }
 
 //    /**

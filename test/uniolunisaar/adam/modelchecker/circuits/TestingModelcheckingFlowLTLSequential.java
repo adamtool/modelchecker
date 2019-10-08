@@ -58,7 +58,8 @@ public class TestingModelcheckingFlowLTLSequential {
     private static final String outputDirInFormula = outputDir + "sequential/max_in_formula/";
 
     private static final OptimizationsSystem optSys = OptimizationsSystem.NONE;
-    private static final OptimizationsComplete optCom = OptimizationsComplete.NB_GATES_BY_REGEX_WITH_IDX_SQUEEZING;
+//    private static final OptimizationsComplete optCom = OptimizationsComplete.NB_GATES_BY_REGEX_WITH_IDX_SQUEEZING;
+    private static final OptimizationsComplete optCom = OptimizationsComplete.NONE;
 
     @BeforeClass
     public void silence() {
@@ -75,6 +76,63 @@ public class TestingModelcheckingFlowLTLSequential {
     public void createFolder() {
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
+    }
+
+    @Test(enabled = true)
+    public void testCounterExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = ToyExamples.createFirstExample(true);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+
+        String formula;
+        RunFormula f;
+        ModelCheckingResult ret;
+        String name;
+
+        formula = "A F out";
+        f = FlowLTLParser.parse(net, formula);
+        name = net.getName() + "_" + f.toString().replace(" ", "");
+
+        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, true, true);
+
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                TransitionSemantics.OUTGOING,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                optSys,
+                optCom,
+                true,
+                VerificationAlgo.IC3);
+        settings.setOutputData(dataInCircuit);
+        settings.getAbcSettings().setDetailedCEX(true);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        settings.getAbcSettings().setDetailedCEX(false);
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        net = ToyExamples.createIntroductoryExample();                
+        settings.getAbcSettings().setDetailedCEX(true);
+        f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("E"))));
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        
+        settings.getAbcSettings().setDetailedCEX(false);
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);        
     }
 
     @Test
@@ -351,32 +409,13 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = true)
     public void introducingExamplePlaces() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriNetWithTransits net = new PetriNetWithTransits("introduction");
-        Place a = net.createPlace("a");
-        a.setInitialToken(1);
-        net.setInitialTransit(a);
-        Place b = net.createPlace("B");
-        b.setInitialToken(1);
-        net.setInitialTransit(b);
-        Place c = net.createPlace("C");
-        c.setInitialToken(1);
-        Place d = net.createPlace("D");
-        Place e = net.createPlace("E");
-        Place f = net.createPlace("F");
-        Transition t1 = net.createTransition("o1");
-        Transition t2 = net.createTransition("o2");
-        net.createFlow(a, t1);
-        net.createFlow(b, t1);
-        net.createFlow(t1, d);
-        net.createFlow(c, t2);
-        net.createFlow(d, t2);
-        net.createFlow(t2, e);
-        net.createFlow(t2, f);
-        net.createFlow(t2, b);
-        net.createTransit(a, t1, d);
-        net.createTransit(b, t1, d);
-        net.createTransit(d, t2, e, b);
-        net.createInitialTransit(t2, f);
+        PetriNetWithTransits net = ToyExamples.createIntroductoryExample();
+        Place a = net.getPlace("a");
+        Place c = net.getPlace("C");
+        Place f = net.getPlace("F");
+        Place b = net.getPlace("B");
+        Place d = net.getPlace("D");
+        Place e = net.getPlace("E");
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
@@ -1240,7 +1279,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test
+    @Test(enabled = false) // due to time
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
@@ -1259,36 +1298,21 @@ public class TestingModelcheckingFlowLTLSequential {
         AdamCircuitFlowLTLMCStatistics stats;
 
         f = FlowLTLParser.parse(net, "𝔸 ◇ pOut");
-        stats = new AdamCircuitFlowLTLMCStatistics();        
+        stats = new AdamCircuitFlowLTLMCStatistics();
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
-        ret = mc.check(net, f);
+        ret = mc.check(net, f); // takes some time
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = FlowLTLParser.parse(net, "𝔸 ⬜ pOut");
         stats = new AdamCircuitFlowLTLMCStatistics();
-//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
-//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        ret = mc.check(net, f); // takes some time
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         f = FlowLTLParser.parse(net, "𝔸 ⬜ sw002fwdTosw000");
 
         stats = new AdamCircuitFlowLTLMCStatistics();
-//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
-//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-
-//        f = FlowLTLParser.parse(net, "𝔸 (⬜ (sw000fwdTosw001))");
-//        stats = new ModelcheckingStatistics();
-//        ret = mc.check(net, f, outputDirInCircuit + net.getName(),  stats);
-//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-//
-//        f = FlowLTLParser.parse(net, "𝔸 (⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000)))");
-//        stats = new ModelcheckingStatistics();
-//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
-//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-//
-//        f = FlowLTLParser.parse(net, "𝔸 (◇ pOut ⋏ ⬜ (((pOut ⋎ sw002fwdTosw000) ⋎ sw000fwdTosw001) ⋎ sw002fwdTosw000))");
-//        stats = new ModelcheckingStatistics();
-//        ret = mc.check(net, f, outputDirInCircuit + net.getName(), true, stats);
-//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        ret = mc.check(net, f);  // takes some time
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test
@@ -1312,8 +1336,7 @@ public class TestingModelcheckingFlowLTLSequential {
         pnwt.createTransit(in, t, out);
         pnwt.createTransit(out, t, out);
 //        PNWTTools.savePnwt2PDF(outputDir+pnwt.getName(), pnwt, false);
-        
-        
+
         RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(out)));
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(

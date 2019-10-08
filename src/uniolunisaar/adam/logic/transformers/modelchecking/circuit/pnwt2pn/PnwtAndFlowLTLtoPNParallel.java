@@ -2,11 +2,13 @@ package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn;
 
 import java.util.ArrayList;
 import java.util.List;
+import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import static uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPN.createOriginalPartOfTheNet;
 import uniolunisaar.adam.tools.Logger;
@@ -128,6 +130,11 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
     public static PetriNetWithTransits createNet4ModelCheckingParallelOneFlowFormula(PetriNetWithTransits net) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
         out.setName(net.getName() + "_mc");
+        // mark all nodes as original 
+        for (Node node : out.getNodes()) {
+            PetriNetExtensionHandler.setOriginal(node);
+        }
+
         // Add to each original transition a place such that we can disable these transitions
         // as soon as we started to check a token chain
         for (Transition t : net.getTransitions()) {

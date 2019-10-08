@@ -200,7 +200,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID))),
                         LTLOperators.Binary.OR,
-                        flowF.getPhi())));
+                        new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID)), LTLOperators.Binary.U, flowF.getPhi()))));
                 return convert(f);
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);

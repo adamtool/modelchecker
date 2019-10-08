@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.modelchecking.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.exceptions.ExternalToolException;
@@ -40,7 +39,7 @@ public class Abc {
         BMC3
     }
 
-    public static ModelCheckingResult call(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitLTLMCStatistics stats) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+    public static ModelCheckingResult call(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, AdamCircuitLTLMCStatistics stats) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         if (settings.getVerificationAlgos().length == 0) {
             throw new InvalidParameterException("At least one verification algorithm has to be given.");
         }
@@ -48,7 +47,7 @@ public class Abc {
             String outputFile = outputData.getPath() + ".cex";
             String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
                     settings.isCircuitReduction(), settings.getPreProcessing());
-            ModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
+            ModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
             result.setAlgo(settings.getVerificationAlgos()[0]);
             return result;
         }
@@ -63,7 +62,7 @@ public class Abc {
                         String outputFile = outputData.getPath() + ".cex";
                         String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
                                 settings.isCircuitReduction(), settings.getPreProcessing());
-                        ModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, net, outputFile, settings.isVerbose(), stats);
+                        ModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
                         if (out.getSatisfied() != ModelCheckingResult.Satisfied.UNKNOWN) {
                             result.setCex(out.getCex());
                             result.setSat(out.getSatisfied());
@@ -169,7 +168,7 @@ public class Abc {
         return abcOutput + "\nERRORS: " + procAbc.getErrors();
     }
 
-    private static ModelCheckingResult parseOutput(String path, String abcOutput, PetriNet net, String cexOutputFile, boolean verbose, AdamCircuitLTLMCStatistics stats) throws ExternalToolException, IOException {
+    private static ModelCheckingResult parseOutput(String path, String abcOutput, String cexOutputFile, AdamCircuitLTLMCStatistics stats, AbcSettings settings) throws ExternalToolException, IOException {
         Logger.getInstance().addMessage("Parsing abc output ...", false);
         //todo: hack for checking the abc output
 //        Logger.getInstance().addMessage(abcOutput, false, true);
@@ -185,10 +184,10 @@ public class Abc {
             if (f.exists() && !f.isDirectory()) {
                 boolean safety = abcOutput.contains("Output 0 of miter \"" + path + "\"" + " was asserted in frame");
                 boolean liveness = abcOutput.contains("Output 1 of miter \"" + path + "\"" + " was asserted in frame");
-                CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(net, cexOutputFile, new CounterExample(safety, liveness));
+                CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(settings, cexOutputFile, new CounterExample(safety, liveness));
                 ret.setCex(cex);
                 ret.setSat(ModelCheckingResult.Satisfied.FALSE);
-                if (!verbose) { // cleanup
+                if (!settings.isVerbose()) { // cleanup
                     Tools.deleteFile(cexOutputFile);
                 }
             } else {

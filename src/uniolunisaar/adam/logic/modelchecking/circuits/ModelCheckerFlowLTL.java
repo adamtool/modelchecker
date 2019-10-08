@@ -24,6 +24,7 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.LoLASettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.PnAndFlowLTLtoCircuit;
@@ -60,7 +61,7 @@ public class ModelCheckerFlowLTL {
                 AdamCircuitFlowLTLMCSettings props = (AdamCircuitFlowLTLMCSettings) settings;
                 PnAndFlowLTLtoCircuit.createCircuit(net, formula, props);
                 props.fillAbcData(net);
-                return Abc.call(props.getAbcSettings(), props.getOutputData(), net, props.getStatistics());
+                return Abc.call(props.getAbcSettings(), props.getOutputData(), props.getStatistics());
             case LOLA:
                 PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
                 String f = FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mcNet, formula);
@@ -105,7 +106,7 @@ public class ModelCheckerFlowLTL {
         }
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData("./" + net.getName(), false, false, false);
 
-        CircuitAndLTLtoCircuit.createCircuit(gameMC, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), data, null, false);
+        CircuitAndLTLtoCircuit.createCircuit(renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(formulaMC), data, null, false, PetriNetExtensionHandler.getProcessFamilyID(gameMC));
 
         String inputFile = "./" + gameMC.getName() + ".aig";
         return PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, gameMC, renderer, "./" + gameMC.getName(), "", data);

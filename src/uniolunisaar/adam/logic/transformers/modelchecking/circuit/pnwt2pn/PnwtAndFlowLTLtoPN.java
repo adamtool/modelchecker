@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 
@@ -25,9 +26,18 @@ public class PnwtAndFlowLTLtoPN {
         out.setName(orig.getName() + "_mc");
 
         // delete the fairness assumption of all original transitions
+        // and mark them as original
         for (Transition t : orig.getTransitions()) {
-            out.removeStrongFair(out.getTransition(t.getId()));
-            out.removeWeakFair(out.getTransition(t.getId()));
+            Transition outT = out.getTransition(t.getId());
+            PetriNetExtensionHandler.setOriginal(outT);
+            out.removeStrongFair(outT);
+            out.removeWeakFair(outT);
+        }
+
+        // mark also the places as original (for CEX)
+        for (Place place : orig.getPlaces()) {
+            Place outP = out.getPlace(place.getId());
+            PetriNetExtensionHandler.setOriginal(outP);
         }
         return out;
     }

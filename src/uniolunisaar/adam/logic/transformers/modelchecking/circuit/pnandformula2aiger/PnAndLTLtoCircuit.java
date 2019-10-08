@@ -14,6 +14,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformer;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
@@ -115,6 +116,9 @@ public class PnAndLTLtoCircuit {
 
         int f_size = formula.getSize();
 
+        // Set the Real net what is checked to ABC for parsing the CEX
+        settings.getAbcSettings().setNet(net);
+
         // Choose renderer and add the corresponding stuttering
         AigerRenderer renderer;
         String mcHyperFormula;
@@ -161,7 +165,7 @@ public class PnAndLTLtoCircuit {
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% END COLLECT STATISTICS
 
         Logger.getInstance().addMessage("This means we create the product for F='" + formula.toSymbolString() + "'.");
-        CircuitAndLTLtoCircuit.createCircuit(net, renderer, mcHyperFormula, data, stats, settings.isUseFormulaFileForMcHyper());
+        CircuitAndLTLtoCircuit.createCircuit(renderer, mcHyperFormula, data, stats, settings.isUseFormulaFileForMcHyper(), PetriNetExtensionHandler.getProcessFamilyID(net));
         return renderer;
     }
 

@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
+import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import static uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister.STUTT_LATCH;
 import uniolunisaar.adam.ds.modelchecking.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.CounterExampleElement;
+import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
@@ -19,6 +22,7 @@ import uniolunisaar.adam.tools.Logger;
  */
 public class CounterExampleParser {
 
+    @Deprecated
     public static CounterExample parseCounterExampleStandard(PetriNet net, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
             String cexText = IOUtils.streamToString(inputStream);
@@ -91,8 +95,9 @@ public class CounterExampleParser {
         }
     }
 
-    public static CounterExample parseCounterExampleWithStutteringLatch(PetriNet net, String path, CounterExample cex) throws IOException {
+    public static CounterExample parseCounterExampleWithStutteringLatch(AbcSettings settings, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
+            PetriNet net = settings.getNet();
             String cexText = IOUtils.streamToString(inputStream);
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
@@ -147,9 +152,15 @@ public class CounterExampleParser {
                             String id = elem.substring(0, elem.length() - 2);
                             if (val == '1') {
                                 if (net.containsPlace(id)) {
-                                    cexe.add(net.getPlace(id));
+                                    Place place = net.getPlace(id);
+                                    if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(place)) {
+                                        cexe.add(place);
+                                    }
                                 } else if (net.containsTransition(id)) {
-                                    cexe.add(net.getTransition(id));
+                                    Transition t = net.getTransition(id);
+                                    if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t)) {
+                                        cexe.add(t);
+                                    }
                                 }
                             }
                         }
