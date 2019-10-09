@@ -113,14 +113,16 @@ public class CounterExampleElement {
         return init && transitions.isEmpty() && marking.isEmpty();
     }
 
-    @Override
-    public String toString() {
+    public String getStringRepresenation(boolean isDetailed) {
         StringBuilder sb = new StringBuilder();
-        sb.append("init:").append(init);
-        if (withStuttering) {
-            sb.append(", stutt:").append(stutter);
+        if (isDetailed) {
+            sb.append("init:").append(init);
+            if (withStuttering) {
+                sb.append(", stutt:").append(stutter);
+            }
+            sb.append("\n");
         }
-        sb.append("\n[");
+        sb.append("[");
         if (binID == null) {
             for (Transition t : transitions) {
                 sb.append(t.getId()).append(", ");
@@ -140,6 +142,11 @@ public class CounterExampleElement {
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return getStringRepresenation(true);
     }
 
     public char[] getBinID() {

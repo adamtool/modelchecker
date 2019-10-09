@@ -49,6 +49,7 @@ public class PetriNetModelChecker {
     @Deprecated
     public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         AbcSettings settings = new AbcSettings(inputFile, abcParameters, true, null, new VerificationAlgo[]{alg});
+        settings.setNet(net);
         return check(settings, data, net, null);
     }
 

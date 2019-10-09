@@ -53,11 +53,11 @@ public class TestingModelcheckingFlowLTLParallel {
 
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setVerbose(false);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+//        Logger.getInstance().setVerbose(true);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -72,7 +72,7 @@ public class TestingModelcheckingFlowLTLParallel {
         (new File(outDir)).mkdirs();
     }
 
-        @Test(enabled = true)
+    @Test(enabled = true)
     public void introducingExamplePlaces() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = new PetriNetWithTransits("introduction");
         Place a = net.createPlace("a");
@@ -210,6 +210,7 @@ public class TestingModelcheckingFlowLTLParallel {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
+        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
@@ -421,7 +422,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
 //        Assert.assertNull(ret);
     }
-    
+
     @Test(enabled = true)
     public void checkToyExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(false);

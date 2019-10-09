@@ -146,6 +146,7 @@ public class CounterExampleParser {
                 }
             }
 //            Logger.getInstance().addMessage(cropped.toString(), false);
+//            System.out.println(cropped.toString());
             // create the counter example
             int timestep = 0;
             while (timestep >= 0) {
@@ -167,6 +168,7 @@ public class CounterExampleParser {
                         } else {
                             if (timestep != 0) { // for outgoing jump over the first step
                                 String id = elem.substring(0, elem.length() - 2);
+//                                System.out.println(id + "=" + val);
                                 if (id.startsWith(AigerRendererSafeOutStutterRegisterLogTrans.BIN_COD_ID)) {
                                     String binIDChar = id.substring((AigerRendererSafeOutStutterRegisterLogTrans.BIN_COD_ID).length());
                                     cexe.add(Integer.parseInt(binIDChar), val);

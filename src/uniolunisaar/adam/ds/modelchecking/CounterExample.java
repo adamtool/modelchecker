@@ -46,16 +46,21 @@ public class CounterExample {
 //                    elemSB.append(" looping");
 //                }
                 elemSB.append("\n");
-                String value = elem.toString();
-                if (elem.getBinID() != null) { // this for binary coded
-                    String binString = new String(elem.getBinID());
-                    Transition t = codingMap.get(binString);
-                    value = value.replace(CounterExampleElement.PLACEHOLDER_FOR_BINTRAN, t.getId());
-                    if (!PetriNetExtensionHandler.isOriginal(t) && !isDetailed) {
-                        add = false;
+                String value = elem.getStringRepresenation(isDetailed);
+                if (elem.isStutter()) {
+                    elemSB.append("--- stuttering ...");
+                } else {
+                    if (elem.getBinID() != null) { // this for binary coded
+                        String binString = new String(elem.getBinID());
+                        Transition t = codingMap.get(binString);
+                        value = value.replace(CounterExampleElement.PLACEHOLDER_FOR_BINTRAN, t.getId());
+                        if (!PetriNetExtensionHandler.isOriginal(t) && !isDetailed) {
+                            add = false;
+                        }
                     }
+                    elemSB.append(value);
                 }
-                elemSB.append(value).append("\n");
+                elemSB.append("\n");
             } else { // check if it is looping
                 if (elem.isStartsLoop()) {
                     sb.append("%%%%%%% Loop started with this step.\n");
