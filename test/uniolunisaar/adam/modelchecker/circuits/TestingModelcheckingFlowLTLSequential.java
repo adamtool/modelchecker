@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
@@ -18,17 +19,20 @@ import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
 import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING;
 import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering;
 import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
 import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL;
 import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR;
@@ -42,9 +46,11 @@ import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_ERR;
 import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.LOGGER_ABC_OUT;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsComplete;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.tools.Tools;
+import uniolunisaar.adam.util.logics.LogicsTools;
 import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 import static uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics.OUTGOING;
 
@@ -65,19 +71,51 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(false);
-        Logger.getInstance().setShortMessageStream(null);
-        Logger.getInstance().setVerboseMessageStream(null);
-        Logger.getInstance().setWarningStream(null);
-//               Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
-//        Logger.getInstance().addMessageStream(LOGGER_ABC_ERR, System.err);
+//        Logger.getInstance().setVerbose(false);
+//        Logger.getInstance().setShortMessageStream(null);
+//        Logger.getInstance().setVerboseMessageStream(null);
+//        Logger.getInstance().setWarningStream(null);
+               Logger.getInstance().setVerbose(true);
+        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+        Logger.getInstance().addMessageStream(LOGGER_ABC_ERR, System.err);
     }
 
     @BeforeClass
     public void createFolder() {
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
+    }
+
+    AdamCircuitFlowLTLMCSettings settings;
+
+    @BeforeMethod
+    public void initMCSettings() {
+        settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_NONE,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+    }
+
+    @Test
+    public void testInitFirstStep() throws Exception {
+        PetriNetWithTransits net = new PetriNetWithTransits("initFirst");
+        Place init = net.createPlace("init");
+        init.setInitialToken(1);
+
+        ModelCheckerFlowLTL mc;
+        ModelCheckingResult ret;
+
+        FlowFormula flowF = new FlowFormula(new LTLConstants.True());
+        RunFormula f = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, flowF);
+
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = true)
@@ -122,19 +160,19 @@ public class TestingModelcheckingFlowLTLSequential {
         System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
-        net = ToyExamples.createIntroductoryExample();                
+        net = ToyExamples.createIntroductoryExample();
         settings.getAbcSettings().setDetailedCEX(true);
         f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("E"))));
         ret = mc.check(net, f);
         System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-        
+
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
         System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         System.out.println(ret.getCex().toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);        
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test
@@ -837,66 +875,66 @@ public class TestingModelcheckingFlowLTLSequential {
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-//        // without init
-//        settings.setInitFirst(false);
-//        ret = mc.check(net, f, outputDirInFormula + name, false);
-//        Assert.assertNotNull(ret);
-
-        // previous semantics
-//        mc.setSemantics(TransitionSemantics.INGOING);
-//        ret = mc.check(net, f, "./" + net.getName(), false);
-//        Assert.assertNotNull(ret);
-        // check standard maximality
-        // + sequential
-        // + next semantics
-//        mc.setSemantics(TransitionSemantics.OUTGOING);
-        net = ToyExamples.createFirstExample(false);
-        name = net.getName() + "_" + f.toString().replace(" ", "");
-        PNWTTools.saveAPT(outputDir + net.getName() + "_" + formula, net, false);
-        PNWTTools.savePnwt2PDF(outputDir + net.getName() + "_" + formula, net, false);
-        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
-        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
-
-        // Check maximality in circuit
-        settings.setInitFirst(true);
-        settings.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
-        settings.setOutputData(dataInCircuit);
-        mc = new ModelCheckerFlowLTL(settings);
-        ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
-
-        // check it outside
-        settings.setInitFirst(true);
-        settings.setMaximality(Maximality.MAX_INTERLEAVING);
-        settings.setOutputData(dataInFormula);
-        mc = new ModelCheckerFlowLTL(settings);
-        ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
-//        // without init
-//        settings.setInitFirst(false);
-//        ret = mc.check(net, f, outputDirInFormula + name, false);
-//        Assert.assertNull(ret);
-
-        // previous semantics
-//        mc.setSemantics(TransitionSemantics.INGOING);
-//        ret = mc.check(net, f, "./" + net.getName(), true);
-//        Assert.assertNull(ret);
-        // check to flow formulas
-//        mc.setSemantics(TransitionSemantics.OUTGOING);
-        f = new RunFormula(f, RunOperators.Binary.OR, f);
-        name = net.getName() + "_" + f.toString().replace(" ", "");
-        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
-        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
-
-        settings.setInitFirst(true);
-        settings.setOutputData(dataInFormula);
-        mc = new ModelCheckerFlowLTL(settings);
-        ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
-//        // without init
-//        settings.setInitFirst(false);
-//        ret = mc.check(net, f, outputDirInFormula + name, false);
-//        Assert.assertNull(ret);
+////        // without init
+////        settings.setInitFirst(false);
+////        ret = mc.check(net, f, outputDirInFormula + name, false);
+////        Assert.assertNotNull(ret);
+//
+//        // previous semantics
+////        mc.setSemantics(TransitionSemantics.INGOING);
+////        ret = mc.check(net, f, "./" + net.getName(), false);
+////        Assert.assertNotNull(ret);
+//        // check standard maximality
+//        // + sequential
+//        // + next semantics
+////        mc.setSemantics(TransitionSemantics.OUTGOING);
+//        net = ToyExamples.createFirstExample(false);
+//        name = net.getName() + "_" + f.toString().replace(" ", "");
+//        PNWTTools.saveAPT(outputDir + net.getName() + "_" + formula, net, false);
+//        PNWTTools.savePnwt2PDF(outputDir + net.getName() + "_" + formula, net, false);
+//        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
+//        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
+//
+//        // Check maximality in circuit
+//        settings.setInitFirst(true);
+//        settings.setMaximality(Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+//        settings.setOutputData(dataInCircuit);
+//        mc = new ModelCheckerFlowLTL(settings);
+//        ret = mc.check(net, f);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+//
+//        // check it outside
+//        settings.setInitFirst(true);
+//        settings.setMaximality(Maximality.MAX_INTERLEAVING);
+//        settings.setOutputData(dataInFormula);
+//        mc = new ModelCheckerFlowLTL(settings);
+//        ret = mc.check(net, f);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+////        // without init
+////        settings.setInitFirst(false);
+////        ret = mc.check(net, f, outputDirInFormula + name, false);
+////        Assert.assertNull(ret);
+//
+//        // previous semantics
+////        mc.setSemantics(TransitionSemantics.INGOING);
+////        ret = mc.check(net, f, "./" + net.getName(), true);
+////        Assert.assertNull(ret);
+//        // check to flow formulas
+////        mc.setSemantics(TransitionSemantics.OUTGOING);
+//        f = new RunFormula(f, RunOperators.Binary.OR, f);
+//        name = net.getName() + "_" + f.toString().replace(" ", "");
+//        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
+//        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
+//
+//        settings.setInitFirst(true);
+//        settings.setOutputData(dataInFormula);
+//        mc = new ModelCheckerFlowLTL(settings);
+//        ret = mc.check(net, f);
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+////        // without init
+////        settings.setInitFirst(false);
+////        ret = mc.check(net, f, outputDirInFormula + name, false);
+////        Assert.assertNull(ret);
 
     }
 
@@ -1229,11 +1267,6 @@ public class TestingModelcheckingFlowLTLSequential {
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
 //        Assert.assertNotNull(ret);
-    }
-
-    @Test
-    public void testNetwork() {
-
     }
 
     @Test

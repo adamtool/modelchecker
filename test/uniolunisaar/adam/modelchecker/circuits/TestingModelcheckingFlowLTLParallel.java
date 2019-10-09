@@ -6,14 +6,17 @@ import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.logics.AtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
@@ -26,7 +29,12 @@ import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
+import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING;
+import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
+import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.PARALLEL;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
@@ -36,10 +44,12 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.logics.LogicsTools;
+import static uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics.OUTGOING;
 
 /**
  *
@@ -53,11 +63,11 @@ public class TestingModelcheckingFlowLTLParallel {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().setVerbose(false);
-        Logger.getInstance().setShortMessageStream(null);
-        Logger.getInstance().setVerboseMessageStream(null);
-        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().setVerbose(false);
+//        Logger.getInstance().setShortMessageStream(null);
+//        Logger.getInstance().setVerboseMessageStream(null);
+//        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -70,6 +80,371 @@ public class TestingModelcheckingFlowLTLParallel {
     @BeforeClass
     public void createFolder() {
         (new File(outDir)).mkdirs();
+    }
+
+    AdamCircuitFlowLTLMCSettings settings;
+
+    @BeforeMethod
+    public void initMCSettings() {
+        settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+    }
+
+    @Test
+    public void testInitFirstStep() throws Exception {
+        PetriNetWithTransits net = new PetriNetWithTransits("initFirst");
+        Place init = net.createPlace("init");
+        init.setInitialToken(1);
+
+        ModelCheckerFlowLTL mc;
+        ModelCheckingResult ret;
+
+        FlowFormula flowF = new FlowFormula(new LTLConstants.True());
+        RunFormula f = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, flowF);
+
+        // show mcNet
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName(), false, true, true);
+        settings.setOutputData(data);
+
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+    }
+
+    @Test(enabled = true)
+    public void testCounterExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = ToyExamples.createFirstExample(true);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+
+        String formula;
+        RunFormula f;
+        ModelCheckingResult ret;
+        String name;
+
+        formula = "A F out";
+        f = FlowLTLParser.parse(net, formula);
+        name = net.getName() + "_" + f.toString().replace(" ", "");
+
+        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
+
+        // check maximal initerleaving in the circuit
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+        settings.setOutputData(dataInCircuit);
+        settings.getAbcSettings().setDetailedCEX(true);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        settings.getAbcSettings().setDetailedCEX(false);
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        net = ToyExamples.createIntroductoryExample();
+        settings.getAbcSettings().setDetailedCEX(true);
+        f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("E"))));
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+
+        settings.getAbcSettings().setDetailedCEX(false);
+        ret = mc.check(net, f);
+        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println(ret.getCex().toString());
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+    }
+
+    @Test
+    public void testMaxInCircuitVsFormula() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
+
+        String formula;
+        RunFormula f;
+        ModelCheckingResult ret;
+        String name;
+
+        formula = "A F pOut";
+        f = FlowLTLParser.parse(net, formula);
+        name = net.getName() + "_" + f.toString().replace(" ", "");
+
+        // maximality in circuit 
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                MAX_INTERLEAVING_IN_CIRCUIT,
+                PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+        AdamCircuitFlowLTLMCStatistics statsInCircuit = new AdamCircuitFlowLTLMCStatistics();
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        settings.setOutputData(dataInCircuit);
+        settings.setStatistics(statsInCircuit);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        // maximality in formula        
+        AdamCircuitFlowLTLMCStatistics statsInFormula = new AdamCircuitFlowLTLMCStatistics();
+        settings.setMaximality(Maximality.MAX_INTERLEAVING);
+
+        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        settings.setOutputData(dataInFormula);
+        settings.setStatistics(statsInFormula);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+//        System.out.println(statsInCircuit.toString());
+//        System.out.println("-------");
+//        System.out.println(statsInFormula.toString());
+    }
+
+    @Test
+    public void testNewlyFlowCreation() throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = new PetriNetWithTransits("infFlows");
+        Transition tin = net.createTransition("createFlows");
+        Place init = net.createPlace("pIn");
+        init.setInitialToken(1);
+        net.createFlow(tin, init);
+        net.createFlow(init, tin);
+        net.createTransit(init, tin, init);
+        net.createInitialTransit(tin, init);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+
+        RunFormula formula;
+        String name;
+        ModelCheckingResult ret;
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                OUTGOING,
+                PARALLEL,
+                MAX_INTERLEAVING,
+                PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+
+        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(init))); // should be true since the first place of each chain is pIn
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+
+        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+
+        settings.setOutputData(dataInCircuit);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        formula = new RunFormula(new FlowFormula(new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(init))));  //should still be true
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+
+        settings.setOutputData(dataInCircuit);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+    }
+
+    @Test(enabled = true)
+    public void introducingExampleTransitions() throws IOException, RenderException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+        PetriNetWithTransits net = new PetriNetWithTransits("introduction");
+        Place a = net.createPlace("a");
+        a.setInitialToken(1);
+        net.setInitialTransit(a);
+        Place b = net.createPlace("B");
+        b.setInitialToken(1);
+        net.setInitialTransit(b);
+        Place c = net.createPlace("C");
+        c.setInitialToken(1);
+        Place d = net.createPlace("D");
+        Place e = net.createPlace("E");
+        Place f = net.createPlace("F");
+        Transition t1 = net.createTransition("o1");
+        Transition t2 = net.createTransition("o2");
+        net.createFlow(a, t1);
+        net.createFlow(b, t1);
+        net.createFlow(t1, d);
+        net.createFlow(c, t2);
+        net.createFlow(d, t2);
+        net.createFlow(t2, e);
+        net.createFlow(t2, f);
+        net.createFlow(t2, b);
+        net.createTransit(a, t1, d);
+        net.createTransit(b, t1, d);
+        net.createTransit(d, t2, e, b);
+        net.createInitialTransit(t2, f);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+
+        RunFormula formula;
+        String name;
+        ModelCheckingResult ret;
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL,
+                AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%    
+        RunFormula a1 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1)));
+        RunFormula a2 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t2)));
+        formula = new RunFormula(a1, RunOperators.Binary.OR, a2); // should not hold since the newly created flow does not start with a transition, but a place
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+
+        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+
+        // check in circuit
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+
+        settings.setOutputData(dataInCircuit);
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+//        ret = mc.check(net, formula); // cannot check since this are two flow formulas
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        // %%%%%%% newly added (not done for all cases)
+        formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        // check in circuit
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+
+        settings.setOutputData(dataInCircuit);
+        mc = new ModelCheckerFlowLTL(settings);
+//        ret = mc.check(net, formula); // cannot check since this are two flow formulas
+//        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        // %%%%%%%% newly added (not done for all cases)
+        formula = new RunFormula(new FlowFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+
+        // check in circuit
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING);
+
+        settings.setOutputData(dataInCircuit);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(new LTLAtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+
+        // check in circuit
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+
+        settings.setOutputData(dataInCircuit);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+//        // without init
+//        settings.setInitFirst(false);
+//        ret = mc.check(net, formula, outputDirInCircuit + name, false);
+//        Assert.assertNull(ret);
+        // check in formula
+        settings.setInitFirst(true);
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING);
+        settings.setOutputData(dataInFormula);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+//        // without init
+//        settings.setInitFirst(false);
+//        ret = mc.check(net, formula, outputDirInFormula + name, false);
+//        Assert.assertNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(new LTLAtomicProposition(t2)); // should not hold since the flows starting in A and B
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+
+        // check in circuit
+        settings.setInitFirst(true);
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+
+        settings.setOutputData(dataInCircuit);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+//        // without init
+//        settings.setInitFirst(false);
+//        ret = mc.check(net, formula, outputDirInCircuit + name, false);
+//        Assert.assertNotNull(ret);
+        // check in formula
+        settings.setInitFirst(true);
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING);
+
+        settings.setOutputData(dataInFormula);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+//        // without init
+//        settings.setInitFirst(false);
+//        ret = mc.check(net, formula, outputDirInFormula + name, false);
+//        Assert.assertNotNull(ret);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
+
+        // check in circuit
+        settings.setInitFirst(true);
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+        settings.setOutputData(dataInCircuit);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+//        // without init
+//        settings.setInitFirst(false);
+//        ret = mc.check(net, formula, outputDirInCircuit + name, false);
+//        Assert.assertNotNull(ret);
+        // check in formula
+        settings.setInitFirst(true);
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING);
+        settings.setOutputData(dataInFormula);
+        mc = new ModelCheckerFlowLTL(settings);
+        ret = mc.check(net, formula);
+        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+//        // without init
+//        settings.setInitFirst(false);
+//        ret = mc.check(net, formula, outputDirInFormula + name, false);
+//        Assert.assertNotNull(ret);
     }
 
     @Test(enabled = true)
@@ -210,7 +585,7 @@ public class TestingModelcheckingFlowLTLParallel {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        System.out.println(ret.getCex().toString());
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
@@ -494,7 +869,7 @@ public class TestingModelcheckingFlowLTLParallel {
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
                 ModelCheckingSettings.Approach.PARALLEL,
-                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,// todo: here is an error, for MAX_INTERLEAVING
+                AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
@@ -609,7 +984,7 @@ public class TestingModelcheckingFlowLTLParallel {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void redundantFlowExampleFix() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         RunFormula f = new RunFormula(
@@ -742,7 +1117,7 @@ public class TestingModelcheckingFlowLTLParallel {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false) // due to time
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);

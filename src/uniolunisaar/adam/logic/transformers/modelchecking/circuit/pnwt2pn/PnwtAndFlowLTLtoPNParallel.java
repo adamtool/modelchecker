@@ -1,9 +1,12 @@
 package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.Place;
+import uniol.apt.adt.pn.Token;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
@@ -130,9 +133,26 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
     public static PetriNetWithTransits createNet4ModelCheckingParallelOneFlowFormula(PetriNetWithTransits net) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
         out.setName(net.getName() + "_mc");
-        // mark all nodes as original 
+        //      INITIALISATION IS NOW DONE IN THE FIRST STEP:
+//           otherwise here was a problem that one could chose 
+//           to consider the chain, when the original net already terminated.
+//           Also just taken the token while firing the original transition 
+//           should be a problem, since then everytime passing this place
+//           it could be chosen to consider it as creating a new chain.  
+//          Changes are marekd by keyword INITPLACES:
+        // INITPLACES:
+        Set<Place> origInitMarking = new HashSet<>();
         for (Node node : out.getNodes()) {
+            // mark all nodes as original 
             PetriNetExtensionHandler.setOriginal(node);
+            // INITPLACES: Remove the original initial marking since the initialisation is done in the first step
+            if (out.containsPlace(node.getId())) {
+                Place p = (Place) node;
+                if (p.getInitialToken().getValue() > 0) {
+                    origInitMarking.add(p);
+                    p.setInitialToken(Token.ZERO);
+                }
+            }
         }
 
         // Add to each original transition a place such that we can disable these transitions
@@ -164,7 +184,22 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                         out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + tr.getId()), t);
                     }
                 }
+                // INITPLACES: activate the original initial marking
+                for (Place place1 : origInitMarking) {
+                    out.createFlow(t, place1);
+                }
             }
+        }
+        // INITPLACES: add a place and transition for the case that a newly created chain should be considered
+        //          this is necesarry since otherwise only adding a transition activating the 
+        //          original initial marking would yield that still the chosing of a transition
+        //          for an initial transit marked place could be chosen after the first step
+        Place newTransitByTransition = out.createPlace(NEW_TOKENFLOW_ID);
+        Transition initTransitByTransition = out.createTransition(INIT_TOKENFLOW_ID + "-new");
+        out.createFlow(init, initTransitByTransition);
+        out.createFlow(initTransitByTransition, newTransitByTransition);
+        for (Place place1 : origInitMarking) {
+            out.createFlow(initTransitByTransition, place1);
         }
         // via transitions
         for (Transition t : net.getTransitions()) {
@@ -184,7 +219,9 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                 }
                 Transition tout = out.createTransition();
                 tout.setLabel(t.getId());
-                out.createFlow(init, tout);
+                //INITPLACES:
+//                out.createFlow(init, tout);
+                out.createFlow(newTransitByTransition, tout);
                 out.createFlow(tout, p);
                 for (Place place : t.getPreset()) {
                     out.createFlow(place, tout);

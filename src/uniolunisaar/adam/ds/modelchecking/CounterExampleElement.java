@@ -122,7 +122,15 @@ public class CounterExampleElement {
             }
             sb.append("\n");
         }
-        sb.append("[");
+        sb.append("M={");
+        for (Place place : marking) {
+            sb.append(place.getId()).append(", ");
+        }
+        if (!marking.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        sb.append("}");
+        sb.append(" -> [");
         if (binID == null) {
             for (Transition t : transitions) {
                 sb.append(t.getId()).append(", ");
@@ -133,14 +141,7 @@ public class CounterExampleElement {
         } else {
             sb.append(PLACEHOLDER_FOR_BINTRAN);
         }
-        sb.append("] -> M={");
-        for (Place place : marking) {
-            sb.append(place.getId()).append(", ");
-        }
-        if (!marking.isEmpty()) {
-            sb.setLength(sb.length() - 2);
-        }
-        sb.append("}");
+        sb.append("]");
         return sb.toString();
     }
 

@@ -15,7 +15,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.Fl
 public class FlowLTLTransformerLoLA {
 
     public static String createFormula4ModelChecking4LoLASequential(PetriNet orig, PetriNet mc, RunFormula formula) throws NotConvertableException {
-        ILTLFormula f = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(orig, mc, formula, new AdamCircuitFlowLTLMCSettings());
+        ILTLFormula f = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(orig, mc, formula, new AdamCircuitFlowLTLMCSettings());
         String lola = f.toLoLA();
         return "ALLPATH " + lola;
     }

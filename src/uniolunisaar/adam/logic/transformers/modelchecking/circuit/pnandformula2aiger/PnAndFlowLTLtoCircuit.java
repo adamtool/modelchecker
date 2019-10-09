@@ -15,7 +15,6 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.FlowLTLTransformerParallel;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.FlowLTLTransformerSequential;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
@@ -88,7 +87,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
         }
 
         // Add Fairness
-        RunFormula f = FlowLTLTransformer.addFairness(net, formula);
+        RunFormula f = LogicsTools.addFairness(net, formula);
 
         // Get the formula for the maximality (null if MAX_NONE)
         ILTLFormula max = null;
@@ -132,7 +131,8 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         }
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size());
                     }
-                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
+                    formulaMC = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
+//                    formulaMC = FlowLTLTransformerSequentialBackup.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     break;
                 case SEQUENTIAL_INHIBITOR:
                     netMC = PnwtAndFlowLTLtoPNSequentialInhibitor.createNet4ModelCheckingSequential(net, f, initFirst);
@@ -149,7 +149,8 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         }
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size());
                     }
-                    formulaMC = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
+                    formulaMC = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
+//                    formulaMC = FlowLTLTransformerSequentialBackup.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     break;
                 default:
                     throw new RuntimeException("Didn't provided a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");

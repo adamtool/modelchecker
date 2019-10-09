@@ -38,8 +38,8 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
     private final AbcSettings abcSettings = new AbcSettings();
     private D outputData;
     private S statistics = null;
-//    private boolean codeInputTransitionsBinary = true;
-    private boolean codeInputTransitionsBinary = false;
+    private boolean codeInputTransitionsBinary = true;
+//    private boolean codeInputTransitionsBinary = false;
     private boolean useFormulaFileForMcHyper = true;
 
     public AdamCircuitMCSettings(D outputData) {

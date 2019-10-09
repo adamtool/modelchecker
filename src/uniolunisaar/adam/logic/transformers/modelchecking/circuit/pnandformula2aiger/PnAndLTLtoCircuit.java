@@ -16,11 +16,11 @@ import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatist
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformer;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.util.logics.FormulaCreator;
+import uniolunisaar.adam.util.logics.LogicsTools;
 import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
@@ -67,7 +67,7 @@ public class PnAndLTLtoCircuit {
         TransitionSemantics semantics = settings.getSemantics();
 
         // Add Fairness
-        formula = FlowLTLTransformer.addFairness(net, formula);
+        formula = LogicsTools.addFairness(net, formula);
 
         // Add Maximality
         ILTLFormula max = null;

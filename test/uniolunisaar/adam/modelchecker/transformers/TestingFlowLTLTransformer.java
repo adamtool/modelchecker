@@ -83,7 +83,7 @@ public class TestingFlowLTLTransformer {
 
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
         PNWTTools.savePnwt2PDF(mc.getName() + "mc", mc, true);
-        ILTLFormula f_mc = FlowLTLTransformerSequential.createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings());
+        ILTLFormula f_mc = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings());
 //        System.out.println(f_mc);
 
     }
