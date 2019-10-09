@@ -72,7 +72,7 @@ public class CounterExample {
                 //if next step is a stuttering replace the transition by an -
                 if (i + 1 < timestep.size()) {
                     CounterExampleElement nextElem = timestep.get(i + 1);
-                    if (nextElem.isStutter() && !elem.isStutter()) {
+                    if (nextElem.isStutter() && !elem.isStutter()) {                       
                         lastElem.replace(lastElem.indexOf("["), lastElem.indexOf("]") + 1, "-");
                     }
                 }

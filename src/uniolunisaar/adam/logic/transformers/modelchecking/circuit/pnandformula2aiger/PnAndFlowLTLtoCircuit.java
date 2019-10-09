@@ -113,7 +113,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     if (data.isOutputTransformedNet()) {
                         PNWTTools.savePnwt2PDF(data.getPath(), netMC, true);
                     }
-                    formulaMC = FlowLTLTransformerParallel.createFormula4ModelChecking4CircuitParallel(net, netMC, f);
+                    formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
 //            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
                     break;
                 case SEQUENTIAL:

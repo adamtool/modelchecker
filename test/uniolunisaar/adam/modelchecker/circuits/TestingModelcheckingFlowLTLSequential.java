@@ -71,13 +71,13 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(false);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
-               Logger.getInstance().setVerbose(true);
-        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
-        Logger.getInstance().addMessageStream(LOGGER_ABC_ERR, System.err);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
+//               Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().addMessageStream(LOGGER_ABC_OUT, System.out);
+//        Logger.getInstance().addMessageStream(LOGGER_ABC_ERR, System.err);
     }
 
     @BeforeClass

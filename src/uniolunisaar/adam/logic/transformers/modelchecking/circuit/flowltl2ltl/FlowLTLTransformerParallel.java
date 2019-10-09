@@ -7,21 +7,15 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
-import uniolunisaar.adam.ds.logics.AtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.FormulaBinary;
 import uniolunisaar.adam.ds.logics.FormulaUnary;
-import uniolunisaar.adam.ds.logics.IAtomicProposition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IFlowFormula;
 import uniolunisaar.adam.ds.logics.IFormula;
-import uniolunisaar.adam.ds.logics.IOperatorBinary;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPN;
@@ -37,111 +31,122 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 
-    private static FlowFormula replaceNextInFlowFormulaParallel(PetriNetWithTransits orig, PetriNet net, FlowFormula flowFormula) {
-        ILTLFormula phi = flowFormula.getPhi();
-        return new FlowFormula(replaceNextWithinFlowFormulaParallel(orig, net, phi));
+    @Override
+    ILTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, int nb_ff, boolean scopeEventually) {
+        if (phi.isTransition()) {
+            // It is possible to fire original transition (currently is happening s.th.) until a transition concerning my flow is fired
+            Collection<ILTLFormula> origT = new ArrayList<>();
+            for (Transition t : orig.getTransitions()) {
+                origT.add(new LTLAtomicProposition(t));
+            }
+            Collection<ILTLFormula> mine = new ArrayList<>();
+            for (Transition t : net.getTransitions()) {
+                if (t.getLabel().equals(phi.get()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled
+                    mine.add(new LTLAtomicProposition(t));
+                }
+            }
+            return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(origT, false), LTLOperators.Binary.U, FormulaCreator.bigWedgeOrVeeObject(mine, false));
+        } else if (phi.isPlace()) {
+            String id = phi.get() + TOKENFLOW_SUFFIX_ID;
+            if (!net.containsPlace(id)) {
+                return new LTLConstants.False();
+            }
+            Place p = net.getPlace(id);
+            return new LTLAtomicProposition(p);
+        }
+        return phi;
     }
 
-    private static ILTLFormula replaceNextWithinFlowFormulaParallel(PetriNetWithTransits orig, PetriNet net, ILTLFormula phi) {
-        if (phi instanceof IAtomicProposition) {
-            return phi;
-        } else if (phi instanceof LTLFormula) {
-            return new LTLFormula(replaceNextWithinFlowFormulaParallel(orig, net, ((LTLFormula) phi).getPhi()));
-        } else if (phi instanceof FormulaUnary) {
-            FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi;
-            ILTLFormula subst = replaceNextWithinFlowFormulaParallel(orig, net, castPhi.getPhi());
-            if (subst instanceof LTLFormula && ((LTLFormula) subst).getPhi() instanceof FormulaUnary) {
-                FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
-                if (substCast.getOp() == LTLOperators.Unary.X) {
-                    List<Transition> newTransitions = new ArrayList<>();
-                    for (Place place : orig.getPlaces()) {
-                        if (place.getInitialToken().getValue() > 0 && orig.isInitialTransit(place)) {
-                            String id = INIT_TOKENFLOW_ID + "-" + place.getId();
+    @Override
+    ILTLFormula replaceFormulaUnaryInFlowFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, int nb_ff, boolean scopeEventually) {
+        if (!scopeEventually && phi.getOp() == LTLOperators.Unary.F) {
+            scopeEventually = true;
+        } else if (scopeEventually && phi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
+            scopeEventually = false;
+        }
+        ILTLFormula subst = replaceInFlowFormula(orig, net, phi.getPhi(), nb_ff, scopeEventually);
+        if (subst instanceof LTLFormula && ((LTLFormula) subst).getPhi() instanceof FormulaUnary) {
+            FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
+            if (substCast.getOp() == LTLOperators.Unary.X) {
+                List<Transition> newTransitions = new ArrayList<>();
+                for (Place place : orig.getPlaces()) {
+                    if (place.getInitialToken().getValue() > 0) {
+                        String id = INIT_TOKENFLOW_ID + "-" + place.getId();
+                        if (net.containsTransition(id)) { // checks if initial transit
                             newTransitions.add(net.getTransition(id));
                         }
                     }
-
-                    // all original transitions
-                    Collection<ILTLFormula> elements = new ArrayList<>();
-                    for (Transition t : orig.getTransitions()) {
-                        elements.add(new LTLAtomicProposition(t));
-                    }
-                    // and the new transitions
-                    for (Transition t : newTransitions) {
-                        elements.add(new LTLAtomicProposition(t));
-                    }
-
-                    ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
-                    elements = new ArrayList<>();
-                    // all transitions which are not original or the new ones
-                    for (Transition t : net.getTransitions()) {
-                        if (!orig.containsTransition(t.getId()) || !newTransitions.contains(t)) {
-                            elements.add(new LTLAtomicProposition(t));
-                        }
-                    }
-                    LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
-                    return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
                 }
-            }
-            return new LTLFormula(castPhi.getOp(), subst);
-        } else if (phi instanceof FormulaBinary) {
-            FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula> castPhi = (FormulaBinary<ILTLFormula, LTLOperators.Binary, ILTLFormula>) phi;
-            ILTLFormula subst1 = replaceNextWithinFlowFormulaParallel(orig, net, castPhi.getPhi1());
-            ILTLFormula subst2 = replaceNextWithinFlowFormulaParallel(orig, net, castPhi.getPhi2());
-            return new LTLFormula(subst1, castPhi.getOp(), subst2);
-        }
-        throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
-    }
 
-    private static IFormula replaceNextWithinRunFormulaParallel(PetriNet orig, PetriNet net, IFormula phi) {
-        if (phi instanceof IAtomicProposition) {
-            return phi;
-        } else if (phi instanceof IFlowFormula) {
-            return phi;
-        } else if (phi instanceof RunFormula) {
-            return new RunFormula(replaceNextWithinRunFormulaParallel(orig, net, ((RunFormula) phi).getPhi()));
-        } else if (phi instanceof LTLFormula) {
-            IFormula f = replaceNextWithinRunFormulaParallel(orig, net, ((LTLFormula) phi).getPhi());
-            return new LTLFormula((ILTLFormula) f); // cast no problem since the next is replace by an LTLFormula
-        } else if (phi instanceof FormulaUnary) {
-            FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
-            ILTLFormula substChildPhi = (ILTLFormula) replaceNextWithinRunFormulaParallel(orig, net, castPhi.getPhi()); // since castPhi is of type ILTLFormula this must result an ILTLFormula
-            if (castPhi.getOp() == LTLOperators.Unary.X) {
-                // all init transitions can be skipped
+                // all original transitions
                 Collection<ILTLFormula> elements = new ArrayList<>();
-                for (Transition t : net.getTransitions()) {
-                    if (t.getId().startsWith(INIT_TOKENFLOW_ID)) {
-                        elements.add(new LTLAtomicProposition(t));
-                    }
+                for (Transition t : orig.getTransitions()) {
+                    elements.add(new LTLAtomicProposition(t));
+                }
+                // and the new transitions
+                for (Transition t : newTransitions) {
+                    elements.add(new LTLAtomicProposition(t));
                 }
 
                 ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
                 elements = new ArrayList<>();
-                // all transitions which are original
-                for (Transition t : orig.getTransitions()) {
-                    elements.add(new LTLAtomicProposition(t));
+                // all transitions which are not original or the new ones
+                for (Transition t : net.getTransitions()) {
+                    if (!orig.containsTransition(t.getId()) || !newTransitions.contains(t)) {
+                        elements.add(new LTLAtomicProposition(t));
+                    }
                 }
-                LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, castPhi.getPhi());
-//                ILTLFormula untilSecond =  castPhi.getPhi();
+                LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, phi.getPhi());
                 return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
             }
-            return new LTLFormula(castPhi.getOp(), substChildPhi);
-        } else if (phi instanceof FormulaBinary) {
-            IFormula subst1 = replaceNextWithinRunFormulaParallel(orig, net, ((FormulaBinary) phi).getPhi1());
-            IFormula subst2 = replaceNextWithinRunFormulaParallel(orig, net, ((FormulaBinary) phi).getPhi2());
-            IOperatorBinary op = ((FormulaBinary) phi).getOp();
-            if (phi instanceof ILTLFormula) {
-                return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
-            } else if (phi instanceof IRunFormula) {
-                if (op instanceof RunOperators.Binary) {
-                    return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
-                } else {
-                    return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+        }
+        return new LTLFormula(phi.getOp(), subst);
+    }
+
+    @Override
+    IFormula replaceLTLAtomicPropositionInRunFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, boolean scopeEventually, int nbFlowFormulas) {
+        if (phi.isTransition()) {
+            // in the run part when a t transition should fire, it's ok when any t labeled transition can fire
+            Collection<ILTLFormula> elements = new ArrayList<>();
+            for (Transition t : net.getTransitions()) {
+                if (t.getLabel().equals(phi.get())) {
+                    elements.add(new LTLAtomicProposition(t));
                 }
             }
+            return FormulaCreator.bigWedgeOrVeeObject(elements, false);
         }
-        throw new RuntimeException(
-                "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
+        return phi;
+    }
+
+    @Override
+    ILTLFormula replaceFormulaUnaryInRunFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, boolean scopeEventually, int nbFlowFormulas) {
+        // check if it's in the scope of an eventually
+        if (!scopeEventually && phi.getOp() == LTLOperators.Unary.F) {
+            scopeEventually = true;
+        } else if (scopeEventually && phi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
+            scopeEventually = false;
+        }
+        ILTLFormula substChildPhi = (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
+        if (phi.getOp() == LTLOperators.Unary.X) {
+            // all init transitions can be skipped
+            Collection<ILTLFormula> elements = new ArrayList<>();
+            for (Transition t : net.getTransitions()) {
+                if (t.getId().startsWith(INIT_TOKENFLOW_ID)) {
+                    elements.add(new LTLAtomicProposition(t));
+                }
+            }
+
+            ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+            elements = new ArrayList<>();
+            // all transitions which are original
+            for (Transition t : orig.getTransitions()) {
+                elements.add(new LTLAtomicProposition(t));
+            }
+            LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, phi.getPhi());
+//                ILTLFormula untilSecond =  castPhi.getPhi();
+            return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
+        }
+        return new LTLFormula(phi.getOp(), substChildPhi);
     }
 
     /**
@@ -153,49 +158,20 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public static ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, IRunFormula formula) throws NotConvertableException {
-        // replace the next operator in the run-part
-        IFormula f = replaceNextWithinRunFormulaParallel(orig, net, formula);
+    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
+        int nbFlowFormulas = LogicsTools.getFlowFormulas(formula).size();
 
-        // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
-        // Replace the transitions with the big-or of all accordingly labelled transitions
-        for (Transition transition : orig.getTransitions()) {
-            try {
-                AtomicProposition trans = new LTLAtomicProposition(transition);
-                Collection<ILTLFormula> elements = new ArrayList<>();
-                for (Transition t : net.getTransitions()) {
-                    if (t.getLabel().equals(transition.getId())) {
-                        elements.add(new LTLAtomicProposition(t));
-                    }
-                }
-                f = f.substitute(trans, FormulaCreator.bigWedgeOrVeeObject(elements, false));
-            } catch (NotSubstitutableException ex) {
-                throw new RuntimeException("Cannot substitute the transitions. (Should not happen).", ex);
-            }
-        }
+        // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
+        IFormula f = replaceInRunFormula(orig, net, formula, nbFlowFormulas);
 
+        // %%%%%%%%%%%%%%%%%  REPLACE WITHIN FLOW FORMULA
         List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
         if (flowFormulas.size() > 1) {
             throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
         }
         if (flowFormulas.size() == 1) {
+            FlowFormula flowF = replaceInFlowFormula(orig, net, flowFormulas.get(0), 0);
             try {
-                // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
-                // NOT ANYMORE, do it later because of the next: and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
-//                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
-                FlowFormula flowF = flowFormulas.get(0);
-                // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
-                // Replace the place with the ones belonging to the guessing of the chain
-                for (Place place : orig.getPlaces()) {
-                    if (net.containsNode(place.getId() + TOKENFLOW_SUFFIX_ID)) { // only if the place is part of the subnet                   
-                        AtomicProposition p = new LTLAtomicProposition(place);
-                        AtomicProposition psub = new LTLAtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID));
-                        flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
-                    }
-                }
-
-                // Replace the next operator within the flow formula
-                flowF = replaceNextInFlowFormulaParallel(orig, net, flowF);
 //// VERSION: This version would need an additional forcing of the firing of the first transition (instead of the globally init_tfl)
 ////          in cases where maximality is not stated in the circuit.
 //                //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
@@ -224,7 +200,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 // END VERSION
                 return retF;
             } catch (NotSubstitutableException ex) {
-                throw new RuntimeException("Cannot substitute the places. (Should not happen).", ex);
+                throw new RuntimeException("Cannot substitute. (Should not happen).", ex);
             }
         } else {
             Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);

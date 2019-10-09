@@ -405,8 +405,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
                         LTLOperators.Binary.IMP, ret);
             }
-        }
-
+        }        
         return ret;
     }
 
