@@ -33,7 +33,7 @@ import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.
 import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
 import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
-import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.PARALLEL;
+import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.PARALLEL_INHIBITOR;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
@@ -87,7 +87,7 @@ public class TestingModelcheckingFlowLTLParallel {
     public void initMCSettings() {
         settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -138,7 +138,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -190,7 +190,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // maximality in circuit 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 MAX_INTERLEAVING_IN_CIRCUIT,
                 PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -239,7 +239,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 OUTGOING,
-                PARALLEL,
+                PARALLEL_INHIBITOR,
                 MAX_INTERLEAVING,
                 PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -306,7 +306,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -491,7 +491,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check in circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -829,7 +829,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check interleaving in circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -867,7 +867,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -910,7 +910,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -940,7 +940,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -967,7 +967,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -1002,7 +1002,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        System.out.println(f.toString());
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -1030,7 +1030,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -1079,7 +1079,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -1101,7 +1101,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_NONE,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -1116,7 +1116,7 @@ public class TestingModelcheckingFlowLTLParallel {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = true) // due to time
+    @Test(enabled = true) 
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
@@ -1124,7 +1124,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
@@ -1178,7 +1178,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitLTLMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitLTLMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,

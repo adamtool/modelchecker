@@ -1080,7 +1080,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        Assert.assertNull(ret);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = false) // due to time
     public void redundantFlowExampleFix() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
         RunFormula f = new RunFormula(
@@ -1115,7 +1115,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-    @Test(enabled = false)
+    @Test(enabled = false) // due to time
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);

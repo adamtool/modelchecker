@@ -13,6 +13,7 @@ public class ModelCheckingSettings {
 
     public enum Approach {
         PARALLEL,
+        PARALLEL_INHIBITOR,
         SEQUENTIAL,
         SEQUENTIAL_INHIBITOR
     }

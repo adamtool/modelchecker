@@ -122,7 +122,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
      * flow formula by checking all runs and a run considers one chain.
      *
      * Deprecated since there is a version which handles more then one
-     * FlowFormula and handles the other initialization approach.
+     * FlowFormula and handles the other initialization approach. (this is not true, because I never finished that method)
      *
      * This version is from 19.10.2018 and should be identically to the
      * semantics of createNet4ModelCheckingParallel concerning the special case.
@@ -261,22 +261,20 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                     }
                     Transition tout = out.createTransition(); // create the new transition
                     tout.setLabel(t.getId());
-                    if (net.isStrongFair(t)) {
-                        out.setStrongFair(tout);
-                    }
-                    if (net.isWeakFair(t)) {
-                        out.setWeakFair(tout);
-                    }
+//                    if (net.isStrongFair(t)) { // don't need this, fairness is done in the formula
+//                        out.setStrongFair(tout);
+//                    }
+//                    if (net.isWeakFair(t)) {
+//                        out.setWeakFair(tout);
+//                    }
                     // move the token along the token flow
                     out.createFlow(pl, tout);
-
-                    out.createFlow(tout, pout);
+                    out.createFlow(tout, pout);                    
                     for (Place place : t.getPreset()) { // move the tokens in the original net
                         if (!place.getId().equals(actID)) {// don't add it to the added activation transition
                             out.createFlow(place, tout);
                         }
                     }
-
                     for (Place place : t.getPostset()) {
                         if (!place.getId().equals(actID)) { // don't add it to the added activation transition
                             out.createFlow(tout, place);

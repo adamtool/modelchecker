@@ -26,6 +26,7 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallelInhibitor;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -110,6 +111,14 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
             switch (approach) {
                 case PARALLEL:
                     netMC = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    if (data.isOutputTransformedNet()) {
+                        PNWTTools.savePnwt2PDF(data.getPath(), netMC, true);
+                    }
+                    formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
+//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
+                    break;
+                case PARALLEL_INHIBITOR:
+                    netMC = PnwtAndFlowLTLtoPNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
                     if (data.isOutputTransformedNet()) {
                         PNWTTools.savePnwt2PDF(data.getPath(), netMC, true);
                     }

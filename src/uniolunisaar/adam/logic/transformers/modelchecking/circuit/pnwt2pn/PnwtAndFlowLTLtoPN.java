@@ -75,7 +75,7 @@ public class PnwtAndFlowLTLtoPN {
                 todo.add(p);
             }
         }
-        if (initFirstStep) {
+        if (initFirstStep) { 
             // create the place and transition which choses that a new chain will be created during the processing of the net
             // if there is any // just do it in every case this can subsume the place that no_chain had been chosen.
 //            boolean newFlowCanBeCreated = false;
