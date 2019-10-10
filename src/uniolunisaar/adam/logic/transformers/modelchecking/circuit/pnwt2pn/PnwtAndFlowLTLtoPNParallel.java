@@ -133,6 +133,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
     public static PetriNetWithTransits createNet4ModelCheckingParallelOneFlowFormula(PetriNetWithTransits net) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
         out.setName(net.getName() + "_mc");
+        out.putExtension("parallel", true);// todo: just a quick hack to have the counter example properly printed
         //      INITIALISATION IS NOW DONE IN THE FIRST STEP:
 //           otherwise here was a problem that one could chose 
 //           to consider the chain, when the original net already terminated.

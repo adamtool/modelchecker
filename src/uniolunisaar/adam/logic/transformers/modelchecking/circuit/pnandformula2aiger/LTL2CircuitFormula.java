@@ -125,6 +125,20 @@ public class LTL2CircuitFormula {
                                 LTLOperators.Binary.IMP, formula)
                 );
             }
+            case ERROR_REGISTER: {
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+                ILTLFormula f = new LTLFormula(
+                        new LTLFormula(
+                                LTLOperators.Unary.G,
+                                new LTLFormula(LTLOperators.Unary.NEG, stutterReg)
+                        ));
+
+                return new LTLFormula(
+                        LTLOperators.Unary.X,
+                        new LTLFormula(f,
+                                LTLOperators.Binary.IMP, formula)
+                );
+            }
         }
         throw new RuntimeException("Not for every possibility of stuttering approaches a case is handled. " + stutt + " is missing.");
     }

@@ -28,6 +28,7 @@ public class CounterExampleParser {
     @Deprecated
     public static CounterExample parseCounterExampleStandard(PetriNet net, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
+            boolean isParallel = net.hasExtension("parallel"); // todo: quick hack to have it properly printed
             String cexText = IOUtils.streamToString(inputStream);
 //            Logger.getInstance().addMessage(cexText, true);
             // crop counter example
@@ -60,7 +61,7 @@ public class CounterExampleParser {
 //            Logger.getInstance().addMessage(cropped.toString(), true);
             int timestep = 0;
             while (timestep >= 0) {
-                CounterExampleElement cexe = new CounterExampleElement(timestep, false);
+                CounterExampleElement cexe = new CounterExampleElement(timestep, false, isParallel);
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
@@ -101,6 +102,7 @@ public class CounterExampleParser {
     public static CounterExample parseCounterExampleWithStutteringLatch(AbcSettings settings, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
             PetriNet net = settings.getNet();
+            boolean isParallel = net.hasExtension("parallel"); // todo: quick hack to have it properly printed
             cex.setIsDetailed(settings.isDetailedCEX());
             // start binary coding
             // if it is binary coded get the number of digits
@@ -150,7 +152,7 @@ public class CounterExampleParser {
             // create the counter example
             int timestep = 0;
             while (timestep >= 0) {
-                CounterExampleElement cexe = new CounterExampleElement(timestep, true, digits);
+                CounterExampleElement cexe = new CounterExampleElement(timestep, true, digits, isParallel);
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
@@ -181,7 +183,7 @@ public class CounterExampleParser {
                                         }
                                     } else if (net.containsTransition(id)) {
                                         Transition t = net.getTransition(id);
-                                        if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t)) {
+                                        if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t) || isParallel) {
                                             cexe.add(t);
                                         }
                                     }

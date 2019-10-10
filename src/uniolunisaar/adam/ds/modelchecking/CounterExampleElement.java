@@ -24,19 +24,23 @@ public class CounterExampleElement {
     private boolean initLoop = false;
     private boolean looping = false;
 
+    private boolean isParallel;
+
     // both only for the case that it is binary coded
     private char[] binID = null;
     private int digits;
 
-    public CounterExampleElement(int timestep, boolean withStuttering) {
+    public CounterExampleElement(int timestep, boolean withStuttering, boolean isParallel) {
         this.timestep = timestep;
         this.withStuttering = withStuttering;
+        this.isParallel = isParallel;
     }
 
-    public CounterExampleElement(int timestep, boolean withStuttering, int digits) {
+    public CounterExampleElement(int timestep, boolean withStuttering, int digits, boolean isParallel) {
         this.timestep = timestep;
         this.withStuttering = withStuttering;
         this.digits = digits;
+        this.isParallel = isParallel;
     }
 
     public void add(int binIDChar, char val) {
@@ -133,7 +137,8 @@ public class CounterExampleElement {
         sb.append(" -> [");
         if (binID == null) {
             for (Transition t : transitions) {
-                sb.append(t.getId()).append(", ");
+                String id = (!isDetailed && isParallel) ? t.getLabel() : t.getId();
+                sb.append(id).append(", ");
             }
             if (!transitions.isEmpty()) {
                 sb.setLength(sb.length() - 2);

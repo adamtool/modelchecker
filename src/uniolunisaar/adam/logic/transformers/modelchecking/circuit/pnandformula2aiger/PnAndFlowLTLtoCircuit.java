@@ -71,13 +71,12 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
     public static AigerRenderer createCircuit(PetriNetWithTransits net, RunFormula formula, AdamCircuitFlowLTLMCSettings settings) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
         TransitionSemantics semantics = settings.getSemantics();
-        AdamCircuitLTLMCSettings.Stuttering stuttering = settings.getStuttering();
         AdamCircuitFlowLTLMCStatistics stats = settings.getStatistics();
         AdamCircuitFlowLTLMCOutputData data = settings.getOutputData();
         AdamCircuitFlowLTLMCSettings.Approach approach = settings.getApproach();
         boolean initFirst = settings.isInitFirst();
         Logger.getInstance().addMessage("We create the net '" + net.getName() + "' for the formula '" + formula.toSymbolString() + "'.\n"
-                + " With maximality term: " + maximality + " approach: " + approach + " semantics: " + semantics + " stuttering: " + stuttering
+                + " With maximality term: " + maximality + " approach: " + approach + " semantics: " + semantics
                 + " initialization first step: " + initFirst, true);
 
         // If we have the LTL fragment just use the standard LTLModelchecker

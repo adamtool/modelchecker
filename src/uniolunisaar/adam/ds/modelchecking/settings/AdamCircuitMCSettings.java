@@ -20,7 +20,8 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         REPLACEMENT,
         REPLACEMENT_REGISTER,
         PREFIX,
-        PREFIX_REGISTER
+        PREFIX_REGISTER,
+        ERROR_REGISTER
     }
 
     public enum Maximality {
