@@ -136,10 +136,28 @@ public class PnAndLTLtoCircuit {
                 throw exp;
             }
             if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
-                if (settings.isCodeInputTransitionsBinary()) {
-                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
+                if (settings.getAtomicPropositionType() == AdamCircuitMCSettings.AtomicProps.PLACES_AND_TRANSITIONS) {
+                    if (settings.isCodeInputTransitionsBinary()) {
+                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
+                    } else {
+                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
+                    }
+                } else if (settings.getAtomicPropositionType() == AdamCircuitMCSettings.AtomicProps.PLACES) {
+//                     if (settings.isCodeInputTransitionsBinary()) {
+//                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
+//                    } else {
+//                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
+//                    }
+                    throw new RuntimeException("not yet implemented atomic propositions only places");
+                } else if (settings.getAtomicPropositionType() == AdamCircuitMCSettings.AtomicProps.FIREABILITY) {
+                    if (settings.isCodeInputTransitionsBinary()) {
+                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS_MAX_INTERLEAVING, net);
+                    } else {
+                        throw new RuntimeException("not yet implemented atomic propositions firability without logCod");
+//                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS, net);
+                    }
                 } else {
-                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
+                    throw new RuntimeException("not yet implemented " + settings.getAtomicPropositionType().name());
                 }
             } else {
                 if (settings.isCodeInputTransitionsBinary()) {

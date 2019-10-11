@@ -31,6 +31,12 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         MAX_NONE
     }
 
+    public enum AtomicProps {
+        PLACES_AND_TRANSITIONS,
+        PLACES,
+        FIREABILITY
+    }
+
     private LogicsTools.TransitionSemantics semantics = LogicsTools.TransitionSemantics.OUTGOING;
     private Maximality maximality = Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
@@ -42,6 +48,7 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
     private boolean codeInputTransitionsBinary = true;
 //    private boolean codeInputTransitionsBinary = false;
     private boolean useFormulaFileForMcHyper = true;
+    private AtomicProps atomicPropositionType = AtomicProps.PLACES_AND_TRANSITIONS;
 
     public AdamCircuitMCSettings(D outputData) {
         super(Solver.ADAM_CIRCUIT);
@@ -158,6 +165,14 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
 
     public void setABCPreprocessingCommands(String cmds) {
         abcSettings.setPreProcessing(cmds);
+    }
+
+    public AtomicProps getAtomicPropositionType() {
+        return atomicPropositionType;
+    }
+
+    public void setAtomicPropositionType(AtomicProps atomicPropositionType) {
+        this.atomicPropositionType = atomicPropositionType;
     }
 
 }
