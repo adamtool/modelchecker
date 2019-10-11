@@ -136,34 +136,56 @@ public class PnAndLTLtoCircuit {
                 throw exp;
             }
             if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
-                if (settings.getAtomicPropositionType() == AdamCircuitMCSettings.AtomicProps.PLACES_AND_TRANSITIONS) {
-                    if (settings.isCodeInputTransitionsBinary()) {
-                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
-                    } else {
-                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
-                    }
-                } else if (settings.getAtomicPropositionType() == AdamCircuitMCSettings.AtomicProps.PLACES) {
-//                     if (settings.isCodeInputTransitionsBinary()) {
-//                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
-//                    } else {
-//                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
-//                    }
-                    throw new RuntimeException("not yet implemented atomic propositions only places");
-                } else if (settings.getAtomicPropositionType() == AdamCircuitMCSettings.AtomicProps.FIREABILITY) {
-                    if (settings.isCodeInputTransitionsBinary()) {
-                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS_MAX_INTERLEAVING, net);
-                    } else {
-                        throw new RuntimeException("not yet implemented atomic propositions firability without logCod");
-//                        renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS, net);
-                    }
-                } else {
-                    throw new RuntimeException("not yet implemented " + settings.getAtomicPropositionType().name());
+                switch (settings.getAtomicPropositionType()) {
+                    case PLACES_AND_TRANSITIONS:
+                        if (settings.isCodeInputTransitionsBinary()) {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
+                        } else {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
+                        }
+                        break;
+                    case PLACES:
+                        if (settings.isCodeInputTransitionsBinary()) {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES_BIN_TRANS_MAX_INTERLEAVING, net);
+                        } else {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES_MAX_INTERLEAVING, net);
+                        }
+                        break;
+                    case FIREABILITY:
+                        if (settings.isCodeInputTransitionsBinary()) {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS_MAX_INTERLEAVING, net);
+                        } else {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_MAX_INTERLEAVING, net);
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException("Not yet implemented: " + settings.getAtomicPropositionType().name());
                 }
             } else {
-                if (settings.isCodeInputTransitionsBinary()) {
-                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS, net);
-                } else {
-                    renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
+                switch (settings.getAtomicPropositionType()) {
+                    case PLACES_AND_TRANSITIONS:
+                        if (settings.isCodeInputTransitionsBinary()) {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS, net);
+                        } else {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
+                        }
+                        break;
+                    case PLACES:
+                        if (settings.isCodeInputTransitionsBinary()) {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES_BIN_TRANS, net);
+                        } else {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES, net);
+                        }
+                        break;
+                    case FIREABILITY:
+                        if (settings.isCodeInputTransitionsBinary()) {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS, net);
+                        } else {
+                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY, net);
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException("Not yet implemented: " + settings.getAtomicPropositionType().name());
                 }
             }
         }
