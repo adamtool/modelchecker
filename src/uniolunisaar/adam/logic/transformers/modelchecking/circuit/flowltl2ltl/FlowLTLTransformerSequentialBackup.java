@@ -367,7 +367,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
     public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
-        System.out.println("before "+formula.toString());
+//        System.out.println("before "+formula.toString());
         boolean initFirst = settings.isInitFirst();
         boolean useNext = settings.isUseNextToReplaceXandTransitionsInRunPart();
         int nbFlowFormulas = useNext ? LogicsTools.getFlowFormulas(formula).size()
@@ -559,7 +559,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                         LTLOperators.Binary.IMP, ret);
             }
         }
-        System.out.println("after "+ret.toString());
+//        System.out.println("after "+ret.toString());
         
         return ret;
     }

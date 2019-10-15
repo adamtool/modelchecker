@@ -84,15 +84,56 @@ public class TestingModelcheckingFlowLTLParallel {
     public void initMCSettings() {
 //        settings = { };
         settings = new AdamCircuitFlowLTLMCSettings[]{
-//            TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
-//            TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
-            TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
-            TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
-//            TestModelCheckerTools.mcSettings_Par_N, TestModelCheckerTools.mcSettings_ParI_N
-//            TestModelCheckerTools.mcSettings_Par_IntF,
-//            TestModelCheckerTools.mcSettings_Seq_IntF
-//              TestModelCheckerTools.mcSettings_Par_IntF,  TestModelCheckerTools.mcSettings_ParI_IntF
+            //            TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
+            //            TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
+                        TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
+                        TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
+            //            TestModelCheckerTools.mcSettings_Par_N, TestModelCheckerTools.mcSettings_ParI_N
+//            TestModelCheckerTools.mcSettings_ParI_IntF, //            TestModelCheckerTools.mcSettings_Seq_IntF
+        //              TestModelCheckerTools.mcSettings_Par_IntF,  TestModelCheckerTools.mcSettings_ParI_IntF
         };
+    }
+
+    @Test
+    public void exampleToolPaper() throws Exception {
+        PetriNetWithTransits net = new PetriNetWithTransits("toolPaper");
+        Place in = net.createPlace("in");
+        in.setInitialToken(1);
+        Place out = net.createPlace("out");
+        out.setInitialToken(1);
+        Transition init = net.createTransition("s");
+        Transition t = net.createTransition("t");
+        net.createFlow(init, in);
+        net.createFlow(in, init);
+        net.createFlow(in, t);
+        net.createFlow(t, in);
+        net.createFlow(t, out);
+        net.createFlow(out, t);
+        net.createTransit(out, t, out);
+        net.createTransit(in, t, out);
+        net.createTransit(in, init, in);
+        net.createInitialTransit(init, in);
+        net.setWeakFair(t);
+
+        PNWTTools.savePnwt2PDF(outDir+net.getName(), net, false);
+        
+        String formula = "A F out";
+        RunFormula f = FlowLTLParser.parse(net, formula);
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+        
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
+        settings.setOutputData(data);
+
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
     }
 
     @Test
