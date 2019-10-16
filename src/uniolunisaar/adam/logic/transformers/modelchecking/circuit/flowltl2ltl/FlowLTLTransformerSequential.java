@@ -114,24 +114,8 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     ILTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, int nb_ff, boolean scopeEventually) {
         AtomicProposition atom = (AtomicProposition) phi;
         if (atom.isTransition()) {
-            // if it's in the direct scope of an eventually we don't need the until
-            if (scopeEventually) {
-                return phi;
-            }
-            // All other transitions then those belonging to nb_ff, apart from the next transitions
-            Collection<ILTLFormula> elements = new ArrayList<>();
-            for (Transition t : net.getTransitions()) { // all transitions
-                if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
-                        || // not of the subformula
-                        t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
-                        ) {
-                    elements.add(new LTLAtomicProposition(t));
-                }
-            }
-            ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
-
             // all of my transitions which have the same label as the atomic proposition and are not the next transition
-            elements = new ArrayList<>();
+            Collection<ILTLFormula> elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
                 if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
                         && // the transitions of my subnet
@@ -142,6 +126,22 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 }
             }
             ILTLFormula myTransitions = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+            // if it's in the direct scope of an eventually we don't need the until
+            if (scopeEventually) {
+                return myTransitions;
+            }
+            // All other transitions then those belonging to nb_ff, apart from the next transitions
+            elements = new ArrayList<>();
+            for (Transition t : net.getTransitions()) { // all transitions
+                if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
+                        || // not of the subformula
+                        t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
+                        ) {
+                    elements.add(new LTLAtomicProposition(t));
+                }
+            }
+            ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+
             return new LTLFormula(untilFirst, LTLOperators.Binary.U, myTransitions);
         } else if (atom.isPlace()) {
             String id = atom.get() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
@@ -405,7 +405,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
                         LTLOperators.Binary.IMP, ret);
             }
-        }        
+        }
         return ret;
     }
 

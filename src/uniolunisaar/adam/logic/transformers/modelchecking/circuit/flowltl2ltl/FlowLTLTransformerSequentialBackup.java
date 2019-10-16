@@ -124,7 +124,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
             AtomicProposition atom = (AtomicProposition) phi;
             if (atom.isTransition()) {
                 // if it's in the direct scope of an eventually we don't need the until
-                if (scopeEventually) {
+                if (scopeEventually) { //todo: error here, have to be my trnasitions (the same for next)
                     return phi;
                 }
                 // All other transitions then those belonging to nb_ff, apart from the next transitions

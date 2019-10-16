@@ -34,7 +34,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
     @Override
     ILTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, int nb_ff, boolean scopeEventually) {
         if (phi.isTransition()) {
-            // It is possible to fire original transition (currently is happening s.th.) until a transition concerning my flow is fired
+            // It is possible to fire original transition (concurrently s.th. is happening) until a transition concerning my flow is fired
             Collection<ILTLFormula> origT = new ArrayList<>();
             for (Transition t : orig.getTransitions()) {
                 origT.add(new LTLAtomicProposition(t));
