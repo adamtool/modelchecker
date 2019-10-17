@@ -56,11 +56,11 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         ILTLFormula substChildPhi = replaceInFlowFormula(orig, net, phi.getPhi(), nb_ff, scopeEventually);
         LTLFormula substPhi = new LTLFormula(phi.getOp(), substChildPhi);
         if (phi.getOp() == LTLOperators.Unary.X) {
-            // if it's under the scope of eventually, this means the last temporal operator Box or Diamond is a Diamond
-            // just delete the next, meaning just return the child
-            if (scopeEventually) { // scope is still the old one because of phi.getOP == X
-                return substChildPhi;
-            }
+//            // if it's under the scope of eventually, this means the last temporal operator Box or Diamond is a Diamond
+//            // just delete the next, meaning just return the child
+//            if (scopeEventually) { // scope is still the old one because of phi.getOP == X
+//                return substChildPhi;
+//            } // don't do this, e.g. F( p -> X q)
             // if it's not in the last scope of an eventually, then replace it according to the document
             // All other transitions then those belonging to nb_ff, apart from the next transitions
             Collection<ILTLFormula> elements = new ArrayList<>();
@@ -129,7 +129,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             // if it's in the direct scope of an eventually we don't need the until
             if (scopeEventually) {
                 return myTransitions;
-            }
+            } 
             // All other transitions then those belonging to nb_ff, apart from the next transitions
             elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) { // all transitions
@@ -170,9 +170,9 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         if (castPhi.getOp() == LTLOperators.Unary.X) {
             // if it's under the scope of eventually, this means the last temporal operator Box or Diamond is a Diamond
             // just delete the next, meaning just return the child
-            if (scopeEventually) {
-                return substChildPhi;
-            }
+//            if (scopeEventually) {
+//                return substChildPhi;
+//            } this is not true F p -> X q, direct would work F X = F
             if (nbFlowFormulas > 0) {
                 ILTLFormula retPhi = substChildPhi;
                 for (int i = 0; i < nbFlowFormulas; i++) {
@@ -214,7 +214,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     IFormula replaceLTLAtomicPropositionInRunFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, boolean scopeEventually, int nbFlowFormulas) {
         LTLAtomicProposition atom = (LTLAtomicProposition) phi;
         if (atom.isTransition()) {
-            // if it's in the direct scope of an eventually we don't need the until
+//             if it's in the direct scope of an eventually we don't need the until
             if (scopeEventually) {
                 return phi;
             }
