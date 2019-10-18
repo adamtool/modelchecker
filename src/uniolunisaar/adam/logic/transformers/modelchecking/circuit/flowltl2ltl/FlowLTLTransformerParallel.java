@@ -47,7 +47,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
             }
             return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(origT, false), LTLOperators.Binary.U, FormulaCreator.bigWedgeOrVeeObject(mine, false));
         } else if (phi.isPlace()) {
-            String id = phi.get() + TOKENFLOW_SUFFIX_ID;
+            String id = phi.get() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
             if (!net.containsPlace(id)) {
                 return new LTLConstants.False();
             }
@@ -149,8 +149,48 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         return new LTLFormula(phi.getOp(), substChildPhi);
     }
 
+    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
+        int nbFlowFormulas = LogicsTools.getFlowFormulas(formula).size();
+        if (nbFlowFormulas == 0) {
+            Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
+            return LogicsTools.convert(formula);
+        }
+
+        // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
+        IFormula f = replaceInRunFormula(orig, net, formula, nbFlowFormulas);
+        // %%%%%%%%%%%%%%%%%  REPLACE WITHIN FLOW FORMULA
+        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        for (int i = 0; i < flowFormulas.size(); i++) {
+            FlowFormula flowFormula = flowFormulas.get(i);
+            flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
+            try {
+//                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID + "_" + i));
+                LTLAtomicProposition newChains = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "_" + i));
+
+                //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
+                //(init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)   
+                f = f.substitute(flowFormulas.get(i), new RunFormula(new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.G, newChains),
+                        LTLOperators.Binary.OR,
+                        new LTLFormula(newChains, LTLOperators.Binary.U,
+                                // the new chain starts with a transition which has to be skipped
+                                // so we really have to be in the last step where newChains hold
+                                new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, newChains), LTLOperators.Binary.AND, flowFormula.getPhi())))));
+            } catch (NotSubstitutableException ex) {
+                throw new RuntimeException("Cannot substitute. (Should not happen).", ex);
+            }
+        }
+        ILTLFormula retF = LogicsTools.convert(f);
+        //INITPLACES: should skip the first init step (since we cannot force that the first step is really done (for MAX=NONE), we omit those runs)
+        //              so only consider the runs where in the next step init not holds
+        return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(net.getPlace(INIT_TOKENFLOW_ID + "_0")), LTLOperators.Binary.OR, retF));
+    }
+
     /**
      * This is only done for ONE flow formula
+     *
+     * Check if this earlier implemented special case has any advantages
+     * compared to the general case!
      *
      * @param orig
      * @param net
@@ -158,7 +198,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
+    public ILTLFormula createFormula4ModelChecking4CircuitParallelOneFlowFormula(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowFormulas(formula).size();
 
         // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
@@ -186,12 +226,15 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 //                retF = new LTLFormula(LTLOperators.Unary.X, retF);
 //// END VERSION
 // VERSION: here we only consider runs where the initialization had been done
-                //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
-                ILTLFormula init = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID)));
+                //INITPLACES: it is also OK to chose to consider newly created chains, but newer do so (init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)               
+                ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID)));
                 f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
-                        new LTLFormula(LTLOperators.Unary.G, init),
+                        new LTLFormula(LTLOperators.Unary.G, newTokenFlow),
                         LTLOperators.Binary.OR,
-                        new LTLFormula(init, LTLOperators.Binary.U, flowF.getPhi()))));
+                        new LTLFormula(newTokenFlow, LTLOperators.Binary.U,
+                                // the new chain starts with a transition which has to be skipped
+                                // so we really have to be in the last step where newChains hold                                
+                                new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, newTokenFlow), LTLOperators.Binary.AND, flowF.getPhi())))));
                 ILTLFormula retF = LogicsTools.convert(f);
                 //INITPLACES: should skip the first init step (since we cannot force that the first step is really done, we omit those runs)
                 //              so only consider the runs where in the next step init not holds

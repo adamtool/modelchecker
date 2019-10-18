@@ -31,7 +31,7 @@ import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
  * @author Manuel Gieseking
  */
 public class TestModelCheckerTools {
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_Seq_N = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.SEQUENTIAL,
@@ -41,7 +41,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_Seq_IntF = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.SEQUENTIAL,
@@ -51,7 +51,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_Seq_IntC = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.SEQUENTIAL,
@@ -61,7 +61,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_SeqI_N = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.SEQUENTIAL,
@@ -71,7 +71,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_SeqI_IntF = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
@@ -81,7 +81,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_SeqI_IntC = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
@@ -91,7 +91,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_Par_N = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.PARALLEL,
@@ -101,18 +101,18 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_Par_IntF = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.PARALLEL,
             Maximality.MAX_INTERLEAVING,
             AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
-//            AdamCircuitMCSettings.Stuttering.ERROR_REGISTER,
+            //            AdamCircuitMCSettings.Stuttering.ERROR_REGISTER,
             AigerRenderer.OptimizationsSystem.NONE,
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_Par_IntC = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.PARALLEL,
@@ -122,7 +122,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_ParI_N = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
@@ -132,18 +132,18 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_ParI_IntF = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
             Maximality.MAX_INTERLEAVING,
-//            AdamCircuitMCSettings.Stuttering.ERROR_REGISTER,
+            //            AdamCircuitMCSettings.Stuttering.ERROR_REGISTER,
             AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
             AigerRenderer.OptimizationsSystem.NONE,
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static final AdamCircuitFlowLTLMCSettings mcSettings_ParI_IntC = new AdamCircuitFlowLTLMCSettings(
             LogicsTools.TransitionSemantics.OUTGOING,
             ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
@@ -153,7 +153,7 @@ public class TestModelCheckerTools {
             AigerRenderer.OptimizationsComplete.NONE,
             true,
             Abc.VerificationAlgo.IC3);
-    
+
     public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunFormula f, ModelCheckingResult.Satisfied expectedResult, AdamCircuitFlowLTLMCOutputData data, AdamCircuitFlowLTLMCSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         int i = 0;
         for (AdamCircuitFlowLTLMCSettings setting : settings) {
@@ -162,13 +162,13 @@ public class TestModelCheckerTools {
             checkFlowLTLFormulaOneSetting(pnwt, f, expectedResult, setting);
         }
     }
-    
+
     public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         for (ModelCheckingSettings setting : settings) {
             checkFlowLTLFormulaOneSetting(pnwt, f, expectedResult, setting);
         }
     }
-    
+
     private static void checkFlowLTLFormulaOneSetting(PetriNetWithTransits pnwt, RunFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings setting) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(setting);
         ModelCheckingResult ret = mc.check(pnwt, f);
@@ -177,28 +177,28 @@ public class TestModelCheckerTools {
             Logger.getInstance().addMessage(ret.getCex().toString());
         }
     }
-    
+
     public static void testModelCheckerFlowLTL(PetriNetWithTransits net, String formula, String path, boolean resMaxInterleaving, boolean resMaxParallel) throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         testModelCheckerFlowLTL(net, FlowLTLParser.parse(net, formula), path, resMaxInterleaving, resMaxParallel);
     }
-    
+
     public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunFormula formula, String path, boolean resMaxInterleaving, boolean resMaxParallel) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         testModelCheckerFlowLTL(net, formula, path, Maximality.MAX_INTERLEAVING, resMaxInterleaving);
         testModelCheckerFlowLTL(net, formula, path, Maximality.MAX_CONCURRENT, resMaxParallel);
     }
-    
+
     public static void testModelCheckerFlowLTL(PetriNetWithTransits net, String formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         testModelCheckerFlowLTL(net, FlowLTLParser.parse(net, formula), path, max, result);
     }
-    
+
     public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunFormula formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings();
         settings.setMaximality(max);
-        
+
         ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
         ModelCheckingResult check;
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(path, false, false, true);
-        
+
         settings.setOutputData(data);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
 
@@ -223,25 +223,25 @@ public class TestModelCheckerTools {
         check = mc.check(net, formula);
         Assert.assertEquals(check.getSatisfied(), sat);
     }
-    
+
     public static void testModelCheckerLTL(PetriNetWithTransits net, String formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws ParseException, InterruptedException, IOException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         testModelCheckerLTL(net, (ILTLFormula) FlowLTLParser.parse(net, formula), path, resMaxStandard, resMaxReisig);
     }
-    
+
     public static void testModelCheckerLTL(PetriNetWithTransits net, ILTLFormula formula, String path, boolean resMaxStandard, boolean resMaxReisig) throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
         testModelCheckerLTL(net, formula, path, Maximality.MAX_INTERLEAVING, resMaxStandard);
         testModelCheckerLTL(net, formula, path, Maximality.MAX_CONCURRENT, resMaxReisig);
     }
-    
+
     public static void testModelCheckerLTL(PetriNetWithTransits net, String formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         testModelCheckerLTL(net, (ILTLFormula) FlowLTLParser.parse(net, formula), path, max, result);
     }
-    
+
     public static void testModelCheckerLTL(PetriNetWithTransits net, ILTLFormula formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, NotSubstitutableException, ParseException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings();
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         settings.setMaximality(max);
-        
+
         ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
         ModelCheckingResult check;
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(path, false, false, true);

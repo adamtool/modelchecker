@@ -9,13 +9,8 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Token;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import static uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPN.createOriginalPartOfTheNet;
-import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -23,98 +18,97 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
 
-    /**
-     * Fairness must be stated within the formula.
-     *
-     * Not yet finished, other algorithms are more urgent :$.
-     *
-     * @param orig
-     * @param formula
-     * @param initFirstStep
-     * @return
-     */
-    public static PetriNetWithTransits createNet4ModelCheckingParallel(PetriNetWithTransits orig, IRunFormula formula, boolean initFirstStep) {
-        PetriNetWithTransits out = createOriginalPartOfTheNet(orig, initFirstStep);
-
-        if (initFirstStep) { // delete the initial marking if init
-            for (Place p : out.getPlaces()) {
-                if (p.getInitialToken().getValue() > 0) {
-                    p.setInitialToken(0);
-                }
-            }
-        }
-
-        // Add to each original transition a place such that we can disable the transitions
-        for (Transition t : orig.getTransitions()) {
-            if (!orig.getTransits(t).isEmpty()) { // only for those which have tokenflows
-                Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
-                act.setInitialToken(1);
-            }
-        }
-
-        // for every original transition add a self dependency to the activation place
-        for (Transition t : orig.getTransitions()) {
-            Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId());
-            out.createFlow(act, t);
-            out.createFlow(t, act);
-        }
-
-        // for all subformulas
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
-        if (flowFormulas.isEmpty()) {
-            // should not really be used, since the normal model checking should be used in these cases
-            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."
-                    + " The standard LTL model checker should be used.", false);
-
-            return out;
-        }
-        int[] indices = new int[flowFormulas.size()];
-        for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
-            // adds the subnet which only creates places and copies of transitions for each flow
-            addSubFlowFormulaNet(orig, out, nb_ff, initFirstStep);
-            indices[nb_ff] = nb_ff;
-        }
-        // add the power set of for all transitions which move the token flow
-        ArrayList<ArrayList<Integer>> powerSet = new ArrayList<>();
-        powerSet(indices, 0, new ArrayList<>(), powerSet);
-        for (Transition t : out.getTransitions()) {
-            if (!orig.containsNode(t)) {
-                for (ArrayList<Integer> set : powerSet) {
-                    if (set.isEmpty()) { // skip the empty set
-                        continue;
-                    }
-                    if (set.size() == 1) { // the case that the transition had already been created by addSubFlowFormulaNet
-                        if (orig.containsTransition(t.getLabel())) { // it is not the additional init transitions
-                            // add the original pre- and postset                        
-                            Transition torig = orig.getTransition(t.getLabel());
-                            for (Place place : torig.getPreset()) {
-                                out.createFlow(place, t);
-                            }
-                            for (Place place : torig.getPostset()) {
-                                out.createFlow(t, place);
-                            }
-
-                        } else {
-                            // todo do the stuff for init
-                        }
-                    }
-                }
-            }
-        }
-        return out;
-    }
-
-    private static void powerSet(int[] flowFormulaIndices, int index, ArrayList<Integer> used, ArrayList<ArrayList<Integer>> powerSet) {
-        if (index == flowFormulaIndices.length) {
-            powerSet.add(used);
-        } else {
-            powerSet(flowFormulaIndices, index + 1, used, powerSet);
-            ArrayList<Integer> set = new ArrayList<>(used);
-            set.add(flowFormulaIndices[index]);
-            powerSet(flowFormulaIndices, index + 1, set, powerSet);
-        }
-    }
-
+//    /**
+//     * Fairness must be stated within the formula.
+//     *
+//     * Not yet finished, other algorithms are more urgent :$.
+//     *
+//     * @param orig
+//     * @param formula
+//     * @param initFirstStep
+//     * @return
+//     */
+//    public static PetriNetWithTransits createNet4ModelCheckingParallel(PetriNetWithTransits orig, IRunFormula formula, boolean initFirstStep) {
+//        PetriNetWithTransits out = createOriginalPartOfTheNet(orig, initFirstStep);
+//
+//        if (initFirstStep) { // delete the initial marking if init
+//            for (Place p : out.getPlaces()) {
+//                if (p.getInitialToken().getValue() > 0) {
+//                    p.setInitialToken(0);
+//                }
+//            }
+//        }
+//
+//        // Add to each original transition a place such that we can disable the transitions
+//        for (Transition t : orig.getTransitions()) {
+//            if (!orig.getTransits(t).isEmpty()) { // only for those which have tokenflows
+//                Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+//                act.setInitialToken(1);
+//            }
+//        }
+//
+//        // for every original transition add a self dependency to the activation place
+//        for (Transition t : orig.getTransitions()) {
+//            Place act = out.getPlace(ACTIVATION_PREFIX_ID + t.getId());
+//            out.createFlow(act, t);
+//            out.createFlow(t, act);
+//        }
+//
+//        // for all subformulas
+//        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+//        if (flowFormulas.isEmpty()) {
+//            // should not really be used, since the normal model checking should be used in these cases
+//            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."
+//                    + " The standard LTL model checker should be used.", false);
+//
+//            return out;
+//        }
+//        int[] indices = new int[flowFormulas.size()];
+//        for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
+//            // adds the subnet which only creates places and copies of transitions for each flow
+//            addSubFlowFormulaNet(orig, out, nb_ff, initFirstStep);
+//            indices[nb_ff] = nb_ff;
+//        }
+//        // add the power set of for all transitions which move the token flow
+//        ArrayList<ArrayList<Integer>> powerSet = new ArrayList<>();
+//        powerSet(indices, 0, new ArrayList<>(), powerSet);
+//        for (Transition t : out.getTransitions()) {
+//            if (!orig.containsNode(t)) {
+//                for (ArrayList<Integer> set : powerSet) {
+//                    if (set.isEmpty()) { // skip the empty set
+//                        continue;
+//                    }
+//                    if (set.size() == 1) { // the case that the transition had already been created by addSubFlowFormulaNet
+//                        if (orig.containsTransition(t.getLabel())) { // it is not the additional init transitions
+//                            // add the original pre- and postset                        
+//                            Transition torig = orig.getTransition(t.getLabel());
+//                            for (Place place : torig.getPreset()) {
+//                                out.createFlow(place, t);
+//                            }
+//                            for (Place place : torig.getPostset()) {
+//                                out.createFlow(t, place);
+//                            }
+//
+//                        } else {
+//                            // todo do the stuff for init
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return out;
+//    }
+//
+//    private static void powerSet(int[] flowFormulaIndices, int index, ArrayList<Integer> used, ArrayList<ArrayList<Integer>> powerSet) {
+//        if (index == flowFormulaIndices.length) {
+//            powerSet.add(used);
+//        } else {
+//            powerSet(flowFormulaIndices, index + 1, used, powerSet);
+//            ArrayList<Integer> set = new ArrayList<>(used);
+//            set.add(flowFormulaIndices[index]);
+//            powerSet(flowFormulaIndices, index + 1, set, powerSet);
+//        }
+//    }
     /**
      * Only allows for checking one FlowFormula.
      *
@@ -122,7 +116,8 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
      * flow formula by checking all runs and a run considers one chain.
      *
      * Deprecated since there is a version which handles more then one
-     * FlowFormula and handles the other initialization approach. (this is not true, because I never finished that method)
+     * FlowFormula and handles the other initialization approach. (this is not
+     * true, because I never finished that method)
      *
      * This version is from 19.10.2018 and should be identically to the
      * semantics of createNet4ModelCheckingParallel concerning the special case.
@@ -166,16 +161,18 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
         }
         List<Place> todo = new ArrayList<>();
         // add Place for the beginning of the guessed chain
-        Place init = out.createPlace(INIT_TOKENFLOW_ID);
+        Place init = out.createPlace(INIT_TOKENFLOW_ID + "_0");
         init.setInitialToken(1);
+        out.setPartition(init, 1);
         // Add places which create a new token flow
         // via initial places
         for (Place place : net.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
-                Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID);
+                Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "_0");
+                out.setPartition(p, 1);
                 todo.add(p);
                 out.setOrigID(p, place.getId());
-                Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId());
+                Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId() + "_0");
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 // Deactivate all original postset transitions which continue the flow
@@ -195,8 +192,9 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
         //          this is necesarry since otherwise only adding a transition activating the 
         //          original initial marking would yield that still the chosing of a transition
         //          for an initial transit marked place could be chosen after the first step
-        Place newTransitByTransition = out.createPlace(NEW_TOKENFLOW_ID);
-        Transition initTransitByTransition = out.createTransition(INIT_TOKENFLOW_ID + "-new");
+        Place newTransitByTransition = out.createPlace(NEW_TOKENFLOW_ID + "_0");
+        out.setPartition(newTransitByTransition, 1);
+        Transition initTransitByTransition = out.createTransition(INIT_TOKENFLOW_ID + "-new" + "_0");
         out.createFlow(init, initTransitByTransition);
         out.createFlow(initTransitByTransition, newTransitByTransition);
         for (Place place1 : origInitMarking) {
@@ -209,10 +207,11 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                 continue;
             }
             for (Place post : tfl.getPostset()) { // for all token flows which are created during the game
-                String id = post.getId() + TOKENFLOW_SUFFIX_ID;
+                String id = post.getId() + TOKENFLOW_SUFFIX_ID + "_0";
                 Place p;
                 if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                     p = out.createPlace(id);
+                    out.setPartition(p, 1);
                     todo.add(p);
                     out.setOrigID(p, post.getId());
                 } else {
@@ -251,10 +250,11 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                 String actID = ACTIVATION_PREFIX_ID + t.getId();
 
                 for (Place post : tfl.getPostset()) {
-                    String id = post.getId() + TOKENFLOW_SUFFIX_ID;
+                    String id = post.getId() + TOKENFLOW_SUFFIX_ID + "_0";
                     Place pout;
                     if (!out.containsPlace(id)) { // create a new one if not already existent
                         pout = out.createPlace(id);
+                        out.setPartition(pout, 1);
                         todo.add(pout);
                         out.setOrigID(pout, post.getId());
                     } else {
@@ -270,7 +270,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
 //                    }
                     // move the token along the token flow
                     out.createFlow(pl, tout);
-                    out.createFlow(tout, pout);                    
+                    out.createFlow(tout, pout);
                     for (Place place : t.getPreset()) { // move the tokens in the original net
                         if (!place.getId().equals(actID)) {// don't add it to the added activation transition
                             out.createFlow(place, tout);

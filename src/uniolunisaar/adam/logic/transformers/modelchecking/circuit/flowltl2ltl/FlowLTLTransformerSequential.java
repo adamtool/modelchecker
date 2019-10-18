@@ -129,7 +129,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             // if it's in the direct scope of an eventually we don't need the until
             if (scopeEventually) {
                 return myTransitions;
-            } 
+            }
             // All other transitions then those belonging to nb_ff, apart from the next transitions
             elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) { // all transitions
@@ -285,7 +285,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                 if (!eventually) { // the whole flowformula is not in the scope of an eventually, we have to skip as long as the new chain is created
                     // all transition starting a flow
                     if (!net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i).getPostset().isEmpty()) { // only if new chains are created during the game
-//                 // %%% OLD VERSION       
+//                 // %%% OLD VERSION       (attention here I don't use the 'U not new chain and phi' to ensure that the first transition is not considered of a newly created chain, check if needed here)
                         if (settings.isNewChainsBySkippingTransitions()) {
                             // %%%%%%%%%%%%%%% OLD AND MORE EXPENSIVE VERSION: we skip all other transition than those which newly starts a chain, only in the next state the formula must hold
                             List<ILTLFormula> elements = new ArrayList<>();
@@ -310,7 +310,9 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 //               //  %%% NEW VERSION: We skip as long as no transition creating a new chain has been token by this subnet
                             skipTillActiveChain = new LTLFormula(
                                     new LTLFormula(newChains, LTLOperators.Binary.OR, init),
-                                    LTLOperators.Binary.U, flowFormula.getPhi());
+                                    LTLOperators.Binary.U,
+                                    // the new chain starts with a transition which has to be skipped (the next)                                    
+                                    new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, newChains), LTLOperators.Binary.AND, flowFormula.getPhi()));
                         }
                     }
                 }

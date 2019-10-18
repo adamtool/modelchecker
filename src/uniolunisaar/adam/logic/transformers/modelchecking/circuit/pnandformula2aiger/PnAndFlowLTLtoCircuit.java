@@ -83,7 +83,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
         List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
         if (flowFormulas.isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula.toSymbolString() + "'. Thus, we use the standard model checking algorithm for LTL.");
-            return PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, formula.toLTLFormula(), settings);
+            return PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, LogicsTools.convert(formula), settings);
         }
 
         // Add Fairness
@@ -109,20 +109,53 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
         if (null != approach) {
             switch (approach) {
                 case PARALLEL:
+                    if (flowFormulas.size() > 1) {
+                        throw new NotConvertableException("The parallel approach (without inhibitor arcs) is not implemented for more than one flow subformula!. Please use another approach.");
+                    }
                     netMC = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
                     if (data.isOutputTransformedNet()) {
-                        PNWTTools.savePnwt2PDF(data.getPath(), netMC, true);
+                        // color all original places
+                        for (Place p : netMC.getPlaces()) {
+                            if (!netMC.hasPartition(p)) {
+                                netMC.setPartition(p, 0);
+                            }
+                        }
+                        try {
+                            PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
+                        } catch (RenderException | FileNotFoundException ex) {
+                        }
+                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
-                    formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
-//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
+                    if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f);
+                    } else { // currently cannot occur
+                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
+                    }
                     break;
                 case PARALLEL_INHIBITOR:
-                    netMC = PnwtAndFlowLTLtoPNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
-                    if (data.isOutputTransformedNet()) {
-                        PNWTTools.savePnwt2PDF(data.getPath(), netMC, true);
+                    if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                        netMC = PnwtAndFlowLTLtoPNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    } else {
+                        netMC = PnwtAndFlowLTLtoPNParallelInhibitor.createNet4ModelCheckingParallel(net, f);
                     }
-                    formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
-//            Logger.getInstance().addMessage("Checking the net '" + gameMC.getName() + "' for the formula '" + formulaMC.toSymbolString() + "'.", false);
+                    if (data.isOutputTransformedNet()) {
+                        // color all original places
+                        for (Place p : netMC.getPlaces()) {
+                            if (!netMC.hasPartition(p)) {
+                                netMC.setPartition(p, 0);
+                            }
+                        }
+                        try {
+                            PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
+                        } catch (RenderException | FileNotFoundException ex) {
+                        }
+                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
+                    }
+                    if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f);
+                    } else {
+                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
+                    }
                     break;
                 case SEQUENTIAL:
                     netMC = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, f, initFirst);
@@ -137,7 +170,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                             PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
                         } catch (RenderException | FileNotFoundException ex) {
                         }
-                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size());
+                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
                     formulaMC = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
 //                    formulaMC = FlowLTLTransformerSequentialBackup.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
@@ -155,7 +188,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                             PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
                         } catch (RenderException | FileNotFoundException ex) {
                         }
-                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size());
+                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
                     formulaMC = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
 //                    formulaMC = FlowLTLTransformerSequentialBackup.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);

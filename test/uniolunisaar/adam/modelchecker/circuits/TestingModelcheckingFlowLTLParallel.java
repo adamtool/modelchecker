@@ -59,11 +59,11 @@ public class TestingModelcheckingFlowLTLParallel {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().setVerbose(false);
-        Logger.getInstance().setShortMessageStream(null);
-        Logger.getInstance().setVerboseMessageStream(null);
-        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().setVerbose(false);
+//        Logger.getInstance().setShortMessageStream(null);
+//        Logger.getInstance().setVerboseMessageStream(null);
+//        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -84,12 +84,13 @@ public class TestingModelcheckingFlowLTLParallel {
     public void initMCSettings() {
 //        settings = { };
         settings = new AdamCircuitFlowLTLMCSettings[]{
-            //            TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
-            //            TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
-                        TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
-                        TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
+                        TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
+                        TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
+//                                    TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
+//                                    TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
             //            TestModelCheckerTools.mcSettings_Par_N, TestModelCheckerTools.mcSettings_ParI_N
-//            TestModelCheckerTools.mcSettings_ParI_IntF, //            TestModelCheckerTools.mcSettings_Seq_IntF
+//            TestModelCheckerTools.mcSettings_ParI_IntC, //            TestModelCheckerTools.mcSettings_Seq_IntF
+//                                    TestModelCheckerTools.mcSettings_SeqI_IntC, //            TestModelCheckerTools.mcSettings_Seq_IntF
         //              TestModelCheckerTools.mcSettings_Par_IntF,  TestModelCheckerTools.mcSettings_ParI_IntF
         };
     }
@@ -115,8 +116,8 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createInitialTransit(init, in);
         net.setWeakFair(t);
 
-        PNWTTools.savePnwt2PDF(outDir+net.getName(), net, false);
-        
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
+
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
 
@@ -129,11 +130,112 @@ public class TestingModelcheckingFlowLTLParallel {
                 AigerRenderer.OptimizationsComplete.NONE,
                 true,
                 VerificationAlgo.IC3);
-        
+
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
         settings.setOutputData(data);
 
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
+    }
+
+    @Test
+    public void testSeveralSubformulas() throws Exception {
+        PetriNetWithTransits net = new PetriNetWithTransits("serveralSub");
+        Place init = net.createPlace("init");
+        init.setInitialToken(1);
+
+        ModelCheckerFlowLTL mc;
+        ModelCheckingResult ret;
+
+        FlowFormula flowTrue = new FlowFormula(new LTLConstants.True());
+        FlowFormula flowFalse = new FlowFormula(new LTLConstants.False());
+
+        RunFormula f1 = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, new RunFormula(flowTrue, RunOperators.Binary.OR, flowFalse));
+
+        // show mcNet
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName(), false, true, true);
+//        settings.setOutputData(data);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f1, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        RunFormula f2 = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, new RunFormula(flowTrue, RunOperators.Binary.AND, flowFalse));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f2, ModelCheckingResult.Satisfied.TRUE, settings);
+        net.setInitialTransit(init);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f1, ModelCheckingResult.Satisfied.TRUE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f2, ModelCheckingResult.Satisfied.FALSE, settings);
+
+        // net extension
+        Place init2 = net.createPlace("init2");
+        init2.setInitialToken(1);
+        net.setInitialTransit(init2);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f1, ModelCheckingResult.Satisfied.TRUE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f2, ModelCheckingResult.Satisfied.FALSE, settings);
+
+        LTLAtomicProposition fInit1 = new LTLAtomicProposition(init);
+        LTLAtomicProposition fInit2 = new LTLAtomicProposition(init2);
+        RunFormula f3 = new RunFormula(fInit1, RunOperators.Binary.OR, fInit2);
+        RunFormula f4 = new RunFormula(fInit1, RunOperators.Binary.AND, fInit2);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f3, ModelCheckingResult.Satisfied.TRUE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f4, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        FlowFormula flowInit1 = new FlowFormula(fInit1);
+        FlowFormula flowInit2 = new FlowFormula(fInit2);
+
+        RunFormula f5 = new RunFormula(flowInit1, RunOperators.Binary.OR, flowInit2);
+        RunFormula f6 = new RunFormula(flowInit1, RunOperators.Binary.AND, flowInit2);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f6, ModelCheckingResult.Satisfied.FALSE, data, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f5, ModelCheckingResult.Satisfied.FALSE, settings);
+
+        RunFormula f7 = new RunFormula(new FlowFormula(new LTLFormula(fInit1, LTLOperators.Binary.AND, fInit2)));
+        RunFormula f8 = new RunFormula(new FlowFormula(new LTLFormula(fInit1, LTLOperators.Binary.OR, fInit2)));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f7, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f8, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        // net extension
+        Place out1 = net.createPlace("out1");
+        Transition t = net.createTransition();
+        net.createFlow(init, t);
+        net.createFlow(t, out1);
+        net.createTransit(init, t, out1);
+
+        LTLAtomicProposition fOut1 = new LTLAtomicProposition(out1);
+        LTLAtomicProposition ft = new LTLAtomicProposition(t);
+
+        RunFormula f9 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.AND, fInit2)));
+        RunFormula f10 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, fInit2)));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f9, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f10, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        RunFormula f11 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.AND, fInit2))); // A (t AND init2)
+        RunFormula f12 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.OR, fInit2)));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f11, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f12, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        // net extension
+        net.createInitialTransit(t, out1);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f7, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f8, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f9, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f10, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        // net extension
+        Place out2 = net.createPlace("out2");
+        Transition t2 = net.createTransition();
+        net.createFlow(init2, t2);
+        net.createFlow(t2, out2);
+        net.createTransit(init2, t2, out2);
+        PNWTTools.savePnwt2PDF(outDir+net.getName()+"_net", net, false);
+
+        LTLAtomicProposition fOut2 = new LTLAtomicProposition(out2);
+
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f7, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f8, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f9, ModelCheckingResult.Satisfied.FALSE, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f10, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        RunFormula f13 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, fOut2))));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f13, ModelCheckingResult.Satisfied.TRUE, settings);
+        
+        RunFormula f14 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.OR, new LTLAtomicProposition(t2))));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f14, ModelCheckingResult.Satisfied.FALSE, settings);
     }
 
     @Test
@@ -152,6 +254,11 @@ public class TestingModelcheckingFlowLTLParallel {
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName(), false, true, true);
 //        settings.setOutputData(data);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
+
+        net.setInitialTransit(init);
+        RunFormula f2 = new RunFormula(new FlowFormula(new LTLAtomicProposition(init)));
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f2, ModelCheckingResult.Satisfied.TRUE, settings);
+
     }
 
     @Test(enabled = true)
@@ -235,7 +342,7 @@ public class TestingModelcheckingFlowLTLParallel {
                 true,
                 VerificationAlgo.IC3);
         AdamCircuitFlowLTLMCStatistics statsInCircuit = new AdamCircuitFlowLTLMCStatistics();
-        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
         settings.setOutputData(dataInCircuit);
         settings.setStatistics(statsInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
@@ -246,7 +353,7 @@ public class TestingModelcheckingFlowLTLParallel {
         AdamCircuitFlowLTLMCStatistics statsInFormula = new AdamCircuitFlowLTLMCStatistics();
         settings.setMaximality(Maximality.MAX_INTERLEAVING);
 
-        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
         settings.setOutputData(dataInFormula);
         settings.setStatistics(statsInFormula);
         mc = new ModelCheckerFlowLTL(settings);
@@ -319,7 +426,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName()+"_net", net, false);
 
         RunFormula formula;
         String name;
@@ -332,7 +439,7 @@ public class TestingModelcheckingFlowLTLParallel {
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 
 //        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-//        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outDir + name + "_init", false, true, true);
 //
 //        // check in circuit
 //        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
@@ -341,6 +448,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
 //        ret = mc.check(net, formula); // cannot check since this are two flow formulas
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, dataInCircuit, settings);
+
         // %%%%%%% newly added (not done for all cases)
         formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
         name = net.getName() + "_" + formula.toString().replace(" ", "");
@@ -352,6 +461,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        mc = new ModelCheckerFlowLTL(settings);
 //        ret = mc.check(net, formula); // cannot check since this are two flow formulas
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, settings);
+
         // %%%%%%%% newly added (not done for all cases)
         formula = new RunFormula(new FlowFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
         name = net.getName() + "_" + formula.toString().replace(" ", "");
