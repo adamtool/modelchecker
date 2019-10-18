@@ -227,7 +227,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 //// END VERSION
 // VERSION: here we only consider runs where the initialization had been done
                 //INITPLACES: it is also OK to chose to consider newly created chains, but newer do so (init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)               
-                ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID)));
+                ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "_0")));
                 f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, newTokenFlow),
                         LTLOperators.Binary.OR,
@@ -238,7 +238,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
                 ILTLFormula retF = LogicsTools.convert(f);
                 //INITPLACES: should skip the first init step (since we cannot force that the first step is really done, we omit those runs)
                 //              so only consider the runs where in the next step init not holds
-                retF = new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID)),
+                retF = new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID + "_0")),
                         LTLOperators.Binary.OR, retF));
 // END VERSION
                 return retF;

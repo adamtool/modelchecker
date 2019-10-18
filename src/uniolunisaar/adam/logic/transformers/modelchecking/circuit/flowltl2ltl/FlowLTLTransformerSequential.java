@@ -313,6 +313,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                                     LTLOperators.Binary.U,
                                     // the new chain starts with a transition which has to be skipped (the next)                                    
                                     new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, newChains), LTLOperators.Binary.AND, flowFormula.getPhi()));
+//                                    flowFormula.getPhi());
                         }
                     }
                 }
