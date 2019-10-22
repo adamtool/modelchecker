@@ -118,37 +118,6 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         return phi;
     }
 
-    @Override
-    ILTLFormula replaceFormulaUnaryInRunFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, boolean scopeEventually, int nbFlowFormulas) {
-        // check if it's in the scope of an eventually
-        if (!scopeEventually && phi.getOp() == LTLOperators.Unary.F) {
-            scopeEventually = true;
-        } else if (scopeEventually && phi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
-            scopeEventually = false;
-        }
-        ILTLFormula substChildPhi = (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
-        if (phi.getOp() == LTLOperators.Unary.X) {
-            // all init transitions can be skipped
-            Collection<ILTLFormula> elements = new ArrayList<>();
-            for (Transition t : net.getTransitions()) {
-                if (t.getId().startsWith(INIT_TOKENFLOW_ID)) {
-                    elements.add(new LTLAtomicProposition(t));
-                }
-            }
-
-            ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
-            elements = new ArrayList<>();
-            // all transitions which are original
-            for (Transition t : orig.getTransitions()) {
-                elements.add(new LTLAtomicProposition(t));
-            }
-            LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, phi.getPhi());
-//                ILTLFormula untilSecond =  castPhi.getPhi();
-            return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
-        }
-        return new LTLFormula(phi.getOp(), substChildPhi);
-    }
-
     public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowFormulas(formula).size();
         if (nbFlowFormulas == 0) {
