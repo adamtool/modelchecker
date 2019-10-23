@@ -135,9 +135,6 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
             indices[nb_ff] = nb_ff;
         }
 
-        ArrayList<ArrayList<Integer>> powerSet = new ArrayList<>();
-        powerSet(indices, 0, new ArrayList<>(), powerSet);
-
         // CREATE THE INIT AND NEW CHAIN GUESSING TRANSITION
         // this means we need a transition for every combination of guesses
         // that is m = |initPlaces|+1 (the one for the new chains)
@@ -154,7 +151,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
         createGuesses(initPlaces, 0, flowFormulas.size(), new ArrayList<>(), ids);
         // now create transitions and the connections
         for (List<String> id : ids) {
-            Transition t = out.createTransition();
+            Transition t = out.createTransition(); // don't have to name this one, since it's used in the first step
             // take each init token
             for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
                 out.createFlow(out.getPlace(INIT_TOKENFLOW_ID + "_" + nb_ff), t);
@@ -206,6 +203,8 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
 //                }
 //            }
 //        }
+        ArrayList<ArrayList<Integer>> powerSet = new ArrayList<>();
+        powerSet(indices, 0, new ArrayList<>(), powerSet);
 
         // ADD THE POWER SET OF ALL TRANSITIONS FOR EACH TRANSIT
         for (Transition tOrig : net.getTransitions()) {
@@ -224,6 +223,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
                         // for each combination which is not belonging to the original net add a transition and connected them accordingly
                         if (!set.isEmpty()) {
                             Transition tOut = out.createTransition();
+                            tOut.putExtension("subnets", set); // remember which subnets are involved
                             tOut.setLabel(tOrig.getId());
                             for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) { // add all arcs and inhibitor arcs to this transition
                                 // get either the new or the corresponding place as predecessor (if was connected with transits)
