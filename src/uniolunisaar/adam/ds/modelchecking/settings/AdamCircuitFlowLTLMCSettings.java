@@ -19,7 +19,7 @@ public class AdamCircuitFlowLTLMCSettings extends AdamCircuitMCSettings<AdamCirc
         GFANDNpiAndo
     }
 
-    private Approach approach = Approach.SEQUENTIAL_INHIBITOR;
+    private Approach approach = Approach.PARALLEL_INHIBITOR;
 
     private boolean initFirst = true;
     private Stucking stucking = Stucking.GFANDNpi;

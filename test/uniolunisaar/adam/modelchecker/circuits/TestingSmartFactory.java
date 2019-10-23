@@ -6,6 +6,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
+import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
@@ -29,6 +30,7 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
@@ -53,9 +55,10 @@ public class TestingSmartFactory {
         (new File(outputDirInFormula)).mkdirs();
     }
 
-    @Test(enabled = false)
-    public void testSmartFactoryFixed() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    @Test(enabled = true)
+    public void testSmartFactoryFixed() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException, RenderException {
         PetriNetWithTransits net = SmartFactory.createMillingDrillingDeburringValidationExample(false);
+        PNWTTools.saveAPT(outputDir+net.getName(), net, true);
 
         RunFormula f;
         ModelCheckingResult ret;
@@ -127,7 +130,7 @@ public class TestingSmartFactory {
         // maximality in circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL,
+                Approach.PARALLEL_INHIBITOR,
                 Maximality.MAX_NONE,
                 Stuttering.PREFIX_REGISTER,
                 optSys,
