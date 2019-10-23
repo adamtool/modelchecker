@@ -152,6 +152,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
         // now create transitions and the connections
         for (List<String> id : ids) {
             Transition t = out.createTransition(); // don't have to name this one, since it's used in the first step
+            t.putExtension("initSubnet", true);// todo: hack
             // take each init token
             for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
                 out.createFlow(out.getPlace(INIT_TOKENFLOW_ID + "_" + nb_ff), t);
@@ -372,6 +373,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
                 todo.add(p);
                 out.setOrigID(p, place.getId());
                 Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId() + "_0");
+                t.putExtension("initSubnet", true);// todo: hack
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 // add an inhibitor arc to all original transitions whichs succeeds this chain
@@ -390,12 +392,16 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
                 }
             }
         }
+
+        List<Integer> subNetid = new ArrayList<>();
+        subNetid.add(0);
         // INITPLACES: add a place and transition for the case that a newly created chain should be considered
         //          this is necesarry since otherwise only adding a transition activating the 
         //          original initial marking would yield that still the chosing of a transition
         //          for an initial transit marked place could be chosen after the first step
         Place newTransitByTransition = out.createPlace(NEW_TOKENFLOW_ID + "_0");
         Transition initTransitByTransition = out.createTransition(INIT_TOKENFLOW_ID + "-new" + "_0");
+        initTransitByTransition.putExtension("initSubnet", true);// todo: hack
         out.createFlow(init, initTransitByTransition);
         out.createFlow(initTransitByTransition, newTransitByTransition);
         for (Place place1 : origInitMarking) {
@@ -428,6 +434,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
                     p = out.getPlace(id);
                 }
                 Transition tout = out.createTransition();
+                tout.putExtension("subnets", subNetid); // remember which subnets are involved
                 tout.setLabel(t.getId());
                 //INITPLACES:
 //                out.createFlow(init, tout);
@@ -471,6 +478,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
                         pout = out.getPlace(id);
                     }
                     Transition tout = out.createTransition(); // create the new transition
+                    tout.putExtension("subnets", subNetid); // remember which subnets are involved
                     tout.setLabel(t.getId());
 //                    if (net.isStrongFair(t)) { // don't need this, fairness is done in the formula
 //                        out.setStrongFair(tout);

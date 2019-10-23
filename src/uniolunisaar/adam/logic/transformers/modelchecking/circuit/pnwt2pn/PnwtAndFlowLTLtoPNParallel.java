@@ -173,6 +173,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                 todo.add(p);
                 out.setOrigID(p, place.getId());
                 Transition t = out.createTransition(INIT_TOKENFLOW_ID + "-" + place.getId() + "_0");
+                t.putExtension("initSubnet", true);// todo: hack
                 out.createFlow(init, t);
                 out.createFlow(t, p);
                 // Deactivate all original postset transitions which continue the flow
@@ -188,6 +189,8 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                 }
             }
         }
+        List<Integer> subNetid = new ArrayList<>();
+        subNetid.add(0);
         // INITPLACES: add a place and transition for the case that a newly created chain should be considered
         //          this is necesarry since otherwise only adding a transition activating the 
         //          original initial marking would yield that still the chosing of a transition
@@ -195,6 +198,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
         Place newTransitByTransition = out.createPlace(NEW_TOKENFLOW_ID + "_0");
         out.setPartition(newTransitByTransition, 1);
         Transition initTransitByTransition = out.createTransition(INIT_TOKENFLOW_ID + "-new" + "_0");
+        initTransitByTransition.putExtension("initSubnet", true);// todo: hack
         out.createFlow(init, initTransitByTransition);
         out.createFlow(initTransitByTransition, newTransitByTransition);
         for (Place place1 : origInitMarking) {
@@ -218,6 +222,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                     p = out.getPlace(id);
                 }
                 Transition tout = out.createTransition();
+                tout.putExtension("subnets", subNetid); // remember which subnets are involved
                 tout.setLabel(t.getId());
                 //INITPLACES:
 //                out.createFlow(init, tout);
@@ -261,6 +266,7 @@ public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
                         pout = out.getPlace(id);
                     }
                     Transition tout = out.createTransition(); // create the new transition
+                    tout.putExtension("subnets", subNetid); // remember which subnets are involved
                     tout.setLabel(t.getId());
 //                    if (net.isStrongFair(t)) { // don't need this, fairness is done in the formula
 //                        out.setStrongFair(tout);

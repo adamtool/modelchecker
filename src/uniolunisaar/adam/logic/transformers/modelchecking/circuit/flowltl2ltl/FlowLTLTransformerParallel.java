@@ -34,18 +34,24 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
     @Override
     ILTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, int nb_ff, boolean scopeEventually) {
         if (phi.isTransition()) {
-            // It is possible to fire original transition (concurrently s.th. is happening) until a transition concerning my flow is fired
-            Collection<ILTLFormula> origT = new ArrayList<>();
-            for (Transition t : orig.getTransitions()) {
-                origT.add(new LTLAtomicProposition(t));
-            }
+            // It is possible to fire original transition (concurrently s.th. is happening)
+            // also if more than one subformula transition not moving my flow
+            // until a transition concerning my flow is fired
+            Collection<ILTLFormula> other = new ArrayList<>();
             Collection<ILTLFormula> mine = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
-                if (t.getLabel().equals(phi.get()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled
+                // this is only for one subformula
+//                if (t.getLabel().equals(phi.get()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
+                // for all subnet transition the extension saves the participating subnets              
+                if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) {
                     mine.add(new LTLAtomicProposition(t));
+                } else {
+                    if (!t.hasExtension("initSubnet")) { // not the init transitions
+                        other.add(new LTLAtomicProposition(t));
+                    }
                 }
             }
-            return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(origT, false), LTLOperators.Binary.U, FormulaCreator.bigWedgeOrVeeObject(mine, false));
+            return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(other, false), LTLOperators.Binary.U, FormulaCreator.bigWedgeOrVeeObject(mine, false));
         } else if (phi.isPlace()) {
             String id = phi.get() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
             if (!net.containsPlace(id)) {
@@ -68,36 +74,28 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         if (subst instanceof LTLFormula && ((LTLFormula) subst).getPhi() instanceof FormulaUnary) {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
             if (substCast.getOp() == LTLOperators.Unary.X) {
-                List<Transition> newTransitions = new ArrayList<>();
-                for (Place place : orig.getPlaces()) {
-                    if (place.getInitialToken().getValue() > 0) {
-                        String id = INIT_TOKENFLOW_ID + "-" + place.getId();
-                        if (net.containsTransition(id)) { // checks if initial transit
-                            newTransitions.add(net.getTransition(id));
+                // next means next for our flow, thus we can first skip all other transitions
+                // which are not moving our chain until some transition is used which 
+                // moves the tracked chain, then really in the next step phi has to hold
+                // in the case that never a transition fires again which moves our chain
+                // (the chain is finite and we stutter), the formula directly has to hold
+                Collection<ILTLFormula> other = new ArrayList<>();
+                Collection<ILTLFormula> mine = new ArrayList<>();
+                for (Transition t : net.getTransitions()) {
+                    // for all subnet transition the extension saves the participating subnets              
+                    if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) {
+                        mine.add(new LTLAtomicProposition(t));
+                    } else {
+                        if (!t.hasExtension("initSubnet")) { // not the init transitions
+                            other.add(new LTLAtomicProposition(t));
                         }
                     }
                 }
+                ILTLFormula Vmine = FormulaCreator.bigWedgeOrVeeObject(mine, false);
+                LTLFormula mineAndNext = new LTLFormula(Vmine, LTLOperators.Binary.AND, new LTLFormula(phi.getOp(), subst));
+                LTLFormula neverMine = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, Vmine)), LTLOperators.Binary.AND, subst);
 
-                // all original transitions
-                Collection<ILTLFormula> elements = new ArrayList<>();
-                for (Transition t : orig.getTransitions()) {
-                    elements.add(new LTLAtomicProposition(t));
-                }
-                // and the new transitions
-                for (Transition t : newTransitions) {
-                    elements.add(new LTLAtomicProposition(t));
-                }
-
-                ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
-                elements = new ArrayList<>();
-                // all transitions which are not original or the new ones
-                for (Transition t : net.getTransitions()) {
-                    if (!orig.containsTransition(t.getId()) || !newTransitions.contains(t)) {
-                        elements.add(new LTLAtomicProposition(t));
-                    }
-                }
-                LTLFormula untilSecond = new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(elements, false), LTLOperators.Binary.AND, phi.getPhi());
-                return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
+                return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(other, false), LTLOperators.Binary.U, new LTLFormula(mineAndNext, LTLOperators.Binary.OR, neverMine));
             }
         }
         return new LTLFormula(phi.getOp(), subst);
