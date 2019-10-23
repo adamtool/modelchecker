@@ -36,7 +36,7 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         PLACES,
         FIREABILITY
     }
-
+              
     private LogicsTools.TransitionSemantics semantics = LogicsTools.TransitionSemantics.OUTGOING;
     private Maximality maximality = Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
@@ -99,6 +99,14 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         return stuttering;
     }
 
+    public void setOptsSys(AigerRenderer.OptimizationsSystem optsSys) {
+        this.optsSys = optsSys;
+    }
+
+    public void setOptsComp(AigerRenderer.OptimizationsComplete optsComp) {
+        this.optsComp = optsComp;
+    }
+    
     public AigerRenderer.OptimizationsSystem getOptsSys() {
         return optsSys;
     }
