@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.transformers;
 
+import java.io.File;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
 import java.io.IOException;
 import org.testng.Assert;
@@ -39,6 +40,13 @@ import uniolunisaar.adam.tools.Logger;
 @Test
 public class TestingFlowLTLTransformer {
 
+    private static final String outputDir = System.getProperty("testoutputfolder") + "/transformers/";
+
+    @BeforeClass
+    public void createFolder() {
+        (new File(outputDir)).mkdirs();
+    }
+
     @BeforeClass
     public void silence() {
         Logger.getInstance().setVerbose(false);
@@ -75,14 +83,14 @@ public class TestingFlowLTLTransformer {
         net.createTransit(b, t1, d);
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
-        PNWTTools.saveAPT(net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
         RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(t2))), RunOperators.Implication.IMP, new FlowFormula(new LTLAtomicProposition(f)));
 
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
-        PNWTTools.savePnwt2PDF(mc.getName() + "mc", mc, true);
+        PNWTTools.savePnwt2PDF(outputDir + mc.getName() + "mc", mc, true);
         ILTLFormula f_mc = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings());
 //        System.out.println(f_mc);
 
@@ -100,7 +108,7 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        ModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING, net), formula, "./" + net.getName(), "");
+        ModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING, net), formula, outputDir + net.getName(), "");
         Assert.assertEquals(output.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -128,7 +136,7 @@ public class TestingFlowLTLTransformer {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        PNWTTools.savePnwt2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(outputDir + game.getName(), game, true);
 
         // test maximality
         // standard
@@ -149,7 +157,7 @@ public class TestingFlowLTLTransformer {
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
 
-        ModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING, game), formula, "./" + game.getName(), "");
+        ModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING, game), formula, outputDir + game.getName(), "");
         Assert.assertEquals(output.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         // new version

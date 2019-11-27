@@ -146,6 +146,6 @@ public class TestingSmartFactory {
         ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        System.out.println(stats.toString());
+//        System.out.println(stats.toString());
     }
 }

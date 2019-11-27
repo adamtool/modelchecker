@@ -150,28 +150,28 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.getAbcSettings().setDetailedCEX(true);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createIntroductoryExample();
         settings.getAbcSettings().setDetailedCEX(true);
         f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("E"))));
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 

@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.libraries;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.testng.annotations.BeforeClass;
@@ -39,6 +40,11 @@ public class TestingAiger {
         if (System.getProperty("examplesfolder") == null) {
             System.setProperty("examplesfolder", "examples");
         }
+    }
+
+    @BeforeClass
+    public void createFolder() {
+        (new File(outputDir)).mkdirs();
     }
 
     private void testAiger(PetriNet pn) throws IOException, InterruptedException, ExternalToolException {

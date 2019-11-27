@@ -125,9 +125,9 @@ public class PetriNetModelChecker {
 
     @Deprecated
     public static ModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(path + net.getName(), false, false);
         CircuitAndLTLtoCircuit.createCircuit(renderer, formula, data, null, false, PetriNetExtensionHandler.getProcessFamilyID(net));
-        String inputFile = "./" + net.getName() + ".aig";
+        String inputFile = path + net.getName() + ".aig";
         return check(inputFile, verificationAlgo, net, renderer, path, abcParameters, data);
     }
 

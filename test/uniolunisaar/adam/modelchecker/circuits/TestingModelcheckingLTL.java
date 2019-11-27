@@ -55,6 +55,13 @@ import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 @Test
 public class TestingModelcheckingLTL {
 
+    private static final String outputDir = System.getProperty("testoutputfolder") + "/ltl/";
+
+    @BeforeClass
+    public void createFolder() {
+        (new File(outputDir)).mkdirs();
+    }
+
     @BeforeClass
     public void silence() {
         Logger.getInstance().setVerbose(false);
@@ -82,20 +89,20 @@ public class TestingModelcheckingLTL {
         net.createFlow(init, t2);
         net.createFlow(t2, init);
 
-        PNWTTools.savePnwt2PDF(net.getName(), new PetriNetWithTransits(net), false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), new PetriNetWithTransits(net), false);
 
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, net); // MCHyper should not directly be used anymore
 
         String formula = "Forall (G (AP \"#out#_in\" 0))";
-        ModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName(), "");
+        ModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = "Forall (G (AP \"#out#_t1\" 0))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         formula = "Forall (AP \"#out#_in\" 0)";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, "./" + net.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         PetriNet doublediamond = PNTools.createPetriNet("doublediamond");
@@ -138,30 +145,30 @@ public class TestingModelcheckingLTL {
         doublediamond.createFlow(RR, rrrr);
         doublediamond.createFlow(rrrr, MM);
 
-        PNWTTools.savePnwt2PDF(doublediamond.getName(), new PetriNetWithTransits(doublediamond), false);
+        PNWTTools.savePnwt2PDF(outputDir + doublediamond.getName(), new PetriNetWithTransits(doublediamond), false);
 
         // formula: in
         LTLFormula f = new LTLFormula(new LTLAtomicProposition(doublediamond.getPlace("in")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // F M
         f = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(doublediamond.getPlace("M")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // F MM
         f = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(doublediamond.getPlace("MM")));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         // Fairness
         f = new LTLFormula(FormulaCreator.createStrongFairness(l));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(doublediamond), LTLOperators.Binary.IMP, f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + net.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, doublediamond, renderer, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + net.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -187,7 +194,7 @@ public class TestingModelcheckingLTL {
 
         // initially the initial place
         ILTLFormula pA = new LTLAtomicProposition(init);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + game.getName(), false, true);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + game.getName(), false, true);
         settings.setOutputData(data);
         ModelCheckingResult cex = mc.check(game, pA);
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
@@ -203,7 +210,7 @@ public class TestingModelcheckingLTL {
 //        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), data);
 //        cex = mc.check(game, new Constants.False(), data);
         IFormula f = new Constants.False();
-        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
+        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + game.getName(), "");
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         f = new LTLFormula(LTLOperators.Unary.X, stutt);
 //        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
@@ -224,7 +231,7 @@ public class TestingModelcheckingLTL {
         // Not all runs should be maximal
         cex = mc.check(game, new LTLConstants.False());
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
-        PNWTTools.savePnwt2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(outputDir + game.getName(), game, true);
         // but not globally since the net is finite
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, propT));
         Assert.assertEquals(cex.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
@@ -255,65 +262,65 @@ public class TestingModelcheckingLTL {
         game.createFlow(init3, t2);
         game.createFlow(t2, init3);
 
-        PNWTTools.savePnwt2PDF(game.getName(), game, true);
+        PNWTTools.savePnwt2PDF(outputDir + game.getName(), game, true);
 
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, game); // MCHyper should not directly be used anymore
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         String formula = "Forall (G (AP \"#out#_inittflB\" 0))";
-        ModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        ModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         formula = "Forall (AP \"#out#_inittfl\" 0)";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         formula = "Forall (F (AP \"#out#_out\" 0))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         formula = "Forall (Neg (AP \"#out#_out\" 0))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         ILTLFormula f = FormulaCreator.enabledObject(tstolen);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = new LTLFormula(LTLOperators.Unary.G, f);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         formula = "Forall (Neg (AP \"#out#_tB\" 0))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         formula = "Forall (Neg (AP \"#out#_tC\" 0))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //        formula = "Forall (Implies (AP \"#out#_tB\" 0) false)"; // syntactic 'false' ? don't now how to give it to MCHyper
 //        check = PetriNetModelChecker.check(game, formula, "./" + game.getName());
 //        Assert.assertFalse(check);
 
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         formula = "Forall (Implies (AP \"#out#_tB\" 0) (AP \"#out#_out\" 0))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         formula = "Forall (Implies (X (AP \"#out#_tB\" 0)) (F (AP \"#out#_out\" 0)))";
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         f = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(game);
         ILTLFormula reachOut = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(out));
         f = new LTLFormula(f, LTLOperators.Binary.IMP, reachOut);
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         RunFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximalityInterleavingObject(game);
         LTLFormula ftest = new LTLFormula((ILTLFormula) maxStandard.getPhi(), LTLOperators.Binary.IMP, reachOut);
 //        System.out.println(ftest.toSymbolString());
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(ftest);
-        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, "./" + game.getName(), "");
+        check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
         Assert.assertEquals(check.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
@@ -332,7 +339,7 @@ public class TestingModelcheckingLTL {
                 OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
                 VerificationAlgo.IC3);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + game.getName(), false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + game.getName(), false, false);
         settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)));
@@ -343,7 +350,7 @@ public class TestingModelcheckingLTL {
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-        PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
+        PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
 
         AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
         settings.setMaximality(Maximality.MAX_NONE); // since it is done by hand
@@ -351,7 +358,7 @@ public class TestingModelcheckingLTL {
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + pn.getName(), true, true);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), true, true);
 
         settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
@@ -390,7 +397,7 @@ public class TestingModelcheckingLTL {
     public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
         final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
-        PNWTTools.savePnwt2PDF(pn.getName(), new PetriNetWithTransits(pn), false);
+        PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.G,
                 new LTLFormula(
@@ -406,7 +413,7 @@ public class TestingModelcheckingLTL {
         // test previous
         LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
 //        CounterExample cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), data);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + pn.getName(), false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, false);
 
         settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
@@ -440,7 +447,7 @@ public class TestingModelcheckingLTL {
         Transition tloop = net.createTransition("tl");
         net.createFlow(B, tloop);
         net.createFlow(tloop, B);
-        PNWTTools.savePnwt2PDF(net.getName(), new PetriNetWithTransits(net), false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), new PetriNetWithTransits(net), false);
 
         // Check previous semantics
         AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
@@ -454,7 +461,7 @@ public class TestingModelcheckingLTL {
         LTLFormula evB2 = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(B2));
 
         LTLFormula f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, true);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + net.getName(), false, true);
 
 //        CounterExample cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), data);
         settings.setOutputData(data);

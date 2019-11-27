@@ -1,5 +1,6 @@
 package uniolunisaar.adam.modelchecker.libraries;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,13 @@ import uniolunisaar.adam.tools.Logger;
  */
 @Test
 public class TestingMCHyper {
+
+    private static final String outputDir = System.getProperty("testoutputfolder") + "/mcHyper/";
+
+    @BeforeClass
+    public void createFolder() {
+        (new File(outputDir)).mkdirs();
+    }
 
     @BeforeClass
     public void silence() {
@@ -60,7 +68,7 @@ public class TestingMCHyper {
         net.createFlow(init3, t2);
         net.createFlow(t2, init3);
 
-        PNWTTools.savePnwt2PDF(net.getName(), net, true);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, true);
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
 //        String formula = "Forall (F (AP \"#out#_out\" 0))";
 //        String formula = "Forall (Implies (AP \"#out#_tB\" 0) (F (AP \"#out#_out\" 0)))";
@@ -76,12 +84,12 @@ public class TestingMCHyper {
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
         AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData("./" + net.getName(), false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + net.getName(), false, false);
 
         CircuitAndLTLtoCircuit.createCircuit(renderer, formula, data, null, false, PetriNetExtensionHandler.getProcessFamilyID(net));
 
-        String inputFile = "./" + net.getName() + ".aig";
-        PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, "./" + net.getName(), "", data);
+        String inputFile = outputDir + net.getName() + ".aig";
+        PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, outputDir + net.getName(), "", data);
     }
 
     @Test

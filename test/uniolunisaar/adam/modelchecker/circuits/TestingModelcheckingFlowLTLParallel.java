@@ -59,11 +59,11 @@ public class TestingModelcheckingFlowLTLParallel {
 
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setVerbose(false);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+//        Logger.getInstance().setVerbose(true);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -84,11 +84,11 @@ public class TestingModelcheckingFlowLTLParallel {
     public void initMCSettings() {
 //        settings = { };
         settings = new AdamCircuitFlowLTLMCSettings[]{
-//                        TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
-//                        TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
-                                    TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
-                                    TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
-            //            TestModelCheckerTools.mcSettings_Par_N, TestModelCheckerTools.mcSettings_ParI_N
+            //                        TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
+            //                        TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
+            TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
+            TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
+        //            TestModelCheckerTools.mcSettings_Par_N, TestModelCheckerTools.mcSettings_ParI_N
 //            TestModelCheckerTools.mcSettings_ParI_IntC, //            TestModelCheckerTools.mcSettings_Seq_IntF
 //                                    TestModelCheckerTools.mcSettings_SeqI_IntC, //            TestModelCheckerTools.mcSettings_Seq_IntF
         //              TestModelCheckerTools.mcSettings_Par_IntF,  TestModelCheckerTools.mcSettings_ParI_IntF
@@ -222,7 +222,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createFlow(init2, t2);
         net.createFlow(t2, out2);
         net.createTransit(init2, t2, out2);
-        PNWTTools.savePnwt2PDF(outDir+net.getName()+"_net", net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_net", net, false);
 
         LTLAtomicProposition fOut2 = new LTLAtomicProposition(out2);
 
@@ -233,7 +233,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         RunFormula f13 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, fOut2))));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f13, ModelCheckingResult.Satisfied.TRUE, settings);
-        
+
         RunFormula f14 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.OR, new LTLAtomicProposition(t2))));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f14, ModelCheckingResult.Satisfied.FALSE, settings);
     }
@@ -293,28 +293,28 @@ public class TestingModelcheckingFlowLTLParallel {
         settings.getAbcSettings().setDetailedCEX(true);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createIntroductoryExample();
         settings.getAbcSettings().setDetailedCEX(true);
         f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("E"))));
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
-        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        System.out.println(ret.getCex().toString());
+//        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+//        System.out.println(ret.getCex().toString());
         Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
     }
 
@@ -426,7 +426,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(outDir + net.getName()+"_net", net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_net", net, false);
 
         RunFormula formula;
         String name;
@@ -952,8 +952,8 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
 
         String formula = "F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
@@ -973,7 +973,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
 
         PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ModelCheckingResult ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
@@ -986,10 +986,10 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
-        PNWTTools.saveAPT(net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
@@ -998,8 +998,8 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
-        PNWTTools.saveAPT(net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
 
@@ -1018,7 +1018,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        settings.setOutputData(data);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 
 //        ModelCheckingResult ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); 
@@ -1028,8 +1028,8 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
-        PNWTTools.saveAPT(net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
 
@@ -1048,7 +1048,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        settings.setOutputData(data);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
 //        ModelCheckingResult ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
@@ -1057,7 +1057,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F pOut";
         RunFormula f = FlowLTLParser.parse(net, formula);
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
@@ -1076,7 +1076,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
 
         PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ModelCheckingResult ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
@@ -1121,8 +1121,8 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
-        PNWTTools.saveAPT(net.getName(), net, false);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
         RunFormula f = FlowLTLParser.parse(net, formula);
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
@@ -1141,31 +1141,31 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
 
         PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ModelCheckingResult ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
 
         net = RedundantNetwork.getUpdatingNetwork(1, 1);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.FALSE, settings);
 
         net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.FALSE, settings);
 
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
-        PNWTTools.savePnwt2PDF(net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-        PNWTTools.savePnwt2PDF(net.getName() + "_mc", mcNet, true);
+        PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
 //        ret = mc.check(net, f);
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.FALSE, settings);
