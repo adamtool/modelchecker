@@ -110,7 +110,7 @@ public class SDNFormelCreator {
         Place init = pnwt.getPlace(SDNTools.updateStartID);
         Marking m = pnwt.getInitialMarking();
         // Search and fire the transitions in breadth-first order
-        Queue<Place> todo = new LinkedList();
+        Queue<Place> todo = new LinkedList<>();
         todo.add(init);
         while (!todo.isEmpty()) {
             Place start = todo.poll();

@@ -103,7 +103,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
         } else if (phi instanceof LTLFormula) {
             IFormula f = replaceNextWithinRunFormulaParallel(orig, net, ((LTLFormula) phi).getPhi());
             return new LTLFormula((ILTLFormula) f); // cast no problem since the next is replace by an LTLFormula
-        } else if (phi instanceof FormulaUnary) {
+        } else if (phi instanceof FormulaUnary<?,?>) {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
             ILTLFormula substChildPhi = (ILTLFormula) replaceNextWithinRunFormulaParallel(orig, net, castPhi.getPhi()); // since castPhi is of type ILTLFormula this must result an ILTLFormula
             if (castPhi.getOp() == LTLOperators.Unary.X) {
@@ -126,10 +126,10 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
                 return new LTLFormula(LTLOperators.Unary.X, new LTLFormula(untilFirst, LTLOperators.Binary.U, untilSecond));
             }
             return new LTLFormula(castPhi.getOp(), substChildPhi);
-        } else if (phi instanceof FormulaBinary) {
+        } else if (phi instanceof FormulaBinary<?,?,?>) {
             IFormula subst1 = replaceNextWithinRunFormulaParallel(orig, net, ((FormulaBinary) phi).getPhi1());
             IFormula subst2 = replaceNextWithinRunFormulaParallel(orig, net, ((FormulaBinary) phi).getPhi2());
-            IOperatorBinary op = ((FormulaBinary) phi).getOp();
+            IOperatorBinary<?,?> op = ((FormulaBinary<?,?,?>) phi).getOp();
             if (phi instanceof ILTLFormula) {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
             } else if (phi instanceof IRunFormula) {

@@ -129,10 +129,10 @@ public class FlowLTLTransformer {
         return new LTLFormula(phi.getOp(), substChildPhi);
     }
 
-    IFormula replaceFormulaBinaryInRunFormula(PetriNet orig, PetriNet net, FormulaBinary phi, boolean scopeEventually, int nbFlowFormulas) {
+    IFormula replaceFormulaBinaryInRunFormula(PetriNet orig, PetriNet net, FormulaBinary<IFormula, IOperatorBinary<IFormula, IFormula>, IFormula> phi, boolean scopeEventually, int nbFlowFormulas) {
         IFormula subst1 = replaceInRunFormula(orig, net, phi.getPhi1(), scopeEventually, nbFlowFormulas);
         IFormula subst2 = replaceInRunFormula(orig, net, phi.getPhi2(), scopeEventually, nbFlowFormulas);
-        IOperatorBinary op = ((FormulaBinary) phi).getOp();
+        IOperatorBinary<? extends IFormula, ? extends IFormula> op = phi.getOp();
         if (phi instanceof ILTLFormula) {
             return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
         } else if (phi instanceof IRunFormula) {
@@ -157,11 +157,11 @@ public class FlowLTLTransformer {
             return replaceRunFormulaInRunFormula(orig, net, (RunFormula) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof LTLFormula) {
             return replaceLTLFormulaInRunFormula(orig, net, (LTLFormula) phi, scopeEventually, nbFlowFormulas);
-        } else if (phi instanceof FormulaUnary) {
+        } else if (phi instanceof FormulaUnary<?, ?>) {
             FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
             return replaceFormulaUnaryInRunFormula(orig, net, castPhi, scopeEventually, nbFlowFormulas);
-        } else if (phi instanceof FormulaBinary) {
-            return replaceFormulaBinaryInRunFormula(orig, net, (FormulaBinary) phi, scopeEventually, nbFlowFormulas);
+        } else if (phi instanceof FormulaBinary<?, ?, ?>) {
+            return replaceFormulaBinaryInRunFormula(orig, net, (FormulaBinary<IFormula, IOperatorBinary<IFormula, IFormula>, IFormula>) phi, scopeEventually, nbFlowFormulas);
         }
         throw new RuntimeException(
                 "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");

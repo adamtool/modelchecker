@@ -147,7 +147,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
             }
         }
         // start recursion
-        List<List<String>> ids = new ArrayList();
+        List<List<String>> ids = new ArrayList<>();
         createGuesses(initPlaces, 0, flowFormulas.size(), new ArrayList<>(), ids);
         // now create transitions and the connections
         for (List<String> id : ids) {

@@ -264,10 +264,10 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 }
             }
             return substPhi;
-        } else if (phi instanceof FormulaBinary) {
+        } else if (phi instanceof FormulaBinary<?, ?, ?>) {
             IFormula subst1 = replaceNextWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi1(), scopeEventually, nbFlowFormulas);
             IFormula subst2 = replaceNextWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi2(), scopeEventually, nbFlowFormulas);
-            IOperatorBinary op = ((FormulaBinary) phi).getOp();
+            IOperatorBinary<?, ?> op = ((FormulaBinary<?, ?, ?>) phi).getOp();
             if (phi instanceof ILTLFormula) {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
             } else if (phi instanceof IRunFormula) {
@@ -335,10 +335,10 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
 
             ILTLFormula substChildPhi = (ILTLFormula) replaceTransitionsWithinRunFormulaSequential(orig, net, castPhi.getPhi(), scopeEventually, nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
             return new LTLFormula(castPhi.getOp(), substChildPhi);
-        } else if (phi instanceof FormulaBinary) {
+        } else if (phi instanceof FormulaBinary<?, ?, ?>) {
             IFormula subst1 = replaceTransitionsWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi1(), scopeEventually, nbFlowFormulas);
             IFormula subst2 = replaceTransitionsWithinRunFormulaSequential(orig, net, ((FormulaBinary) phi).getPhi2(), scopeEventually, nbFlowFormulas);
-            IOperatorBinary op = ((FormulaBinary) phi).getOp();
+            IOperatorBinary<?, ?> op = ((FormulaBinary<?, ?, ?>) phi).getOp();
             if (phi instanceof ILTLFormula) {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
             } else if (phi instanceof IRunFormula) {
@@ -560,7 +560,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
             }
         }
 //        System.out.println("after "+ret.toString());
-        
+
         return ret;
     }
 

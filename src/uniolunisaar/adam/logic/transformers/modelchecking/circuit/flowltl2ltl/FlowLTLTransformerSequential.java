@@ -156,7 +156,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 
     @Override
     ILTLFormula replaceFormulaUnaryInRunFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, boolean scopeEventually, int nbFlowFormulas) {
-        FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = (FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
+        FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = phi;
 
         // check if it's in the scope of an eventually
         if (!scopeEventually && castPhi.getOp() == LTLOperators.Unary.F) {
@@ -212,7 +212,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 
     @Override
     IFormula replaceLTLAtomicPropositionInRunFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, boolean scopeEventually, int nbFlowFormulas) {
-        LTLAtomicProposition atom = (LTLAtomicProposition) phi;
+        LTLAtomicProposition atom = phi;
         if (atom.isTransition()) {
 //             if it's in the direct scope of an eventually we don't need the until
             if (scopeEventually) {

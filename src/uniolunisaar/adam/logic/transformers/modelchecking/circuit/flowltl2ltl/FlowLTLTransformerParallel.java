@@ -72,7 +72,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         }
         ILTLFormula subst = replaceInFlowFormula(orig, net, phi.getPhi(), nb_ff, scopeEventually);
         if (subst instanceof LTLFormula && ((LTLFormula) subst).getPhi() instanceof FormulaUnary) {
-            FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = ((FormulaUnary<ILTLFormula, LTLOperators.Unary>) phi);
+            FormulaUnary<ILTLFormula, LTLOperators.Unary> substCast = phi;
             if (substCast.getOp() == LTLOperators.Unary.X) {
                 // next means next for our flow, thus we can first skip all other transitions
                 // which are not moving our chain until some transition is used which 
