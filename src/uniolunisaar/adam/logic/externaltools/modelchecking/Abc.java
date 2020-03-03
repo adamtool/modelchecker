@@ -133,7 +133,7 @@ public class Abc {
         }
         procAbc.start(outStream, errStream);
         PrintWriter abcInput = new PrintWriter(procAbc.getProcessInput());
-        abcInput.println("read " + inputFile);
+        abcInput.println("read \"" + inputFile + "\"");
         if (preProcessing != null) {
             abcInput.println(preProcessing);
         }
