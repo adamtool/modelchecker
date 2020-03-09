@@ -24,7 +24,7 @@ public class CounterExampleElement {
     private boolean initLoop = false;
     private boolean looping = false;
 
-    private boolean isParallel;
+    private final boolean isParallel;
 
     // both only for the case that it is binary coded
     private char[] binID = null;
