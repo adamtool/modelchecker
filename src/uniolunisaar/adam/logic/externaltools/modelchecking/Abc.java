@@ -141,7 +141,7 @@ public class Abc {
             abcInput.println("dfraig");
         }
         abcInput.println(call + " " + parameters);
-        abcInput.println("write_cex -f " + outputFile);
+        abcInput.println("write_cex -f \"" + outputFile + "\"");
         abcInput.println("quit");
         abcInput.flush();
         int exitValue = procAbc.waitFor();

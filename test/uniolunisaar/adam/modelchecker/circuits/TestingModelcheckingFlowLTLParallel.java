@@ -24,6 +24,7 @@ import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.modelchecking.CounterExample.CounterExampleIterator;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
@@ -1305,4 +1306,36 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(pnwt, formula, ModelCheckingResult.Satisfied.TRUE, settings);
     }
 
+    @Test
+    public void testCounterExampleATVA() throws Exception {
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/ATVA19_motivatingExample.apt"), false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+
+        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("p6"))));
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                VerificationAlgo.IC3);
+
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
+        settings.setOutputData(data);
+        settings.getAbcSettings().setDetailedCEX(false);
+
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        ModelCheckingResult ret = mc.check(net, formula);
+//        System.out.println(ret.getCex());
+        for (CounterExampleIterator iterator = ret.getCex().iterator(); iterator.hasNext();) {
+            String next = iterator.next();
+            Transition t = net.getTransition(next);
+//            System.out.println(t.toString());
+//            System.out.println("is in loop" + iterator.isInLoop());
+        }
+    }
 }

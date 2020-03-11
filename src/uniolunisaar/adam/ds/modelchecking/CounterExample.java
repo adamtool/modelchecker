@@ -1,6 +1,7 @@
 package uniolunisaar.adam.ds.modelchecking;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import uniol.apt.adt.pn.Transition;
@@ -10,7 +11,7 @@ import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
  *
  * @author Manuel Gieseking
  */
-public class CounterExample {
+public class CounterExample implements Iterable<String> {
 
     private final List<CounterExampleElement> timestep = new ArrayList<>();
     private final boolean safety;
@@ -97,4 +98,41 @@ public class CounterExample {
         this.isDetailed = isDetailed;
     }
 
+    @Override
+    public CounterExampleIterator iterator() {
+        return new CounterExampleIterator();
+    }
+
+    public class CounterExampleIterator implements Iterator<String> {
+
+        private final String cex = CounterExample.this.toString();
+        private final int loopPos = cex.lastIndexOf("start loop");
+        private int pos = 0;
+        private boolean inLoop = false;
+
+        @Override
+        public boolean hasNext() {
+            int idx = cex.indexOf("[", pos);
+            return idx >= 0;
+        }
+
+        @Override
+        public String next() {
+            if (hasNext()) {
+                int start = cex.indexOf("[", pos);
+                int end = cex.indexOf("]", start);
+                pos = end;
+                if (!inLoop && loopPos < pos) {
+                    inLoop = true;
+                }
+                return cex.substring(start + 1, end);
+            } else {
+                return null;
+            }
+        }
+
+        public boolean isInLoop() {
+            return inLoop;
+        }
+    }
 }
