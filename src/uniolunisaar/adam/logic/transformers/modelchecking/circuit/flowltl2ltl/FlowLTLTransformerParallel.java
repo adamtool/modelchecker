@@ -7,7 +7,7 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.FormulaUnary;
 import uniolunisaar.adam.ds.logics.IFormula;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
@@ -15,7 +15,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPN;
@@ -116,7 +116,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         return phi;
     }
 
-    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
+    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowFormulas(formula).size();
         if (nbFlowFormulas == 0) {
             Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
@@ -126,9 +126,9 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
         IFormula f = replaceInRunFormula(orig, net, formula, nbFlowFormulas);
         // %%%%%%%%%%%%%%%%%  REPLACE WITHIN FLOW FORMULA
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
-            FlowFormula flowFormula = flowFormulas.get(i);
+            FlowLTLFormula flowFormula = flowFormulas.get(i);
             flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
             try {
 //                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID + "_" + i));
@@ -136,7 +136,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 
                 //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
                 //(init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)   
-                f = f.substitute(flowFormulas.get(i), new RunFormula(new LTLFormula(
+                f = f.substitute(flowFormulas.get(i), new RunLTLFormula(new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, newChains),
                         LTLOperators.Binary.OR,
                         new LTLFormula(newChains, LTLOperators.Binary.U,
@@ -165,19 +165,19 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public ILTLFormula createFormula4ModelChecking4CircuitParallelOneFlowFormula(PetriNetWithTransits orig, PetriNet net, RunFormula formula) throws NotConvertableException {
+    public ILTLFormula createFormula4ModelChecking4CircuitParallelOneFlowFormula(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowFormulas(formula).size();
 
         // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
         IFormula f = replaceInRunFormula(orig, net, formula, nbFlowFormulas);
 
         // %%%%%%%%%%%%%%%%%  REPLACE WITHIN FLOW FORMULA
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
         if (flowFormulas.size() > 1) {
             throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
         }
         if (flowFormulas.size() == 1) {
-            FlowFormula flowF = replaceInFlowFormula(orig, net, flowFormulas.get(0), 0);
+            FlowLTLFormula flowF = replaceInFlowFormula(orig, net, flowFormulas.get(0), 0);
             try {
 //// VERSION: This version would need an additional forcing of the firing of the first transition (instead of the globally init_tfl)
 ////          in cases where maximality is not stated in the circuit.
@@ -195,7 +195,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 // VERSION: here we only consider runs where the initialization had been done
                 //INITPLACES: it is also OK to chose to consider newly created chains, but newer do so (init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)               
                 ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "_0")));
-                f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
+                f = f.substitute(flowFormulas.get(0), new RunLTLFormula(new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, newTokenFlow),
                         LTLOperators.Binary.OR,
                         new LTLFormula(newTokenFlow, LTLOperators.Binary.U,

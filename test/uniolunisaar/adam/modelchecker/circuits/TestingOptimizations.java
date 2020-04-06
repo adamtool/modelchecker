@@ -9,7 +9,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
@@ -52,7 +52,7 @@ public class TestingOptimizations {
         PetriNetWithTransits net = UpdatingNetwork.create(3);
 
         String formula;
-        RunFormula f;
+        RunLTLFormula f;
         ModelCheckingResult ret;
         String name;
 

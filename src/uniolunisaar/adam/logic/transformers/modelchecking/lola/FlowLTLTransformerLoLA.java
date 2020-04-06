@@ -3,7 +3,7 @@ package uniolunisaar.adam.logic.transformers.modelchecking.lola;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.FlowLTLTransformerSequential;
@@ -14,7 +14,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.Fl
  */
 public class FlowLTLTransformerLoLA {
 
-    public static String createFormula4ModelChecking4LoLASequential(PetriNet orig, PetriNet mc, RunFormula formula) throws NotConvertableException {
+    public static String createFormula4ModelChecking4LoLASequential(PetriNet orig, PetriNet mc, RunLTLFormula formula) throws NotConvertableException {
         ILTLFormula f = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(orig, mc, formula, new AdamCircuitFlowLTLMCSettings());
         String lola = f.toLoLA();
         return "ALLPATH " + lola;

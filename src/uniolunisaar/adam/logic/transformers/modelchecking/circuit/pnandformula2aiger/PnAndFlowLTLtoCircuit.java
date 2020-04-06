@@ -7,9 +7,9 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
@@ -68,7 +68,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public static AigerRenderer createCircuit(PetriNetWithTransits net, RunFormula formula, AdamCircuitFlowLTLMCSettings settings) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static AigerRenderer createCircuit(PetriNetWithTransits net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
         TransitionSemantics semantics = settings.getSemantics();
         AdamCircuitFlowLTLMCStatistics stats = settings.getStatistics();
@@ -80,14 +80,14 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                 + " initialization first step: " + initFirst, true);
 
         // If we have the LTL fragment just use the standard LTLModelchecker
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
         if (flowFormulas.isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula.toSymbolString() + "'. Thus, we use the standard model checking algorithm for LTL.");
             return PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, LogicsTools.convert(formula), settings);
         }
 
         // Add Fairness
-        RunFormula f = LogicsTools.addFairness(net, formula);
+        RunLTLFormula f = LogicsTools.addFairness(net, formula);
 
         // Get the formula for the maximality (null if MAX_NONE)
         ILTLFormula max = null;
@@ -100,7 +100,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                 break;
         }
         if (max != null) {
-            f = new RunFormula(max, RunOperators.Implication.IMP, f);
+            f = new RunLTLFormula(max, RunOperators.Implication.IMP, f);
         }
 //        IRunFormula f = formula;
 

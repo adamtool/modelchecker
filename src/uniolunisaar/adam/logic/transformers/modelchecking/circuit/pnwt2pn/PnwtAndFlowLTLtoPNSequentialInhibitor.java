@@ -4,8 +4,8 @@ import java.util.List;
 import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import static uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNSequential.NEXT_ID;
 import uniolunisaar.adam.tools.Logger;
@@ -36,7 +36,7 @@ public class PnwtAndFlowLTLtoPNSequentialInhibitor extends PnwtAndFlowLTLtoPN {
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
 
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
             addSubFlowFormulaNet(orig, out, nb_ff, initFirstStep);

@@ -9,20 +9,20 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.AtomicProposition;
 import uniolunisaar.adam.ds.logics.Constants;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.FormulaBinary;
 import uniolunisaar.adam.ds.logics.FormulaUnary;
 import uniolunisaar.adam.ds.logics.IAtomicProposition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IFlowFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IFlowFormula;
 import uniolunisaar.adam.ds.logics.IFormula;
 import uniolunisaar.adam.ds.logics.IOperatorBinary;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Stucking;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
@@ -40,9 +40,9 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
 
-    private static FlowFormula replaceNextInFlowFormulaSequential(PetriNet orig, PetriNet net, FlowFormula flowFormula, int nb_ff) {
+    private static FlowLTLFormula replaceNextInFlowFormulaSequential(PetriNet orig, PetriNet net, FlowLTLFormula flowFormula, int nb_ff) {
         ILTLFormula phi = flowFormula.getPhi();
-        return new FlowFormula(replaceNextWithinFlowFormulaSequential(orig, net, phi, nb_ff, false));
+        return new FlowLTLFormula(replaceNextWithinFlowFormulaSequential(orig, net, phi, nb_ff, false));
     }
 
     private static ILTLFormula replaceNextWithinFlowFormulaSequential(PetriNet orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually) {
@@ -112,9 +112,9 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    private static FlowFormula replaceTransitionsInFlowFormulaSequential(PetriNet orig, PetriNet net, FlowFormula flowFormula, int nb_ff, boolean initFirst) {
+    private static FlowLTLFormula replaceTransitionsInFlowFormulaSequential(PetriNet orig, PetriNet net, FlowLTLFormula flowFormula, int nb_ff, boolean initFirst) {
         ILTLFormula phi = flowFormula.getPhi();
-        return new FlowFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, phi, nb_ff, false, initFirst));
+        return new FlowLTLFormula(replaceTransitionsWithinFlowFormulaSequential(orig, net, phi, nb_ff, false, initFirst));
     }
 
     private static ILTLFormula replaceTransitionsWithinFlowFormulaSequential(PetriNet orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually, boolean initFirst) {
@@ -182,8 +182,8 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
             return phi;
         } else if (phi instanceof IFlowFormula) {
             return phi;
-        } else if (phi instanceof RunFormula) {
-            return new RunFormula(replaceNextWithinRunFormulaSequential(orig, net, ((RunFormula) phi).getPhi(), scopeEventually, nbFlowFormulas));
+        } else if (phi instanceof RunLTLFormula) {
+            return new RunLTLFormula(replaceNextWithinRunFormulaSequential(orig, net, ((RunLTLFormula) phi).getPhi(), scopeEventually, nbFlowFormulas));
         } else if (phi instanceof LTLFormula) {
             IFormula f = replaceNextWithinRunFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), scopeEventually, nbFlowFormulas);
             return new LTLFormula((ILTLFormula) f); // cast no problem since the next is replace by an LTLFormula
@@ -272,9 +272,9 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
             } else if (phi instanceof IRunFormula) {
                 if (op instanceof RunOperators.Binary) {
-                    return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
+                    return new RunLTLFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
                 } else {
-                    return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+                    return new RunLTLFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
                 }
             }
         }
@@ -282,8 +282,8 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    private static RunFormula replaceNextWithinRunFormulaSequential(PetriNet orig, PetriNet net, RunFormula phi, int nbFlowFormulas) {
-        return new RunFormula(replaceNextWithinRunFormulaSequential(orig, net, phi.getPhi(), false, nbFlowFormulas));
+    private static RunLTLFormula replaceNextWithinRunFormulaSequential(PetriNet orig, PetriNet net, RunLTLFormula phi, int nbFlowFormulas) {
+        return new RunLTLFormula(replaceNextWithinRunFormulaSequential(orig, net, phi.getPhi(), false, nbFlowFormulas));
     }
 
     private static IFormula replaceTransitionsWithinRunFormulaSequential(PetriNet orig, PetriNet net, IFormula phi, boolean scopeEventually, int nbFlowFormulas) {
@@ -318,8 +318,8 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
             return phi;
         } else if (phi instanceof IFlowFormula) {
             return phi;
-        } else if (phi instanceof RunFormula) {
-            return new RunFormula(replaceTransitionsWithinRunFormulaSequential(orig, net, ((RunFormula) phi).getPhi(), scopeEventually, nbFlowFormulas));
+        } else if (phi instanceof RunLTLFormula) {
+            return new RunLTLFormula(replaceTransitionsWithinRunFormulaSequential(orig, net, ((RunLTLFormula) phi).getPhi(), scopeEventually, nbFlowFormulas));
         } else if (phi instanceof LTLFormula) {
             IFormula f = replaceTransitionsWithinRunFormulaSequential(orig, net, ((LTLFormula) phi).getPhi(), scopeEventually, nbFlowFormulas);
             return new LTLFormula((ILTLFormula) f);
@@ -343,9 +343,9 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
             } else if (phi instanceof IRunFormula) {
                 if (op instanceof RunOperators.Binary) {
-                    return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
+                    return new RunLTLFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
                 } else {
-                    return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+                    return new RunLTLFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
                 }
             }
         }
@@ -353,8 +353,8 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    private static RunFormula replaceTransitionsWithinRunFormulaSequential(PetriNet orig, PetriNet net, RunFormula phi, int nbFlowFormulas) {
-        return new RunFormula(replaceTransitionsWithinRunFormulaSequential(orig, net, phi.getPhi(), false, nbFlowFormulas));
+    private static RunLTLFormula replaceTransitionsWithinRunFormulaSequential(PetriNet orig, PetriNet net, RunLTLFormula phi, int nbFlowFormulas) {
+        return new RunLTLFormula(replaceTransitionsWithinRunFormulaSequential(orig, net, phi.getPhi(), false, nbFlowFormulas));
     }
 
     /**
@@ -366,7 +366,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
+    public static ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
 //        System.out.println("before "+formula.toString());
         boolean initFirst = settings.isInitFirst();
         boolean useNext = settings.isUseNextToReplaceXandTransitionsInRunPart();
@@ -374,17 +374,17 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 : // todo: maybe expensive, could make this smarter
                 -1;
         // %%%%%%%%%%%%%%%%%  RUN REPLACE TRANSITIONS
-        RunFormula runF = replaceTransitionsWithinRunFormulaSequential(orig, net, formula, nbFlowFormulas);
+        RunLTLFormula runF = replaceTransitionsWithinRunFormulaSequential(orig, net, formula, nbFlowFormulas);
         // %%%%%%%%%%%%%%%%%  RUN REPLACE NEXT 
         IFormula f = replaceNextWithinRunFormulaSequential(orig, net, runF, nbFlowFormulas);
 
         // %%%%%%%%%%%%%%%%% FLOW PART
 //        List<AtomicProposition> allInitTransitions = new ArrayList<>();
 //        List<LTLFormula> allInitPlaces = new ArrayList<>();
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
             // %%%%%%%%%%%%%%%%%%% FLOW REPLACE PLACES
-            FlowFormula flowFormula = flowFormulas.get(i);
+            FlowLTLFormula flowFormula = flowFormulas.get(i);
             try {
                 // replace the places within the flow formula accordingly                 
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
@@ -393,7 +393,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                     if (net.containsNode(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i)) { // only if the place is part of the subnet
                         LTLAtomicProposition p = new LTLAtomicProposition(place);
                         LTLAtomicProposition psub = new LTLAtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + i));
-                        flowFormula = (FlowFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
+                        flowFormula = (FlowLTLFormula) flowFormula.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                     }
                 }
             } catch (NotSubstitutableException ex) {
@@ -479,7 +479,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                         LTLOperators.Binary.OR,
                         chainFormula);
                 // %%%%% REPLACE THE FLOW FORMULA
-                f = f.substitute(flowFormulas.get(i), new RunFormula(flowLTL));
+                f = f.substitute(flowFormulas.get(i), new RunLTLFormula(flowLTL));
 
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);

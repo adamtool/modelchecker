@@ -10,8 +10,8 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
@@ -60,7 +60,7 @@ public class TestingSmartFactory {
         PetriNetWithTransits net = SmartFactory.createMillingDrillingDeburringValidationExample(false);
         PNWTTools.saveAPT(outputDir+net.getName(), net, true);
 
-        RunFormula f;
+        RunLTLFormula f;
         ModelCheckingResult ret;
         String name;
 
@@ -68,7 +68,7 @@ public class TestingSmartFactory {
         LTLAtomicProposition milling = new LTLAtomicProposition(net.getPlace("m_w"));
         LTLAtomicProposition deburring = new LTLAtomicProposition(net.getPlace("db_w"));
         LTLAtomicProposition validating = new LTLAtomicProposition(net.getPlace("vA_w"));
-        RunFormula allMilledDeburredValidated = new RunFormula(new FlowFormula(
+        RunLTLFormula allMilledDeburredValidated = new RunLTLFormula(new FlowLTLFormula(
                 new LTLFormula(
                         new LTLFormula(
                                 new LTLFormula(LTLOperators.Unary.F, milling),
@@ -83,7 +83,7 @@ public class TestingSmartFactory {
         LTLAtomicProposition start_A = new LTLAtomicProposition(net.getPlace("sm_0"));
         LTLAtomicProposition drillingH = new LTLAtomicProposition(net.getPlace("dH_w"));
         LTLAtomicProposition drillingT = new LTLAtomicProposition(net.getPlace("dT_w"));
-        RunFormula typeACorrect = new RunFormula(new FlowFormula(
+        RunLTLFormula typeACorrect = new RunLTLFormula(new FlowLTLFormula(
                 new LTLFormula(start_A, LTLOperators.Binary.IMP,
                         new LTLFormula(new LTLFormula(LTLOperators.Unary.F, drillingH),
                                 LTLOperators.Binary.AND,
@@ -92,7 +92,7 @@ public class TestingSmartFactory {
                 )));
         // for typeB the other way round
         LTLAtomicProposition start_B = new LTLAtomicProposition(net.getPlace("sm_1"));
-        RunFormula typeBCorrect = new RunFormula(new FlowFormula(
+        RunLTLFormula typeBCorrect = new RunLTLFormula(new FlowLTLFormula(
                 new LTLFormula(start_B, LTLOperators.Binary.IMP,
                         new LTLFormula(new LTLFormula(LTLOperators.Unary.F, drillingT),
                                 LTLOperators.Binary.AND,

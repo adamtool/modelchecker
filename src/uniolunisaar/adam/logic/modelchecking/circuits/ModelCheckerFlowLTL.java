@@ -9,7 +9,7 @@ import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
@@ -54,7 +54,7 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriNetWithTransits net, RunFormula formula) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public ModelCheckingResult check(PetriNetWithTransits net, RunLTLFormula formula) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         switch (settings.getSolver()) {
             case ADAM_CIRCUIT:
                 AdamCircuitFlowLTLMCSettings props = (AdamCircuitFlowLTLMCSettings) settings;
@@ -92,7 +92,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static ModelCheckingResult checkWithParallelApproach(PetriNetWithTransits net, RunFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static ModelCheckingResult checkWithParallelApproach(PetriNetWithTransits net, RunLTLFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula + "'.", true);
         PetriNetWithTransits gameMC = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         ILTLFormula formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, gameMC, formula);

@@ -10,11 +10,11 @@ import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IFlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IFlowFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 
 /**
  *
@@ -76,9 +76,9 @@ public class FlowLTLTransformer {
         throw new RuntimeException("The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    FlowFormula replaceInFlowFormula(PetriNet orig, PetriNet net, FlowFormula flowFormula, int nb_ff) {
+    FlowLTLFormula replaceInFlowFormula(PetriNet orig, PetriNet net, FlowLTLFormula flowFormula, int nb_ff) {
         ILTLFormula phi = flowFormula.getPhi();
-        return new FlowFormula(replaceInFlowFormula(orig, net, phi, nb_ff, false));
+        return new FlowLTLFormula(replaceInFlowFormula(orig, net, phi, nb_ff, false));
     }
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RUN FORMULA PART 
@@ -97,8 +97,8 @@ public class FlowLTLTransformer {
         return phi;
     }
 
-    IFormula replaceRunFormulaInRunFormula(PetriNet orig, PetriNet net, RunFormula phi, boolean scopeEventually, int nbFlowFormulas) {
-        return new RunFormula(replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas));
+    IFormula replaceRunFormulaInRunFormula(PetriNet orig, PetriNet net, RunLTLFormula phi, boolean scopeEventually, int nbFlowFormulas) {
+        return new RunLTLFormula(replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas));
     }
 
     /**
@@ -137,9 +137,9 @@ public class FlowLTLTransformer {
             return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
         } else if (phi instanceof IRunFormula) {
             if (op instanceof RunOperators.Binary) {
-                return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
+                return new RunLTLFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
             } else {
-                return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+                return new RunLTLFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
             }
         }
         throw new RuntimeException("The given formula '" + phi + "' is neither an LTLFormula nor FormulaUnary nor FormulaBinary. This should not be possible.");
@@ -153,8 +153,8 @@ public class FlowLTLTransformer {
             return replaceLTLAtomicPropositionInRunFormula(orig, net, (LTLAtomicProposition) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof IFlowFormula) {
             return replaceFlowFormulaInRunFormula(orig, net, (IFlowFormula) phi, scopeEventually, nbFlowFormulas);
-        } else if (phi instanceof RunFormula) {
-            return replaceRunFormulaInRunFormula(orig, net, (RunFormula) phi, scopeEventually, nbFlowFormulas);
+        } else if (phi instanceof RunLTLFormula) {
+            return replaceRunFormulaInRunFormula(orig, net, (RunLTLFormula) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof LTLFormula) {
             return replaceLTLFormulaInRunFormula(orig, net, (LTLFormula) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof FormulaUnary<?, ?>) {
@@ -167,8 +167,8 @@ public class FlowLTLTransformer {
                 "The given formula '" + phi + "' is not an LTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    RunFormula replaceInRunFormula(PetriNet orig, PetriNet net, RunFormula phi, int nbFlowFormulas) {
-        return new RunFormula(replaceInRunFormula(orig, net, phi.getPhi(), false, nbFlowFormulas));
+    RunLTLFormula replaceInRunFormula(PetriNet orig, PetriNet net, RunLTLFormula phi, int nbFlowFormulas) {
+        return new RunLTLFormula(replaceInRunFormula(orig, net, phi.getPhi(), false, nbFlowFormulas));
     }
 
 }

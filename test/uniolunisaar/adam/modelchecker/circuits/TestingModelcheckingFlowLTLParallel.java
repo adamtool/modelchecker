@@ -18,12 +18,12 @@ import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.CounterExample.CounterExampleIterator;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
@@ -120,7 +120,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
 
         String formula = "A F out";
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
@@ -147,17 +147,17 @@ public class TestingModelcheckingFlowLTLParallel {
         ModelCheckerFlowLTL mc;
         ModelCheckingResult ret;
 
-        FlowFormula flowTrue = new FlowFormula(new LTLConstants.True());
-        FlowFormula flowFalse = new FlowFormula(new LTLConstants.False());
+        FlowLTLFormula flowTrue = new FlowLTLFormula(new LTLConstants.True());
+        FlowLTLFormula flowFalse = new FlowLTLFormula(new LTLConstants.False());
 
-        RunFormula f1 = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, new RunFormula(flowTrue, RunOperators.Binary.OR, flowFalse));
+        RunLTLFormula f1 = new RunLTLFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, new RunLTLFormula(flowTrue, RunOperators.Binary.OR, flowFalse));
 
         // show mcNet
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName(), false, true, true);
 //        settings.setOutputData(data);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f1, ModelCheckingResult.Satisfied.TRUE, settings);
 
-        RunFormula f2 = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, new RunFormula(flowTrue, RunOperators.Binary.AND, flowFalse));
+        RunLTLFormula f2 = new RunLTLFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, new RunLTLFormula(flowTrue, RunOperators.Binary.AND, flowFalse));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f2, ModelCheckingResult.Satisfied.TRUE, settings);
         net.setInitialTransit(init);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f1, ModelCheckingResult.Satisfied.TRUE, settings);
@@ -172,21 +172,21 @@ public class TestingModelcheckingFlowLTLParallel {
 
         LTLAtomicProposition fInit1 = new LTLAtomicProposition(init);
         LTLAtomicProposition fInit2 = new LTLAtomicProposition(init2);
-        RunFormula f3 = new RunFormula(fInit1, RunOperators.Binary.OR, fInit2);
-        RunFormula f4 = new RunFormula(fInit1, RunOperators.Binary.AND, fInit2);
+        RunLTLFormula f3 = new RunLTLFormula(fInit1, RunOperators.Binary.OR, fInit2);
+        RunLTLFormula f4 = new RunLTLFormula(fInit1, RunOperators.Binary.AND, fInit2);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f3, ModelCheckingResult.Satisfied.TRUE, settings);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f4, ModelCheckingResult.Satisfied.TRUE, settings);
 
-        FlowFormula flowInit1 = new FlowFormula(fInit1);
-        FlowFormula flowInit2 = new FlowFormula(fInit2);
+        FlowLTLFormula flowInit1 = new FlowLTLFormula(fInit1);
+        FlowLTLFormula flowInit2 = new FlowLTLFormula(fInit2);
 
-        RunFormula f5 = new RunFormula(flowInit1, RunOperators.Binary.OR, flowInit2);
-        RunFormula f6 = new RunFormula(flowInit1, RunOperators.Binary.AND, flowInit2);
+        RunLTLFormula f5 = new RunLTLFormula(flowInit1, RunOperators.Binary.OR, flowInit2);
+        RunLTLFormula f6 = new RunLTLFormula(flowInit1, RunOperators.Binary.AND, flowInit2);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f6, ModelCheckingResult.Satisfied.FALSE, data, settings);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f5, ModelCheckingResult.Satisfied.FALSE, settings);
 
-        RunFormula f7 = new RunFormula(new FlowFormula(new LTLFormula(fInit1, LTLOperators.Binary.AND, fInit2)));
-        RunFormula f8 = new RunFormula(new FlowFormula(new LTLFormula(fInit1, LTLOperators.Binary.OR, fInit2)));
+        RunLTLFormula f7 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(fInit1, LTLOperators.Binary.AND, fInit2)));
+        RunLTLFormula f8 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(fInit1, LTLOperators.Binary.OR, fInit2)));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f7, ModelCheckingResult.Satisfied.FALSE, settings);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f8, ModelCheckingResult.Satisfied.TRUE, settings);
 
@@ -200,13 +200,13 @@ public class TestingModelcheckingFlowLTLParallel {
         LTLAtomicProposition fOut1 = new LTLAtomicProposition(out1);
         LTLAtomicProposition ft = new LTLAtomicProposition(t);
 
-        RunFormula f9 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.AND, fInit2)));
-        RunFormula f10 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, fInit2)));
+        RunLTLFormula f9 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.AND, fInit2)));
+        RunLTLFormula f10 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, fInit2)));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f9, ModelCheckingResult.Satisfied.FALSE, settings);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f10, ModelCheckingResult.Satisfied.TRUE, settings);
 
-        RunFormula f11 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.AND, fInit2))); // A (t AND init2)
-        RunFormula f12 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.OR, fInit2)));
+        RunLTLFormula f11 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(ft, LTLOperators.Binary.AND, fInit2))); // A (t AND init2)
+        RunLTLFormula f12 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(ft, LTLOperators.Binary.OR, fInit2)));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f11, ModelCheckingResult.Satisfied.FALSE, settings);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f12, ModelCheckingResult.Satisfied.TRUE, settings);
 
@@ -232,10 +232,10 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f9, ModelCheckingResult.Satisfied.FALSE, settings);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f10, ModelCheckingResult.Satisfied.TRUE, settings);
 
-        RunFormula f13 = new RunFormula(new FlowFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, fOut2))));
+        RunLTLFormula f13 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLFormula(LTLOperators.Unary.F, fOut1), LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, fOut2))));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f13, ModelCheckingResult.Satisfied.TRUE, settings);
 
-        RunFormula f14 = new RunFormula(new FlowFormula(new LTLFormula(ft, LTLOperators.Binary.OR, new LTLAtomicProposition(t2))));
+        RunLTLFormula f14 = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(ft, LTLOperators.Binary.OR, new LTLAtomicProposition(t2))));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f14, ModelCheckingResult.Satisfied.FALSE, settings);
     }
 
@@ -248,8 +248,8 @@ public class TestingModelcheckingFlowLTLParallel {
         ModelCheckerFlowLTL mc;
         ModelCheckingResult ret;
 
-        FlowFormula flowF = new FlowFormula(new LTLConstants.True());
-        RunFormula f = new RunFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, flowF);
+        FlowLTLFormula flowF = new FlowLTLFormula(new LTLConstants.True());
+        RunLTLFormula f = new RunLTLFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, flowF);
 
         // show mcNet
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName(), false, true, true);
@@ -257,7 +257,7 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, ModelCheckingResult.Satisfied.TRUE, settings);
 
         net.setInitialTransit(init);
-        RunFormula f2 = new RunFormula(new FlowFormula(new LTLAtomicProposition(init)));
+        RunLTLFormula f2 = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(init)));
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f2, ModelCheckingResult.Satisfied.TRUE, settings);
 
     }
@@ -269,7 +269,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
-        RunFormula f;
+        RunLTLFormula f;
         ModelCheckingResult ret;
         String name;
 
@@ -306,7 +306,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         net = ToyExamples.createIntroductoryExample();
         settings.getAbcSettings().setDetailedCEX(true);
-        f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("E"))));
+        f = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(net.getPlace("E"))));
         ret = mc.check(net, f);
 //        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 //        System.out.println(ret.getCex().toString());
@@ -324,7 +324,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
 
         String formula;
-        RunFormula f;
+        RunLTLFormula f;
         ModelCheckingResult ret;
         String name;
 
@@ -378,11 +378,11 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createInitialTransit(tin, init);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
-        RunFormula formula;
+        RunLTLFormula formula;
         String name;
         ModelCheckingResult ret;
 
-        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(init))); // should be true since the first place of each chain is pIn
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(init))); // should be true since the first place of each chain is pIn
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 
 //        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -390,7 +390,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        settings.setOutputData(dataInCircuit);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, settings);
 
-        formula = new RunFormula(new FlowFormula(new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(init))));  //should still be true
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(init))));  //should still be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -429,14 +429,14 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName() + "_net", net, false);
 
-        RunFormula formula;
+        RunLTLFormula formula;
         String name;
         ModelCheckingResult ret;
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%    
-        RunFormula a1 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1)));
-        RunFormula a2 = new RunFormula(new FlowFormula(new LTLAtomicProposition(t2)));
-        formula = new RunFormula(a1, RunOperators.Binary.OR, a2); // should not hold since the newly created flow does not start with a transition, but a place
+        RunLTLFormula a1 = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(t1)));
+        RunLTLFormula a2 = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(t2)));
+        formula = new RunLTLFormula(a1, RunOperators.Binary.OR, a2); // should not hold since the newly created flow does not start with a transition, but a place
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 
 //        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -452,7 +452,7 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, dataInCircuit, settings);
 
         // %%%%%%% newly added (not done for all cases)
-        formula = new RunFormula(a1, RunOperators.Binary.OR, new FlowFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
+        formula = new RunLTLFormula(a1, RunOperators.Binary.OR, new FlowLTLFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -465,7 +465,7 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, settings);
 
         // %%%%%%%% newly added (not done for all cases)
-        formula = new RunFormula(new FlowFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -475,7 +475,7 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, settings);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new LTLAtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
+        formula = new RunLTLFormula(new LTLAtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -500,7 +500,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertNull(ret);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new LTLAtomicProposition(t2)); // should not hold since the flows starting in A and B
+        formula = new RunLTLFormula(new LTLAtomicProposition(t2)); // should not hold since the flows starting in A and B
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -526,7 +526,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertNotNull(ret);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(t1))); // should not hold since t2 generates a new one which directly dies
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
@@ -583,12 +583,12 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
-        RunFormula formula;
+        RunLTLFormula formula;
         String name;
         ModelCheckingResult ret;
 
         //%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(new FlowFormula(new LTLAtomicProposition(e))); // should not be true
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(e))); // should not be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //
 //        AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -631,8 +631,8 @@ public class TestingModelcheckingFlowLTLParallel {
         ILTLFormula inifintelyB = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlB));
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula(
-                new FlowFormula(
+        formula = new RunLTLFormula(
+                new FlowLTLFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, ltlB))); // should not be true since the new chain in F exists
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -659,8 +659,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
 //        Assert.assertNotNull(ret);
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula( // should not be true, since flow A->D->B
-                new FlowFormula(
+        formula = new RunLTLFormula( // should not be true, since flow A->D->B
+                new FlowLTLFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, ltlB))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -688,8 +688,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
 //        Assert.assertNotNull(ret);
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula( // should be true
-                new FlowFormula(
+        formula = new RunLTLFormula( // should be true
+                new FlowLTLFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.F, ltlB)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -716,8 +716,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
 //        Assert.assertNull(ret);// todo: it's a problem since when not init in the first step we could chose to consider the given chain, after the chain has started.
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula( // should be true since the infinitely B is the last place of the run and it is the whole time stuttering
-                new FlowFormula(
+        formula = new RunLTLFormula( // should be true since the infinitely B is the last place of the run and it is the whole time stuttering
+                new FlowLTLFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, inifintelyB))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -746,8 +746,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertNull(ret);// todo: it's a problem since when not init in the first step we could chose to consider the given chain, after the chain has started.
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         LTLAtomicProposition ltlD = new LTLAtomicProposition(d);
-        formula = new RunFormula( // should not be true since the net is finite and D is not a place of all final markings
-                new FlowFormula(
+        formula = new RunLTLFormula( // should not be true since the net is finite and D is not a place of all final markings
+                new FlowLTLFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -789,8 +789,8 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula( // should still be true, since the chains end in B
-                new FlowFormula(
+        formula = new RunLTLFormula( // should still be true, since the chains end in B
+                new FlowLTLFormula(
                         new LTLFormula(finallyE, LTLOperators.Binary.OR, new LTLFormula(finallyF, LTLOperators.Binary.OR, inifintelyB))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -821,8 +821,8 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertNull(ret);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula( // should still not be true since the chain in E terminates after one round
-                new FlowFormula(
+        formula = new RunLTLFormula( // should still not be true since the chain in E terminates after one round
+                new FlowLTLFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -860,8 +860,8 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunFormula( // should be true since now all apart of the newly created chain in F will be alive in each round
-                new FlowFormula(
+        formula = new RunLTLFormula( // should be true since now all apart of the newly created chain in F will be alive in each round
+                new FlowLTLFormula(
                         new LTLFormula(finallyF, LTLOperators.Binary.OR, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, ltlD)))));
         name = net.getName() + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
@@ -911,7 +911,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
         String formula;
         String name;
-        RunFormula f;
+        RunLTLFormula f;
         ModelCheckingResult ret;
 
         formula = "A F out";
@@ -957,7 +957,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
 
         String formula = "F out";
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
 //
 //        // check maximal initerleaving in the circuit
@@ -1002,7 +1002,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.saveAPT(outDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
 
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
 //
@@ -1032,7 +1032,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.saveAPT(outDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
 
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
 //
@@ -1060,7 +1060,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F pOut";
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
 //
 //        // check maximal initerleaving in the circuit
@@ -1086,7 +1086,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void redundantFlowExampleFix() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getUpdatingStillNotFixedMutexNetwork(1, 1);
-        RunFormula f = new RunFormula(
+        RunLTLFormula f = new RunLTLFormula(
                 new LTLFormula(LTLOperators.Unary.NEG,
                         new LTLFormula(LTLOperators.Unary.G,
                                 new LTLFormula(LTLOperators.Unary.F,
@@ -1094,7 +1094,7 @@ public class TestingModelcheckingFlowLTLParallel {
                                 )
                         )
                 ), RunOperators.Implication.IMP,
-                new FlowFormula(
+                new FlowLTLFormula(
                         new LTLFormula(LTLOperators.Unary.F,
                                 new LTLAtomicProposition(net.getPlace("out"))
                         ))
@@ -1125,7 +1125,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.saveAPT(outDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
 //        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outDir + net.getName() + "_init", false, false, true);
 //
 //        // check maximal initerleaving in the circuit
@@ -1193,7 +1193,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //                true, Abc.VerificationAlgo.IC3
 //        );
 //        ModelCheckingResult ret;
-        RunFormula f = new RunFormula(new FlowFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
+        RunLTLFormula f = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
         AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
 
         AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName(), false, false, true);
@@ -1238,7 +1238,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //                AigerRenderer.OptimizationsComplete.NONE,
 //                true, Abc.VerificationAlgo.IC3);
 //        ModelCheckingResult ret;
-        RunFormula f;
+        RunLTLFormula f;
         AdamCircuitFlowLTLMCStatistics stats;
 
         f = FlowLTLParser.parse(net, "𝔸 ◇ pOut");
@@ -1284,7 +1284,7 @@ public class TestingModelcheckingFlowLTLParallel {
         pnwt.createTransit(out, t, out);
 //        PNWTTools.savePnwt2PDF(outputDir+pnwt.getName(), pnwt, false);
 
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(out)));
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(out)));
 
 //        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
 //                LogicsTools.TransitionSemantics.OUTGOING,
@@ -1312,7 +1312,7 @@ public class TestingModelcheckingFlowLTLParallel {
         PNWTTools.saveAPT(outputDir + net.getName(), net, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("p6"))));
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("p6"))));
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,

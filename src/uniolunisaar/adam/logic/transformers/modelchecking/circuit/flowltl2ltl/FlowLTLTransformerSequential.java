@@ -8,7 +8,7 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.AtomicProposition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.FormulaUnary;
 import uniolunisaar.adam.ds.logics.IFormula;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
@@ -16,7 +16,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings.Stucking;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
@@ -249,7 +249,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
+    public ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
         boolean initFirst = settings.isInitFirst();
         boolean useNext = settings.isUseNextToReplaceXandTransitionsInRunPart();
         int nbFlowFormulas = useNext ? LogicsTools.getFlowFormulas(formula).size()
@@ -262,9 +262,9 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         IFormula f = replaceInRunFormula(orig, net, formula, nbFlowFormulas);
 
         // %%%%%%%%%%%%%%%%%  REPLACE WITHIN FLOW FORMULA
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
-            FlowFormula flowFormula = flowFormulas.get(i);
+            FlowLTLFormula flowFormula = flowFormulas.get(i);
             flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
 
             // %%%%%%%% NEWLY CREATED CHAINS CASE
@@ -335,7 +335,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
                         LTLOperators.Binary.OR,
                         skipTillActiveChain);
                 // %%%%% REPLACE THE FLOW FORMULA
-                f = f.substitute(flowFormulas.get(i), new RunFormula(flowLTL));
+                f = f.substitute(flowFormulas.get(i), new RunLTLFormula(flowLTL));
 
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);

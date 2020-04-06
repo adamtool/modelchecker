@@ -10,8 +10,8 @@ import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Token;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
@@ -59,7 +59,7 @@ public class PnwtAndFlowLTLtoPNParallelInhibitor extends PnwtAndFlowLTLtoPN {
         }
 
         // for all subformulas
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
         if (flowFormulas.isEmpty()) {
             // should not really be used, since the normal model checking should be used in these cases
             Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "."

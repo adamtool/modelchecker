@@ -5,7 +5,7 @@ import org.testng.Assert;
 import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerLTL;
@@ -154,7 +154,7 @@ public class TestModelCheckerTools {
             true,
             Abc.VerificationAlgo.IC3);
 
-    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunFormula f, ModelCheckingResult.Satisfied expectedResult, AdamCircuitFlowLTLMCOutputData data, AdamCircuitFlowLTLMCSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
+    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunLTLFormula f, ModelCheckingResult.Satisfied expectedResult, AdamCircuitFlowLTLMCOutputData data, AdamCircuitFlowLTLMCSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         int i = 0;
         for (AdamCircuitFlowLTLMCSettings setting : settings) {
             data.setPath(data.getPath() + "_" + (i++));
@@ -163,13 +163,13 @@ public class TestModelCheckerTools {
         }
     }
 
-    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
+    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunLTLFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         for (ModelCheckingSettings setting : settings) {
             checkFlowLTLFormulaOneSetting(pnwt, f, expectedResult, setting);
         }
     }
 
-    private static void checkFlowLTLFormulaOneSetting(PetriNetWithTransits pnwt, RunFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings setting) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
+    private static void checkFlowLTLFormulaOneSetting(PetriNetWithTransits pnwt, RunLTLFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings setting) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(setting);
         ModelCheckingResult ret = mc.check(pnwt, f);
         Assert.assertEquals(ret.getSatisfied(), expectedResult);
@@ -182,7 +182,7 @@ public class TestModelCheckerTools {
         testModelCheckerFlowLTL(net, FlowLTLParser.parse(net, formula), path, resMaxInterleaving, resMaxParallel);
     }
 
-    public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunFormula formula, String path, boolean resMaxInterleaving, boolean resMaxParallel) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunLTLFormula formula, String path, boolean resMaxInterleaving, boolean resMaxParallel) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         testModelCheckerFlowLTL(net, formula, path, Maximality.MAX_INTERLEAVING, resMaxInterleaving);
         testModelCheckerFlowLTL(net, formula, path, Maximality.MAX_CONCURRENT, resMaxParallel);
     }
@@ -191,7 +191,7 @@ public class TestModelCheckerTools {
         testModelCheckerFlowLTL(net, FlowLTLParser.parse(net, formula), path, max, result);
     }
 
-    public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunFormula formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static void testModelCheckerFlowLTL(PetriNetWithTransits net, RunLTLFormula formula, String path, Maximality max, boolean result) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings();
         settings.setMaximality(max);
 

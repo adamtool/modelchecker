@@ -8,20 +8,20 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.AtomicProposition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.FormulaBinary;
 import uniolunisaar.adam.ds.logics.FormulaUnary;
 import uniolunisaar.adam.ds.logics.IAtomicProposition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IFlowFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IFlowFormula;
 import uniolunisaar.adam.ds.logics.IFormula;
 import uniolunisaar.adam.ds.logics.IOperatorBinary;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.IRunFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunOperators;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPN;
@@ -37,9 +37,9 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
 
-    private static FlowFormula replaceNextInFlowFormulaParallel(PetriNetWithTransits orig, PetriNet net, FlowFormula flowFormula) {
+    private static FlowLTLFormula replaceNextInFlowFormulaParallel(PetriNetWithTransits orig, PetriNet net, FlowLTLFormula flowFormula) {
         ILTLFormula phi = flowFormula.getPhi();
-        return new FlowFormula(replaceNextWithinFlowFormulaParallel(orig, net, phi));
+        return new FlowLTLFormula(replaceNextWithinFlowFormulaParallel(orig, net, phi));
     }
 
     private static ILTLFormula replaceNextWithinFlowFormulaParallel(PetriNetWithTransits orig, PetriNet net, ILTLFormula phi) {
@@ -98,8 +98,8 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
             return phi;
         } else if (phi instanceof IFlowFormula) {
             return phi;
-        } else if (phi instanceof RunFormula) {
-            return new RunFormula(replaceNextWithinRunFormulaParallel(orig, net, ((RunFormula) phi).getPhi()));
+        } else if (phi instanceof RunLTLFormula) {
+            return new RunLTLFormula(replaceNextWithinRunFormulaParallel(orig, net, ((RunLTLFormula) phi).getPhi()));
         } else if (phi instanceof LTLFormula) {
             IFormula f = replaceNextWithinRunFormulaParallel(orig, net, ((LTLFormula) phi).getPhi());
             return new LTLFormula((ILTLFormula) f); // cast no problem since the next is replace by an LTLFormula
@@ -134,9 +134,9 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
                 return new LTLFormula((ILTLFormula) subst1, (LTLOperators.Binary) op, (ILTLFormula) subst2);
             } else if (phi instanceof IRunFormula) {
                 if (op instanceof RunOperators.Binary) {
-                    return new RunFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
+                    return new RunLTLFormula((IRunFormula) subst1, (RunOperators.Binary) op, (IRunFormula) subst2);
                 } else {
-                    return new RunFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
+                    return new RunLTLFormula((ILTLFormula) subst1, (RunOperators.Implication) op, (IRunFormula) subst2);
                 }
             }
         }
@@ -174,7 +174,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
             }
         }
 
-        List<FlowFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
         if (flowFormulas.size() > 1) {
             throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
         }
@@ -183,14 +183,14 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
                 // replace the places within the flow formula accordingly (the transitions can be replaced for the whole formula and is done later)
                 // NOT ANYMORE, do it later because of the next: and replace the flow formula by the ltl formula with G(initfl> 0)\vee LTL-Part-Of-FlowFormula
 //                IFormula flowF = ((FlowFormula) flowFormulas.get(0)).getPhi();
-                FlowFormula flowF = flowFormulas.get(0);
+                FlowLTLFormula flowF = flowFormulas.get(0);
                 // todo:  the replacements are expensive, think of going recursivly through the formula and replace it there accordingly
                 // Replace the place with the ones belonging to the guessing of the chain
                 for (Place place : orig.getPlaces()) {
                     if (net.containsNode(place.getId() + TOKENFLOW_SUFFIX_ID)) { // only if the place is part of the subnet                   
                         AtomicProposition p = new LTLAtomicProposition(place);
                         AtomicProposition psub = new LTLAtomicProposition(net.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID));
-                        flowF = (FlowFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
+                        flowF = (FlowLTLFormula) flowF.substitute(p, psub); // no cast error since the substitution of propositions should preserve the types of the formula
                     }
                 }
 
@@ -212,7 +212,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
 // VERSION: here we only consider runs where the initialization had been done
                 //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
                 ILTLFormula init = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID)));
-                f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
+                f = f.substitute(flowFormulas.get(0), new RunLTLFormula(new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, init),
                         LTLOperators.Binary.OR,
                         new LTLFormula(init, LTLOperators.Binary.U, flowF.getPhi()))));

@@ -11,7 +11,7 @@ import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
@@ -74,7 +74,7 @@ public class MCFlowLTLSeqGenerators {
         (new File(outputDirInFormula)).mkdirs();
 
         String formula;
-        RunFormula f;
+        RunLTLFormula f;
         ModelCheckingResult ret;
         String name;
 
@@ -128,7 +128,7 @@ public class MCFlowLTLSeqGenerators {
         PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(1, 1);
         String formula = "A F out";
 
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
         String name = net.getName() + "_" + f.toString().replace(" ", "");
         AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
