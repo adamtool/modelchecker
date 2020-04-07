@@ -1,40 +1,28 @@
-package uniolunisaar.adam.ds.modelchecking;
+package uniolunisaar.adam.ds.modelchecking.results;
 
+import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 
 /**
  *
  * @author Manuel Gieseking
  */
-public class ModelCheckingResult {
-
-    public enum Satisfied {
-        TRUE,
-        FALSE,
-        UNKNOWN
-    }
+public class LTLModelCheckingResult extends ModelCheckingResult {
 
     private CounterExample cex = null;
-    private Satisfied sat;
     private Abc.VerificationAlgo algo;
 
+    @Override
     public CounterExample getCex() {
         return cex;
     }
 
+    @Override
     public void setCex(CounterExample cex) {
         if (cex != null) {
             this.cex = cex;
-            sat = Satisfied.FALSE;
+            setSat(Satisfied.FALSE);
         }
-    }
-
-    public void setSat(Satisfied sat) {
-        this.sat = sat;
-    }
-
-    public Satisfied getSatisfied() {
-        return sat;
     }
 
     public Abc.VerificationAlgo getAlgo() {

@@ -1,6 +1,6 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,10 +13,10 @@ import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
@@ -26,7 +26,7 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
@@ -75,7 +75,7 @@ public class MCFlowLTLSeqGenerators {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F pOut";
@@ -98,7 +98,7 @@ public class MCFlowLTLSeqGenerators {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -106,7 +106,7 @@ public class MCFlowLTLSeqGenerators {
         AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
         settings.setOutputData(dataInFormula);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test
@@ -137,8 +137,8 @@ public class MCFlowLTLSeqGenerators {
         AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
         settings.setStatistics(stats);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
-        ModelCheckingResult ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        System.out.println(ret.getAlgo());
 //        System.out.println("ABC sec: " + stats.getAbc_sec());
     }

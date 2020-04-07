@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking;
+package uniolunisaar.adam.ds.modelchecking.cex;
 
 import java.util.ArrayList;
 import java.util.List;

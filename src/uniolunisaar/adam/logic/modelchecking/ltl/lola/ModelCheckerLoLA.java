@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.modelchecking.lola;
+package uniolunisaar.adam.logic.modelchecking.ltl.lola;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,9 +8,10 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
 import uniol.apt.io.renderer.impl.LoLAPNRenderer;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.exceptions.ExternalToolException;
+import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
@@ -19,7 +20,7 @@ import uniolunisaar.adam.tools.Logger;
  */
 public class ModelCheckerLoLA {
 
-    public static ModelCheckingResult check(PetriNet pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException, ExternalToolException {
+    public static LTLModelCheckingResult check(PetriNet pn, String formula, String path) throws RenderException, InterruptedException, FileNotFoundException, IOException, ExternalToolException {
         String file = new LoLAPNRenderer().render(pn);
 
         for (Transition t : pn.getTransitions()) {
@@ -48,7 +49,7 @@ public class ModelCheckerLoLA {
         final String json = path + ".json";
         final String state = path + "_witness_state.txt";
         final String witness_path = path + "_witness_path.txt";
-        final String lola = "lola";
+        final String lola = AdamProperties.getInstance().getProperty(AdamProperties.LOLA);
         // the following version doesn't care about fairness assumptions, cp:
         //  ./src/Exploration/LTLExploration.h:class LTLExploration // In this version, we do not care about fairness!!!!!!!
 //        final String lola = "/home/thewn/tools/mcc2019/lola-tool/lola_bin_mcc"; 
@@ -74,7 +75,7 @@ public class ModelCheckerLoLA {
         Logger.getInstance().addMessage(error, true);
 
 //        String result;
-        ModelCheckingResult mc = new ModelCheckingResult();
+        LTLModelCheckingResult mc = new LTLModelCheckingResult();
         try (FileInputStream inputStream = new FileInputStream(json)) {
             String output = IOUtils.streamToString(inputStream);
 //            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
@@ -102,11 +103,11 @@ public class ModelCheckerLoLA {
 //            String line = output.substring(value_idx, end_line);
             // %% END LoLA format (mcc2019 version)
             if (line.contains("true")) {
-                mc.setSat(ModelCheckingResult.Satisfied.TRUE);
+                mc.setSat(LTLModelCheckingResult.Satisfied.TRUE);
             } else if (line.contains("false")) {
-                mc.setSat(ModelCheckingResult.Satisfied.FALSE);
+                mc.setSat(LTLModelCheckingResult.Satisfied.FALSE);
             } else {
-                mc.setSat(ModelCheckingResult.Satisfied.UNKNOWN);
+                mc.setSat(LTLModelCheckingResult.Satisfied.UNKNOWN);
             }
             if (output.contains("witness state")) {
                 try (FileInputStream is = new FileInputStream(state)) {

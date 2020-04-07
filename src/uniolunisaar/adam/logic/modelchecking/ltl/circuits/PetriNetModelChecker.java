@@ -1,7 +1,7 @@
-package uniolunisaar.adam.logic.modelchecking.circuits;
+package uniolunisaar.adam.logic.modelchecking.ltl.circuits;
 
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
-import uniolunisaar.adam.ds.modelchecking.CounterExample;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.processHandling.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AbcSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.tools.processHandling.ProcessPool;
 import uniolunisaar.adam.util.AigerTools;
@@ -29,7 +29,7 @@ import uniolunisaar.adam.util.AigerTools;
 public class PetriNetModelChecker {
 
     @Deprecated
-    private static ModelCheckingResult checkSeparate(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    private static LTLModelCheckingResult checkSeparate(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         return Abc.call(settings, outputData, stats);
     }
 
@@ -47,14 +47,14 @@ public class PetriNetModelChecker {
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
     @Deprecated
-    public static ModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static LTLModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         AbcSettings settings = new AbcSettings(inputFile, abcParameters, true, null, new VerificationAlgo[]{alg});
         settings.setNet(net);
         return check(settings, data, net, null);
     }
 
     @Deprecated
-    public static ModelCheckingResult check(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static LTLModelCheckingResult check(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
         return checkSeparate(settings, outputData, net, stats);
     }
@@ -124,7 +124,7 @@ public class PetriNetModelChecker {
     }
 
     @Deprecated
-    public static ModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static LTLModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(path + net.getName(), false, false);
         CircuitAndLTLtoCircuit.createCircuit(renderer, formula, data, null, false, PetriNetExtensionHandler.getProcessFamilyID(net));
         String inputFile = path + net.getName() + ".aig";

@@ -8,19 +8,19 @@ import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerLTL;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerLTL;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -154,7 +154,7 @@ public class TestModelCheckerTools {
             true,
             Abc.VerificationAlgo.IC3);
 
-    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunLTLFormula f, ModelCheckingResult.Satisfied expectedResult, AdamCircuitFlowLTLMCOutputData data, AdamCircuitFlowLTLMCSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
+    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunLTLFormula f, LTLModelCheckingResult.Satisfied expectedResult, AdamCircuitFlowLTLMCOutputData data, AdamCircuitFlowLTLMCSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         int i = 0;
         for (AdamCircuitFlowLTLMCSettings setting : settings) {
             data.setPath(data.getPath() + "_" + (i++));
@@ -163,17 +163,17 @@ public class TestModelCheckerTools {
         }
     }
 
-    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunLTLFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
+    public static void checkFlowLTLFormulaWithSeveralSettings(PetriNetWithTransits pnwt, RunLTLFormula f, LTLModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings... settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         for (ModelCheckingSettings setting : settings) {
             checkFlowLTLFormulaOneSetting(pnwt, f, expectedResult, setting);
         }
     }
 
-    private static void checkFlowLTLFormulaOneSetting(PetriNetWithTransits pnwt, RunLTLFormula f, ModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings setting) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
+    private static void checkFlowLTLFormulaOneSetting(PetriNetWithTransits pnwt, RunLTLFormula f, LTLModelCheckingResult.Satisfied expectedResult, ModelCheckingSettings setting) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, NotConvertableException, ExternalToolException {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(setting);
-        ModelCheckingResult ret = mc.check(pnwt, f);
+        LTLModelCheckingResult ret = mc.check(pnwt, f);
         Assert.assertEquals(ret.getSatisfied(), expectedResult);
-        if (ret.getSatisfied() == ModelCheckingResult.Satisfied.FALSE) {
+        if (ret.getSatisfied() == LTLModelCheckingResult.Satisfied.FALSE) {
             Logger.getInstance().addMessage(ret.getCex().toString());
         }
     }
@@ -195,8 +195,8 @@ public class TestModelCheckerTools {
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings();
         settings.setMaximality(max);
 
-        ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
-        ModelCheckingResult check;
+        LTLModelCheckingResult.Satisfied sat = (result) ? LTLModelCheckingResult.Satisfied.TRUE : LTLModelCheckingResult.Satisfied.FALSE;
+        LTLModelCheckingResult check;
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(path, false, false, true);
 
         settings.setOutputData(data);
@@ -242,8 +242,8 @@ public class TestModelCheckerTools {
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         settings.setMaximality(max);
 
-        ModelCheckingResult.Satisfied sat = (result) ? ModelCheckingResult.Satisfied.TRUE : ModelCheckingResult.Satisfied.FALSE;
-        ModelCheckingResult check;
+        LTLModelCheckingResult.Satisfied sat = (result) ? LTLModelCheckingResult.Satisfied.TRUE : LTLModelCheckingResult.Satisfied.FALSE;
+        LTLModelCheckingResult check;
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(path, false, false, true);
         //%%%%%%%%%%%% sequential
         //%%%%% next semantics

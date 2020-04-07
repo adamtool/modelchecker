@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.settings;
+package uniolunisaar.adam.ds.modelchecking.settings.ltl;
 
 /**
  *
@@ -18,14 +18,26 @@ public class ModelCheckingSettings {
         SEQUENTIAL_INHIBITOR
     }
 
+//    public enum Logic {
+//        LTL,
+//        CTL
+//    }
     private Solver solver = Solver.ADAM_CIRCUIT;
+//    private Logic logic = Logic.LTL;
 
     ModelCheckingSettings(Solver solver) {
         this.solver = solver;
     }
 
+//    public ModelCheckingSettings(Solver solver, Logic logic) {
+//        this.solver = solver;
+//        this.logic = logic;
+//    }
     public Solver getSolver() {
         return solver;
     }
 
+//    public Logic getLogic() {
+//        return logic;
+//    }
 }

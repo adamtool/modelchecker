@@ -1,21 +1,21 @@
-package uniolunisaar.adam.logic.modelchecking.circuits;
+package uniolunisaar.adam.logic.modelchecking.ltl.circuits;
 
 import java.io.FileNotFoundException;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import java.io.IOException;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.LoLASettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.LoLASettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
-import uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA;
+import uniolunisaar.adam.logic.modelchecking.ltl.lola.ModelCheckerLoLA;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -42,7 +42,7 @@ public class ModelCheckerLTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriNet net, ILTLFormula formula) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
+    public LTLModelCheckingResult check(PetriNet net, ILTLFormula formula) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         switch (settings.getSolver()) {
             case ADAM_CIRCUIT:
                 AdamCircuitLTLMCSettings props = (AdamCircuitLTLMCSettings) settings;

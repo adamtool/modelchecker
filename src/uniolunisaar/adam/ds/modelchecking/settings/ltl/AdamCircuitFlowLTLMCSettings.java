@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.settings;
+package uniolunisaar.adam.ds.modelchecking.settings.ltl;
 
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;

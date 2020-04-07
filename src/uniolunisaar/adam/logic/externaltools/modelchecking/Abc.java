@@ -1,6 +1,6 @@
 package uniolunisaar.adam.logic.externaltools.modelchecking;
 
-import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AbcSettings;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -8,10 +8,10 @@ import java.io.PrintWriter;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import uniolunisaar.adam.ds.modelchecking.CounterExample;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.logic.modelchecking.circuits.CounterExampleParser;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.CounterExampleParser;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.processHandling.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
@@ -39,7 +39,7 @@ public class Abc {
         BMC3
     }
 
-    public static ModelCheckingResult call(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, AdamCircuitLTLMCStatistics stats) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+    public static LTLModelCheckingResult call(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, AdamCircuitLTLMCStatistics stats) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
         if (settings.getVerificationAlgos().length == 0) {
             throw new InvalidParameterException("At least one verification algorithm has to be given.");
         }
@@ -47,13 +47,13 @@ public class Abc {
             String outputFile = outputData.getPath() + ".cex";
             String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
                     settings.isCircuitReduction(), settings.getPreProcessing());
-            ModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
+            LTLModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
             result.setAlgo(settings.getVerificationAlgos()[0]);
             return result;
         }
         // Start all given verifier and falsifier in parallel, return when the first finished with a real result        
         final CountDownLatch latch = new CountDownLatch(1);
-        final ModelCheckingResult result = new ModelCheckingResult();
+        final LTLModelCheckingResult result = new LTLModelCheckingResult();
         for (VerificationAlgo verificationAlgo : settings.getVerificationAlgos()) {
             new Thread(new Runnable() {
                 @Override
@@ -62,8 +62,8 @@ public class Abc {
                         String outputFile = outputData.getPath() + ".cex";
                         String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
                                 settings.isCircuitReduction(), settings.getPreProcessing());
-                        ModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
-                        if (out.getSatisfied() != ModelCheckingResult.Satisfied.UNKNOWN) {
+                        LTLModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
+                        if (out.getSatisfied() != LTLModelCheckingResult.Satisfied.UNKNOWN) {
                             result.setCex(out.getCex());
                             result.setSat(out.getSatisfied());
                             result.setAlgo(verificationAlgo);
@@ -168,16 +168,16 @@ public class Abc {
         return abcOutput + "\nERRORS: " + procAbc.getErrors();
     }
 
-    private static ModelCheckingResult parseOutput(String path, String abcOutput, String cexOutputFile, AdamCircuitLTLMCStatistics stats, AbcSettings settings) throws ExternalToolException, IOException {
+    private static LTLModelCheckingResult parseOutput(String path, String abcOutput, String cexOutputFile, AdamCircuitLTLMCStatistics stats, AbcSettings settings) throws ExternalToolException, IOException {
         Logger.getInstance().addMessage("Parsing abc output ...", false);
         //todo: hack for checking the abc output
 //        Logger.getInstance().addMessage(abcOutput, false, true);
         // Parse the output to know the result of the model checking
-        ModelCheckingResult ret = new ModelCheckingResult();
+        LTLModelCheckingResult ret = new LTLModelCheckingResult();
         // for the falsifiers when they didn't finished
         if (abcOutput.contains("No output asserted in")) {
             Logger.getInstance().addWarning("The bound for the falsifier was not big enough.");
-            ret.setSat(ModelCheckingResult.Satisfied.UNKNOWN);
+            ret.setSat(LTLModelCheckingResult.Satisfied.UNKNOWN);
         } else if (!abcOutput.contains("Counter-example is not available")) {
             // has a counter example, ergo read it
             File f = new File(cexOutputFile);
@@ -186,7 +186,7 @@ public class Abc {
                 boolean liveness = abcOutput.contains("Output 1 of miter \"" + path + "\"" + " was asserted in frame");
                 CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(settings, cexOutputFile, new CounterExample(safety, liveness));
                 ret.setCex(cex);
-                ret.setSat(ModelCheckingResult.Satisfied.FALSE);
+                ret.setSat(LTLModelCheckingResult.Satisfied.FALSE);
                 if (!settings.isVerbose()) { // cleanup
                     Tools.deleteFile(cexOutputFile);
                 }
@@ -196,13 +196,13 @@ public class Abc {
                         + " Check the abc output for more information:\n" + abcOutput);
             }
         } else {
-            ret.setSat(ModelCheckingResult.Satisfied.TRUE);
+            ret.setSat(LTLModelCheckingResult.Satisfied.TRUE);
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
-            if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.FALSE)) {
+            if (ret.getSatisfied().equals(LTLModelCheckingResult.Satisfied.FALSE)) {
                 stats.setSatisfied(0);
-            } else if (ret.getSatisfied().equals(ModelCheckingResult.Satisfied.TRUE)) {
+            } else if (ret.getSatisfied().equals(LTLModelCheckingResult.Satisfied.TRUE)) {
                 stats.setSatisfied(1);
             }
             if (BenchmarksMC.EDACC) {

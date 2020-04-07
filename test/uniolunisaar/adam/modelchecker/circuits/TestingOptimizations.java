@@ -1,7 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import java.io.File;
 import java.io.IOException;
 import org.testng.Assert;
@@ -11,7 +11,7 @@ import uniol.apt.io.parser.ParseException;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.exceptions.ExternalToolException;
@@ -53,7 +53,7 @@ public class TestingOptimizations {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F pOut";
@@ -78,7 +78,7 @@ public class TestingOptimizations {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        System.out.println(statsGS.toString()
 //        );
 
@@ -100,7 +100,7 @@ public class TestingOptimizations {
 
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        System.out.println(statsGSEQ.toString());
     }
 

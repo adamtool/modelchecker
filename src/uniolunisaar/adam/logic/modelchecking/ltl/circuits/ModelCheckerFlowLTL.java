@@ -1,7 +1,7 @@
-package uniolunisaar.adam.logic.modelchecking.circuits;
+package uniolunisaar.adam.logic.modelchecking.ltl.circuits;
 
 import java.io.FileNotFoundException;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
@@ -20,12 +20,12 @@ import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2a
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.LoLASettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.LoLASettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
-import uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA;
+import uniolunisaar.adam.logic.modelchecking.ltl.lola.ModelCheckerLoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.PnAndFlowLTLtoCircuit;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.lola.FlowLTLTransformerLoLA;
@@ -54,7 +54,7 @@ public class ModelCheckerFlowLTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      * @throws uniolunisaar.adam.exceptions.ExternalToolException
      */
-    public ModelCheckingResult check(PetriNetWithTransits net, RunLTLFormula formula) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public LTLModelCheckingResult check(PetriNetWithTransits net, RunLTLFormula formula) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         switch (settings.getSolver()) {
             case ADAM_CIRCUIT:
                 AdamCircuitFlowLTLMCSettings props = (AdamCircuitFlowLTLMCSettings) settings;
@@ -92,7 +92,7 @@ public class ModelCheckerFlowLTL {
      * @throws IOException
      */
     @Deprecated
-    public static ModelCheckingResult checkWithParallelApproach(PetriNetWithTransits net, RunLTLFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
+    public static LTLModelCheckingResult checkWithParallelApproach(PetriNetWithTransits net, RunLTLFormula formula, String path, boolean previousSemantics) throws InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         Logger.getInstance().addMessage("Checking the net '" + net.getName() + "' for the formula '" + formula + "'.", true);
         PetriNetWithTransits gameMC = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         ILTLFormula formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, gameMC, formula);

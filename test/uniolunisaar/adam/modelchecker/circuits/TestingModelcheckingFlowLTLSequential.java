@@ -1,7 +1,7 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import java.io.File;
 import java.io.IOException;
 import org.testng.Assert;
@@ -25,17 +25,17 @@ import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
-import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING;
-import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering;
-import static uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
-import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL;
-import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
+import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING;
+import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering;
+import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach;
+import static uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach.SEQUENTIAL;
+import static uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.util.PNWTTools;
@@ -108,14 +108,14 @@ public class TestingModelcheckingFlowLTLSequential {
         init.setInitialToken(1);
 
         ModelCheckerFlowLTL mc;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
 
         FlowLTLFormula flowF = new FlowLTLFormula(new LTLConstants.True());
         RunLTLFormula f = new RunLTLFormula(new LTLAtomicProposition(init), RunOperators.Binary.AND, flowF);
 
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = true)
@@ -126,7 +126,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F out";
@@ -152,13 +152,13 @@ public class TestingModelcheckingFlowLTLSequential {
         ret = mc.check(net, f);
 //        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 //        System.out.println(ret.getCex().toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
 //        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 //        System.out.println(ret.getCex().toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createIntroductoryExample();
         settings.getAbcSettings().setDetailedCEX(true);
@@ -166,13 +166,13 @@ public class TestingModelcheckingFlowLTLSequential {
         ret = mc.check(net, f);
 //        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 //        System.out.println(ret.getCex().toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         settings.getAbcSettings().setDetailedCEX(false);
         ret = mc.check(net, f);
 //        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 //        System.out.println(ret.getCex().toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F pOut";
@@ -204,7 +204,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setStatistics(statsInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula        
         AdamCircuitFlowLTLMCStatistics statsInFormula = new AdamCircuitFlowLTLMCStatistics();
@@ -215,7 +215,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setStatistics(statsInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
 //        System.out.println(statsInCircuit.toString());
 //        System.out.println("-------");
@@ -236,7 +236,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         RunLTLFormula formula;
         String name;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 OUTGOING,
@@ -257,7 +257,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(init))));  //should still be true
         name = net.getName() + "_" + formula.toString().replace(" ", "");
@@ -267,7 +267,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = true)
@@ -303,7 +303,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         RunLTLFormula formula;
         String name;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 TransitionSemantics.OUTGOING,
@@ -330,7 +330,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         // %%%%%%% newly added (not done for all cases)
         formula = new RunLTLFormula(a1, RunOperators.Binary.OR, new FlowLTLFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
         name = net.getName() + "_" + formula.toString().replace(" ", "");
@@ -342,7 +342,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         // %%%%%%%% newly added (not done for all cases)
         formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
         name = net.getName() + "_" + formula.toString().replace(" ", "");
@@ -355,7 +355,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunLTLFormula(new LTLAtomicProposition(t1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
@@ -369,7 +369,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -380,7 +380,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -399,7 +399,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -411,7 +411,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -429,7 +429,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -440,7 +440,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -461,7 +461,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         RunLTLFormula formula;
         String name;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
 
         //%%%%%%%%%%%%%%%%%%%
         formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(e))); // should not be true
@@ -484,7 +484,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -496,7 +496,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -523,7 +523,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -535,7 +535,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -555,7 +555,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -566,7 +566,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -586,7 +586,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -597,7 +597,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -617,7 +617,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -628,7 +628,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -649,7 +649,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -660,7 +660,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -691,7 +691,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -702,7 +702,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -722,7 +722,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -733,7 +733,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -760,7 +760,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInCircuit + name, false);
@@ -771,7 +771,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, formula);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, formula, outputDirInFormula + name, false);
@@ -798,7 +798,7 @@ public class TestingModelcheckingFlowLTLSequential {
         String formula;
         String name;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
 
         formula = "A F out";
         f = FlowLTLParser.parse(net, formula);
@@ -820,7 +820,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // check interleaving in formula
         settings.setInitFirst(true);
@@ -828,7 +828,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -843,7 +843,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F out";
@@ -866,7 +866,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // check interleaving in formula
         settings.setInitFirst(true);
@@ -874,7 +874,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 ////        // without init
 ////        settings.setInitFirst(false);
 ////        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -947,7 +947,7 @@ public class TestingModelcheckingFlowLTLSequential {
         String formula;
         String name;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
 
         formula = "A F out ";
         f = FlowLTLParser.parse(net, formula);
@@ -969,7 +969,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -977,7 +977,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -992,7 +992,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F out";
@@ -1020,7 +1020,7 @@ public class TestingModelcheckingFlowLTLSequential {
 //        System.out.println(stats.toString());
 //        System.out.println(stats.getAbc_mem());
 //        System.out.println(stats.getAbc_sec());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -1028,7 +1028,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1042,7 +1042,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F pOut";
@@ -1065,7 +1065,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -1073,7 +1073,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1111,8 +1111,8 @@ public class TestingModelcheckingFlowLTLSequential {
 
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
-        ModelCheckingResult ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        LTLModelCheckingResult ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = false) // due to time
@@ -1123,7 +1123,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
         String formula;
         RunLTLFormula f;
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F out";
@@ -1148,7 +1148,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -1156,7 +1156,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1174,7 +1174,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -1182,7 +1182,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1201,7 +1201,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -1209,7 +1209,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1227,7 +1227,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -1235,7 +1235,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1254,7 +1254,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInCircuit);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         // maximality in formula
         settings.setInitFirst(true);
         settings.setMaximality(Maximality.MAX_INTERLEAVING);
@@ -1262,7 +1262,7 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(dataInFormula);
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        // without init
 //        settings.setInitFirst(false);
 //        ret = mc.check(net, f, outputDirInFormula + name, false);
@@ -1284,7 +1284,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 optCom,
                 true, VerificationAlgo.IC3
         );
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         RunLTLFormula f = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(net.getPlace("bureau"))));
         AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
 
@@ -1295,7 +1295,7 @@ public class TestingModelcheckingFlowLTLSequential {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
 //        System.out.println(stats.toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         settings = new AdamCircuitFlowLTLMCSettings(
                 TransitionSemantics.OUTGOING,
@@ -1311,7 +1311,7 @@ public class TestingModelcheckingFlowLTLSequential {
         mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
 //        System.out.println(stats.toString());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test(enabled = false) // due to time
@@ -1328,7 +1328,7 @@ public class TestingModelcheckingFlowLTLSequential {
                 optSys,
                 optCom,
                 true, VerificationAlgo.IC3);
-        ModelCheckingResult ret;
+        LTLModelCheckingResult ret;
         RunLTLFormula f;
         AdamCircuitFlowLTLMCStatistics stats;
 
@@ -1336,18 +1336,18 @@ public class TestingModelcheckingFlowLTLSequential {
         stats = new AdamCircuitFlowLTLMCStatistics();
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f); // takes some time
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         f = FlowLTLParser.parse(net, "𝔸 ⬜ pOut");
         stats = new AdamCircuitFlowLTLMCStatistics();
         ret = mc.check(net, f); // takes some time
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         f = FlowLTLParser.parse(net, "𝔸 ⬜ sw002fwdTosw000");
 
         stats = new AdamCircuitFlowLTLMCStatistics();
         ret = mc.check(net, f);  // takes some time
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test
@@ -1388,8 +1388,8 @@ public class TestingModelcheckingFlowLTLSequential {
         settings.setOutputData(new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, false)); // Todo: error when this is not added.
 
         ModelCheckerFlowLTL checker = new ModelCheckerFlowLTL(settings);
-        ModelCheckingResult res = checker.check(pnwt, formula);
+        LTLModelCheckingResult res = checker.check(pnwt, formula);
 //        System.out.println(stats.getMc_formula());
-        Assert.assertEquals(res.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(res.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 }

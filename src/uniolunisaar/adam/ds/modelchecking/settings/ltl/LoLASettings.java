@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.settings;
+package uniolunisaar.adam.ds.modelchecking.settings.ltl;
 
 /**
  *

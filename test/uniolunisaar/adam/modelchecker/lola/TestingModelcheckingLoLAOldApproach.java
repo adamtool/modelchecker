@@ -9,14 +9,14 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.util.PNWTTools;
-import static uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA.check;
+import static uniolunisaar.adam.logic.modelchecking.ltl.lola.ModelCheckerLoLA.check;
 import uniolunisaar.adam.logic.transformers.modelchecking.lola.FlowLTLTransformerLoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
 import uniolunisaar.adam.tools.Logger;
@@ -81,12 +81,12 @@ public class TestingModelcheckingLoLAOldApproach {
 
         // test finite        
         PNWTTools.savePnwt2PDF(game.getName() + "_finite", game, true);
-        ModelCheckingResult ret = check(game, "A(inA > 0)", "./testing");
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        LTLModelCheckingResult ret = check(game, "A(inA > 0)", "./testing");
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
         ret = check(game, "A(X(out > 0))", "./testing");
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
         ret = check(game, "A(X(X(out > 0)))", "./testing");
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); // this means LoLA is not stuttering at the end
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE); // this means LoLA is not stuttering at the end
 
         Place init2 = game.createPlace("inB");
         init2.setInitialToken(1);
@@ -94,7 +94,7 @@ public class TestingModelcheckingLoLAOldApproach {
         game.createFlow(init2, t);
         game.createFlow(t, init2);
         ret = check(game, "A(X(out > 0))", "./testing");
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); // this means LoLA considers the interleaving semantics also for the next
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE); // this means LoLA considers the interleaving semantics also for the next
 
 //
 //        Place init2 = game.createPlace("inB");
@@ -128,8 +128,8 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
-        ModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
         PNWTTools.saveAPT(net.getName(), net, false);
@@ -137,7 +137,7 @@ public class TestingModelcheckingLoLAOldApproach {
         mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
     }
 
@@ -149,8 +149,8 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
-        ModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test
@@ -161,8 +161,8 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
-        ModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
     }
 

@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.modelchecking.circuits;
+package uniolunisaar.adam.logic.modelchecking.ltl.circuits;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,9 +11,9 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import static uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister.STUTT_LATCH;
-import uniolunisaar.adam.ds.modelchecking.CounterExample;
-import uniolunisaar.adam.ds.modelchecking.CounterExampleElement;
-import uniolunisaar.adam.ds.modelchecking.settings.AbcSettings;
+import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
+import uniolunisaar.adam.ds.modelchecking.cex.CounterExampleElement;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AbcSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegisterLogTrans;
 import uniolunisaar.adam.tools.IOUtils;

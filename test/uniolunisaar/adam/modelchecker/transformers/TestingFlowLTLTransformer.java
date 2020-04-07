@@ -23,9 +23,9 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
-import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.PetriNetModelChecker;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl.FlowLTLTransformerSequential;
@@ -108,8 +108,8 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        ModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING, net), formula, outputDir + net.getName(), "");
-        Assert.assertEquals(output.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        LTLModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING, net), formula, outputDir + net.getName(), "");
+        Assert.assertEquals(output.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test
@@ -157,8 +157,8 @@ public class TestingFlowLTLTransformer {
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
 
-        ModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING, game), formula, outputDir + game.getName(), "");
-        Assert.assertEquals(output.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING, game), formula, outputDir + game.getName(), "");
+        Assert.assertEquals(output.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // new version
         String formula2 = FlowLTLTransformerHyperLTL.toMCHyperFormat(f);
