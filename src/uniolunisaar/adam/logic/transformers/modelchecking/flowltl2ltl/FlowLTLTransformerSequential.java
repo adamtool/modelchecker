@@ -252,7 +252,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     public ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
         boolean initFirst = settings.isInitFirst();
         boolean useNext = settings.isUseNextToReplaceXandTransitionsInRunPart();
-        int nbFlowFormulas = useNext ? LogicsTools.getFlowFormulas(formula).size()
+        int nbFlowFormulas = useNext ? LogicsTools.getFlowLTLFormulas(formula).size()
                 : // todo: maybe expensive, could make this smarter
                 -1;
 
@@ -262,7 +262,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         IFormula f = replaceInRunFormula(orig, net, formula, nbFlowFormulas);
 
         // %%%%%%%%%%%%%%%%%  REPLACE WITHIN FLOW FORMULA
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
             FlowLTLFormula flowFormula = flowFormulas.get(i);
             flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
@@ -343,7 +343,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         }
 
         // %%%%%%%%%% GENERAL FORMULA
-        ILTLFormula ret = LogicsTools.convert(f);
+        ILTLFormula ret = LogicsTools.convert2LTL(f);
         // %%%%%%%%%%%%%%%% JUMP OVER INITIALIZATION
         // The formula does not have to hold in the initilisation phase
         if (initFirst) {

@@ -80,10 +80,10 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                 + " initialization first step: " + initFirst, true);
 
         // If we have the LTL fragment just use the standard LTLModelchecker
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(formula);
         if (flowFormulas.isEmpty()) {
             Logger.getInstance().addMessage("There is no flow formula within '" + formula.toSymbolString() + "'. Thus, we use the standard model checking algorithm for LTL.");
-            return PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, LogicsTools.convert(formula), settings);
+            return PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, LogicsTools.convert2LTL(formula), settings);
         }
 
         // Add Fairness

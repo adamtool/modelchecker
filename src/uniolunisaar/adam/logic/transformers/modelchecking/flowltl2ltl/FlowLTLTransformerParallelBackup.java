@@ -174,7 +174,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
             }
         }
 
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(f);
         if (flowFormulas.size() > 1) {
             throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
         }
@@ -205,7 +205,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
 //                        new LTLFormula(LTLOperators.Unary.G, init),
 //                        LTLOperators.Binary.OR,
 //                        new LTLFormula(init, LTLOperators.Binary.U, flowF.getPhi()))));
-//                ILTLFormula retF = convert(f);
+//                ILTLFormula retF = convert2LTL(f);
 //                //INITPLACES: should skip the first init step
 //                retF = new LTLFormula(LTLOperators.Unary.X, retF);
 //// END VERSION
@@ -216,7 +216,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
                         new LTLFormula(LTLOperators.Unary.G, init),
                         LTLOperators.Binary.OR,
                         new LTLFormula(init, LTLOperators.Binary.U, flowF.getPhi()))));
-                ILTLFormula retF = LogicsTools.convert(f);
+                ILTLFormula retF = LogicsTools.convert2LTL(f);
                 //INITPLACES: should skip the first init step (since we cannot force that the first step is really done, we omit those runs)
                 //              so only consider the runs where in the next step init not holds
                 retF = new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID)),
@@ -228,7 +228,7 @@ public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
             }
         } else {
             Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
-            return LogicsTools.convert(f);
+            return LogicsTools.convert2LTL(f);
         }
     }
 

@@ -370,7 +370,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
 //        System.out.println("before "+formula.toString());
         boolean initFirst = settings.isInitFirst();
         boolean useNext = settings.isUseNextToReplaceXandTransitionsInRunPart();
-        int nbFlowFormulas = useNext ? LogicsTools.getFlowFormulas(formula).size()
+        int nbFlowFormulas = useNext ? LogicsTools.getFlowLTLFormulas(formula).size()
                 : // todo: maybe expensive, could make this smarter
                 -1;
         // %%%%%%%%%%%%%%%%%  RUN REPLACE TRANSITIONS
@@ -381,7 +381,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
         // %%%%%%%%%%%%%%%%% FLOW PART
 //        List<AtomicProposition> allInitTransitions = new ArrayList<>();
 //        List<LTLFormula> allInitPlaces = new ArrayList<>();
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(f);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(f);
         for (int i = 0; i < flowFormulas.size(); i++) {
             // %%%%%%%%%%%%%%%%%%% FLOW REPLACE PLACES
             FlowLTLFormula flowFormula = flowFormulas.get(i);
@@ -497,7 +497,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
 //            }
         }
 
-        ILTLFormula ret = LogicsTools.convert(f);
+        ILTLFormula ret = LogicsTools.convert2LTL(f);
 
         // %%%%%%%%%%%%%%%% JUMP OVER INITIALIZATION
         if (initFirst) {

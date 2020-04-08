@@ -8,7 +8,6 @@ import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.util.PNWTTools;
 
 /**
  *

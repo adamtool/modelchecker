@@ -38,7 +38,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
 
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
             addSubFlowFormulaNet(orig, out, nb_ff, initFirstStep);
@@ -348,7 +348,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
         }
 
         // Add a subnet for each flow formula where each run of this subnet represents a flow chain of the original net
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // create an initial place representing the chosen place
             Place init = out.createPlace(INIT_TOKENFLOW_ID + "-" + nb_ff);
@@ -620,7 +620,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
         // or on a place where the transitions which start new token chains have to start from
         // after deciding which new chain should start or that a new chain should be started later by a transition
         // we put back the initial marking.
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowFormulas(formula);
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // create an initial place representing the chosen place
             Place init = out.createPlace(INIT_TOKENFLOW_ID + "-" + nb_ff);
