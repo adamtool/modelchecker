@@ -1,14 +1,17 @@
 package uniolunisaar.adam.logic.externaltools.modelchecking;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.CTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.AdamProperties;
+import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.tools.processHandling.ExternalProcessHandler;
@@ -54,53 +57,58 @@ public class LoLA {
 
         CTLModelcheckingResult result = new CTLModelcheckingResult(procHandlerLoLA.getOutput(), procHandlerLoLA.getErrors());
 
-//
-////        String result;
-//        LTLModelCheckingResult mc = new LTLModelCheckingResult();
-//        try (FileInputStream inputStream = new FileInputStream(json)) {
-//            String output = IOUtils.streamToString(inputStream);
-////            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
-////            System.out.println(output);
-////            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
-//            // %%% START OLD LoLA format parsing
-//            int start_idx = output.indexOf("result");
-//            int endA_idx = output.indexOf('}', start_idx);
-//            int endB_idx = output.indexOf(',', start_idx);
-//            int end_idx = (endA_idx < endB_idx) ? endA_idx : endB_idx;
-//            if (start_idx == -1) { // no result found
-//                int idx = output.indexOf("error");
-//                if (idx != -1) {
-//                    throw new ExternalToolException("LoLA: \"" + output.substring(idx, output.indexOf(",", idx)));
-//                }
-//                throw new ExternalToolException("LoLA ended unexpectedly");
-//            }
-//            String line = output.substring(start_idx, end_idx);
-//            // %% END OLD LoLA format            
-//
-//            // %% NEW LoLA format (mcc2019 version)
+        try (FileInputStream inputStream = new FileInputStream(settings.getJsonPath())) {
+            String output = IOUtils.streamToString(inputStream);
+//            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
+//            System.out.println(output);
+//            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
+            // %%% START OLD LoLA format parsing
+            int start_idx = output.indexOf("result");
+            int endA_idx = output.indexOf('}', start_idx);
+            int endB_idx = output.indexOf(',', start_idx);
+            int end_idx = (endA_idx < endB_idx) ? endA_idx : endB_idx;
+            if (start_idx == -1) { // no result found
+                int idx = output.indexOf("error");
+                if (idx != -1) {
+                    throw new ExternalToolException("LoLA: \"" + output.substring(idx, output.indexOf(",", idx)));
+                }
+                throw new ExternalToolException("LoLA ended unexpectedly");
+            }
+            String line = output.substring(start_idx, end_idx);
+            // %% END OLD LoLA format            
+
+            // %% NEW LoLA format (mcc2019 version)
 ////            int result_idx = output.indexOf("result");
 ////            int value_idx = output.indexOf("value", result_idx);
 ////            int end_line = output.indexOf("\n", value_idx);
 ////            String line = output.substring(value_idx, end_line);
 //            // %% END LoLA format (mcc2019 version)
-//            if (line.contains("true")) {
-//                mc.setSat(LTLModelCheckingResult.Satisfied.TRUE);
-//            } else if (line.contains("false")) {
-//                mc.setSat(LTLModelCheckingResult.Satisfied.FALSE);
-//            } else {
-//                mc.setSat(LTLModelCheckingResult.Satisfied.UNKNOWN);
-//            }
-//            if (output.contains("witness state")) {
-//                try (FileInputStream is = new FileInputStream(state)) {
+            if (line.contains("true")) {
+                result.setSat(ModelCheckingResult.Satisfied.TRUE);
+            } else if (line.contains("false")) {
+                result.setSat(ModelCheckingResult.Satisfied.FALSE);
+            } else {
+                result.setSat(ModelCheckingResult.Satisfied.UNKNOWN);
+            }
+            if (output.contains("witness state")) {
+                try (FileInputStream is = new FileInputStream(settings.getWitnessStatePath())) {
+                    String state = IOUtils.streamToString(is);
+                    if (!state.isEmpty()) {
+                        result.setWitnessState(state);
+                    }
 //                    Logger.getInstance().addMessage("Witness state: " + IOUtils.streamToString(is), true);
-//                }
-//            }
-//            if (output.contains("witness path")) {
-//                try (FileInputStream is = new FileInputStream(witness_path)) {
+                }
+            }
+            if (output.contains("witness path")) {
+                try (FileInputStream is = new FileInputStream(settings.getWitnessPathPath())) {
 //                    Logger.getInstance().addMessage("Witness path: " + IOUtils.streamToString(is), true);
-//                }
-//            }
-//        }
+                    String path = IOUtils.streamToString(is);
+                    if (!path.isEmpty()) {
+                        result.setWitnessPath(path);
+                    }
+                }
+            }
+        }
         if (!settings.isVerbose()) { // cleanup
             Tools.deleteFile(settings.getJsonPath());
             Tools.deleteFile(settings.getWitnessStatePath());

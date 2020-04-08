@@ -32,10 +32,10 @@ import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSetti
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering;
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
-import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach;
-import static uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach.SEQUENTIAL;
-import static uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
+import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL;
+import static uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.util.PNWTTools;

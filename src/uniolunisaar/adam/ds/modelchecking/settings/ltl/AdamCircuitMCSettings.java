@@ -1,5 +1,6 @@
 package uniolunisaar.adam.ds.modelchecking.settings.ltl;
 
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;

@@ -10,6 +10,8 @@ public class CTLModelcheckingResult extends ModelCheckingResult {
 
     private final String lolaOutput;
     private final String lolaError;
+    private String witnessState = null;
+    private String witnessPath = null;
 
     public CTLModelcheckingResult(String lolaOutput, String lolaError) {
         this.lolaOutput = lolaOutput;
@@ -32,6 +34,22 @@ public class CTLModelcheckingResult extends ModelCheckingResult {
 
     public String getLolaError() {
         return lolaError;
+    }
+
+    public String getWitnessState() {
+        return witnessState;
+    }
+
+    public void setWitnessState(String witnessState) {
+        this.witnessState = witnessState;
+    }
+
+    public String getWitnessPath() {
+        return witnessPath;
+    }
+
+    public void setWitnessPath(String witnessPath) {
+        this.witnessPath = witnessPath;
     }
 
 }

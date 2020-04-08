@@ -1,5 +1,7 @@
 package uniolunisaar.adam.ds.modelchecking.settings.ltl;
 
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+
 /**
  *
  * @author Manuel Gieseking

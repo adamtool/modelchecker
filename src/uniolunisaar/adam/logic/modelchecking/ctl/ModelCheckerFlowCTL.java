@@ -2,20 +2,22 @@ package uniolunisaar.adam.logic.modelchecking.ctl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import uniol.apt.adt.pn.PetriNet;
-import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
-import uniol.apt.io.renderer.impl.LoLAPNRenderer;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
-import uniolunisaar.adam.ds.modelchecking.settings.ctl.CTLLoLAModelcheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
+import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.LoLA;
-import uniolunisaar.adam.util.PNTools;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNParallelInhibitor;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNSequentialInhibitor;
 
 /**
  *
@@ -23,9 +25,9 @@ import uniolunisaar.adam.util.PNTools;
  */
 public class ModelCheckerFlowCTL {
 
-    private final CTLLoLAModelcheckingSettings settings;
+    private final FlowCTLLoLAModelcheckingSettings settings;
 
-    public ModelCheckerFlowCTL(CTLLoLAModelcheckingSettings settings) {
+    public ModelCheckerFlowCTL(FlowCTLLoLAModelcheckingSettings settings) {
         this.settings = settings;
     }
 
@@ -41,25 +43,29 @@ public class ModelCheckerFlowCTL {
      * @throws java.lang.InterruptedException
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      */
-    public CTLModelcheckingResult check(PetriNet net, ICTLFormula formula) throws RenderException, FileNotFoundException, NotConvertableException, ExternalToolException, InterruptedException, IOException, ProcessNotStartedException {
-
-        // Render the net in LoLA syntax into a file
-        String file = new LoLAPNRenderer().render(net);
-        //net add the fairness additionally (the APT renderer don't handle this)
-        for (Transition t : net.getTransitions()) {
-            if (PetriNetExtensionHandler.isWeakFair(t)) {
-                file = file.replaceAll("TRANSITION " + t.getId() + "\n", "TRANSITION " + t.getId() + " WEAK FAIR\n");
-            }
-            if (PetriNetExtensionHandler.isStrongFair(t)) {
-                file = file.replaceAll("TRANSITION " + t.getId() + "\n", "TRANSITION " + t.getId() + " STRONG FAIR\n");
-            }
+    public CTLModelcheckingResult check(PetriNetWithTransits net, RunCTLFormula formula) throws RenderException, FileNotFoundException, NotConvertableException, ExternalToolException, InterruptedException, IOException, ProcessNotStartedException {
+        // transform the net        
+        PetriNet mcNet;
+        switch (settings.getApproach()) { // todo: choose extra algos dependent on number flow formulas
+            case PARALLEL:
+                mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+                break;
+            case PARALLEL_INHIBITOR:
+                mcNet = PnwtAndFlowLTLtoPNParallelInhibitor.createNet4ModelCheckingParallel(net, formula);
+                break;
+            case SEQUENTIAL:
+                mcNet = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
+                break;
+            case SEQUENTIAL_INHIBITOR:
+                mcNet = PnwtAndFlowLTLtoPNSequentialInhibitor.createNet4ModelCheckingSequential(net, formula, true);
+                break;
+            default:
+                throw new NotConvertableException("Didn't consider the approach: " + settings.getApproach().name());
         }
-        String path = settings.getOutputPath() + ".lola";
-        try (PrintStream out = new PrintStream(path)) {
-            out.println(file);
-        }
-        PNTools.annotateProcessFamilyID(net);
-        return LoLA.call(path, formula.toLoLA(), settings, PetriNetExtensionHandler.getProcessFamilyID(net));
+        // transform the formula
+        ICTLFormula f=null;
+        String path = ModelCheckerCTL.renderLoLAtoFile(mcNet, settings);
+        return LoLA.call(path, f.toLoLA(), settings, PetriNetExtensionHandler.getProcessFamilyID(net));
     }
 
 }

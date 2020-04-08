@@ -19,7 +19,7 @@ public class CTLLoLAModelcheckingSettings extends CTLModelcheckingSettings {
 //        witnessPathPath = outputPath + "_witness.txt";
 //    }
     public CTLLoLAModelcheckingSettings(String outputPath) {
-        super(outputPath);
+        super(Solver.LOLA, outputPath);
         jsonPath = outputPath + ".json";
         witnessStatePath = outputPath + "_witness_state.txt";
         witnessPathPath = outputPath + "_witness.txt";
@@ -40,5 +40,4 @@ public class CTLLoLAModelcheckingSettings extends CTLModelcheckingSettings {
 //    public String getFamilyID() {
 //        return familyID;
 //    }
-
 }

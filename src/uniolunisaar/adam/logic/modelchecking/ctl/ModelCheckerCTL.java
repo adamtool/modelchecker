@@ -42,7 +42,11 @@ public class ModelCheckerCTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      */
     public CTLModelcheckingResult check(PetriNet net, ICTLFormula formula) throws RenderException, FileNotFoundException, NotConvertableException, ExternalToolException, InterruptedException, IOException, ProcessNotStartedException {
+        String path = renderLoLAtoFile(net, settings);
+        return LoLA.call(path, formula.toLoLA(), settings, PetriNetExtensionHandler.getProcessFamilyID(net));
+    }
 
+    public static String renderLoLAtoFile(PetriNet net, CTLLoLAModelcheckingSettings settings) throws FileNotFoundException, RenderException {
         // Render the net in LoLA syntax into a file
         String file = new LoLAPNRenderer().render(net);
         //net add the fairness additionally (the APT renderer don't handle this)
@@ -59,7 +63,7 @@ public class ModelCheckerCTL {
             out.println(file);
         }
         PNTools.annotateProcessFamilyID(net);
-        return LoLA.call(path, formula.toLoLA(), settings, PetriNetExtensionHandler.getProcessFamilyID(net));
+        return path;
     }
 
 }

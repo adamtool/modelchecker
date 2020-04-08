@@ -31,7 +31,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
-import uniolunisaar.adam.ds.modelchecking.settings.ltl.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;

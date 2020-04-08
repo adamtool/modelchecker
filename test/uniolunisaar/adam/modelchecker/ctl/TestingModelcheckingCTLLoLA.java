@@ -1,7 +1,6 @@
 package uniolunisaar.adam.modelchecker.ctl;
 
 import java.io.File;
-import java.io.IOException;
 import org.testng.Assert;
 
 import org.testng.annotations.BeforeClass;
@@ -9,8 +8,6 @@ import org.testng.annotations.Test;
 
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniol.apt.io.parser.ParseException;
-import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
@@ -18,8 +15,6 @@ import uniolunisaar.adam.ds.modelchecking.settings.ctl.CTLLoLAModelcheckingSetti
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
-import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerCTL;
 import uniolunisaar.adam.logic.parser.logics.flowctl.FlowCTLParser;
 import uniolunisaar.adam.tools.Logger;
@@ -82,45 +77,93 @@ public class TestingModelcheckingCTLLoLA {
 
         CTLLoLAModelcheckingSettings settings = new CTLLoLAModelcheckingSettings(outputDir + net.getName());
         ModelCheckerCTL mc = new ModelCheckerCTL(settings);
+
+        String witnessPath, witnessState;
+
         RunCTLFormula formula = FlowCTLParser.parse(net, "AF TRUE");
         CTLModelcheckingResult result = mc.check(net, formula.toCTLFormula());
-        Logger.getInstance().addMessage("ERROR:");
-        Logger.getInstance().addMessage(result.getLolaError());
-        Logger.getInstance().addMessage("OUTPUT:");
-        Logger.getInstance().addMessage(result.getLolaOutput());
-//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = FlowCTLParser.parse(net, "EF out");
         result = mc.check(net, formula.toCTLFormula());
-        Logger.getInstance().addMessage("ERROR:");
-        Logger.getInstance().addMessage(result.getLolaError());
-        Logger.getInstance().addMessage("OUTPUT:");
-        Logger.getInstance().addMessage(result.getLolaOutput());
-//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = FlowCTLParser.parse(net, "AF out");
         result = mc.check(net, formula.toCTLFormula());
-        Logger.getInstance().addMessage("ERROR:");
-        Logger.getInstance().addMessage(result.getLolaError());
-        Logger.getInstance().addMessage("OUTPUT:");
-        Logger.getInstance().addMessage(result.getLolaOutput());
-//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.FALSE); // should be TRUE for concurrency maximality
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); // should be TRUE for concurrency maximality
 
         PetriNetExtensionHandler.setWeakFair(tstolen);
         result = mc.check(net, formula.toCTLFormula());
-        Logger.getInstance().addMessage("ERROR:");
-        Logger.getInstance().addMessage(result.getLolaError());
-        Logger.getInstance().addMessage("OUTPUT:");
-        Logger.getInstance().addMessage(result.getLolaOutput());
-//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
         formula = FlowCTLParser.parse(net, "A(inittfl U out)");
         result = mc.check(net, formula.toCTLFormula());
-        Logger.getInstance().addMessage("ERROR:");
-        Logger.getInstance().addMessage(result.getLolaError());
-        Logger.getInstance().addMessage("OUTPUT:");
-        Logger.getInstance().addMessage(result.getLolaOutput());
-//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
 //    @Test(enabled = true)
