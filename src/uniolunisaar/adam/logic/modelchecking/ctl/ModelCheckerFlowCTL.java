@@ -18,6 +18,7 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.LoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTransformerParallel;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNParInhibitorNoInit;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -74,6 +75,7 @@ public class ModelCheckerFlowCTL {
                 throw new NotConvertableException("Didn't consider the approach: " + settings.getApproach().name());
         }
         if (settings.isVerbose()) { // todo: should add an additional flag
+            Logger.getInstance().addMessage(f.toSymbolString(), true);
             // color all original places
             for (Place p : mcNet.getPlaces()) {
                 if (!mcNet.hasPartition(p)) {

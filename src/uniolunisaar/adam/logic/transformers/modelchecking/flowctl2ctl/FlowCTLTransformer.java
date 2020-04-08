@@ -13,11 +13,8 @@ import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
-import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.IFlowFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 
 /**
@@ -37,9 +34,6 @@ public class FlowCTLTransformer {
     ICTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, CTLAtomicProposition phi, int nb_ff) throws NotConvertableException {
         return phi;
     }
-//    ILTLFormula replaceIAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, ILTLFormula phi, int nb_ff, boolean scopeEventually) {
-//        return phi;
-//    }
 
     ICTLFormula replaceCTLFormulaInFlowFormula(PetriNet orig, PetriNet net, CTLFormula phi, int nb_ff) throws NotConvertableException {
         return new CTLFormula(replaceInFlowFormula(orig, net, phi.getPhi(), nb_ff));
@@ -60,9 +54,9 @@ public class FlowCTLTransformer {
     ICTLFormula replaceInFlowFormula(PetriNet orig, PetriNet net, ICTLFormula phi, int nb_ff) throws NotConvertableException {
         if (phi instanceof Constants) {
             return replaceConstantInFlowFormula(orig, net, phi, nb_ff);
-        } else if (phi instanceof LTLAtomicProposition) {
+        } else if (phi instanceof CTLAtomicProposition) {
             return replaceAtomicPropositionInFlowFormula(orig, net, (CTLAtomicProposition) phi, nb_ff);
-        } else if (phi instanceof LTLFormula) {
+        } else if (phi instanceof CTLFormula) {
             return replaceCTLFormulaInFlowFormula(orig, net, (CTLFormula) phi, nb_ff);
         } else if (phi instanceof FormulaUnary) {
             FormulaUnary<ICTLFormula, CTLOperators.Unary> castPhi = (FormulaUnary<ICTLFormula, CTLOperators.Unary>) phi; // since we are in the scope of a FlowFormula
@@ -100,8 +94,8 @@ public class FlowCTLTransformer {
     }
 
     /**
-     * Attention: everything replaced in an LTL formula should be replaced as an
-     * LTLFormula otherwise the cast would fail
+     * Attention: everything replaced in a CTL formula should be replaced as an
+     * CTLFormula otherwise the cast would fail
      *
      * @param orig
      * @param net
@@ -112,11 +106,11 @@ public class FlowCTLTransformer {
      */
     CTLFormula replaceCTLFormulaInRunFormula(PetriNet orig, PetriNet net, CTLFormula phi, int nbFlowFormulas) throws NotConvertableException {
         IFormula f = replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas);
-        return new CTLFormula((ICTLFormula) f); // cast no problem since the next is replace by an LTLFormula
+        return new CTLFormula((ICTLFormula) f); // cast no problem since the next is replace by an CTLFormula
     }
 
     ICTLFormula replaceFormulaUnaryInRunFormula(PetriNet orig, PetriNet net, FormulaUnary<ICTLFormula, CTLOperators.Unary> phi, int nbFlowFormulas) throws NotConvertableException {
-        ICTLFormula substChildPhi = (ICTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
+        ICTLFormula substChildPhi = (ICTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas); // since castPhi is of type ICTLFormula this must result an ICTLFormula
         return new CTLFormula(phi.getOp(), substChildPhi);
     }
 
@@ -136,16 +130,16 @@ public class FlowCTLTransformer {
     IFormula replaceInRunFormula(PetriNet orig, PetriNet net, IFormula phi, int nbFlowFormulas) throws NotConvertableException {
         if (phi instanceof Constants) {
             return replaceConstantsInRunFormula(orig, net, (Constants) phi, nbFlowFormulas);
-        } else if (phi instanceof LTLAtomicProposition) {
+        } else if (phi instanceof CTLAtomicProposition) {
             return replaceCTLAtomicPropositionInRunFormula(orig, net, (CTLAtomicProposition) phi, nbFlowFormulas);
         } else if (phi instanceof IFlowFormula) {
             return replaceFlowFormulaInRunFormula(orig, net, (IFlowFormula) phi, nbFlowFormulas);
-        } else if (phi instanceof RunLTLFormula) {
+        } else if (phi instanceof RunCTLFormula) {
             return replaceRunFormulaInRunFormula(orig, net, (RunCTLFormula) phi, nbFlowFormulas);
-        } else if (phi instanceof LTLFormula) {
+        } else if (phi instanceof CTLFormula) {
             return replaceCTLFormulaInRunFormula(orig, net, (CTLFormula) phi, nbFlowFormulas);
         } else if (phi instanceof FormulaUnary<?, ?>) {
-            FormulaUnary<ICTLFormula, CTLOperators.Unary> castPhi = (FormulaUnary<ICTLFormula, CTLOperators.Unary>) phi; // Since Unary can only be ILTLFormula since IFlowFormula was already checked
+            FormulaUnary<ICTLFormula, CTLOperators.Unary> castPhi = (FormulaUnary<ICTLFormula, CTLOperators.Unary>) phi; // Since Unary can only be ICTLFormula since IFlowFormula was already checked
             return replaceFormulaUnaryInRunFormula(orig, net, castPhi, nbFlowFormulas);
         } else if (phi instanceof FormulaBinary<?, ?, ?>) {
             return replaceFormulaBinaryInRunFormula(orig, net, (FormulaBinary<IFormula, IOperatorBinary<IFormula, IFormula>, IFormula>) phi, nbFlowFormulas);

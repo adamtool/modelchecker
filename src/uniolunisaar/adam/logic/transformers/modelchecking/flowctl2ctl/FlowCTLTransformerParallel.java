@@ -129,14 +129,14 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
             FlowCTLFormula flowFormula = flowFormulas.get(i);
             flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
             try {
-                CTLAtomicProposition init = new CTLAtomicProposition(net.getPlace(PnwtAndFlowCTLStarToPNNoInit.INIT_TOKENFLOW_ID + "-" + i));
+                CTLAtomicProposition init = new CTLAtomicProposition(net.getPlace(PnwtAndFlowCTLStarToPNNoInit.INIT_TOKENFLOW_ID + "_" + i));
                 CTLFormula phi2 = new CTLFormula(new CTLFormula(CTLOperators.Unary.NEG, init), CTLOperators.Binary.AND, flowFormula.getPhi());
                 CTLFormula subs = null;
                 if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.All) {
                     subs = new CTLFormula(init, CTLOperators.Binary.AU, phi2);
-                    subs = new CTLFormula(subs, CTLOperators.Binary.AND, new CTLFormula(CTLOperators.Unary.AG, init));
+                    subs = new CTLFormula(subs, CTLOperators.Binary.OR, new CTLFormula(CTLOperators.Unary.AG, init));
                 } else if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.Exists) {
-                    subs = new CTLFormula(init, CTLOperators.Binary.AU, phi2);
+                    subs = new CTLFormula(init, CTLOperators.Binary.EU, phi2);
                 }
                 f = f.substitute(flowFormulas.get(i), new RunCTLFormula(subs));
             } catch (NotSubstitutableException ex) {
