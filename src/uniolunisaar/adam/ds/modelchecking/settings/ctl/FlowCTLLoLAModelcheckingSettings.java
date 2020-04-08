@@ -12,6 +12,10 @@ public class FlowCTLLoLAModelcheckingSettings extends CTLLoLAModelcheckingSettin
         super(outputPath);
     }
 
+    public FlowCTLLoLAModelcheckingSettings(String outputPath, boolean verbose) {
+        super(outputPath, verbose);
+    }
+
     public Approach getApproach() {
         return approach;
     }

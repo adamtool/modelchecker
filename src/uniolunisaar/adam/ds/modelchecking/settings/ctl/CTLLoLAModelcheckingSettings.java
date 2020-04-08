@@ -25,6 +25,13 @@ public class CTLLoLAModelcheckingSettings extends CTLModelcheckingSettings {
         witnessPathPath = outputPath + "_witness.txt";
     }
 
+    public CTLLoLAModelcheckingSettings(String outputPath, boolean verbose) {
+        super(Solver.LOLA, outputPath, verbose);
+        jsonPath = outputPath + ".json";
+        witnessStatePath = outputPath + "_witness_state.txt";
+        witnessPathPath = outputPath + "_witness.txt";
+    }
+
     public String getJsonPath() {
         return jsonPath;
     }

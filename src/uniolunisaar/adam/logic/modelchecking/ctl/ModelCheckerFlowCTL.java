@@ -2,9 +2,11 @@ package uniolunisaar.adam.logic.modelchecking.ctl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import uniol.apt.adt.pn.PetriNet;
+import java.util.List;
+import uniol.apt.adt.pn.Place;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
@@ -14,10 +16,10 @@ import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.LoLA;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNParallel;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNParallelInhibitor;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequentialInhibitor;
+import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTransformerParallel;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNParInhibitorNoInit;
+import uniolunisaar.adam.util.PNWTTools;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -44,26 +46,46 @@ public class ModelCheckerFlowCTL {
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      */
     public CTLModelcheckingResult check(PetriNetWithTransits net, RunCTLFormula formula) throws RenderException, FileNotFoundException, NotConvertableException, ExternalToolException, InterruptedException, IOException, ProcessNotStartedException {
-        // transform the net        
-        PetriNet mcNet;
+        List<FlowCTLFormula> flowFormulas = LogicsTools.getFlowCTLFormulas(formula);
+        // transform the net and the formula
+        PetriNetWithTransits mcNet;
+        ICTLFormula f = null;
         switch (settings.getApproach()) { // todo: choose extra algos dependent on number flow formulas
             case PARALLEL:
-                mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
-                break;
+                throw new RuntimeException("Not yet implemented");
+//                mcNet = PnwtAndFlowLTLtoPNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+//                f = new FlowCTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
+//                break;
             case PARALLEL_INHIBITOR:
-                mcNet = PnwtAndFlowLTLtoPNParallelInhibitor.createNet4ModelCheckingParallel(net, formula);
+                mcNet = PnwtAndFlowCTLStarToPNParInhibitorNoInit.createNet4ModelCheckingParallel(net, formula, flowFormulas.size());
+                f = new FlowCTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
                 break;
             case SEQUENTIAL:
-                mcNet = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
-                break;
+                throw new RuntimeException("Not yet implemented");
+//                mcNet = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
+//                f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
+//                break;
             case SEQUENTIAL_INHIBITOR:
-                mcNet = PnwtAndFlowLTLtoPNSequentialInhibitor.createNet4ModelCheckingSequential(net, formula, true);
-                break;
+                throw new RuntimeException("Not yet implemented");
+//                mcNet = PnwtAndFlowLTLtoPNSequentialInhibitor.createNet4ModelCheckingSequential(net, formula, true);
+//                f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
+//                break;
             default:
                 throw new NotConvertableException("Didn't consider the approach: " + settings.getApproach().name());
         }
-        // transform the formula
-        ICTLFormula f=null;
+        if (settings.isVerbose()) { // todo: should add an additional flag
+            // color all original places
+            for (Place p : mcNet.getPlaces()) {
+                if (!mcNet.hasPartition(p)) {
+                    mcNet.setPartition(p, 0);
+                }
+            }
+            try {
+                PNWTTools.saveAPT(settings.getOutputPath() + "_mc", mcNet, false);
+            } catch (RenderException | FileNotFoundException ex) {
+            }
+            PNWTTools.savePnwt2PDF(settings.getOutputPath() + "_mc", mcNet, true, flowFormulas.size() + 1);
+        }
         String path = ModelCheckerCTL.renderLoLAtoFile(mcNet, settings);
         return LoLA.call(path, f.toLoLA(), settings, PetriNetExtensionHandler.getProcessFamilyID(net));
     }

@@ -30,5 +30,7 @@ public class CTLModelcheckingSettings extends ModelCheckingSettings {
     public boolean isVerbose() {
         return verbose;
     }
+    
+    
 
 }
