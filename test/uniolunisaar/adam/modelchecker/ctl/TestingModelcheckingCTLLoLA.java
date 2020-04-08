@@ -113,6 +113,14 @@ public class TestingModelcheckingCTLLoLA {
         Logger.getInstance().addMessage("OUTPUT:");
         Logger.getInstance().addMessage(result.getLolaOutput());
 //        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
+
+        formula = FlowCTLParser.parse(net, "A(inittfl U out)");
+        result = mc.check(net, formula.toCTLFormula());
+        Logger.getInstance().addMessage("ERROR:");
+        Logger.getInstance().addMessage(result.getLolaError());
+        Logger.getInstance().addMessage("OUTPUT:");
+        Logger.getInstance().addMessage(result.getLolaOutput());
+//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
     }
 
 //    @Test(enabled = true)
