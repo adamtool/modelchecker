@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
-import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.CircuitAndLTLtoCircuit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.exceptions.ExternalToolException;

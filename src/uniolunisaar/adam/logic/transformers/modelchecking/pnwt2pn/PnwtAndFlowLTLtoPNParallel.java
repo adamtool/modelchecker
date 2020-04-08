@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn;
+package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn;
 
 import java.util.ArrayList;
 import java.util.HashSet;

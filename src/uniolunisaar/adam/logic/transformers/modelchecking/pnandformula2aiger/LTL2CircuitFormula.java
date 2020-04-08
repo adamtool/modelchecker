@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger;
+package uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger;
 
 import java.util.ArrayList;
 import java.util.Collection;

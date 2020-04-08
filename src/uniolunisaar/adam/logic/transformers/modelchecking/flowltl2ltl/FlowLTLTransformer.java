@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.transformers.modelchecking.circuit.flowltl2ltl;
+package uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl;
 
 import uniol.apt.adt.pn.PetriNet;
 import uniolunisaar.adam.ds.logics.Constants;

@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger;
+package uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger;
 
 import uniolunisaar.adam.ds.circuits.AigerFile;
 import java.io.BufferedReader;

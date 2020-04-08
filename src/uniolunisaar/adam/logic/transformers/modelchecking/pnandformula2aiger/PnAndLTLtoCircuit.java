@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger;
+package uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger;
 
 import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;

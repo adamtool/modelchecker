@@ -1,4 +1,4 @@
-package uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn;
+package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn;
 
 import java.util.List;
 import uniol.apt.adt.pn.Flow;
@@ -7,7 +7,7 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import static uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNSequential.NEXT_ID;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential.NEXT_ID;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
