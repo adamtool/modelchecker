@@ -13,12 +13,12 @@ import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
-import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
 import uniolunisaar.adam.logic.parser.logics.flowctl.FlowCTLParser;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.tools.Tools;
 
 /**
  *
@@ -135,7 +135,25 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); // should be TRUE for concurrency maximality
 
-        
+        formula = FlowCTLParser.parse(net, "(𝔼EF out AND 𝔼EF inittflB)"); // true
+        formula = FlowCTLParser.parse(net, "(𝔸AF out AND 𝔸AF inittflB)"); // false
+        formula = FlowCTLParser.parse(net, "(𝔼AF out AND 𝔼AF inittflB)"); // why is this true? (hm it's really OK, since I chose the flow chain with the E and branch then, really have to think about that)
+        result = mc.check(net, formula);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: Problem with fairness, how should those be translated to the transitions in the mc net?
 //        PetriNetExtensionHandler.setWeakFair(tstolen);
 //        result = mc.check(net, formula);
@@ -172,52 +190,64 @@ public class TestingModelcheckingFlowCTLLoLA {
 //        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
     }
 
-//    @Test(enabled = true)
-//    void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
-//        final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
-//        PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
-//        PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
-//
-//        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
-//        settings.setMaximality(Maximality.MAX_NONE); // since it is done by hand
-//        settings.setSemantics(TransitionSemantics.INGOING);
-//
-//        LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
-//        f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-//        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), true, true);
-//
-//        settings.setOutputData(data);
-//        ModelCheckerLTL mc = new ModelCheckerLTL(settings);
-//        LTLModelCheckingResult check = mc.check(pn, f);
-//        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
-//
-//        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbad"))));
-//        f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-//        check = mc.check(pn, f);
-//        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
-//
-//        LTLFormula bothA = new LTLFormula(
-//                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("A"))),
-//                LTLOperators.Binary.AND,
-//                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("AA")))
-//        );
-//        LTLFormula bothB = new LTLFormula(
-//                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("B"))),
-//                LTLOperators.Binary.AND,
-//                new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(pn.getPlace("BB")))
-//        );
-//        f = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbad"))));
-//        f = new LTLFormula(new LTLFormula(bothA, LTLOperators.Binary.OR, bothB), LTLOperators.Binary.IMP, f);
-//
-//        // test previous
-//        LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-//        check = mc.check(pn, maxf);
-//        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
-//        // test next
-//        settings.setSemantics(TransitionSemantics.OUTGOING);
-//        maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-//        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
-//    }
+    @Test(enabled = true)
+    void testFirstExamplePaper() throws Exception {
+        final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
+        PetriNetWithTransits net = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
+        Transition start = net.createTransition("startFlow");
+        Place sys = net.getPlace("Sys");
+        net.createFlow(start, sys);
+        net.createFlow(sys, start);
+        net.createInitialTransit(start, sys);
+        net.createTransit(sys, start, sys);
+        net.createTransit(sys, net.getTransition("t11"), net.getPlace("AA"));
+        net.createTransit(sys, net.getTransition("t22"), net.getPlace("BB"));
+        net.createTransit(net.getPlace("AA"), net.getTransition("tbad3"), net.getPlace("qbad"));
+        net.createTransit(net.getPlace("AA"), net.getTransition("tbad1"), net.getPlace("qbad"));
+        net.createTransit(net.getPlace("BB"), net.getTransition("tbad2"), net.getPlace("qbad"));
+        net.createTransit(net.getPlace("BB"), net.getTransition("tbad4"), net.getPlace("qbad"));
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), new PetriNetWithTransits(net), false);
+
+        FlowCTLLoLAModelcheckingSettings settings = new FlowCTLLoLAModelcheckingSettings(outputDir + net.getName(), true);
+        settings.setApproach(ModelCheckingSettings.Approach.PARALLEL_INHIBITOR);
+        ModelCheckerFlowCTL mc = new ModelCheckerFlowCTL(settings);
+
+        String witnessPath, witnessState;
+
+        RunCTLFormula formula = FlowCTLParser.parse(net, "(𝔼EG (AA -> AG NEG qbad) AND 𝔼EG (BB -> AG NEG qbad))");
+        CTLModelcheckingResult result = mc.check(net, formula);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+
+        formula = FlowCTLParser.parse(net, "𝔸G((AA -> AG NEG qbad) AND (BB -> AG NEG qbad))");
+        result = mc.check(net, formula);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+    }
 //
 //    @Test(enabled = true)
 //    public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
