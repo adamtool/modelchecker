@@ -133,8 +133,12 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
                 CTLFormula phi2 = new CTLFormula(new CTLFormula(CTLOperators.Unary.NEG, init), CTLOperators.Binary.AND, flowFormula.getPhi());
                 CTLFormula subs = null;
                 if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.All) {
-                    subs = new CTLFormula(init, CTLOperators.Binary.AU, phi2);
-                    subs = new CTLFormula(subs, CTLOperators.Binary.OR, new CTLFormula(CTLOperators.Unary.AG, init));
+                    // not working, would need CTL* to have as second disjunct only G init
+//                    subs = new CTLFormula(init, CTLOperators.Binary.AU, phi2);
+//                    subs = new CTLFormula(subs, CTLOperators.Binary.OR, new CTLFormula(CTLOperators.Unary.AG, init));
+                    subs = new CTLFormula(CTLOperators.Unary.NEG, 
+                            new CTLFormula(init, CTLOperators.Binary.EU, new CTLFormula(new CTLFormula(CTLOperators.Unary.NEG, init), CTLOperators.Binary.AND,
+                            new CTLFormula(CTLOperators.Unary.NEG, flowFormula.getPhi()))));
                 } else if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.Exists) {
                     subs = new CTLFormula(init, CTLOperators.Binary.EU, phi2);
                 }
