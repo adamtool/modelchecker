@@ -15,8 +15,6 @@ import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
-import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
@@ -103,13 +101,13 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
     IFormula replaceCTLAtomicPropositionInRunFormula(PetriNet orig, PetriNet net, CTLAtomicProposition phi, int nbFlowFormulas) throws NotConvertableException {
         if (phi.isTransition()) {
             // in the run part when a t transition should fire, it's ok when any t labeled transition can fire
-            Collection<ILTLFormula> elements = new ArrayList<>();
+            Collection<ICTLFormula> elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
                 if (t.getLabel().equals(phi.get())) {
-                    elements.add(new LTLAtomicProposition(t));
+                    elements.add(new CTLAtomicProposition(t));
                 }
             }
-            return FormulaCreator.bigWedgeOrVeeObject(elements, false);
+            return FormulaCreator.bigWedgeOrVeeObjectCTL(elements, false);
         }
         return phi;
     }

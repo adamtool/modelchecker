@@ -4,7 +4,7 @@ import java.util.List;
 import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential.NEXT_ID;
@@ -37,8 +37,9 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
+        actO.setInitialToken(1);
 
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(formula);
+        List<FlowCTLFormula> flowFormulas = LogicsTools.getFlowCTLFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
             addSubFlowFormulaNet(orig, out, nb_ff);
@@ -134,7 +135,7 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
         } else {
             // should not really be used, since the normal model checking should be used in these cases
             Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "'."
-                    + " The standard LTL model checker should be used.", false);
+                    + " The standard CTL model checker should be used.", false);
             // but to have still some meaningful output add for all transition the
             // connections to the act places
             for (Transition t : out.getTransitions()) {

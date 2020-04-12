@@ -50,6 +50,13 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
     }
 
+    public ModelCheckerFlowCTL getModelChecker(String name) {
+        FlowCTLLoLAModelcheckingSettings settings = new FlowCTLLoLAModelcheckingSettings(outputDir + name, true);
+//        settings.setApproach(ModelCheckingSettings.Approach.PARALLEL_INHIBITOR);
+        settings.setApproach(ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR);
+        return new ModelCheckerFlowCTL(settings);
+    }
+
     @Test
     void testToyExample() throws Exception {
         PetriNetWithTransits net = new PetriNetWithTransits("testing");
@@ -78,9 +85,7 @@ public class TestingModelcheckingFlowCTLLoLA {
 
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, true);
 
-        FlowCTLLoLAModelcheckingSettings settings = new FlowCTLLoLAModelcheckingSettings(outputDir + net.getName(), true);
-        settings.setApproach(ModelCheckingSettings.Approach.PARALLEL_INHIBITOR);
-        ModelCheckerFlowCTL mc = new ModelCheckerFlowCTL(settings);
+        ModelCheckerFlowCTL mc = getModelChecker(net.getName());
 
         String witnessPath, witnessState;
 
@@ -208,9 +213,7 @@ public class TestingModelcheckingFlowCTLLoLA {
         net.createTransit(net.getPlace("BB"), net.getTransition("tbad4"), net.getPlace("qbad"));
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), new PetriNetWithTransits(net), false);
 
-        FlowCTLLoLAModelcheckingSettings settings = new FlowCTLLoLAModelcheckingSettings(outputDir + net.getName(), true);
-        settings.setApproach(ModelCheckingSettings.Approach.PARALLEL_INHIBITOR);
-        ModelCheckerFlowCTL mc = new ModelCheckerFlowCTL(settings);
+        ModelCheckerFlowCTL mc = getModelChecker(net.getName());
 
         String witnessPath, witnessState;
 
@@ -231,7 +234,7 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "𝔸G((AA -> AG NEG qbad) AND (BB -> AG NEG qbad))");
+        formula = FlowCTLParser.parse(net, "𝔸AG((AA -> AG NEG qbad) AND (BB -> AG NEG qbad))");
         result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());

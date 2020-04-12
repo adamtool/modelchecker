@@ -17,7 +17,9 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.LoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTransformerParallel;
+import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTransformerSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNParInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNSeqInhibitorNoInit;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -67,10 +69,9 @@ public class ModelCheckerFlowCTL {
 //                f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
 //                break;
             case SEQUENTIAL_INHIBITOR:
-                throw new RuntimeException("Not yet implemented");
-//                mcNet = PnwtAndFlowLTLtoPNSequentialInhibitor.createNet4ModelCheckingSequential(net, formula, true);
-//                f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
-//                break;
+                mcNet = PnwtAndFlowCTLStarToPNSeqInhibitorNoInit.createNet4ModelCheckingSequential(net, formula, flowFormulas.size());
+                f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, mcNet, formula);
+                break;
             default:
                 throw new NotConvertableException("Didn't consider the approach: " + settings.getApproach().name());
         }
