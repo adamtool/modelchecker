@@ -20,7 +20,9 @@ import uniol.apt.util.Pair;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.CTLLoLAModelcheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
@@ -28,6 +30,7 @@ import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControl;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerCTL;
+import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
 import uniolunisaar.adam.logic.parser.logics.flowctl.FlowCTLParser;
 import uniolunisaar.adam.tools.Logger;
 
@@ -59,6 +62,13 @@ public class TestingModelcheckingAccessControl {
         if (System.getProperty("examplesfolder") == null) {
             System.setProperty("examplesfolder", "examples");
         }
+    }
+    
+    public ModelCheckerFlowCTL getModelChecker(String name) {
+        FlowCTLLoLAModelcheckingSettings settings = new FlowCTLLoLAModelcheckingSettings(outputDir + name, true);
+//        settings.setApproach(ModelCheckingSettings.Approach.PARALLEL_INHIBITOR);
+        settings.setApproach(ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR);
+        return new ModelCheckerFlowCTL(settings);
     }
 
     @Test
@@ -111,9 +121,6 @@ public class TestingModelcheckingAccessControl {
 		PetriNetWithTransits net = new AccessControl(name, groups, locations, starts, connections, open).createAccessControlExample();
         
 		PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, true);
-
-		CTLLoLAModelcheckingSettings settings = new CTLLoLAModelcheckingSettings(outputDir + net.getName());
-        ModelCheckerCTL mc = new ModelCheckerCTL(settings);
 		
 		String witnessPath, witnessState;
 
@@ -128,8 +135,10 @@ public class TestingModelcheckingAccessControl {
 		// new ForallGlobally(new Not(new AP(pos)));
 		// new ForallGlobally(new Not(new AP(buS)));
 		
+		ModelCheckerFlowCTL mc = getModelChecker(net.getName());
+
         RunCTLFormula formula = FlowCTLParser.parse(net, "𝔸EF itATbur");
-        CTLModelcheckingResult result = mc.check(net, formula.toCTLFormula());
+        CTLModelcheckingResult result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
 //        Logger.getInstance().addMessage("OUTPUT:");
