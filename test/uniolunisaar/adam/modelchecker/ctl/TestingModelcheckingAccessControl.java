@@ -112,14 +112,37 @@ public class TestingModelcheckingAccessControl {
         
 		PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, true);
 
-        CTLLoLAModelcheckingSettings settings = new CTLLoLAModelcheckingSettings(outputDir + net.getName());
+		CTLLoLAModelcheckingSettings settings = new CTLLoLAModelcheckingSettings(outputDir + net.getName());
         ModelCheckerCTL mc = new ModelCheckerCTL(settings);
-        RunCTLFormula formula = FlowCTLParser.parse(net, "AF TRUE");
+		
+		String witnessPath, witnessState;
+
+		// new ExistsEventually(new AP(bu1));
+		// new ExistsEventually(new AP(bu2));
+		// new ExistsEventually(new AP(bu3));
+		// new ExistsEventually(new AP(bu4));
+		// new ExistsEventually(new AP(bu5));
+		// new ExistsEventually(new AP(bu7));
+		// new ExistsEventually(new AP(lob));
+		// new ExistsEventually(new AP(ser));
+		// new ForallGlobally(new Not(new AP(pos)));
+		// new ForallGlobally(new Not(new AP(buS)));
+		
+        RunCTLFormula formula = FlowCTLParser.parse(net, "𝔸EF itATbur");
         CTLModelcheckingResult result = mc.check(net, formula.toCTLFormula());
-        Logger.getInstance().addMessage("ERROR:");
-        Logger.getInstance().addMessage(result.getLolaError());
-        Logger.getInstance().addMessage("OUTPUT:");
-        Logger.getInstance().addMessage(result.getLolaOutput());
-//        Assert.assertEquals(result.getSatisfied() , ModelCheckingResult.Satisfied.TRUE);
+//        Logger.getInstance().addMessage("ERROR:");
+//        Logger.getInstance().addMessage(result.getLolaError());
+//        Logger.getInstance().addMessage("OUTPUT:");
+//        Logger.getInstance().addMessage(result.getLolaOutput());
+        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
+        witnessState = result.getWitnessState();
+        if (witnessState != null) {
+            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
+        }
+        witnessPath = result.getWitnessPath();
+        if (witnessPath != null) {
+            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
+        }
+        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 	}
 }
