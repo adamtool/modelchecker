@@ -11,7 +11,7 @@ import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLOperators;
 import uniolunisaar.adam.ds.logics.flowlogics.IFlowFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
@@ -89,8 +89,8 @@ public class FlowCTLTransformer {
         return phi;
     }
 
-    IFormula replaceRunFormulaInRunFormula(PetriNet orig, PetriNet net, RunCTLFormula phi, int nbFlowFormulas) throws NotConvertableException {
-        return new RunCTLFormula(replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas));
+    IFormula replaceRunFormulaInRunFormula(PetriNet orig, PetriNet net, RunCTLSeparateFormula phi, int nbFlowFormulas) throws NotConvertableException {
+        return new RunCTLSeparateFormula(replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas));
     }
 
     /**
@@ -121,7 +121,7 @@ public class FlowCTLTransformer {
         if (phi instanceof ICTLFormula) {
             return new CTLFormula((ICTLFormula) subst1, (CTLOperators.Binary) op, (ICTLFormula) subst2);
         } else if (phi instanceof IRunFormula) {
-            return new RunCTLFormula((IRunFormula) subst1, (RunCTLOperators.Binary) op, (IRunFormula) subst2);
+            return new RunCTLSeparateFormula((IRunFormula) subst1, (RunCTLOperators.Binary) op, (IRunFormula) subst2);
         }
         throw new RuntimeException("The given formula '" + phi + "' is neither a CTLFormula nor FormulaUnary nor FormulaBinary. This should not be possible.");
     }
@@ -134,8 +134,8 @@ public class FlowCTLTransformer {
             return replaceCTLAtomicPropositionInRunFormula(orig, net, (CTLAtomicProposition) phi, nbFlowFormulas);
         } else if (phi instanceof IFlowFormula) {
             return replaceFlowFormulaInRunFormula(orig, net, (IFlowFormula) phi, nbFlowFormulas);
-        } else if (phi instanceof RunCTLFormula) {
-            return replaceRunFormulaInRunFormula(orig, net, (RunCTLFormula) phi, nbFlowFormulas);
+        } else if (phi instanceof RunCTLSeparateFormula) {
+            return replaceRunFormulaInRunFormula(orig, net, (RunCTLSeparateFormula) phi, nbFlowFormulas);
         } else if (phi instanceof CTLFormula) {
             return replaceCTLFormulaInRunFormula(orig, net, (CTLFormula) phi, nbFlowFormulas);
         } else if (phi instanceof FormulaUnary<?, ?>) {
@@ -148,8 +148,8 @@ public class FlowCTLTransformer {
                 "The given formula '" + phi + "' is not a CTLFormula or FormulaUnary or FormulaBinary. This should not be possible.");
     }
 
-    RunCTLFormula replaceInRunFormula(PetriNet orig, PetriNet net, RunCTLFormula phi, int nbFlowFormulas) throws NotConvertableException {
-        return new RunCTLFormula(replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas));
+    RunCTLSeparateFormula replaceInRunFormula(PetriNet orig, PetriNet net, RunCTLSeparateFormula phi, int nbFlowFormulas) throws NotConvertableException {
+        return new RunCTLSeparateFormula(replaceInRunFormula(orig, net, phi.getPhi(), nbFlowFormulas));
     }
 
 }

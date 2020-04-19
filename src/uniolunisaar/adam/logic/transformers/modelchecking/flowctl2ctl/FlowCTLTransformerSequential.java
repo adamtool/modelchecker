@@ -12,7 +12,7 @@ import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN.TOKENFLOW_SUFFIX_ID;
@@ -196,7 +196,7 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public ICTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunCTLFormula formula) throws NotConvertableException {
+    public ICTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunCTLSeparateFormula formula) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowCTLFormulas(formula).size();
 
         // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
@@ -223,7 +223,7 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
                 } else if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.Exists) {
                     subs = new CTLFormula(init, CTLOperators.Binary.EU, phi2);
                 }
-                f = f.substitute(flowFormulas.get(i), new RunCTLFormula(subs));
+                f = f.substitute(flowFormulas.get(i), new RunCTLSeparateFormula(subs));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute. (Should not happen).", ex);
             }

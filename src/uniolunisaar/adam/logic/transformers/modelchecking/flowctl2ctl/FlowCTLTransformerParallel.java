@@ -14,7 +14,7 @@ import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
@@ -112,7 +112,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
         return phi;
     }
 
-    public ICTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunCTLFormula formula) throws NotConvertableException {
+    public ICTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunCTLSeparateFormula formula) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowCTLFormulas(formula).size();
         if (nbFlowFormulas == 0) {
             Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net modelchecker should be used.", false);
@@ -140,7 +140,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
                 } else if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.Exists) {
                     subs = new CTLFormula(init, CTLOperators.Binary.EU, phi2);
                 }
-                f = f.substitute(flowFormulas.get(i), new RunCTLFormula(subs));
+                f = f.substitute(flowFormulas.get(i), new RunCTLSeparateFormula(subs));
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute. (Should not happen).", ex);
             }

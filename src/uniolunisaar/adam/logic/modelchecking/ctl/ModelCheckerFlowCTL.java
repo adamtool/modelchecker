@@ -7,7 +7,7 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
@@ -48,7 +48,7 @@ public class ModelCheckerFlowCTL {
      * @throws java.lang.InterruptedException
      * @throws uniolunisaar.adam.exceptions.ProcessNotStartedException
      */
-    public CTLModelcheckingResult check(PetriNetWithTransits net, RunCTLFormula formula) throws RenderException, FileNotFoundException, NotConvertableException, ExternalToolException, InterruptedException, IOException, ProcessNotStartedException {
+    public CTLModelcheckingResult check(PetriNetWithTransits net, RunCTLSeparateFormula formula) throws RenderException, FileNotFoundException, NotConvertableException, ExternalToolException, InterruptedException, IOException, ProcessNotStartedException {
         List<FlowCTLFormula> flowFormulas = LogicsTools.getFlowCTLFormulas(formula);
         // transform the net and the formula
         PetriNetWithTransits mcNet;

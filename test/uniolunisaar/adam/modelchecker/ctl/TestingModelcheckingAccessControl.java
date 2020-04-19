@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import uniol.apt.util.Pair;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
@@ -127,7 +127,7 @@ public class TestingModelcheckingAccessControl {
 		
 		ModelCheckerFlowCTL mc = getModelChecker(net.getName());
 
-        RunCTLFormula formula = FlowCTLSeparateParser.parse(net, "𝔸EF itATbur");
+        RunCTLSeparateFormula formula = FlowCTLSeparateParser.parse(net, "𝔸EF itATbur");
         CTLModelcheckingResult result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());

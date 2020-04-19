@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.CTLLoLAModelcheckingSettings;
@@ -80,7 +80,7 @@ public class TestingModelcheckingCTLLoLA {
 
         String witnessPath, witnessState;
 
-        RunCTLFormula formula = FlowCTLSeparateParser.parse(net, "AF TRUE");
+        RunCTLSeparateFormula formula = FlowCTLSeparateParser.parse(net, "AF TRUE");
         CTLModelcheckingResult result = mc.check(net, formula.toCTLFormula());
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
