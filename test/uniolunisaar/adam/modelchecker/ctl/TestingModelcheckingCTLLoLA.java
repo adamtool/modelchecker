@@ -16,7 +16,7 @@ import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerCTL;
-import uniolunisaar.adam.logic.parser.logics.flowctl.FlowCTLParser;
+import uniolunisaar.adam.logic.parser.logics.flowctl.separate.FlowCTLSeparateParser;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -80,7 +80,7 @@ public class TestingModelcheckingCTLLoLA {
 
         String witnessPath, witnessState;
 
-        RunCTLFormula formula = FlowCTLParser.parse(net, "AF TRUE");
+        RunCTLFormula formula = FlowCTLSeparateParser.parse(net, "AF TRUE");
         CTLModelcheckingResult result = mc.check(net, formula.toCTLFormula());
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -97,7 +97,7 @@ public class TestingModelcheckingCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "EF out");
+        formula = FlowCTLSeparateParser.parse(net, "EF out");
         result = mc.check(net, formula.toCTLFormula());
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -114,7 +114,7 @@ public class TestingModelcheckingCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "AF out");
+        formula = FlowCTLSeparateParser.parse(net, "AF out");
         result = mc.check(net, formula.toCTLFormula());
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -148,7 +148,7 @@ public class TestingModelcheckingCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "A(inittfl U out)");
+        formula = FlowCTLSeparateParser.parse(net, "A(inittfl U out)");
         result = mc.check(net, formula.toCTLFormula());
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());

@@ -16,7 +16,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingS
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
-import uniolunisaar.adam.logic.parser.logics.flowctl.FlowCTLParser;
+import uniolunisaar.adam.logic.parser.logics.flowctl.separate.FlowCTLSeparateParser;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 
@@ -89,7 +89,7 @@ public class TestingModelcheckingFlowCTLLoLA {
 
         String witnessPath, witnessState;
 
-        RunCTLFormula formula = FlowCTLParser.parse(net, "𝔸AF TRUE");
+        RunCTLFormula formula = FlowCTLSeparateParser.parse(net, "𝔸AF TRUE");
         CTLModelcheckingResult result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -106,7 +106,7 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "𝔼EF out");
+        formula = FlowCTLSeparateParser.parse(net, "𝔼EF out");
         result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -123,7 +123,7 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "𝔸AF out");
+        formula = FlowCTLSeparateParser.parse(net, "𝔸AF out");
         result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -140,9 +140,10 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.FALSE); // should be TRUE for concurrency maximality
 
-        formula = FlowCTLParser.parse(net, "(𝔼EF out AND 𝔼EF inittflB)"); // true
-        formula = FlowCTLParser.parse(net, "(𝔸AF out AND 𝔸AF inittflB)"); // false
-        formula = FlowCTLParser.parse(net, "(𝔼AF out AND 𝔼AF inittflB)"); // why is this true? (hm it's really OK, since I chose the flow chain with the E and branch then, really have to think about that)
+        formula = FlowCTLSeparateParser.parse(net, "(𝔼EF out AND 𝔼EF inittflB)"); // true
+        formula = FlowCTLSeparateParser.parse(net, "(𝔸AF out AND 𝔸AF inittflB)"); // false
+        formula = FlowCTLSeparateParser.parse(net, "(𝔼AF out AND 𝔼AF inittflB)"); // why is this true? (hm it's really OK, since I chose the flow chain with the E and branch then, really have to think about that)
+//        formula = FlowCTLSeparateParser.parse(net, "All EF inittflB"); // why is this true? (hm it's really OK, since I chose the flow chain with the E and branch then, really have to think about that)
         result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -177,7 +178,7 @@ public class TestingModelcheckingFlowCTLLoLA {
 //        }
 //        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 //
-//        formula = FlowCTLParser.parse(net, "𝔸A(inittfl U out)");
+//        formula = FlowCTLSeparateParser.parse(net, "𝔸A(inittfl U out)");
 //        result = mc.check(net, formula);
 ////        Logger.getInstance().addMessage("ERROR:");
 ////        Logger.getInstance().addMessage(result.getLolaError());
@@ -217,7 +218,7 @@ public class TestingModelcheckingFlowCTLLoLA {
 
         String witnessPath, witnessState;
 
-        RunCTLFormula formula = FlowCTLParser.parse(net, "(𝔼EG (AA -> AG NEG qbad) AND 𝔼EG (BB -> AG NEG qbad))");
+        RunCTLFormula formula = FlowCTLSeparateParser.parse(net, "(𝔼EG (AA -> AG NEG qbad) AND 𝔼EG (BB -> AG NEG qbad))");
         CTLModelcheckingResult result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
@@ -234,7 +235,7 @@ public class TestingModelcheckingFlowCTLLoLA {
         }
         Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
 
-        formula = FlowCTLParser.parse(net, "𝔸AG((AA -> AG NEG qbad) AND (BB -> AG NEG qbad))");
+        formula = FlowCTLSeparateParser.parse(net, "𝔸AG((AA -> AG NEG qbad) AND (BB -> AG NEG qbad))");
         result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());

@@ -1,7 +1,6 @@
 package uniolunisaar.adam.modelchecker.ctl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,26 +11,17 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import uniol.apt.adt.pn.Place;
-import uniol.apt.adt.pn.Transition;
-import uniol.apt.io.parser.ParseException;
-import uniol.apt.io.renderer.RenderException;
 import uniol.apt.util.Pair;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.RunCTLFormula;
 import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ctl.CTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
-import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
-import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControl;
-import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerCTL;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
-import uniolunisaar.adam.logic.parser.logics.flowctl.FlowCTLParser;
+import uniolunisaar.adam.logic.parser.logics.flowctl.separate.FlowCTLSeparateParser;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -137,7 +127,7 @@ public class TestingModelcheckingAccessControl {
 		
 		ModelCheckerFlowCTL mc = getModelChecker(net.getName());
 
-        RunCTLFormula formula = FlowCTLParser.parse(net, "𝔸EF itATbur");
+        RunCTLFormula formula = FlowCTLSeparateParser.parse(net, "𝔸EF itATbur");
         CTLModelcheckingResult result = mc.check(net, formula);
 //        Logger.getInstance().addMessage("ERROR:");
 //        Logger.getInstance().addMessage(result.getLolaError());
