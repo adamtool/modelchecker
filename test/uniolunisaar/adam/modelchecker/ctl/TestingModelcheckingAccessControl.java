@@ -19,7 +19,8 @@ import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
-import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControl;
+import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtPlaces;
+import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtTransitions;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
 import uniolunisaar.adam.logic.parser.logics.flowctl.separate.FlowCTLSeparateParser;
 import uniolunisaar.adam.tools.Logger;
@@ -108,7 +109,7 @@ public class TestingModelcheckingAccessControl {
 		itOpen.add(new Pair<String, String>("bur", "cor"));
 		open.put("it", itOpen);
 		
-		PetriNetWithTransits net = new AccessControl(name, groups, locations, starts, connections, open).createAccessControlExample();
+		PetriNetWithTransits net = new AccessControlChainSplitAtPlaces(name, groups, locations, starts, connections, open).createAccessControlExample();
         
 		PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, true);
 		
