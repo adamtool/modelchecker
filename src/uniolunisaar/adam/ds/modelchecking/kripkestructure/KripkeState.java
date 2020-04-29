@@ -14,12 +14,12 @@ public class KripkeState<L extends ILabel> {
     private final Set<L> labels = new HashSet<>();
     private final String id;
 
-    public KripkeState(String id, L[] labels) {
+    KripkeState(String id, L[] labels) {
         this.id = id;
         this.labels.addAll(Arrays.asList(labels));
     }
 
-    public KripkeState(String id, L label) {
+    KripkeState(String id, L label) {
         this.id = id;
         this.labels.add(label);
     }

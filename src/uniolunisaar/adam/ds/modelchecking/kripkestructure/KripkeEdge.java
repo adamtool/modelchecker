@@ -10,7 +10,7 @@ public class KripkeEdge<L extends ILabel> {
     private final KripkeState<L> pre;
     private final KripkeState<L> post;
 
-    public KripkeEdge(KripkeState<L> pre, KripkeState<L> post) {
+    KripkeEdge(KripkeState<L> pre, KripkeState<L> post) {
         this.pre = pre;
         this.post = post;
     }

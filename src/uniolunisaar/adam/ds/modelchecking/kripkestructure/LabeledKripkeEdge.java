@@ -10,12 +10,12 @@ public class LabeledKripkeEdge<SL extends ILabel, EL extends ILabel> extends Kri
 
     private final EL label;
 
-    public LabeledKripkeEdge(EL label, KripkeState<SL> pre, KripkeState<SL> post) {
+    LabeledKripkeEdge(KripkeState<SL> pre, EL label, KripkeState<SL> post) {
         super(pre, post);
         this.label = label;
     }
 
-    public EL getLabel() {
+    EL getLabel() {
         return label;
     }
 

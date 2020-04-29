@@ -1,9 +1,8 @@
 package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import uniol.apt.adt.exception.StructureException;
 
 /**
  *
@@ -13,12 +12,32 @@ import java.util.Set;
  */
 public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
 
-    private final Set<KripkeState<SL>> states;
+    private final Map<String, KripkeState<SL>> states;
     private final Map<KripkeState<SL>, E> edges;
+    private KripkeState<SL> init;
 
     public KripkeStructure() {
-        this.states = new HashSet<>();
+        this.states = new HashMap<>();
         this.edges = new HashMap<>();
+    }
+
+    public KripkeState<SL> getInit() {
+        return init;
+    }
+
+    public void setInit(KripkeState<SL> init) {
+        if (!states.containsKey(init.getId())) {
+            throw new StructureException("The state '" + init.getId() + "' does not belong to the Kripke structure.");
+        }
+        this.init = init;
+    }
+
+    public Map<String, KripkeState<SL>> getStates() {
+        return states;
+    }
+
+    public Map<KripkeState<SL>, E> getEdges() {
+        return edges;
     }
 
 }
