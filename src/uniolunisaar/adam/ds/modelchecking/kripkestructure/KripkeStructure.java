@@ -1,6 +1,7 @@
 package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
@@ -16,24 +17,29 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implem
 
     private final Map<String, KripkeState<SL>> states;
     private final Map<KripkeState<SL>, Set<E>> edges;
-    private KripkeState<SL> init;
+    private final Set<KripkeState<SL>> inits;
     private final String name;
 
     public KripkeStructure(String name) {
         this.states = new HashMap<>();
         this.edges = new HashMap<>();
         this.name = name;
+        this.inits = new HashSet<>();
     }
 
-    public KripkeState<SL> getInit() {
-        return init;
+    public Set<KripkeState<SL>> getInitialStates() {
+        return inits;
     }
 
-    public void setInit(KripkeState<SL> init) {
+    public void clearInitialStates() {
+        inits.clear();
+    }
+
+    public void addInitialState(KripkeState<SL> init) {
         if (!states.containsKey(init.getId())) {
             throw new StructureException("The state '" + init.getId() + "' does not belong to the Kripke structure.");
         }
-        this.init = init;
+        this.inits.add(init);
     }
 
     public Map<String, KripkeState<SL>> getStates() {
@@ -51,8 +57,9 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implem
 
         // States
         sb.append("#states\n");
-        if (init != null) {
-            sb.append(this.hashCode()).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
+        int counter = 0;
+        for (KripkeState<SL> init : inits) {
+            sb.append(this.hashCode()).append("").append(counter++).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
         }
         for (String id : states.keySet()) {
             KripkeState<SL> state = states.get(id);
@@ -61,8 +68,9 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implem
 
         // Edges
         sb.append("\n#flows\n");
-        if (init != null) {
-            sb.append(this.hashCode()).append("->").append(init.getId().hashCode()).append("\n");// add the init arc
+        counter = 0;
+        for (KripkeState<SL> init : inits) {
+            sb.append(this.hashCode()).append("").append(counter++).append("->").append(init.getId().hashCode()).append("\n");// add the inits arc
         }
         for (Set<E> es : edges.values()) {
             for (E edge : es) {

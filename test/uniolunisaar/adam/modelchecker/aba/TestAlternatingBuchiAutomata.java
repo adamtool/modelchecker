@@ -34,10 +34,11 @@ public class TestAlternatingBuchiAutomata {
     public void firstTests() throws Exception {
         AlternatingBuchiAutomaton aba = new AlternatingBuchiAutomaton("test");
         ABAState i = aba.createAndAddState("i");
-        aba.setInit(i);
+        aba.addInitialStates(i);
         ABAState a = aba.createAndAddState("phi,(s,tq)");
         ABAState b = aba.createAndAddState("phi,(s,tp)");
         aba.createAndAddEdge(i.getId(), ABAEdge.TYPE.EXISTS, "ts", a.getId(), b.getId());
+        aba.addInitialStates(a,b);
         ABAState c = aba.createAndAddState("phi,q1");
         ABAState d = aba.createAndAddState("phi,q2");
         aba.createAndAddEdge(a.getId(), ABAEdge.TYPE.ALL, "tq", c.getId(), d.getId());

@@ -24,7 +24,7 @@ public class Pnwt2KripkeStructureTransformer {
         PnwtKripkeStructure k = new PnwtKripkeStructure(pnwt.getName() + "_ks");
         // initial state
         KripkeState<NodeLabel> init = k.createAndAddState("I", new NodeLabel[0]);
-        k.setInit(init);
+        k.addInitialState(init);
 
         LinkedList<KripkeState<NodeLabel>> todo = new LinkedList<>();
 

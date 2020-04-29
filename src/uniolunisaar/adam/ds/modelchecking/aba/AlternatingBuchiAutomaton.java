@@ -18,23 +18,30 @@ public class AlternatingBuchiAutomaton implements DotSaveable {
     private final Map<String, ABAState> states;
     private final Map<ABAState, Set<ABAEdge>> edges;
     private final String name;
-    private ABAState init;
+    private final Set<ABAState> inits;
 
     public AlternatingBuchiAutomaton(String name) {
         states = new HashMap<>();
         edges = new HashMap<>();
         this.name = name;
+        this.inits = new HashSet<>();
     }
 
-    public ABAState getInit() {
-        return init;
+    public Set<ABAState> getInitialStates() {
+        return inits;
     }
 
-    public void setInit(ABAState init) {
-        if (!states.containsKey(init.getId())) {
-            throw new StructureException("The state '" + init.getId() + "' does not belong to the alternating automaton '" + name + "'.");
+    public void clearInitialStates() {
+        inits.clear();
+    }
+
+    public void addInitialStates(ABAState... inits) {
+        for (ABAState init : inits) {
+            if (!states.containsKey(init.getId())) {
+                throw new StructureException("The state '" + init.getId() + "' does not belong to the alternating automaton '" + name + "'.");
+            }
+            this.inits.add(init);
         }
-        this.init = init;
     }
 
     public String getName() {
@@ -106,8 +113,9 @@ public class AlternatingBuchiAutomaton implements DotSaveable {
 
         // States
         sb.append("#states\n");
-        if (init != null) {
-            sb.append(this.hashCode()).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
+        int counter = 0;
+        for (ABAState init : inits) {
+            sb.append(this.hashCode()).append("").append(counter++).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
         }
         for (String id : states.keySet()) {
             ABAState state = states.get(id);
@@ -115,9 +123,10 @@ public class AlternatingBuchiAutomaton implements DotSaveable {
         }
 
         // Edges
-        if (init != null) {
-            sb.append("\n#flows\n");
-            sb.append(this.hashCode()).append("->").append(init.getId().hashCode()).append("\n");// add the init arc
+        sb.append("\n#flows\n");
+        counter = 0;
+        for (ABAState init : inits) {
+            sb.append(this.hashCode()).append("").append(counter++).append("->").append(init.getId().hashCode()).append("\n");// add the inits arc
         }
         for (Set<ABAEdge> es : edges.values()) {
             for (ABAEdge edge : es) {
