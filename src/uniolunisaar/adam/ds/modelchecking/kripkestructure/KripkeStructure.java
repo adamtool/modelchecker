@@ -49,6 +49,7 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
 
         // States
         sb.append("#states\n");
+        sb.append(this.hashCode()).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
         for (String id : states.keySet()) {
             KripkeState<SL> state = states.get(id);
             sb.append(state.toDot());
@@ -59,8 +60,9 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
         sb.append("\n#flows\n");
 
         // Edges
-        for (Set<E> edges : edges.values()) {
-            for (E edge : edges) {
+        sb.append(this.hashCode()).append("->").append(init.getId().hashCode()).append("\n");// add the init arc
+        for (Set<E> es : edges.values()) {
+            for (E edge : es) {
                 sb.append(edge.toDot());
             }
         }
