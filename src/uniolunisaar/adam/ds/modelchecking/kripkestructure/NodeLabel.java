@@ -18,4 +18,9 @@ public class NodeLabel implements ILabel {
         return node;
     }
 
+    @Override
+    public String toString() {
+        return node.getId();
+    }
+
 }

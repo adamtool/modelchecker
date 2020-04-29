@@ -32,4 +32,15 @@ public class KripkeState<L extends ILabel> {
         return id;
     }
 
+    public String toDot() {
+        StringBuilder sb = new StringBuilder();
+        String color = "black";
+        sb.append(id.hashCode()).append("[shape=circle, color=").append(color);
+        sb.append(", height=0.5, width=0.5, fixedsize=false,  penwidth=").append(1);
+        sb.append(", label=\"").append(id).append("\"");
+        sb.append(", xlabel=").append("\"").append(labels.toString()).append("\"");
+        sb.append("];\n");
+        return sb.toString();
+    }
+
 }

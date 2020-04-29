@@ -40,4 +40,30 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
         return edges;
     }
 
+    public String toDot() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph GraphGame {\n");
+
+        // States
+        sb.append("#states\n");
+        for (String id : states.keySet()) {
+            KripkeState<SL> state = states.get(id);
+            sb.append(state.toDot());
+        }
+        sb.append("overlap=false\n");
+        sb.append("label=\"").append("states").append("\"\n");
+        sb.append("fontsize=12\n\n");
+        sb.append("\n#flows\n");
+
+        // Edges
+        for (E edge : edges.values()) {
+            sb.append(edge.toDot());
+        }
+        sb.append("overlap=false\n");
+        sb.append("label=\"").append("Kripke structure").append("\"\n");
+        sb.append("fontsize=12\n\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
 }

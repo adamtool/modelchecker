@@ -18,4 +18,8 @@ public class TransitionLabel implements ILabel {
         return t;
     }
 
+    @Override
+    public String toString() {
+        return t.getId();
+    }
 }

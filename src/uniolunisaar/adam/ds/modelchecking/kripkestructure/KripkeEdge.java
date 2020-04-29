@@ -23,4 +23,10 @@ public class KripkeEdge<L extends ILabel> {
         return post;
     }
 
+    public String toDot() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(pre.getId()).append("->").append(post.getId());
+        sb.append("\n");
+        return sb.toString();
+    }
 }
