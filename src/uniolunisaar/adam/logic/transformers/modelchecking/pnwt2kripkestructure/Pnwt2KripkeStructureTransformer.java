@@ -94,14 +94,15 @@ public class Pnwt2KripkeStructureTransformer {
             if (!k.stateExists(id)) {
                 succ = k.createAndAddState(id, new NodeLabel(place));
                 todo.add(succ);
+                // add loops to this state for all transitions not succeeding a chain
+                for (Transition notTransitingTransition : notTransitingTransitions) {
+                    k.createAndAddEdge(succ.getId(), new TransitionLabel(notTransitingTransition), succ.getId());
+                }
             } else {
                 succ = k.getState(id);
             }
             k.createAndAddEdge(preState.getId(), new TransitionLabel(t), succ.getId());
-            // add loops to this state for all transitions not succeeding a chain
-            for (Transition notTransitingTransition : notTransitingTransitions) {
-                k.createAndAddEdge(succ.getId(), new TransitionLabel(notTransitingTransition), succ.getId());
-            }
+
         }
     }
 
