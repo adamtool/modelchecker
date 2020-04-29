@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.KripkeStructure;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.tools.AdamProperties;
 import uniolunisaar.adam.tools.Logger;
@@ -19,19 +18,19 @@ import uniolunisaar.adam.tools.processHandling.ProcessPool;
  */
 public class MCTools {
 
-    public static void saveKripke2Dot(String path, KripkeStructure<?, ?> k) throws FileNotFoundException {
+    public static void save2Dot(String path, DotSaveable object) throws FileNotFoundException {
         try (PrintStream out = new PrintStream(path + ".dot")) {
-            out.println(k.toDot());
+            out.println(object.toDot());
         }
         Logger.getInstance().addMessage("Saved to: " + path + ".dot", true);
     }
 
-    public static Thread saveKripkeStructure2DotAndPDF(String path, KripkeStructure<?, ?> k) throws IOException, InterruptedException {
-        saveKripke2Dot(path, k);
+    public static Thread save2DotAndPDF(String path, DotSaveable object) throws IOException, InterruptedException {
+        save2Dot(path, object);
         String dot = AdamProperties.getInstance().getProperty(AdamProperties.DOT);
         String[] command = {dot, "-Tpdf", path + ".dot", "-o", path + ".pdf"};
         ExternalProcessHandler procH = new ExternalProcessHandler(true, command);
-        ProcessPool.getInstance().putProcess(k.hashCode() + "#dot", procH);
+        ProcessPool.getInstance().putProcess(object.hashCode() + "#dot", procH);
         // start it in an extra thread
         Thread thread = new Thread(() -> {
             try {
@@ -55,10 +54,10 @@ public class MCTools {
         return thread;
     }
 
-    public static Thread saveKripkestructure2PDF(String path, KripkeStructure<?, ?> k) throws IOException, InterruptedException {
+    public static Thread save2PDF(String path, DotSaveable object) throws IOException, InterruptedException {
         String bufferpath = path + "_" + System.currentTimeMillis();
         Thread dot;
-        dot = saveKripkeStructure2DotAndPDF(bufferpath, k);
+        dot = save2DotAndPDF(bufferpath, object);
         Thread mvPdf = new Thread(() -> {
             try {
                 dot.join();

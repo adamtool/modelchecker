@@ -43,7 +43,7 @@ public class TestPnwt2KripkeStructure {
         Assert.assertTrue(pnwt.isInhibitor(pnwt.getFlow("r", "tp")));
 
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(pnwt);
-        MCTools.saveKripkeStructure2DotAndPDF(outputDir + "initLate_ks", k);
+        MCTools.save2DotAndPDF(outputDir + "initLate_ks", k);
         System.out.println(k.getEdges().toString());
     }
 }

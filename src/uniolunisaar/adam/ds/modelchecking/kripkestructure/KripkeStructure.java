@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
+import uniolunisaar.adam.util.DotSaveable;
 
 /**
  *
@@ -11,7 +12,7 @@ import uniol.apt.adt.exception.StructureException;
  * @param <SL> state label
  * @param <E> edge
  */
-public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
+public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implements DotSaveable {
 
     private final Map<String, KripkeState<SL>> states;
     private final Map<KripkeState<SL>, Set<E>> edges;
@@ -43,24 +44,26 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
         return edges;
     }
 
+    @Override
     public String toDot() {
         StringBuilder sb = new StringBuilder();
-        sb.append("digraph GraphGame {\n");
+        sb.append("digraph KripkeStructure {\n");
 
         // States
         sb.append("#states\n");
-        sb.append(this.hashCode()).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
+        if (init != null) {
+            sb.append(this.hashCode()).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
+        }
         for (String id : states.keySet()) {
             KripkeState<SL> state = states.get(id);
             sb.append(state.toDot());
         }
-        sb.append("overlap=false\n");
-        sb.append("label=\"").append("states").append("\"\n");
-        sb.append("fontsize=12\n\n");
-        sb.append("\n#flows\n");
 
         // Edges
-        sb.append(this.hashCode()).append("->").append(init.getId().hashCode()).append("\n");// add the init arc
+        sb.append("\n#flows\n");
+        if (init != null) {
+            sb.append(this.hashCode()).append("->").append(init.getId().hashCode()).append("\n");// add the init arc
+        }
         for (Set<E> es : edges.values()) {
             for (E edge : es) {
                 sb.append(edge.toDot());

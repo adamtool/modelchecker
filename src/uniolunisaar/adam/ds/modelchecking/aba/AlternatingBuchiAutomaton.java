@@ -6,13 +6,14 @@ import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.DotSaveable;
 
 /**
  * A deterministic alternating Buchi automaton
  *
  * @author Manuel Gieseking
  */
-public class AlternatingBuchiAutomaton {
+public class AlternatingBuchiAutomaton implements DotSaveable {
 
     private final Map<String, ABAState> states;
     private final Map<ABAState, Set<ABAEdge>> edges;
@@ -34,6 +35,16 @@ public class AlternatingBuchiAutomaton {
             throw new StructureException("The state '" + init.getId() + "' does not belong to the alternating automaton '" + name + "'.");
         }
         this.init = init;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setBuchi(boolean buchi, ABAState... states) {
+        for (ABAState state : states) {
+            state.setBuchi(buchi);
+        }
     }
 
     public ABAState createAndAddState(String id) {
@@ -80,11 +91,43 @@ public class AlternatingBuchiAutomaton {
                 postEdges = new HashSet<>();
                 edges.put(pre, postEdges);
             }
-            ABAEdge edge = new ABAEdge(special);
+            ABAEdge edge = new ABAEdge(pre, special);
             postEdges.add(edge);
             return edge;
         } else {
             throw new StructureException("There is no state with ID '" + preStateID + "'");
         }
+    }
+
+    @Override
+    public String toDot() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph AlternatingBuchiAutomaton {\n");
+
+        // States
+        sb.append("#states\n");
+        if (init != null) {
+            sb.append(this.hashCode()).append(" [label=\"\", shape=point]").append("\n"); // for showing an initial arc
+        }
+        for (String id : states.keySet()) {
+            ABAState state = states.get(id);
+            sb.append(state.toDot());
+        }
+
+        // Edges
+        if (init != null) {
+            sb.append("\n#flows\n");
+            sb.append(this.hashCode()).append("->").append(init.getId().hashCode()).append("\n");// add the init arc
+        }
+        for (Set<ABAEdge> es : edges.values()) {
+            for (ABAEdge edge : es) {
+                sb.append(edge.toDot());
+            }
+        }
+        sb.append("overlap=false\n");
+        sb.append("label=\"").append("Alternating Buchi automaton: ").append(name).append("\"\n");
+        sb.append("fontsize=12\n\n");
+        sb.append("}");
+        return sb.toString();
     }
 }

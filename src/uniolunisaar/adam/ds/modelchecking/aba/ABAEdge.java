@@ -24,8 +24,8 @@ public class ABAEdge {
     private final Set<ABAState> post;
     private final Special special;
 
-    public ABAEdge(Special special) {
-        this.pre = null;
+    public ABAEdge(ABAState pre, Special special) {
+        this.pre = pre;
         this.type = null;
         this.label = null;
         this.post = null;
@@ -58,6 +58,31 @@ public class ABAEdge {
 
     public String getLabel() {
         return label;
+    }
+
+    public String toDot() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("#states\n");
+        if (special != null) {
+            sb.append(this.hashCode()).append(" [label=\"").append(special.name()).append("\", color=white]").append("\n");
+            sb.append("\n#flows\n");
+            sb.append(getPre().getId().hashCode()).append("->").append(this.hashCode());
+        } else {
+            // edge to the node
+            String typeLabel = type == TYPE.ALL ? "⋀" : "⋁";
+            sb.append(this.hashCode()).append(" [label=\"").append(typeLabel).append("\", shape=square]").append("\n");
+            sb.append("\n#flows\n");
+            sb.append(getPre().getId().hashCode()).append("->").append(this.hashCode()).append("\n");
+            sb.append("[label=\"").append(label).append("\"]");
+            // edge to the successors
+            sb.append(this.hashCode()).append("->").append("{");
+            for (ABAState aBAState : post) {
+                sb.append(aBAState.getId().hashCode()).append(",");
+            }
+            sb.replace(sb.length() - 1, sb.length(), "}");
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
 }
