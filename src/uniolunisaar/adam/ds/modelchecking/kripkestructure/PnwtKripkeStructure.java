@@ -1,6 +1,8 @@
 package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
 import uniolunisaar.adam.tools.Logger;
 
@@ -9,6 +11,10 @@ import uniolunisaar.adam.tools.Logger;
  * @author Manuel Gieseking
  */
 public class PnwtKripkeStructure extends LabeledKripkeStructure<NodeLabel, TransitionLabel> {
+
+    public PnwtKripkeStructure(String name) {
+        super(name);
+    }
 
     public KripkeState<NodeLabel> createAndAddState(String id, NodeLabel... labels) {
         Map<String, KripkeState<NodeLabel>> states = getStates();
@@ -28,7 +34,12 @@ public class PnwtKripkeStructure extends LabeledKripkeStructure<NodeLabel, Trans
             if (states.containsKey(postStateID)) {
                 KripkeState<NodeLabel> pre = states.get(preStateID);
                 LabeledKripkeEdge<NodeLabel, TransitionLabel> edge = new LabeledKripkeEdge<>(pre, label, states.get(postStateID));
-                edge = getEdges().put(pre, edge);
+                Set<LabeledKripkeEdge<NodeLabel, TransitionLabel>> edges = getEdges().get(pre);
+                if (edges == null) {
+                    edges = new HashSet<>();
+                    getEdges().put(pre, edges);
+                }
+                edges.add(edge);
                 return edge;
             } else {
                 throw new StructureException("There is no state with ID '" + postStateID + "'");

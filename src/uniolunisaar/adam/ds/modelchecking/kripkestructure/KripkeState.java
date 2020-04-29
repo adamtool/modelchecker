@@ -43,4 +43,9 @@ public class KripkeState<L extends ILabel> {
         return sb.toString();
     }
 
+    @Override
+    public String toString() {
+        return id;
+    }
+
 }

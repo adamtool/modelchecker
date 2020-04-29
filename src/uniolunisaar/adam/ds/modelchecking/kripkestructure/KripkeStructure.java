@@ -2,6 +2,7 @@ package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
 
 /**
@@ -13,12 +14,14 @@ import uniol.apt.adt.exception.StructureException;
 public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
 
     private final Map<String, KripkeState<SL>> states;
-    private final Map<KripkeState<SL>, E> edges;
+    private final Map<KripkeState<SL>, Set<E>> edges;
     private KripkeState<SL> init;
+    private final String name;
 
-    public KripkeStructure() {
+    public KripkeStructure(String name) {
         this.states = new HashMap<>();
         this.edges = new HashMap<>();
+        this.name = name;
     }
 
     public KripkeState<SL> getInit() {
@@ -36,7 +39,7 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
         return states;
     }
 
-    public Map<KripkeState<SL>, E> getEdges() {
+    public Map<KripkeState<SL>, Set<E>> getEdges() {
         return edges;
     }
 
@@ -56,14 +59,20 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> {
         sb.append("\n#flows\n");
 
         // Edges
-        for (E edge : edges.values()) {
-            sb.append(edge.toDot());
+        for (Set<E> edges : edges.values()) {
+            for (E edge : edges) {
+                sb.append(edge.toDot());
+            }
         }
         sb.append("overlap=false\n");
-        sb.append("label=\"").append("Kripke structure").append("\"\n");
+        sb.append("label=\"").append("Kripke structure: ").append(name).append("\"\n");
         sb.append("fontsize=12\n\n");
         sb.append("}");
         return sb.toString();
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

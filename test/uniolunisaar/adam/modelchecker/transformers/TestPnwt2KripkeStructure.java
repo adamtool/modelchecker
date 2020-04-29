@@ -29,7 +29,7 @@ public class TestPnwt2KripkeStructure {
 
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().setVerbose(true);
 //        Logger.getInstance().setShortMessageStream(null);
 //        Logger.getInstance().setVerboseMessageStream(null);
 //        Logger.getInstance().setWarningStream(null);
@@ -44,5 +44,6 @@ public class TestPnwt2KripkeStructure {
 
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(pnwt);
         MCTools.saveKripkeStructure2DotAndPDF(outputDir + "initLate_ks", k);
+        System.out.println(k.getEdges().toString());
     }
 }

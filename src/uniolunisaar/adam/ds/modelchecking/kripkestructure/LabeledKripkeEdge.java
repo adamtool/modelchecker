@@ -27,4 +27,9 @@ public class LabeledKripkeEdge<SL extends ILabel, EL extends ILabel> extends Kri
         sb.append("\n");
         return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        return getPre().getId() + "-" + label.toString() + "->" + getPost().getId();
+    }
 }

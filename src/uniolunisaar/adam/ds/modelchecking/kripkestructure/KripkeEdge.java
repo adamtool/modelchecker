@@ -29,4 +29,10 @@ public class KripkeEdge<L extends ILabel> {
         sb.append("\n");
         return sb.toString();
     }
+
+    @Override
+    public String toString() {
+        return pre.getId() + "->" + post.getId();
+    }
+
 }

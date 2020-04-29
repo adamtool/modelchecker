@@ -21,7 +21,7 @@ import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 public class Pnwt2KripkeStructureTransformer {
 
     public static PnwtKripkeStructure create(PetriNetWithTransits pnwt) {
-        PnwtKripkeStructure k = new PnwtKripkeStructure();
+        PnwtKripkeStructure k = new PnwtKripkeStructure(pnwt.getName() + "_ks");
         // initial state
         KripkeState<NodeLabel> init = k.createAndAddState("I", new NodeLabel[0]);
         k.setInit(init);
