@@ -1,6 +1,6 @@
 package uniolunisaar.adam.ds.modelchecking.aba;
 
-import uniolunisaar.adam.ds.automaton.BuchiState;
+import uniolunisaar.adam.ds.automata.BuchiState;
 
 /**
  *

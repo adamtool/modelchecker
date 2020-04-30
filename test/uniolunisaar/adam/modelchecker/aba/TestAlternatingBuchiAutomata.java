@@ -67,7 +67,7 @@ public class TestAlternatingBuchiAutomata {
         aba.createAndAddDirectEdge(a.getId(), ABAOperatorState.TYPE.ALL, "tq", true, c.getId(), d.getId());
         ABAState e = aba.createAndAddState("phi,(p,tb)");
         aba.createAndAddDirectEdge(b.getId(), ABAOperatorState.TYPE.ALL, "tp", true, e.getId());
-        aba.createSpecialEdge(e.getId(), ABATrueFalseEdge.Type.FALSE, true);
+        aba.createAndAddSpecialEdge(e.getId(), ABATrueFalseEdge.Type.FALSE, true);
         aba.setBuchi(true, a, b, c, d, e);
         MCTools.save2DotAndPDF(outputDir + aba.getName(), aba);
     }

@@ -6,6 +6,8 @@ package uniolunisaar.adam.ds.modelchecking.aba;
  */
 public interface IABANode {
 
+    public String getId();
+
     public String toDot();
 
     public int getDotIdentifier();

@@ -30,4 +30,9 @@ public class ABAOperatorState implements IABANode {
         return this.hashCode();
     }
 
+    @Override
+    public String getId() {
+        return "" + this.hashCode();
+    }
+
 }

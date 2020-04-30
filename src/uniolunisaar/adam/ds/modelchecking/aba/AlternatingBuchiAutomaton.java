@@ -70,6 +70,14 @@ public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements DotSave
         return states;
     }
 
+    public boolean containsState(String postStateId) {
+        return states.containsKey(postStateId);
+    }
+
+    public ABAState getState(String postStateId) {
+        return states.get(postStateId);
+    }
+
     Map<ABAState, Set<EDGE>> getEdges() {
         return edges;
     }

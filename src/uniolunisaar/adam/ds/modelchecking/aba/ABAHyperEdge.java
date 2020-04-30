@@ -46,4 +46,9 @@ public class ABAHyperEdge implements IABAHyperEdge {
         }
         return sb.toString();
     }
+
+    public ABAStartEdge getStart() {
+        return start;
+    }
+
 }

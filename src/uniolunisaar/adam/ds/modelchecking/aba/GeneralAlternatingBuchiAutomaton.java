@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
-import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormula;
 
 /**
  *
@@ -18,7 +17,26 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
 //
 //    public ABAHyperEdge createAndAddDirectEdge(String preStateID, String label, boolean check, IPositiveBooleanFormula formula) {
 //    }
-    
+
+    public ABAIntermediateEndEdge createAndAddIntermediateEdge(ABAOperatorState pre, ABAOperatorState.TYPE postType) {
+        return new ABAIntermediateEndEdge(pre, new ABAOperatorState(postType));
+    }
+
+    public ABAIntermediateEndEdge createAndAddEndEdge(ABAOperatorState pre, ABAState post) {
+        return new ABAIntermediateEndEdge(pre, post);
+    }
+
+    public ABAHyperEdge createAndAddStartEdge(String preStateID, ABAOperatorState.TYPE type, String label) {
+        Map<ABAState, Set<IABAHyperEdge>> edges = getEdges();
+        ABAState pre = getStates().get(preStateID);
+        Set<IABAHyperEdge> postEdges = edges.get(pre);
+        if (postEdges == null) {
+            postEdges = new HashSet<>();
+            edges.put(pre, postEdges);
+        }
+        return new ABAHyperEdge(new ABAStartEdge(pre, label, new ABAOperatorState(type)));
+    }
+
     public ABAHyperEdge createAndAddDirectEdge(String preStateID, ABAOperatorState.TYPE type, String label, boolean check, String... postStateIDs) {
         Map<String, ABAState> states = getStates();
         Map<ABAState, Set<IABAHyperEdge>> edges = getEdges();
@@ -58,7 +76,7 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
         return edge;
     }
 
-    public ABATrueFalseEdge createSpecialEdge(String preStateID, ABATrueFalseEdge.Type type, boolean check) {
+    public ABATrueFalseEdge createAndAddSpecialEdge(String preStateID, ABATrueFalseEdge.Type type, boolean check) {
         Map<String, ABAState> states = getStates();
         Map<ABAState, Set<IABAHyperEdge>> edges = getEdges();
         if (check && !states.containsKey(preStateID)) {
@@ -74,4 +92,6 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
         postEdges.add(edge);
         return edge;
     }
+
+   
 }
