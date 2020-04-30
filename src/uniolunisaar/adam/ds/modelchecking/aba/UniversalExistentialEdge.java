@@ -3,10 +3,12 @@ package uniolunisaar.adam.ds.modelchecking.aba;
 import java.util.Set;
 
 /**
+ * This method covers all edges in one for the subclass of having only
+ * existential or universal choices.
  *
  * @author Manuel Gieseking
  */
-public class ABAEdge {
+public class UniversalExistentialEdge implements IABAEdge {
 
     public enum TYPE {
         ALL,
@@ -24,7 +26,7 @@ public class ABAEdge {
     private final Set<ABAState> post;
     private final Special special;
 
-    public ABAEdge(ABAState pre, Special special) {
+    public UniversalExistentialEdge(ABAState pre, Special special) {
         this.pre = pre;
         this.type = null;
         this.label = null;
@@ -32,7 +34,7 @@ public class ABAEdge {
         this.special = special;
     }
 
-    ABAEdge(ABAState pre, TYPE type, String label, Set<ABAState> post) {
+    UniversalExistentialEdge(ABAState pre, TYPE type, String label, Set<ABAState> post) {
         this.pre = pre;
         this.type = type;
         this.label = label;
@@ -60,6 +62,7 @@ public class ABAEdge {
         return label;
     }
 
+    @Override
     public String toDot() {
         StringBuilder sb = new StringBuilder();
         sb.append("#states\n");

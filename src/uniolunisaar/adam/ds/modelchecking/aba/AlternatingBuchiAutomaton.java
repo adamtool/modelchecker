@@ -12,11 +12,12 @@ import uniolunisaar.adam.util.DotSaveable;
  * A deterministic alternating Buchi automaton
  *
  * @author Manuel Gieseking
+ * @param <EDGE>
  */
-public class AlternatingBuchiAutomaton implements DotSaveable {
+public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements DotSaveable {
 
     private final Map<String, ABAState> states;
-    private final Map<ABAState, Set<ABAEdge>> edges;
+    private final Map<ABAState, Set<EDGE>> edges;
     private final String name;
     private final Set<ABAState> inits;
 
@@ -65,45 +66,12 @@ public class AlternatingBuchiAutomaton implements DotSaveable {
         }
     }
 
-    public ABAEdge createAndAddEdge(String preStateID, ABAEdge.TYPE type, String label, String... postStateIDs) {
-        if (states.containsKey(preStateID)) {
-            // check the existenz of all given successors
-            Set<ABAState> post = new HashSet<>();
-            for (String postStateID : postStateIDs) {
-                if (!states.containsKey(postStateID)) {
-                    throw new StructureException("There is no state with ID '" + postStateID + "'");
-                }
-                post.add(states.get(postStateID));
-            }
-            ABAState pre = states.get(preStateID);
-            Set<ABAEdge> postEdges = edges.get(pre);
-            if (postEdges == null) {
-                postEdges = new HashSet<>();
-                edges.put(pre, postEdges);
-            }
-            ABAEdge edge = new ABAEdge(pre, type, label, post);
-            postEdges.add(edge);
-            return edge;
-
-        } else {
-            throw new StructureException("There is no state with ID '" + preStateID + "'");
-        }
+    Map<String, ABAState> getStates() {
+        return states;
     }
 
-    public ABAEdge createSpecialEdge(String preStateID, ABAEdge.Special special) {
-        if (states.containsKey(preStateID)) {
-            ABAState pre = states.get(preStateID);
-            Set<ABAEdge> postEdges = edges.get(pre);
-            if (postEdges == null) {
-                postEdges = new HashSet<>();
-                edges.put(pre, postEdges);
-            }
-            ABAEdge edge = new ABAEdge(pre, special);
-            postEdges.add(edge);
-            return edge;
-        } else {
-            throw new StructureException("There is no state with ID '" + preStateID + "'");
-        }
+    Map<ABAState, Set<EDGE>> getEdges() {
+        return edges;
     }
 
     @Override
@@ -128,8 +96,8 @@ public class AlternatingBuchiAutomaton implements DotSaveable {
         for (ABAState init : inits) {
             sb.append(this.hashCode()).append("").append(counter++).append("->").append(init.getId().hashCode()).append("\n");// add the inits arc
         }
-        for (Set<ABAEdge> es : edges.values()) {
-            for (ABAEdge edge : es) {
+        for (Set<EDGE> es : edges.values()) {
+            for (EDGE edge : es) {
                 sb.append(edge.toDot());
             }
         }

@@ -6,7 +6,7 @@ import uniolunisaar.adam.ds.automaton.BuchiState;
  *
  * @author Manuel Gieseking
  */
-public class ABAState extends BuchiState {
+public class ABAState extends BuchiState implements IABANode {
 
     ABAState(String id) {
         super(id);
@@ -17,15 +17,21 @@ public class ABAState extends BuchiState {
         super.setBuchi(buchi);
     }
 
+    @Override
     public String toDot() {
         StringBuilder sb = new StringBuilder();
         String color = "black";
         String shape = isBuchi() ? "doublecircle" : "circle";
-        sb.append(getId().hashCode()).append("[shape=").append(shape).append(", color=").append(color);
+        sb.append(getDotIdentifier()).append("[shape=").append(shape).append(", color=").append(color);
         sb.append(", height=0.5, width=0.5, fixedsize=false,  penwidth=").append(1);
         sb.append(", label=\"").append(getId()).append("\"");
         sb.append("];\n");
         return sb.toString();
+    }
+
+    @Override
+    public int getDotIdentifier() {
+        return this.getId().hashCode();
     }
 
 }
