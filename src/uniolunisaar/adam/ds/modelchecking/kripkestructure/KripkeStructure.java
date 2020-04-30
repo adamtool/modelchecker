@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
-import uniolunisaar.adam.util.DotSaveable;
+import uniolunisaar.adam.util.IDotSaveable;
 
 /**
  *
@@ -13,7 +13,7 @@ import uniolunisaar.adam.util.DotSaveable;
  * @param <SL> state label
  * @param <E> edge
  */
-public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implements DotSaveable {
+public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implements IDotSaveable {
 
     private final Map<String, KripkeState<SL>> states;
     private final Map<KripkeState<SL>, Set<E>> edges;

@@ -18,14 +18,14 @@ import uniolunisaar.adam.tools.processHandling.ProcessPool;
  */
 public class MCTools {
 
-    public static void save2Dot(String path, DotSaveable object) throws FileNotFoundException {
+    public static void save2Dot(String path, IDotSaveable object) throws FileNotFoundException {
         try (PrintStream out = new PrintStream(path + ".dot")) {
             out.println(object.toDot());
         }
         Logger.getInstance().addMessage("Saved to: " + path + ".dot", true);
     }
 
-    public static Thread save2DotAndPDF(String path, DotSaveable object) throws IOException, InterruptedException {
+    public static Thread save2DotAndPDF(String path, IDotSaveable object) throws IOException, InterruptedException {
         save2Dot(path, object);
         String dot = AdamProperties.getInstance().getProperty(AdamProperties.DOT);
         String[] command = {dot, "-Tpdf", path + ".dot", "-o", path + ".pdf"};
@@ -54,7 +54,7 @@ public class MCTools {
         return thread;
     }
 
-    public static Thread save2PDF(String path, DotSaveable object) throws IOException, InterruptedException {
+    public static Thread save2PDF(String path, IDotSaveable object) throws IOException, InterruptedException {
         String bufferpath = path + "_" + System.currentTimeMillis();
         Thread dot;
         dot = save2DotAndPDF(bufferpath, object);

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
 import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.util.DotSaveable;
+import uniolunisaar.adam.util.IDotSaveable;
 
 /**
  * A deterministic alternating Buchi automaton
@@ -14,7 +14,7 @@ import uniolunisaar.adam.util.DotSaveable;
  * @author Manuel Gieseking
  * @param <EDGE>
  */
-public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements DotSaveable {
+public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements IDotSaveable {
 
     private final Map<String, ABAState> states;
     private final Map<ABAState, Set<EDGE>> edges;
