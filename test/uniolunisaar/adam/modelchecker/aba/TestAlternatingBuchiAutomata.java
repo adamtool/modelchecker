@@ -7,10 +7,9 @@ import uniolunisaar.adam.ds.modelchecking.aba.ABAOperatorState;
 import uniolunisaar.adam.ds.modelchecking.aba.UniversalExistentialEdge;
 import uniolunisaar.adam.ds.modelchecking.aba.ABAState;
 import uniolunisaar.adam.ds.modelchecking.aba.ABATrueFalseEdge;
-import uniolunisaar.adam.ds.modelchecking.aba.AlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.modelchecking.aba.UniversalExistentialBuchiAutomaton;
-import uniolunisaar.adam.util.MCTools;
+import uniolunisaar.adam.tools.Tools;
 
 /**
  *
@@ -50,7 +49,7 @@ public class TestAlternatingBuchiAutomata {
         aba.createAndAddEdge(b.getId(), UniversalExistentialEdge.TYPE.ALL, "tp", e.getId());
         aba.createSpecialEdge(e.getId(), UniversalExistentialEdge.Special.FALSE);
         aba.setBuchi(true, a, b, c, d, e);
-        MCTools.save2DotAndPDF(outputDir + aba.getName(), aba);
+        Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
     }
 
     @Test
@@ -69,7 +68,7 @@ public class TestAlternatingBuchiAutomata {
         aba.createAndAddDirectEdge(b.getId(), ABAOperatorState.TYPE.ALL, "tp", true, e.getId());
         aba.createAndAddSpecialEdge(e.getId(), ABATrueFalseEdge.Type.FALSE, true);
         aba.setBuchi(true, a, b, c, d, e);
-        MCTools.save2DotAndPDF(outputDir + aba.getName(), aba);
+        Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
     }
 
 }

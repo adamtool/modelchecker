@@ -18,7 +18,7 @@ import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformer;
-import uniolunisaar.adam.util.MCTools;
+import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNWTTools;
 
 /**
@@ -53,13 +53,13 @@ public class TestABTAxKripkeStructure2ABA {
         Assert.assertTrue(pnwt.isInhibitor(pnwt.getFlow("r", "tp")));
 
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(pnwt);
-        MCTools.save2DotAndPDF(outputDir + "initLate_ks", k);
+        Tools.save2DotAndPDF(outputDir + "initLate_ks", k);
 
         // create tree
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = createExampleTree(pnwt);
 
         GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
-        MCTools.save2DotAndPDF(outputDir + aba.getName(), aba);
+        Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
     }
 
     public static AlternatingBuchiTreeAutomaton<Set<NodeLabel>> createExampleTree(PetriNetWithTransits pnwt) {

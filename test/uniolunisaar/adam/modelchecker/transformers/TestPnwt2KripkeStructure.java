@@ -8,8 +8,7 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformer;
-import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.util.MCTools;
+import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNWTTools;
 
 /**
@@ -43,7 +42,7 @@ public class TestPnwt2KripkeStructure {
         Assert.assertTrue(pnwt.isInhibitor(pnwt.getFlow("r", "tp")));
 
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(pnwt);
-        MCTools.save2DotAndPDF(outputDir + "initLate_ks", k);
+        Tools.save2DotAndPDF(outputDir + "initLate_ks", k);
         System.out.println(k.getEdges().toString());
     }
 }
