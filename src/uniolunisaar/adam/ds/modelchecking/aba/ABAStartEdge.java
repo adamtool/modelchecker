@@ -4,7 +4,8 @@ package uniolunisaar.adam.ds.modelchecking.aba;
  *
  * @author Manuel Gieseking
  */
-public class ABAStartEdge implements IABASubEdge {
+//public class ABAStartEdge implements IABASubEdge {
+public class ABAStartEdge {
 
     private final ABAState pre;
     private final String label;
@@ -16,7 +17,7 @@ public class ABAStartEdge implements IABASubEdge {
         this.post = post;
     }
 
-    @Override
+//    @Override
     public String toDot() {
         StringBuilder sb = new StringBuilder();
         sb.append(post.toDot());
@@ -27,7 +28,7 @@ public class ABAStartEdge implements IABASubEdge {
         return sb.toString();
     }
 
-    @Override
+//    @Override
     public ABAState getPre() {
         return pre;
     }
@@ -36,7 +37,7 @@ public class ABAStartEdge implements IABASubEdge {
         return label;
     }
 
-    @Override
+//    @Override
     public ABAOperatorState getPost() {
         return post;
     }

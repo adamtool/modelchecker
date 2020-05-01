@@ -1,6 +1,5 @@
 package uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -148,10 +147,11 @@ public class ABTAxKripke2ABATransformer {
             if (edge == null) { // the inital call
                 return aba.createAndAddDirectEdge(pre.getId(), type, transitionLabel.getTransition().getId(), false, postStateIds);
             } else {
-                ABAIntermediateEndEdge intEdge = aba.createAndAddIntermediateEdge((ABAOperatorState) pre, type); // since edge!=null this can only be an ABAOperatorState
-                edge.addABAEdge(intEdge);
+                ABAOperatorState op = (ABAOperatorState) pre;// since edge!=null this can only be an ABAOperatorState
+                ABAIntermediateEndEdge intEdge = aba.createAndAddIntermediateEdge(op, type);
+                edge.addABAEdge(op, intEdge);
                 for (String postStateId : postStateIds) {
-                    edge.addABAEdge(aba.createAndAddEndEdge(intEdge.getPre(), aba.getState(postStateId)));
+                    edge.addABAEdge(intEdge.getPre(), aba.createAndAddEndEdge(intEdge.getPre(), aba.getState(postStateId)));
                 }
                 return edge;
             }
@@ -164,8 +164,9 @@ public class ABTAxKripke2ABATransformer {
                 addEdgesRecursively(aba, opState, f.getPhi1(), kripkeEdges, transitionLabel, todo, edge);
                 addEdgesRecursively(aba, opState, f.getPhi2(), kripkeEdges, transitionLabel, todo, edge);
             } else {
-                ABAIntermediateEndEdge intEdge = aba.createAndAddIntermediateEdge((ABAOperatorState) pre, type); // since edge!=null this can only be an ABAOperatorState
-                edge.addABAEdge(intEdge);
+                ABAOperatorState op = (ABAOperatorState) pre;// since edge!=null this can only be an ABAOperatorState
+                ABAIntermediateEndEdge intEdge = aba.createAndAddIntermediateEdge(op, type);
+                edge.addABAEdge(op, intEdge);
                 addEdgesRecursively(aba, intEdge.getPost(), f.getPhi1(), kripkeEdges, transitionLabel, todo, edge);
                 addEdgesRecursively(aba, intEdge.getPost(), f.getPhi2(), kripkeEdges, transitionLabel, todo, edge);
             }

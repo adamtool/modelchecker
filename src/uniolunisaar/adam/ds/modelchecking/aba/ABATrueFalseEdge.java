@@ -1,10 +1,13 @@
 package uniolunisaar.adam.ds.modelchecking.aba;
 
+import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormula;
+import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaFactory;
+
 /**
  *
  * @author Manuel Gieseking
  */
-public class ABATrueFalseEdge implements IABAHyperEdge {
+public class ABATrueFalseEdge implements IABALabeledHyperEdge {
 
     public enum Type {
         TRUE,
@@ -25,6 +28,21 @@ public class ABATrueFalseEdge implements IABAHyperEdge {
 
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public String getLabel() {
+        return null;
+    }
+
+    @Override
+    public Successors getSuccessors() {
+        return new Successors(type);
+    }
+
+    @Override
+    public IPositiveBooleanFormula getPositiveBooleanFormula() {
+        return type == Type.TRUE ? PositiveBooleanFormulaFactory.createTrue() : PositiveBooleanFormulaFactory.createFalse();
     }
 
     @Override

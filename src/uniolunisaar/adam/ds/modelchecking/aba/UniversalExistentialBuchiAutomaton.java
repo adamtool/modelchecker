@@ -1,8 +1,8 @@
 package uniolunisaar.adam.ds.modelchecking.aba;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
 
 /**
@@ -18,10 +18,10 @@ public class UniversalExistentialBuchiAutomaton extends AlternatingBuchiAutomato
 
     public UniversalExistentialEdge createAndAddEdge(String preStateID, UniversalExistentialEdge.TYPE type, String label, String... postStateIDs) {
         Map<String, ABAState> states = getStates();
-        Map<ABAState, Set<UniversalExistentialEdge>> edges = getEdges();
+        Map<ABAState, List<UniversalExistentialEdge>> edges = getEdges();
         if (states.containsKey(preStateID)) {
             // check the existenz of all given successors
-            Set<ABAState> post = new HashSet<>();
+            List<ABAState> post = new ArrayList<>();
             for (String postStateID : postStateIDs) {
                 if (!states.containsKey(postStateID)) {
                     throw new StructureException("There is no state with ID '" + postStateID + "'");
@@ -29,9 +29,9 @@ public class UniversalExistentialBuchiAutomaton extends AlternatingBuchiAutomato
                 post.add(states.get(postStateID));
             }
             ABAState pre = states.get(preStateID);
-            Set<UniversalExistentialEdge> postEdges = edges.get(pre);
+            List<UniversalExistentialEdge> postEdges = edges.get(pre);
             if (postEdges == null) {
-                postEdges = new HashSet<>();
+                postEdges = new ArrayList<>();
                 edges.put(pre, postEdges);
             }
             UniversalExistentialEdge edge = new UniversalExistentialEdge(pre, type, label, post);
@@ -45,12 +45,12 @@ public class UniversalExistentialBuchiAutomaton extends AlternatingBuchiAutomato
 
     public UniversalExistentialEdge createSpecialEdge(String preStateID, UniversalExistentialEdge.Special special) {
         Map<String, ABAState> states = getStates();
-        Map<ABAState, Set<UniversalExistentialEdge>> edges = getEdges();
+        Map<ABAState, List<UniversalExistentialEdge>> edges = getEdges();
         if (states.containsKey(preStateID)) {
             ABAState pre = states.get(preStateID);
-            Set<UniversalExistentialEdge> postEdges = edges.get(pre);
+            List<UniversalExistentialEdge> postEdges = edges.get(pre);
             if (postEdges == null) {
-                postEdges = new HashSet<>();
+                postEdges = new ArrayList<>();
                 edges.put(pre, postEdges);
             }
             UniversalExistentialEdge edge = new UniversalExistentialEdge(pre, special);

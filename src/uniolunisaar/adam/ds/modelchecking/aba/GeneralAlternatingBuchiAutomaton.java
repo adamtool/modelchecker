@@ -1,15 +1,15 @@
 package uniolunisaar.adam.ds.modelchecking.aba;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
 
 /**
  *
  * @author Manuel Gieseking
  */
-public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<IABAHyperEdge> {
+public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<IABALabeledHyperEdge> {
 
     public GeneralAlternatingBuchiAutomaton(String name) {
         super(name);
@@ -27,11 +27,11 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
     }
 
     public ABAHyperEdge createAndAddStartEdge(String preStateID, ABAOperatorState.TYPE type, String label) {
-        Map<ABAState, Set<IABAHyperEdge>> edges = getEdges();
+        Map<ABAState, List<IABALabeledHyperEdge>> edges = getEdges();
         ABAState pre = getStates().get(preStateID);
-        Set<IABAHyperEdge> postEdges = edges.get(pre);
+        List<IABALabeledHyperEdge> postEdges = edges.get(pre);
         if (postEdges == null) {
-            postEdges = new HashSet<>();
+            postEdges = new ArrayList<>();
             edges.put(pre, postEdges);
         }
         return new ABAHyperEdge(new ABAStartEdge(pre, label, new ABAOperatorState(type)));
@@ -39,7 +39,7 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
 
     public ABAHyperEdge createAndAddDirectEdge(String preStateID, ABAOperatorState.TYPE type, String label, boolean check, String... postStateIDs) {
         Map<String, ABAState> states = getStates();
-        Map<ABAState, Set<IABAHyperEdge>> edges = getEdges();
+        Map<ABAState, List<IABALabeledHyperEdge>> edges = getEdges();
         ABAState pre = states.get(preStateID);
 
         // check
@@ -57,9 +57,9 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
         }
 
         // create and add
-        Set<IABAHyperEdge> postEdges = edges.get(pre);
+        List<IABALabeledHyperEdge> postEdges = edges.get(pre);
         if (postEdges == null) {
-            postEdges = new HashSet<>();
+            postEdges = new ArrayList<>();
             edges.put(pre, postEdges);
         }
         ABAOperatorState op = new ABAOperatorState(type);
@@ -67,9 +67,9 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
         ABAHyperEdge edge = new ABAHyperEdge(start);
         for (String post : postStateIDs) {
             if (check) {
-                edge.addABAEdgeAndCheckConnectivity(new ABAIntermediateEndEdge(op, states.get(post)));
+                edge.addABAEdgeAndCheckConnectivity(op, new ABAIntermediateEndEdge(op, states.get(post)));
             } else {
-                edge.addABAEdge(new ABAIntermediateEndEdge(op, states.get(post)));
+                edge.addABAEdge(op, new ABAIntermediateEndEdge(op, states.get(post)));
             }
         }
         postEdges.add(edge);
@@ -78,14 +78,14 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
 
     public ABATrueFalseEdge createAndAddSpecialEdge(String preStateID, ABATrueFalseEdge.Type type, boolean check) {
         Map<String, ABAState> states = getStates();
-        Map<ABAState, Set<IABAHyperEdge>> edges = getEdges();
+        Map<ABAState, List<IABALabeledHyperEdge>> edges = getEdges();
         if (check && !states.containsKey(preStateID)) {
             throw new StructureException("There is no state with ID '" + preStateID + "'");
         }
         ABAState pre = states.get(preStateID);
-        Set<IABAHyperEdge> postEdges = edges.get(pre);
+        List<IABALabeledHyperEdge> postEdges = edges.get(pre);
         if (postEdges == null) {
-            postEdges = new HashSet<>();
+            postEdges = new ArrayList<>();
             edges.put(pre, postEdges);
         }
         ABATrueFalseEdge edge = new ABATrueFalseEdge(pre, type);
@@ -93,5 +93,4 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
         return edge;
     }
 
-   
 }

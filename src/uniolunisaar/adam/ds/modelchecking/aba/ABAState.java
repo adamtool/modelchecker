@@ -1,12 +1,15 @@
 package uniolunisaar.adam.ds.modelchecking.aba;
 
+import java.util.ArrayList;
+import java.util.List;
 import uniolunisaar.adam.ds.automata.BuchiState;
+import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormulaAtom;
 
 /**
  *
  * @author Manuel Gieseking
  */
-public class ABAState extends BuchiState implements IABANode {
+public class ABAState extends BuchiState implements IABANode, IPositiveBooleanFormulaAtom {
 
     ABAState(String id) {
         super(id);
@@ -34,4 +37,10 @@ public class ABAState extends BuchiState implements IABANode {
         return this.getId().hashCode();
     }
 
+    @Override
+    public List<IPositiveBooleanFormulaAtom> getAtoms() {
+        List<IPositiveBooleanFormulaAtom> list = new ArrayList<>();
+        list.add(this);
+        return list;
+    }
 }

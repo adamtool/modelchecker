@@ -35,4 +35,8 @@ public class ABAOperatorState implements IABANode {
         return "" + this.hashCode();
     }
 
+    public TYPE getType() {
+        return type;
+    }
+
 }

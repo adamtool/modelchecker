@@ -1,7 +1,9 @@
 package uniolunisaar.adam.ds.modelchecking.aba;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
@@ -14,10 +16,10 @@ import uniolunisaar.adam.util.IDotSaveable;
  * @author Manuel Gieseking
  * @param <EDGE>
  */
-public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements IDotSaveable {
+public class AlternatingBuchiAutomaton<EDGE extends IABALabeledEdge> implements IDotSaveable {
 
     private final Map<String, ABAState> states;
-    private final Map<ABAState, Set<EDGE>> edges;
+    private final Map<ABAState, List<EDGE>> edges;
     private final String name;
     private final Set<ABAState> inits;
 
@@ -78,7 +80,11 @@ public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements IDotSav
         return states.get(postStateId);
     }
 
-    Map<ABAState, Set<EDGE>> getEdges() {
+    public List<EDGE> getPostset(ABAState state) {
+        return edges.get(state);
+    }
+
+    Map<ABAState, List<EDGE>> getEdges() {
         return edges;
     }
 
@@ -104,7 +110,7 @@ public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements IDotSav
         for (ABAState init : inits) {
             sb.append(this.hashCode()).append("").append(counter++).append("->").append(init.getId().hashCode()).append("\n");// add the inits arc
         }
-        for (Set<EDGE> es : edges.values()) {
+        for (List<EDGE> es : edges.values()) {
             for (EDGE edge : es) {
                 sb.append(edge.toDot());
             }
@@ -114,5 +120,15 @@ public class AlternatingBuchiAutomaton<EDGE extends IABAEdge> implements IDotSav
         sb.append("fontsize=12\n\n");
         sb.append("}");
         return sb.toString();
+    }
+
+    public List<ABAState> getBuchiStates() {
+        List<ABAState> out = new ArrayList<>();
+        for (ABAState value : states.values()) {
+            if (value.isBuchi()) {
+                out.add(value);
+            }
+        }
+        return out;
     }
 }
