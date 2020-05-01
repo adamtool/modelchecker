@@ -85,7 +85,9 @@ public class ABTAxKripke2ABATransformer {
         TreeState treeInit = tree.getInitialState();
         for (KripkeState<NodeLabel> initialState : k.getInitialStates()) {
             Key key = new Key(treeInit, initialState);
-            todo.add(new Pair<>(key, aba.createAndAddState(treeInit.getId() + "," + initialState.getId())));
+            ABAState init = aba.createAndAddState(treeInit.getId() + "," + initialState.getId());
+            aba.addInitialStates(init);
+            todo.add(new Pair<>(key, init));
         }
 
         while (!todo.isEmpty()) {
