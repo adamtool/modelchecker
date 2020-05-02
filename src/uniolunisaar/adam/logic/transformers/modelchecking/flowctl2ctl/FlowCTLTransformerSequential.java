@@ -69,7 +69,7 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
 //
 //            return new LTLFormula(untilFirst, LTLOperators.Binary.U, myTransitions);
         } else if (atom.isPlace()) {
-            String id = atom.get() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
+            String id = atom.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
             if (!net.containsPlace(id)) {
                 return new CTLConstants.False();
             }

@@ -41,7 +41,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
 //            Collection<ILTLFormula> mine = new ArrayList<>();
 //            for (Transition t : net.getTransitions()) {
 //                // this is only for one subformula
-////                if (t.getLabel().equals(phi.get()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
+////                if (t.getLabel().equals(phi.getId()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
 //                // for all subnet transition the extension saves the participating subnets              
 //                if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) {
 //                    mine.add(new LTLAtomicProposition(t));
@@ -53,7 +53,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
 //            }
 //            return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(other, false), LTLOperators.Binary.U, FormulaCreator.bigWedgeOrVeeObject(mine, false));
         } else if (phi.isPlace()) {
-            String id = phi.get() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
+            String id = phi.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
             if (!net.containsPlace(id)) {
                 return new CTLConstants.False();
             }
@@ -103,7 +103,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
             // in the run part when a t transition should fire, it's ok when any t labeled transition can fire
             Collection<ICTLFormula> elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
-                if (t.getLabel().equals(phi.get())) {
+                if (t.getLabel().equals(phi.getId())) {
                     elements.add(new CTLAtomicProposition(t));
                 }
             }
@@ -172,14 +172,14 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
 //            throw new RuntimeException("Not yet implemented for more than one token flow formula. You gave me " + flowFormulas.size() + ": " + flowFormulas.toString());
 //        }
 //        if (flowFormulas.size() == 1) {
-//            FlowLTLFormula flowF = replaceInFlowFormula(orig, net, flowFormulas.get(0), 0);
+//            FlowLTLFormula flowF = replaceInFlowFormula(orig, net, flowFormulas.getId(0), 0);
 //            try {
 ////// VERSION: This version would need an additional forcing of the firing of the first transition (instead of the globally init_tfl)
 //////          in cases where maximality is not stated in the circuit.
 ////                //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
 //////                ILTLFormula init = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID));
 ////                ILTLFormula init = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID)), LTLOperators.Binary.OR, new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID)));
-////                f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
+////                f = f.substitute(flowFormulas.getId(0), new RunFormula(new LTLFormula(
 ////                        new LTLFormula(LTLOperators.Unary.G, init),
 ////                        LTLOperators.Binary.OR,
 ////                        new LTLFormula(init, LTLOperators.Binary.U, flowF.getPhi()))));
@@ -190,7 +190,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
 //// VERSION: here we only consider runs where the initialization had been done
 //                //INITPLACES: it is also OK to chose to consider newly created chains, but newer do so (init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)               
 //                ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "_0")));
-//                f = f.substitute(flowFormulas.get(0), new RunLTLFormula(new LTLFormula(
+//                f = f.substitute(flowFormulas.getId(0), new RunLTLFormula(new LTLFormula(
 //                        new LTLFormula(LTLOperators.Unary.G, newTokenFlow),
 //                        LTLOperators.Binary.OR,
 //                        new LTLFormula(newTokenFlow, LTLOperators.Binary.U,

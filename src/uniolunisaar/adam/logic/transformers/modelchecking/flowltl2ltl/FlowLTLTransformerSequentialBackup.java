@@ -415,7 +415,7 @@ public class FlowLTLTransformerSequentialBackup extends FlowLTLTransformer {
                 //                        LTLOperators.Binary.OR,
                 //                        flowFormula.getPhi());
                 //                if (net.containsPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i)) {
-                //                    // it's also OK if when I chosed to have a new chain but this run doesn't get to it
+                //                    // it's also OK if when I chosed to have a new chain but this run doesn't getId to it
                 //                    flowLTL = new LTLFormula(flowLTL,
                 //                            LTLOperators.Binary.OR,
                 //                            new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i))));

@@ -41,7 +41,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
             Collection<ILTLFormula> mine = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
                 // this is only for one subformula
-//                if (t.getLabel().equals(phi.get()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
+//                if (t.getLabel().equals(phi.getId()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
                 // for all subnet transition the extension saves the participating subnets              
                 if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) {
                     mine.add(new LTLAtomicProposition(t));
@@ -53,7 +53,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
             }
             return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(other, false), LTLOperators.Binary.U, FormulaCreator.bigWedgeOrVeeObject(mine, false));
         } else if (phi.isPlace()) {
-            String id = phi.get() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
+            String id = phi.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
             if (!net.containsPlace(id)) {
                 return new LTLConstants.False();
             }
@@ -107,7 +107,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
             // in the run part when a t transition should fire, it's ok when any t labeled transition can fire
             Collection<ILTLFormula> elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
-                if (t.getLabel().equals(phi.get())) {
+                if (t.getLabel().equals(phi.getId())) {
                     elements.add(new LTLAtomicProposition(t));
                 }
             }
@@ -184,7 +184,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
 //                //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
 ////                ILTLFormula init = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID));
 //                ILTLFormula init = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID)), LTLOperators.Binary.OR, new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID)));
-//                f = f.substitute(flowFormulas.get(0), new RunFormula(new LTLFormula(
+//                f = f.substitute(flowFormulas.getId(0), new RunFormula(new LTLFormula(
 //                        new LTLFormula(LTLOperators.Unary.G, init),
 //                        LTLOperators.Binary.OR,
 //                        new LTLFormula(init, LTLOperators.Binary.U, flowF.getPhi()))));
