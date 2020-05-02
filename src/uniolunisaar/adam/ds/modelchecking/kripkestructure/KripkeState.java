@@ -3,6 +3,7 @@ package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import uniolunisaar.adam.ds.automata.ILabel;
 
 /**
  *

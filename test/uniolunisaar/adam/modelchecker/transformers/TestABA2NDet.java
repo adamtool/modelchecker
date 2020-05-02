@@ -14,7 +14,7 @@ import uniolunisaar.adam.ds.modelchecking.aba.ABAState;
 import uniolunisaar.adam.ds.modelchecking.aba.ABATrueFalseEdge;
 import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.modelchecking.aba.UniversalExistentialBuchiAutomaton;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.NodeLabel;
+import uniolunisaar.adam.ds.automata.NodeLabel;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.ABA2NDetTransformer;

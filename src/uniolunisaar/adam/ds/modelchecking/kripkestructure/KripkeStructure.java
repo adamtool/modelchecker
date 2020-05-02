@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import uniol.apt.adt.exception.StructureException;
+import uniolunisaar.adam.ds.automata.ILabel;
 import uniolunisaar.adam.util.IDotSaveable;
 
 /**

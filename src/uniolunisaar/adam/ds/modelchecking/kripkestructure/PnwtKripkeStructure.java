@@ -1,5 +1,6 @@
 package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
+import uniolunisaar.adam.ds.automata.NodeLabel;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;

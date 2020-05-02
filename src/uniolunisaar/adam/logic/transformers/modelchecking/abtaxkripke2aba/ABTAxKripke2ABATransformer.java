@@ -23,7 +23,7 @@ import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.modelchecking.aba.IABANode;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.KripkeState;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.LabeledKripkeEdge;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.NodeLabel;
+import uniolunisaar.adam.ds.automata.NodeLabel;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.exceptions.modelchecking.NotTransformableException;

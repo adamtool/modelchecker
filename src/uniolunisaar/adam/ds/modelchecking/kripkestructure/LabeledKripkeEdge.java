@@ -1,5 +1,7 @@
 package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
+import uniolunisaar.adam.ds.automata.ILabel;
+
 /**
  *
  * @author Manuel Gieseking

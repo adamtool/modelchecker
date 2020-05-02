@@ -13,7 +13,7 @@ import uniolunisaar.adam.ds.abta.TreeState;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaFactory;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaOperators;
 import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.NodeLabel;
+import uniolunisaar.adam.ds.automata.NodeLabel;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;

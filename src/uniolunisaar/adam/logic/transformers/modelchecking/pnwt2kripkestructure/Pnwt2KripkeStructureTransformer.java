@@ -8,7 +8,7 @@ import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.KripkeState;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.NodeLabel;
+import uniolunisaar.adam.ds.automata.NodeLabel;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;

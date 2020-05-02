@@ -2,6 +2,7 @@ package uniolunisaar.adam.ds.modelchecking.kripkestructure;
 
 import java.util.Objects;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.automata.ILabel;
 
 /**
  *
