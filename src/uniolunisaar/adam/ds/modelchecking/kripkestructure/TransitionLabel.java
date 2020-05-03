@@ -20,15 +20,19 @@ public class TransitionLabel implements ILabel {
         return t;
     }
 
+    public String getId() {
+        return t == null ? "-" : t.getId();
+    }
+
     @Override
     public String toString() {
-        return t.getId();
+        return getId();
     }
 
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 59 * hash + Objects.hashCode(this.t.getId());
+        hash = 59 * hash + (t != null ? Objects.hashCode(this.t.getId()) : 0);
         return hash;
     }
 
@@ -44,11 +48,19 @@ public class TransitionLabel implements ILabel {
             return false;
         }
         final TransitionLabel other = (TransitionLabel) obj;
+        if (this.t == null && other.t != null) {
+            return false;
+        }
+        if (this.t != null && other.t == null) {
+            return false;
+        }
+        if (this.t == null && other.t == null) {
+            return true;
+        }
         if (!Objects.equals(this.t.getId(), other.t.getId())) {
             return false;
         }
         return true;
     }
-    
-    
+
 }

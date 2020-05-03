@@ -25,7 +25,9 @@ public class LabeledKripkeEdge<SL extends ILabel, EL extends ILabel> extends Kri
     public String toDot() {
         StringBuilder sb = new StringBuilder();
         sb.append(getPre().getId().hashCode()).append("->").append(getPost().getId().hashCode());
-        sb.append("[label=\"").append(label.toString()).append("\"]");
+        if (label != null) {
+            sb.append("[label=\"").append(label.toString()).append("\"]");
+        }
         sb.append("\n");
         return sb.toString();
     }

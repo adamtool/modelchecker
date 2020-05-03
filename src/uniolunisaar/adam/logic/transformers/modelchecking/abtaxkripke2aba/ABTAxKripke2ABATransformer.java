@@ -147,7 +147,7 @@ public class ABTAxKripke2ABATransformer {
                 postStateIds[i++] = postState.getId();
             }
             if (edge == null) { // the inital call
-                return aba.createAndAddDirectEdge(pre.getId(), type, transitionLabel.getTransition().getId(), false, postStateIds);
+                return aba.createAndAddDirectEdge(pre.getId(), type, transitionLabel.getId(), false, postStateIds);
             } else {
                 ABAOperatorState op = (ABAOperatorState) pre;// since edge!=null this can only be an ABAOperatorState
                 ABAIntermediateEndEdge intEdge = aba.createAndAddIntermediateEdge(op, type);
@@ -161,7 +161,7 @@ public class ABTAxKripke2ABATransformer {
             PositiveBooleanFormulaBinary f = (PositiveBooleanFormulaBinary) formula;
             ABAOperatorState.TYPE type = f.getOp() == Binary.AND ? ABAOperatorState.TYPE.ALL : ABAOperatorState.TYPE.EXISTS;
             if (edge == null) { // the initial call
-                edge = aba.createAndAddStartEdge(pre.getId(), type, transitionLabel.getTransition().getId());
+                edge = aba.createAndAddStartEdge(pre.getId(), type, transitionLabel.getId());
                 ABAOperatorState opState = edge.getStart().getPost();
                 addEdgesRecursively(aba, opState, f.getPhi1(), kripkeEdges, transitionLabel, todo, edge);
                 addEdgesRecursively(aba, opState, f.getPhi2(), kripkeEdges, transitionLabel, todo, edge);
