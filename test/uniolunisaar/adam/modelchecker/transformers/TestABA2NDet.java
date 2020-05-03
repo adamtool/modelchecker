@@ -99,7 +99,7 @@ public class TestABA2NDet {
         Transition tp = pnwt.getTransition("tp");
         Assert.assertTrue(pnwt.isInhibitor(pnwt.getFlow("r", "tp")));
 
-        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(pnwt);
+        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(pnwt, true);
         Tools.save2DotAndPDF(outputDir + "initLate_ks", k);
 
         // create tree

@@ -20,44 +20,119 @@ import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
  */
 public class Pnwt2KripkeStructureTransformer {
 
-    public static PnwtKripkeStructure create(PetriNetWithTransits pnwt) {
+    public static PnwtKripkeStructure create(PetriNetWithTransits pnwt, boolean onlyPlacesInAP) {
         PnwtKripkeStructure k = new PnwtKripkeStructure(pnwt.getName() + "_ks");
-        // initial state
-        KripkeState<NodeLabel> init = k.createAndAddState("I", new NodeLabel[0]);
-        k.addInitialState(init);
 
         LinkedList<KripkeState<NodeLabel>> todo = new LinkedList<>();
 
-        // add all newly created transits
+        // For each place in which a transit starts add an initial state
+        // (if with transitions as atomic propositions also for the combi with the outgoing transiting transitions)
         for (Transition transition : pnwt.getTransitions()) {
             Transit initialTransit = pnwt.getInitialTransit(transition);
             if (initialTransit != null) { // all initial transits
-                addSuccessor(k, pnwt, init, transition, initialTransit, todo);
+                for (Place place : initialTransit.getPostset()) { // all places in which a transit is started
+                    if (onlyPlacesInAP) {
+                        createAndAddStatesForOnlyPlacesInAP(k, pnwt, place, todo);
+                    } else {
+                        createAndAddStatesForAlsoTransitionsInAP(k, pnwt, place, todo);
+                    }
+                }
             }
+        }
+        // all states can now be initial
+        for (KripkeState<NodeLabel> state : k.getStates().values()) {
+            k.addInitialState(state);
         }
 
         // add all successors as long as there are some
         while (!todo.isEmpty()) {
             KripkeState<NodeLabel> pre = todo.pop();
             Set<NodeLabel> labels = pre.getLabels();
-            if (labels.size() == 1) { // this can only happen if it's just a place (and we handled the successors already)
-                continue;
-            }
-            // get the place and transition of the labels
-            Place p = null;
-            Transition t = null;
-            for (NodeLabel label : labels) {
-                Node n = label.getNode();
-                if (n instanceof Place) {
-                    p = (Place) n;
-                } else {
-                    t = (Transition) n;
+
+            if (onlyPlacesInAP || labels.size() == 1) {
+                // Get the corresponding place
+                Place place = pnwt.getPlace(pre.getId());
+                // for all successors reached by a transit add a place and an edge
+                for (Transition t : place.getPostset()) { // get all transiting successors
+                    Transit succTransit = pnwt.getTransit(t, place);
+                    if (succTransit != null) { // this transition can further transit the token
+                        for (Place post : succTransit.getPostset()) {
+                            KripkeState<NodeLabel> succ = createAndAddStatesForOnlyPlacesInAP(k, pnwt, post, todo);
+                            k.createAndAddEdge(place.getId(), new TransitionLabel(t), succ.getId());
+                        }
+                    }
+                }
+                // add the special loop to keep it smaller
+                // with the transition of the transition label == null to state all 
+                // other transitions which are not transiting in this place
+                k.createAndAddEdge(place.getId(), new TransitionLabel(null), place.getId());
+            } else {
+                // get the place and transition of the labels
+                Place p = null;
+                Transition t = null;
+                for (NodeLabel label : labels) {
+                    Node n = label.getNode();
+                    if (n instanceof Place) {
+                        p = (Place) n;
+                    } else {
+                        t = (Transition) n;
+                    }
+                }
+                // t!= null since otherwise labels.size()<2 s.o.
+                Transit succTransit = pnwt.getTransit(t, p); // must have a real transit otherwise the transition would've not been added (thus != null)
+                for (Place post : succTransit.getPostset()) {
+                    KripkeState<NodeLabel> succ = createAndAddStatesForOnlyPlacesInAP(k, pnwt, post, todo);
+                    k.createAndAddEdge(p.getId(), new TransitionLabel(t), succ.getId());
                 }
             }
-            Transit transit = pnwt.getTransit(t, p); // must have a real transit otherwise the transition would've not been added
-            addSuccessor(k, pnwt, pre, t, transit, todo);
         }
         return k;
+    }
+
+    private static KripkeState<NodeLabel> createAndAddStatesForOnlyPlacesInAP(PnwtKripkeStructure k, PetriNetWithTransits pnwt, Place place, LinkedList<KripkeState<NodeLabel>> todo) {
+        String id = place.getId();
+        KripkeState<NodeLabel> succ;
+        if (!k.stateExists(id)) {
+            succ = k.createAndAddState(id, new NodeLabel(place));
+            todo.add(succ);
+        } else {
+            succ = k.getState(id);
+        }
+        return succ;
+    }
+
+    private static List<KripkeState<NodeLabel>> createAndAddStatesForAlsoTransitionsInAP(PnwtKripkeStructure k, PetriNetWithTransits pnwt, Place place, LinkedList<KripkeState<NodeLabel>> todo) {
+        List<KripkeState<NodeLabel>> states = new ArrayList<>();
+        // when we also have transitions as atomic proposition we have to 
+        // add those to the state. We use the outgoing semantics, thus
+        // we have one state (place, t) for each transition t which can
+        // transit the chain from place
+        for (Transition t : place.getPostset()) { // get all transiting successors
+            Transit succTransit = pnwt.getTransit(t, place);
+            if (succTransit != null) { // this transition can further transit the token
+                String id = place.getId() + "," + t.getId();
+                KripkeState<NodeLabel> succ;
+                if (!k.stateExists(id)) {
+                    succ = k.createAndAddState(id, new NodeLabel(place), new NodeLabel(t));
+                    todo.add(succ);
+                } else {
+                    succ = k.getState(id);
+                }
+                states.add(succ);
+            }
+        }
+        // also add one state which only contains the place itself for the 
+        // case the run never chooses one of the transiting transitions anymore
+        String id = place.getId();
+        KripkeState<NodeLabel> succ;
+        if (!k.stateExists(id)) {
+            succ = k.createAndAddState(id, new NodeLabel(place));
+            todo.add(succ);
+        } else {
+            succ = k.getState(id);
+        }
+        states.add(succ);
+        return states;
     }
 
     /**
