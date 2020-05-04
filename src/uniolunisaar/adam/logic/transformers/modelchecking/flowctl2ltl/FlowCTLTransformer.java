@@ -38,7 +38,7 @@ public class FlowCTLTransformer {
         return phi;
     }
 
-    IFormula replaceRunFormulaInRunFormula(PetriNet orig, PetriNet net, RunLTLFormula phi, boolean scopeEventually, int nbFlowFormulas) {
+    IFormula replaceRunFormulaInRunFormula(PetriNet orig, PetriNet net, RunCTLForAllFormula phi, boolean scopeEventually, int nbFlowFormulas) {
         return new RunLTLFormula(replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas));
     }
 
@@ -94,8 +94,8 @@ public class FlowCTLTransformer {
             return replaceLTLAtomicPropositionInRunFormula(orig, net, (LTLAtomicProposition) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof IFlowFormula) {
             return replaceFlowFormulaInRunFormula(orig, net, (IFlowFormula) phi, scopeEventually, nbFlowFormulas);
-        } else if (phi instanceof RunLTLFormula) {
-            return replaceRunFormulaInRunFormula(orig, net, (RunLTLFormula) phi, scopeEventually, nbFlowFormulas);
+        } else if (phi instanceof RunCTLForAllFormula) {
+            return replaceRunFormulaInRunFormula(orig, net, (RunCTLForAllFormula) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof LTLFormula) {
             return replaceLTLFormulaInRunFormula(orig, net, (LTLFormula) phi, scopeEventually, nbFlowFormulas);
         } else if (phi instanceof FormulaUnary<?, ?>) {
