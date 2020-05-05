@@ -258,6 +258,10 @@ public class PnwtAndFlowCTL2PN {
             }
             list.add(tout);
         }
+        // add an activation place for the stuttering transitions
+        String actid = ACTIVATION_PREFIX_ID + STUTTERING_MODE + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
+        Place actStutt = out.createPlace(actid);
+        out.setPartition(actStutt, nb_ff + 1);
     }
 
     void addApproachesPostWork(PetriNetWithTransits out, BuchiAutomaton det, int nb_ff) {
@@ -289,6 +293,7 @@ public class PnwtAndFlowCTL2PN {
 
     void connectApproachesPreset(PetriNetWithTransits out, Transition tout, String id, int nb_ff) {
         out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + id + TOKENFLOW_SUFFIX_ID + "_" + nb_ff), tout);
+        out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + STUTTERING_MODE + TOKENFLOW_SUFFIX_ID + "_" + nb_ff), tout);
     }
 
     void connectApproachesPresetForStuttering(PetriNetWithTransits out, Transition tout,
@@ -301,6 +306,9 @@ public class PnwtAndFlowCTL2PN {
                 out.setInhibitor(flow);
             }
         }
+        // takes the active token
+        String actid = ACTIVATION_PREFIX_ID + STUTTERING_MODE + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
+        out.createFlow(out.getPlace(actid), tout);
     }
 
     public PetriNetWithTransits createSequential(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, FlowCTLModelcheckingSettings settings) throws NotConvertableException, NotTransformableException, IOException, InterruptedException {
@@ -328,6 +336,9 @@ public class PnwtAndFlowCTL2PN {
                 out.createFlow(actO, t);
                 String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "_" + 0;
                 out.createFlow(t, out.getPlace(id));
+                // also put it into the stuttering place
+                String idStutt = ACTIVATION_PREFIX_ID + STUTTERING_MODE + TOKENFLOW_SUFFIX_ID + "_" + 0;
+                out.createFlow(t, out.getPlace(idStutt));
             }
 
             // move the active token through the subnets
@@ -339,6 +350,8 @@ public class PnwtAndFlowCTL2PN {
                     for (Flow f : acti.getPostsetEdges()) {
                         if (!out.isInhibitor(f)) {
                             out.createFlow(f.getTransition(), actii);
+                            // also the general activation place
+                            out.createFlow(f.getTransition(), out.getPlace(ACTIVATION_PREFIX_ID + STUTTERING_MODE + TOKENFLOW_SUFFIX_ID + "_" + i));
                         }
                     }
                 }

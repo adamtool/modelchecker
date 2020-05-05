@@ -123,14 +123,20 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
 
 //        // %%%%%%%%%% GENERAL FORMULA
         ILTLFormula ret = LogicsTools.convert2LTL(f);
-        // GF act_o AND ! G act_o
-        LTLAtomicProposition actO = new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig"));
+                // GF act_o AND ! FG act_o <- don't want the last one since would prevent correct stuttering (for the mode stuttering has act preset place
+//        LTLAtomicProposition actO = new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig"));
+//        ret = new LTLFormula(
+//                new LTLFormula(
+//                        new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, actO))),
+//                        LTLOperators.Binary.OR,
+//                        new LTLFormula(LTLOperators.Unary.NEG, new LTLFormula(LTLOperators.Unary.G, actO))),
+//                LTLOperators.Binary.IMP, ret);
+        ///
         ret = new LTLFormula(
-                new LTLFormula(
-                        new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, actO))),
-                        LTLOperators.Binary.OR,
-                        new LTLFormula(LTLOperators.Unary.NEG, new LTLFormula(LTLOperators.Unary.G, actO))),
+                new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
                 LTLOperators.Binary.IMP, ret);
+        
+        
 
         return ret;
 

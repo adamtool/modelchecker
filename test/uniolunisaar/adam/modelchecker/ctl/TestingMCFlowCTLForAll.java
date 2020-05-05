@@ -88,7 +88,7 @@ public class TestingMCFlowCTLForAll {
         // FALSE: since we can go the tq also already in the begining
         RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
                 new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.AUD, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(pnwt.getPlace("p"))))));
-//        check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
+        check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
 
         // check: G !tq -> A EF p
         // ergo: G !tq -> A A false U_ !p
@@ -97,8 +97,11 @@ public class TestingMCFlowCTLForAll {
         formula = new RunCTLForAllFormula(neverAbove, RunOperators.Implication.IMP, formula);
         check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
 
+        // check: G !tq -> A EF p
+        // ergo: G !tq -> A A false U_ !p
+        // FALSE: this is still false because we can first fire tp without a chain, and then tp would never be enabled anymore
         pnwt.setStrongFair(pnwt.getTransition("tp"));
-        check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.TRUE);
+        check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
 
     }
 
