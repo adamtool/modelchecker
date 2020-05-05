@@ -5,6 +5,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import uniol.apt.adt.pn.Place;
+import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.logics.ctl.CTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ctl.CTLConstants;
 import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
@@ -18,6 +20,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLModelcheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
@@ -91,9 +94,38 @@ public class TestingMCFlowCTLForAll {
 
     }
 
+    @Test
+    public void exampleLTLToolPaper() throws Exception {
+        PetriNetWithTransits net = new PetriNetWithTransits("toolPaper");
+        Place in = net.createPlace("in");
+        in.setInitialToken(1);
+        Place out = net.createPlace("out");
+        out.setInitialToken(1);
+        Transition init = net.createTransition("s");
+        Transition t = net.createTransition("t");
+        net.createFlow(init, in);
+        net.createFlow(in, init);
+        net.createFlow(in, t);
+        net.createFlow(t, in);
+        net.createFlow(t, out);
+        net.createFlow(out, t);
+        net.createTransit(out, t, out);
+        net.createTransit(in, t, out);
+        net.createTransit(in, init, in);
+        net.createInitialTransit(init, in);
+        net.setWeakFair(t);
+        PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
+
+        RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, new CTLAtomicProposition(in)));
+        check(net, formula, ModelCheckingResult.Satisfied.TRUE);
+
+    }
+
     public static void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, LTLModelCheckingResult.Satisfied sat) throws Exception {
         PetriNetWithTransits out = new PnwtAndFlowCTL2PN().createSequential(pnwt, formula, settings);
-        PNWTTools.savePnwt2PDF(outputDir + out.getName(), out, false);
+        if (settings.getOutputData().isVerbose()) {
+            PNWTTools.savePnwt2PDF(outputDir + out.getName(), out, false);
+        }
 
         ILTLFormula fairness = LogicsTools.getFairness(pnwt);
         formula = new RunCTLForAllFormula(fairness, RunOperators.Implication.IMP, formula);
