@@ -146,10 +146,10 @@ public class TestingMCFlowCTLForAll {
 
     }
 
-    public static void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, LTLModelCheckingResult.Satisfied sat) throws Exception {
+    public static void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, FlowCTLModelcheckingSettings settings, LTLModelCheckingResult.Satisfied sat) throws Exception {
         PetriNetWithTransits out = new PnwtAndFlowCTL2PN().createSequential(pnwt, formula, settings);
         if (settings.getOutputData().isVerbose()) {
-            PNWTTools.savePnwt2PDF(outputDir + out.getName(), out, false);
+            PNWTTools.savePnwt2PDF(settings.getOutputData().getPath() + out.getName(), out, false);
         }
 
         ILTLFormula fairness = LogicsTools.getFairness(pnwt);
