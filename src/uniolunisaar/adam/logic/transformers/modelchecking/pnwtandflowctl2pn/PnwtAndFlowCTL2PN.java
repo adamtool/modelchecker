@@ -21,6 +21,7 @@ import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.forall.RunCTLForAllFormula;
 import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
+import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
@@ -80,7 +81,7 @@ public class PnwtAndFlowCTL2PN {
      * @param formula
      * @return
      */
-    PetriNetWithTransits addSubNet(PetriNetWithTransits orig, PetriNetWithTransits out, ICTLFormula formula, int nb_ff) throws NotConvertableException, NotTransformableException, IOException, InterruptedException {
+    PetriNetWithTransits addSubNet(PetriNetWithTransits orig, PetriNetWithTransits out, ICTLFormula formula, int nb_ff, FlowCTLModelcheckingSettings settings) throws NotConvertableException, NotTransformableException, IOException, InterruptedException {
         // create alternating Buchi tree automaton of the formula
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = CTL2AlternatingBuchiTreeAutomaton.transform(formula, orig);
         System.out.println("Tree Automaton: ");
@@ -88,16 +89,24 @@ public class PnwtAndFlowCTL2PN {
         // create the Kripke structure of the Petri net with transits
         // todo: add a method getTransition atoms and put this to the create function and therewith improve the construction
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(orig, true);
-        Tools.save2PDF(k.getName(), k);
+        if (settings.getOutputData().isVerbose()) {
+            Tools.save2PDF(settings.getOutputData().getPath() + k.getName(), k);
+        }
         // create the alternating Buchi product automaton
         GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
-        Tools.save2PDF(aba.getName(), aba);
+        if (settings.getOutputData().isVerbose()) {
+            Tools.save2PDF(settings.getOutputData().getPath() + aba.getName(), aba);
+        }
         // create the nondeterministic Buchi automaton
         BuchiAutomaton nba = ABA2NDetTransformer.transform(aba, true);
-        Tools.save2PDF(nba.getName(), nba);
+        if (settings.getOutputData().isVerbose()) {
+            Tools.save2PDF(settings.getOutputData().getPath() + nba.getName(), nba);
+        }
         // determinize
         BuchiAutomaton det = NDet2DetAutomatonTransformer.transform(nba);
-        Tools.save2PDF(det.getName(), det);
+        if (settings.getOutputData().isVerbose()) {
+            Tools.save2PDF(settings.getOutputData().getPath() + det.getName(), det);
+        }
 
         // create the switch from normal to stuttering mode
         Place normal = out.createPlace(NORMAL_MODE + "_" + nb_ff);
@@ -226,7 +235,9 @@ public class PnwtAndFlowCTL2PN {
         return out;
     }
 
-    void addApproachesPreWork(PetriNetWithTransits orig, PetriNetWithTransits out, ICTLFormula formula, int nb_ff) {
+    void addApproachesPreWork(PetriNetWithTransits orig, PetriNetWithTransits out,
+            ICTLFormula formula, int nb_ff
+    ) {
         // add an activation place for each original transition and the skipping transition
         for (Transition t : orig.getTransitions()) {
             // activation place
@@ -248,7 +259,9 @@ public class PnwtAndFlowCTL2PN {
         }
     }
 
-    void addApproachesPostWork(PetriNetWithTransits out, BuchiAutomaton det, int nb_ff) {
+    void addApproachesPostWork(PetriNetWithTransits out, BuchiAutomaton det,
+            int nb_ff
+    ) {
         // allow the skipping transitions only to fire when no other transition can fire
         for (Transition skippingTransition : skippingTransitions.get(nb_ff)) {
             // add an inhibitor arc to every state which has a transition with the same label
@@ -276,7 +289,8 @@ public class PnwtAndFlowCTL2PN {
         out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + id + TOKENFLOW_SUFFIX_ID + "_" + nb_ff), tout);
     }
 
-    void connectApproachesPresetForStuttering(PetriNetWithTransits out, Transition tout, List<LabeledEdge<BuchiState, StringLabel>> postEdges, int nb_ff) {
+    void connectApproachesPresetForStuttering(PetriNetWithTransits out, Transition tout,
+            List<LabeledEdge<BuchiState, StringLabel>> postEdges, int nb_ff) {
         // can only fire when no other transition would be firable
         // i.e. the activation places of the transition of any other successor are empty
         for (LabeledEdge<BuchiState, StringLabel> labeledEdge : postEdges) {
@@ -287,7 +301,7 @@ public class PnwtAndFlowCTL2PN {
         }
     }
 
-    public PetriNetWithTransits createSequential(PetriNetWithTransits pnwt, RunCTLForAllFormula formula) throws NotConvertableException, NotTransformableException, IOException, InterruptedException {
+    public PetriNetWithTransits createSequential(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, FlowCTLModelcheckingSettings settings) throws NotConvertableException, NotTransformableException, IOException, InterruptedException {
         // create the copy of the original net
         PetriNetWithTransits out = createOriginalPartOfTheNet(pnwt);
 
@@ -300,7 +314,7 @@ public class PnwtAndFlowCTL2PN {
         List<FlowCTLFormula> flowFormulas = LogicsTools.getFlowCTLFormulas(formula);
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             FlowCTLFormula get = flowFormulas.get(nb_ff);
-            addSubNet(pnwt, out, get.getPhi(), nb_ff);
+            addSubNet(pnwt, out, get.getPhi(), nb_ff, settings);
         }
 
         if (!flowFormulas.isEmpty()) {
