@@ -111,7 +111,7 @@ public class PetriNetModelChecker {
         int exitValue = proc.startAndWaitFor();
 
         if (exitValue == 255) {
-            throw new ExternalToolException("MCHyper didn't finshed correctly.");
+            throw new ExternalToolException("MCHyper didn't finish correctly.");
         }
 
         if (exitValue == 42) { // has a counter example, ergo read it

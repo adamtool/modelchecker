@@ -70,7 +70,7 @@ public class Abc {
                             latch.countDown();
                         }
                     } catch (IOException | InterruptedException | ProcessNotStartedException | ExternalToolException ex) {
-                        // todo: should here be some handling? For example the killed processes will send an ABC didn't finished correctly...
+                        // todo: should here be some handling? For example the killed processes will send an ABC didn't finish correctly...
                     }
                 }
             }).start();
@@ -149,11 +149,11 @@ public class Abc {
             Tools.deleteFile(inputFile);
         }
         if (exitValue != 0) {
-            throw new ExternalToolException("ABC didn't finshed correctly.");
+            throw new ExternalToolException("ABC didn't finish correctly.");
         }
         String abcOutput = procAbc.getOutput();
         if (abcOutput.contains("Io_ReadAiger: The network check has failed.")) {
-            throw new ExternalToolException("ABC didn't finshed correctly. The check of the aiger network '" + inputFile + "' has failed."
+            throw new ExternalToolException("ABC didn't finish correctly. The check of the aiger network '" + inputFile + "' has failed."
                     + " Check the abc output for more information:\n" + procAbc.getOutput());
         }
         if (abcOutput.contains("There is no current network.")) {
@@ -174,7 +174,7 @@ public class Abc {
 //        Logger.getInstance().addMessage(abcOutput, false, true);
         // Parse the output to know the result of the model checking
         LTLModelCheckingResult ret = new LTLModelCheckingResult();
-        // for the falsifiers when they didn't finished
+        // for the falsifiers when they didn't finish
         if (abcOutput.contains("No output asserted in")) {
             Logger.getInstance().addWarning("The bound for the falsifier was not big enough.");
             ret.setSat(LTLModelCheckingResult.Satisfied.UNKNOWN);
@@ -191,7 +191,7 @@ public class Abc {
                     Tools.deleteFile(cexOutputFile);
                 }
             } else {
-                throw new ExternalToolException("ABC didn't finshed as expected. There should be a counter-example written to '" + cexOutputFile + "'"
+                throw new ExternalToolException("ABC didn't finish as expected. There should be a counter-example written to '" + cexOutputFile + "'"
                         + " but the file doesn't exist."
                         + " Check the abc output for more information:\n" + abcOutput);
             }

@@ -6,24 +6,29 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.testng.Assert;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import uniol.apt.util.Pair;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
-import uniolunisaar.adam.ds.modelchecking.results.CTLModelcheckingResult;
-import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
+import uniolunisaar.adam.ds.logics.ctl.CTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ctl.CTLConstants;
+import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.flowctl.forall.RunCTLForAllFormula;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLModelcheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import uniolunisaar.adam.util.PNWTTools;
-import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtPlaces;
 import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtTransitions;
+import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
-import uniolunisaar.adam.logic.parser.logics.flowctl.separate.FlowCTLSeparateParser;
-import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.util.PNWTTools;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -41,18 +46,24 @@ public class TestingModelcheckingAccessControl {
 
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setVerbose(false);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+//      Logger.getInstance().setVerbose(true);
+//      Logger.getInstance().setShortMessageStream(null);
+//      Logger.getInstance().setVerboseMessageStream(null);
+//      Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
-    public void setProperties() {
-        if (System.getProperty("examplesfolder") == null) {
-            System.setProperty("examplesfolder", "examples");
-        }
+    public void initMCSettings() {
+    	TestingMCFlowCTLForAll.settings = new FlowCTLModelcheckingSettings(
+                LogicsTools.TransitionSemantics.OUTGOING,
+                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
+                AdamCircuitMCSettings.Maximality.MAX_NONE,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                true,
+                Abc.VerificationAlgo.IC3);
+    	TestingMCFlowCTLForAll.settings.setOutputData(new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, TestingMCFlowCTLForAll.verbose));
     }
     
     public ModelCheckerFlowCTL getModelChecker(String name) {
@@ -61,9 +72,8 @@ public class TestingModelcheckingAccessControl {
         settings.setApproach(ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR);
         return new ModelCheckerFlowCTL(settings);
     }
-
-    @Test
-    void testAccessControl() throws Exception {
+    
+    private PetriNetWithTransits createOfficeSmall() {
     	String name = "officeSmall";
 		Set<String> groups = new HashSet<>();
 		groups.add("it");
@@ -109,40 +119,17 @@ public class TestingModelcheckingAccessControl {
 		itOpen.add(new Pair<String, String>("bur", "cor"));
 		open.put("it", itOpen);
 		
-		PetriNetWithTransits net = new AccessControlChainSplitAtPlaces(name, groups, locations, starts, connections, open).createAccessControlExample();
-        
-		PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, true);
-		
-		String witnessPath, witnessState;
+		return new AccessControlChainSplitAtTransitions(name, groups, locations, starts, connections, open).createAccessControlExample();
+    }
 
-		// new ExistsEventually(new AP(bu1));
-		// new ExistsEventually(new AP(bu2));
-		// new ExistsEventually(new AP(bu3));
-		// new ExistsEventually(new AP(bu4));
-		// new ExistsEventually(new AP(bu5));
-		// new ExistsEventually(new AP(bu7));
-		// new ExistsEventually(new AP(lob));
-		// new ExistsEventually(new AP(ser));
-		// new ForallGlobally(new Not(new AP(pos)));
-		// new ForallGlobally(new Not(new AP(buS)));
+    @Test
+    void testAccessControl() throws Exception {
+    	PetriNetWithTransits pnwt = createOfficeSmall();
+        PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
 		
-		ModelCheckerFlowCTL mc = getModelChecker(net.getName());
-
-        RunCTLSeparateFormula formula = FlowCTLSeparateParser.parse(net, "𝔸EF itATbur");
-        CTLModelcheckingResult result = mc.check(net, formula);
-//        Logger.getInstance().addMessage("ERROR:");
-//        Logger.getInstance().addMessage(result.getLolaError());
-//        Logger.getInstance().addMessage("OUTPUT:");
-//        Logger.getInstance().addMessage(result.getLolaOutput());
-        Logger.getInstance().addMessage("Sat: " + result.getSatisfied().name(), true);
-        witnessState = result.getWitnessState();
-        if (witnessState != null) {
-            Logger.getInstance().addMessage("Witness state: " + witnessState, true);
-        }
-        witnessPath = result.getWitnessPath();
-        if (witnessPath != null) {
-            Logger.getInstance().addMessage("Witness path: " + witnessPath, true);
-        }
-        Assert.assertEquals(result.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        // want to check "𝔸EF itATbur", with negation: "𝔸( (⊥ 𝓤_ ¬itATbur) ) "
+        RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
+                new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.AUD, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(pnwt.getPlace("itATbur"))))));
+        TestingMCFlowCTLForAll.check(pnwt, formula, LTLModelCheckingResult.Satisfied.TRUE);
 	}
 }
