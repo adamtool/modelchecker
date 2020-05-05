@@ -130,6 +130,6 @@ public class TestingModelcheckingAccessControl {
         // want to check "𝔸EF itATbur", with negation: "𝔸( (⊥ 𝓤_ ¬itATbur) ) "
         RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
                 new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.AUD, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(pnwt.getPlace("itATbur"))))));
-        TestingMCFlowCTLForAll.check(pnwt, formula, LTLModelCheckingResult.Satisfied.TRUE);
+        TestingMCFlowCTLForAll.check(pnwt, formula, TestingMCFlowCTLForAll.settings, LTLModelCheckingResult.Satisfied.TRUE);
 	}
 }

@@ -73,6 +73,13 @@ public class ABA2NDetTransformer {
 
         while (!todo.isEmpty()) {
             TransformerState state = todo.pop();
+            // loop for each element in the alphabet in the special case of the ([],[]) state
+            if (state.getW().isEmpty() && state.getX().isEmpty()) {
+                for (String label : alphabet) {
+                    out.createAndAddEdge(state.getNewState().getId(), new StringLabel(label), state.getNewState().getId(), false);
+                }
+                continue;
+            }
             // get for all labels the corresponding list successors states (a state is a list of states)
             Map<String, List<List<ABAState>>> allSuccs = (withMaxSatSolver) ? getSuccessorsMaxSatSolver(aba, state.getX()) : getSuccessorsByPaths(aba, state.getX());
             for (Map.Entry<String, List<List<ABAState>>> entry : allSuccs.entrySet()) { // for each sigma
@@ -94,23 +101,16 @@ public class ABA2NDetTransformer {
                         } else {
                             newState = out.getState(key);
                         }
-                        if (label == null) { // the edge is a true edge (false is already solved solved by the 'continue')
-                            // add an edge for each sigma
-                            for (String lab : alphabet) {
-                                out.createAndAddEdge(state.getNewState().getId(), new StringLabel(lab), key, false);
-                            }
-                        } else {
-                            out.createAndAddEdge(state.getNewState().getId(), new StringLabel(label), key, false);
-                        }
+                        out.createAndAddEdge(state.getNewState().getId(), new StringLabel(label), key, false);
                         // mark as buchi
                         if (w_.isEmpty()) {
                             out.setBuchi(true, newState);
                         }
                     } else { // the successors if w is not empty
                         Map<String, List<List<ABAState>>> allWSuccs = (withMaxSatSolver) ? getSuccessorsMaxSatSolver(aba, state.getW()) : getSuccessorsByPaths(aba, state.getW());
-                        System.out.println("%%");
-                        System.out.println("for x " + x_.toString());
-                        System.out.println("all w succs " + allWSuccs.toString());
+//                        System.out.println("%%");
+//                        System.out.println("for x " + x_.toString());
+//                        System.out.println("all w succs " + allWSuccs.toString());
                         // only those with the same label
                         List<List<ABAState>> all_w_ = allWSuccs.get(label);
                         for (List<ABAState> w_ : all_w_) { // for all the x_ and w_ combinations add a new state

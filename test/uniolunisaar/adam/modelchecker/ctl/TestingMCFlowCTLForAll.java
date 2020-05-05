@@ -122,7 +122,7 @@ public class TestingMCFlowCTLForAll {
         RunCTLForAllFormula formula = new RunCTLForAllFormula(
                 new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
                         new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(in))));
-//        check(net, formula, settings, ModelCheckingResult.Satisfied.TRUE);
+        check(net, formula, settings, ModelCheckingResult.Satisfied.TRUE);
         // check: A EG in
         // ergo: A A true U !in
         // FALSE: since each run which contains t violates this
