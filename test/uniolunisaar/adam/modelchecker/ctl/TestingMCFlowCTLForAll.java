@@ -1,5 +1,6 @@
-package uniolunisaar.adam.modelchecker.transformers;
+package uniolunisaar.adam.modelchecker.ctl;
 
+import uniolunisaar.adam.modelchecker.transformers.*;
 import java.io.File;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -31,7 +32,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  * @author Manuel Gieseking
  */
 @Test
-public class TestPnwt2Pn {
+public class TestingMCFlowCTLForAll {
 
     private static final String outputDir = System.getProperty("testoutputfolder") + "/transformers/pnwt2pn/";
     private static final String inputDir = System.getProperty("examplesfolder") + "/modelchecking/ctl/";
