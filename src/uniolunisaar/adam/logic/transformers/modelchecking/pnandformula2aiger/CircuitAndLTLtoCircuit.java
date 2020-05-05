@@ -38,7 +38,7 @@ public class CircuitAndLTLtoCircuit {
      */
     public static void createCircuit(AigerRenderer circ, String formula, AdamCircuitLTLMCOutputData data, AdamCircuitLTLMCStatistics stats, boolean formulaToFile, String procFamilyID) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         // Create System 
-        String output = data.getPath();
+        String output = data.getPath()+procFamilyID.hashCode();
         String input = output + "_system.aag";
         AigerFile circuit = circ.render();
         Tools.saveFile(input, circuit.toString());

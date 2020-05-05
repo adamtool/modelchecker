@@ -51,7 +51,7 @@ public class McHyper {
         }
         int exitValue = procMCHyper.startAndWaitFor(outStream, errStream);
 
-        if (!verbose) { // cleanup
+        if (!verbose) { // cleanup            
             Tools.deleteFile(inputFile);
             if (formulaToFile) {
                 Tools.deleteFile(callFormula);

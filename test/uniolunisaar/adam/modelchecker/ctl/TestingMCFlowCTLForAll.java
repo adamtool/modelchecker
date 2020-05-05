@@ -66,7 +66,7 @@ public class TestingMCFlowCTLForAll {
         settings = new FlowCTLModelcheckingSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
                 ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
-                AdamCircuitMCSettings.Maximality.MAX_NONE,
+                AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
@@ -114,11 +114,35 @@ public class TestingMCFlowCTLForAll {
         net.createTransit(in, t, out);
         net.createTransit(in, init, in);
         net.createInitialTransit(init, in);
-        net.setWeakFair(t);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
-        RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, new CTLAtomicProposition(in)));
+        // check: A in
+        // ergo: A !in
+        RunCTLForAllFormula formula = new RunCTLForAllFormula(
+                new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
+                        new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(in))));
+//        check(net, formula, ModelCheckingResult.Satisfied.TRUE);
+        // check: A EG in
+        // ergo: A A true U !in
+        // FALSE: since each run which contains t violates this
+        CTLFormula ctl = new CTLFormula(new CTLConstants.True(), CTLOperators.Binary.AU, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(in)));
+        formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, ctl));
+//        check(net, formula, ModelCheckingResult.Satisfied.FALSE);
+
+        // check: A ((EG in) OR EF(out))
+        // ergo: A ((A true U !in) AND (A false U_ !out)) 
+        // TRUE: since now only the run looping with s is possible
+        CTLFormula ctl2 = new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.AUD, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(out)));
+        formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, new CTLFormula(ctl, CTLOperators.Binary.AND, ctl2)));
         check(net, formula, ModelCheckingResult.Satisfied.TRUE);
+//
+//        // check: G!t -> A EG in
+//        // ergo: G!t -> A A true U !in
+//        // TRUE: since now only the run looping with s is possible
+//        formula = new RunCTLForAllFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(t))), RunOperators.Implication.IMP, formula);
+//        check(net, formula, ModelCheckingResult.Satisfied.TRUE);
+
+        net.setWeakFair(t);
 
     }
 
@@ -129,7 +153,9 @@ public class TestingMCFlowCTLForAll {
         }
 
         ILTLFormula fairness = LogicsTools.getFairness(pnwt);
-        formula = new RunCTLForAllFormula(fairness, RunOperators.Implication.IMP, formula);
+        if (!fairness.toString().equals("TRUE")) { // todo: quick hack
+            formula = new RunCTLForAllFormula(fairness, RunOperators.Implication.IMP, formula);
+        }
 
         ILTLFormula ltlFormula = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(pnwt, out, formula, settings);
         System.out.println("formula to check: " + ltlFormula.toSymbolString());
