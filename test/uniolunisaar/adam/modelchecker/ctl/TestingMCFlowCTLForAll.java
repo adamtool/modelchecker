@@ -83,15 +83,21 @@ public class TestingMCFlowCTLForAll {
 
         //RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, new CTLFormula(CTLOperators.Unary.EF, new CTLAtomicProposition(pnwt.getPlace("p")))));
         // the negation in positive normalform 
+        // check: A EF p
+        // ergo: A A false U_ !p
+        // FALSE: since we can go the tq also already in the begining
         RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
                 new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.AUD, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(pnwt.getPlace("p"))))));
-        check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
+//        check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
 
+        // check: G !tq -> A EF p
+        // ergo: G !tq -> A A false U_ !p
+        // FALSE: since we have the run only firing ts
         LTLFormula neverAbove = new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pnwt.getTransition("tq"))));
         formula = new RunCTLForAllFormula(neverAbove, RunOperators.Implication.IMP, formula);
         check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.FALSE);
 
-        pnwt.setWeakFair(pnwt.getTransition("tp"));
+        pnwt.setStrongFair(pnwt.getTransition("tp"));
         check(pnwt, formula, settings, LTLModelCheckingResult.Satisfied.TRUE);
 
     }

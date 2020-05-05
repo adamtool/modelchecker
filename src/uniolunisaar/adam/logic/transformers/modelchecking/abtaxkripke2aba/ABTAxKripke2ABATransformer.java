@@ -86,6 +86,9 @@ public class ABTAxKripke2ABATransformer {
         for (KripkeState<NodeLabel> initialState : k.getInitialStates()) {
             Key key = new Key(treeInit, initialState);
             ABAState init = aba.createAndAddState(treeInit.getId() + "," + initialState.getId());
+            if (treeInit.isBuchi()) { // if the tree automaton state is a buchi state, then also the created one
+                aba.setBuchi(true, init);
+            }
             aba.addInitialStates(init);
             todo.add(new Pair<>(key, init));
         }
@@ -142,6 +145,9 @@ public class ABTAxKripke2ABATransformer {
                     postState = aba.getState(key.toString());
                 } else {
                     postState = aba.createAndAddState(key.toString());
+                    if (treePostState.isBuchi()) { // if the tree automaton state is a buchi state, then also the created one
+                        aba.setBuchi(true, postState);
+                    }
                     todo.add(new Pair<>(key, postState)); // add it to later add the successors
                 }
                 postStateIds[i++] = postState.getId();
