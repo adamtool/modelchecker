@@ -77,6 +77,9 @@ public class ABA2NDetTransformer {
                 String label = entry.getKey();
                 List<List<ABAState>> all_x_ = entry.getValue();
                 for (List<ABAState> x_ : all_x_) { // for each x_ which satisfies the relation
+                    if (x_.isEmpty()) { // there is no successor
+                        continue;
+                    }
                     if (state.getW().isEmpty()) { // the successor for the empty w set
                         // create w_
                         List<ABAState> w_ = new ArrayList<>(x_);

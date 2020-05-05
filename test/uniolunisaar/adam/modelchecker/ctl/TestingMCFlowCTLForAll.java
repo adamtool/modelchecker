@@ -30,6 +30,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ltl.FlowCTLTra
 import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwtandflowctl2pn.PnwtAndFlowCTL2PN;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -50,7 +51,7 @@ public class TestingMCFlowCTLForAll {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(true);
+        Logger.getInstance().setVerbose(true);
 //        Logger.getInstance().setShortMessageStream(null);
 //        Logger.getInstance().setVerboseMessageStream(null);
 //        Logger.getInstance().setWarningStream(null);
@@ -58,7 +59,7 @@ public class TestingMCFlowCTLForAll {
 
     static FlowCTLModelcheckingSettings settings;
 
-    public static final boolean verbose = false;
+    public static final boolean verbose = true;
 
     @BeforeMethod
     public void initMCSettings() {
@@ -136,7 +137,9 @@ public class TestingMCFlowCTLForAll {
         settings.fillAbcData(out);
         LTLModelCheckingResult result = Abc.call(settings.getAbcSettings(), settings.getOutputData(), settings.getStatistics());
 //        System.out.println(result.getSatisfied().toString());
-        System.out.println(result.getCex().toString());
+        if (result.getCex() != null) {
+            System.out.println(result.getCex().toString());
+        }
         Assert.assertEquals(result.getSatisfied(), sat);
     }
 }
