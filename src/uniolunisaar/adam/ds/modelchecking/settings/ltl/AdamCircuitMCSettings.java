@@ -37,7 +37,7 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         PLACES,
         FIREABILITY
     }
-              
+
     private LogicsTools.TransitionSemantics semantics = LogicsTools.TransitionSemantics.OUTGOING;
     private Maximality maximality = Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
@@ -75,9 +75,10 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
     }
 
     public void fillAbcData(PetriNet net) {
-        abcSettings.setInputFile(outputData.getPath() + ".aig");
+        String procID = PetriNetExtensionHandler.getProcessFamilyID(net);
+        abcSettings.setInputFile(outputData.getPath() + procID.hashCode() + ".aig");
         abcSettings.setVerbose(outputData.isVerbose());
-        abcSettings.setProcessFamilyID(PetriNetExtensionHandler.getProcessFamilyID(net));
+        abcSettings.setProcessFamilyID(procID);
     }
 
     public LogicsTools.TransitionSemantics getSemantics() {
@@ -107,7 +108,7 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
     public void setOptsComp(AigerRenderer.OptimizationsComplete optsComp) {
         this.optsComp = optsComp;
     }
-    
+
     public AigerRenderer.OptimizationsSystem getOptsSys() {
         return optsSys;
     }

@@ -43,8 +43,9 @@ public class Abc {
         if (settings.getVerificationAlgos().length == 0) {
             throw new InvalidParameterException("At least one verification algorithm has to be given.");
         }
+        String name = settings.getProcessFamilyID();
         if (settings.getVerificationAlgos().length == 1) {
-            String outputFile = outputData.getPath() + ".cex";
+            String outputFile = outputData.getPath() + name + ".cex";
             String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
                     settings.isCircuitReduction(), settings.getPreProcessing());
             LTLModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
@@ -59,7 +60,7 @@ public class Abc {
                 @Override
                 public void run() {
                     try {
-                        String outputFile = outputData.getPath() + ".cex";
+                        String outputFile = outputData.getPath() + name + "_" + verificationAlgo.name() + ".cex";
                         String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
                                 settings.isCircuitReduction(), settings.getPreProcessing());
                         LTLModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);

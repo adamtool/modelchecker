@@ -131,8 +131,7 @@ public class PnAndLTLtoCircuit {
             try {
                 mcHyperFormula = FlowLTLTransformerHyperLTL.toMCHyperFormat(formula);
             } catch (StackOverflowError exp) { // formula size is too huge
-                // todo: maybe we can add here a little smarter algo which uses the fallback to inCircuit, when the reason for the too huge
-                //      formula is due to the maximality in formula approach
+                // should now be handled by the writing to file possibility
                 throw exp;
             }
             if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
