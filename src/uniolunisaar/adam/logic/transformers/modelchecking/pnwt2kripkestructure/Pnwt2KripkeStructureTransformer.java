@@ -81,8 +81,10 @@ public class Pnwt2KripkeStructureTransformer {
                 // t!= null since otherwise labels.size()<2 s.o.
                 Transit succTransit = pnwt.getTransit(t, p); // must have a real transit otherwise the transition would've not been added (thus != null)
                 for (Place post : succTransit.getPostset()) {
-                    KripkeState<NodeLabel> succ = createAndAddStatesForOnlyPlacesInAP(k, pnwt, post, todo);
-                    k.createAndAddEdge(p.getId(), new TransitionLabel(t), succ.getId());
+                    List<KripkeState<NodeLabel>> succs = createAndAddStatesForAlsoTransitionsInAP(k, pnwt, post, todo);
+                    for (KripkeState<NodeLabel> succ : succs) {
+                        k.createAndAddEdge(p.getId(), new TransitionLabel(t), succ.getId());
+                    }
                 }
             }
         }
