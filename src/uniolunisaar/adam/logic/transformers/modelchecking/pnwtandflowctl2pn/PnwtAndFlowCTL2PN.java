@@ -238,9 +238,7 @@ public class PnwtAndFlowCTL2PN {
         return out;
     }
 
-    void addApproachesPreWork(PetriNetWithTransits orig, PetriNetWithTransits out,
-            ICTLFormula formula, int nb_ff
-    ) {
+    void addApproachesPreWork(PetriNetWithTransits orig, PetriNetWithTransits out, ICTLFormula formula, int nb_ff) {
         // add an activation place for each original transition and the skipping transition
         for (Transition t : orig.getTransitions()) {
             // activation place
@@ -262,10 +260,8 @@ public class PnwtAndFlowCTL2PN {
         }
     }
 
-    void addApproachesPostWork(PetriNetWithTransits out, BuchiAutomaton det,
-            int nb_ff
-    ) {
-        // allow the skipping transitions only to fire when no other transition can fire
+    void addApproachesPostWork(PetriNetWithTransits out, BuchiAutomaton det, int nb_ff) {
+        // allow the skipping transitions only to fire when no other transition can fire and also only in the normal mode
         for (Transition skippingTransition : skippingTransitions.get(nb_ff)) {
             // add an inhibitor arc to every state which has a transition with the same label
             for (BuchiState state : det.getStates().values()) {
@@ -285,6 +281,9 @@ public class PnwtAndFlowCTL2PN {
                     out.setInhibitor(f);
                 }
             }
+            // add an inhibitor arc to the stuttering mode
+            Flow f = out.createFlow(out.getPlace(STUTTERING_MODE + "_" + nb_ff), skippingTransition);
+            out.setInhibitor(f);
         }
     }
 
