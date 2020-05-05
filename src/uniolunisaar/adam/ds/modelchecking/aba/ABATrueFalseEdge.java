@@ -16,10 +16,12 @@ public class ABATrueFalseEdge implements IABALabeledHyperEdge {
 
     private final ABAState pre;
     private final Type type;
+    private final String label;
 
-    ABATrueFalseEdge(ABAState pre, Type type) {
+    ABATrueFalseEdge(ABAState pre, Type type, String label) {
         this.pre = pre;
         this.type = type;
+        this.label = label;
     }
 
     public ABAState getPre() {
@@ -32,7 +34,7 @@ public class ABATrueFalseEdge implements IABALabeledHyperEdge {
 
     @Override
     public String getLabel() {
-        return null;
+        return label;
     }
 
     @Override
@@ -57,6 +59,7 @@ public class ABATrueFalseEdge implements IABALabeledHyperEdge {
         sb.append(this.hashCode()).append(" [label=\"").append(type.name()).append("\", color=white]").append("\n");
         sb.append("\n#flows\n");
         sb.append(getPre().getId().hashCode()).append("->").append(this.hashCode());
+        sb.append("[label=\"").append(label).append("\"]");
         sb.append("\n");
         return sb.toString();
     }

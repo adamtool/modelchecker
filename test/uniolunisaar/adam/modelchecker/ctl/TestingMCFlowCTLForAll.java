@@ -122,7 +122,7 @@ public class TestingMCFlowCTLForAll {
         RunCTLForAllFormula formula = new RunCTLForAllFormula(
                 new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
                         new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(in))));
-        check(net, formula, settings, ModelCheckingResult.Satisfied.TRUE);
+//        check(net, formula, settings, ModelCheckingResult.Satisfied.TRUE);
         // check: A EG in
         // ergo: A A true U !in
         // FALSE: since each run which contains t violates this
@@ -140,7 +140,8 @@ public class TestingMCFlowCTLForAll {
         // check: G!t -> A EG in
         // ergo: G!t -> A A true U !in
         // TRUE: since now only the run looping with s is possible
-        formula = new RunCTLForAllFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(t))), RunOperators.Implication.IMP, formula);
+        formula = new RunCTLForAllFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(t))),
+                RunOperators.Implication.IMP, new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, ctl)));
         check(net, formula, settings, ModelCheckingResult.Satisfied.TRUE);
 
         net.setWeakFair(t);
@@ -150,7 +151,10 @@ public class TestingMCFlowCTLForAll {
     public static void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, FlowCTLModelcheckingSettings settings, LTLModelCheckingResult.Satisfied sat) throws Exception {
         PetriNetWithTransits out = new PnwtAndFlowCTL2PN().createSequential(pnwt, formula, settings);
         if (settings.getOutputData().isVerbose()) {
-            PNWTTools.savePnwt2PDF(settings.getOutputData().getPath() + out.getName(), out, false);
+//            for (Transition transition : out.getTransitions()) {
+//                System.out.println("Label: "+transition.getLabel());
+//            }
+            PNWTTools.savePnwt2PDF(settings.getOutputData().getPath() + out.getName(), out, true);
         }
 
         ILTLFormula fairness = LogicsTools.getFairness(pnwt);

@@ -43,7 +43,7 @@ public class UniversalExistentialBuchiAutomaton extends AlternatingBuchiAutomato
         }
     }
 
-    public UniversalExistentialEdge createSpecialEdge(String preStateID, UniversalExistentialEdge.Special special) {
+    public UniversalExistentialEdge createSpecialEdge(String preStateID, UniversalExistentialEdge.Special special, String label) {
         Map<String, ABAState> states = getStates();
         Map<ABAState, List<UniversalExistentialEdge>> edges = getEdges();
         if (states.containsKey(preStateID)) {
@@ -53,7 +53,7 @@ public class UniversalExistentialBuchiAutomaton extends AlternatingBuchiAutomato
                 postEdges = new ArrayList<>();
                 edges.put(pre, postEdges);
             }
-            UniversalExistentialEdge edge = new UniversalExistentialEdge(pre, special);
+            UniversalExistentialEdge edge = new UniversalExistentialEdge(pre, special, label);
             postEdges.add(edge);
             return edge;
         } else {

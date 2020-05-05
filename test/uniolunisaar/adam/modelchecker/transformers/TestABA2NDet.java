@@ -61,7 +61,7 @@ public class TestABA2NDet {
         aba.createAndAddEdge(a.getId(), UniversalExistentialEdge.TYPE.ALL, "tq", c.getId(), d.getId());
         ABAState e = aba.createAndAddState("phi,(p,tb)");
         aba.createAndAddEdge(b.getId(), UniversalExistentialEdge.TYPE.ALL, "tp", e.getId());
-        aba.createSpecialEdge(e.getId(), UniversalExistentialEdge.Special.FALSE);
+        aba.createSpecialEdge(e.getId(), UniversalExistentialEdge.Special.FALSE, "tb");
         aba.setBuchi(true, a, b, c, d, e);
         Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
 
@@ -83,7 +83,7 @@ public class TestABA2NDet {
         aba.createAndAddDirectEdge(a.getId(), ABAOperatorState.TYPE.ALL, "tq", true, c.getId(), d.getId());
         ABAState e = aba.createAndAddState("phi,(p,tb)");
         aba.createAndAddDirectEdge(b.getId(), ABAOperatorState.TYPE.ALL, "tp", true, e.getId());
-        aba.createAndAddSpecialEdge(e.getId(), ABATrueFalseEdge.Type.FALSE, true);
+        aba.createAndAddSpecialEdge(e.getId(), ABATrueFalseEdge.Type.FALSE, "tb", true);
 //        aba.setBuchi(true, a, b, c, d, e);
         Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
 

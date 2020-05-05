@@ -123,6 +123,7 @@ public class AlternatingBuchiAutomaton<EDGE extends IABALabeledEdge> implements 
     }
 
     public List<ABAState> getBuchiStates() {
+        // todo: could save if it's often used (memory vs. running time)
         List<ABAState> out = new ArrayList<>();
         for (ABAState value : states.values()) {
             if (value.isBuchi()) {
@@ -130,5 +131,18 @@ public class AlternatingBuchiAutomaton<EDGE extends IABALabeledEdge> implements 
             }
         }
         return out;
+    }
+
+    public Set<String> getAlphabet() {
+        // todo: could save if it's often used (memory vs. running time)
+        Set<String> alphabet = new HashSet<>();
+        for (List<EDGE> postEdges : edges.values()) {
+            for (EDGE edge : postEdges) {
+                if (edge.getLabel() != null) {
+                    alphabet.add(edge.getLabel());
+                }
+            }
+        }
+        return alphabet;
     }
 }

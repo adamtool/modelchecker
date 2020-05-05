@@ -79,21 +79,21 @@ public class ABAHyperEdge implements IABALabeledHyperEdge {
     }
 
     private Successors getSuccessorsDirectByEdges() {
-        Successors succ = new Successors();
-        ABAOperatorState op = start.getPost();
-        if (op.getType() == ABAOperatorState.TYPE.ALL) {
-            List<List<ABAState>> states = new ArrayList<>();
-            for (IABASubEdge subedge : edges.get(op)) {
-//                subedge.
-            }
-//            succ.
-        } else {
-
-        }
-        return succ;
+        throw new RuntimeException("Not yet implemented");
+//        Successors succ = new Successors();
+//        ABAOperatorState op = start.getPost();
+//        if (op.getType() == ABAOperatorState.TYPE.ALL) {
+//            List<List<ABAState>> states = new ArrayList<>();
+//            for (IABASubEdge subedge : edges.get(op)) {
+////                subedge.
+//            }
+////            succ.
+//        } else {
+//
+//        }
+//        return succ;
     }
 
-   
     public ABAStartEdge getStart() {
         return start;
     }

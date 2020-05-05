@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormula;
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormulaAtom;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanConstants;
@@ -58,6 +59,7 @@ public class ABA2NDetTransformer {
     public static BuchiAutomaton transform(AlternatingBuchiAutomaton<? extends IABALabeledEdge> aba, boolean withMaxSatSolver) {
         LinkedList<TransformerState> todo = new LinkedList<>();
         List<ABAState> buchiStates = aba.getBuchiStates();
+        Set<String> alphabet = aba.getAlphabet();
 
         BuchiAutomaton out = new BuchiAutomaton(aba.getName() + "ndet");
         // add initial states
@@ -76,10 +78,10 @@ public class ABA2NDetTransformer {
             for (Map.Entry<String, List<List<ABAState>>> entry : allSuccs.entrySet()) { // for each sigma
                 String label = entry.getKey();
                 List<List<ABAState>> all_x_ = entry.getValue();
-                for (List<ABAState> x_ : all_x_) { // for each x_ which satisfies the relation
-                    if (x_.isEmpty()) { // there is no successor
-                        continue;
-                    }
+                if (all_x_.isEmpty()) { // there is no successor (especially the false case)
+                    continue;
+                }
+                for (List<ABAState> x_ : all_x_) { // for each x_ which satisfies the relation                    
                     if (state.getW().isEmpty()) { // the successor for the empty w set
                         // create w_
                         List<ABAState> w_ = new ArrayList<>(x_);
@@ -92,18 +94,28 @@ public class ABA2NDetTransformer {
                         } else {
                             newState = out.getState(key);
                         }
-                        out.createAndAddEdge(state.getNewState().getId(), new StringLabel(label), key, false);
+                        if (label == null) { // the edge is a true edge (false is already solved solved by the 'continue')
+                            // add an edge for each sigma
+                            for (String lab : alphabet) {
+                                out.createAndAddEdge(state.getNewState().getId(), new StringLabel(lab), key, false);
+                            }
+                        } else {
+                            out.createAndAddEdge(state.getNewState().getId(), new StringLabel(label), key, false);
+                        }
                         // mark as buchi
                         if (w_.isEmpty()) {
                             out.setBuchi(true, newState);
                         }
                     } else { // the successors if w is not empty
                         Map<String, List<List<ABAState>>> allWSuccs = (withMaxSatSolver) ? getSuccessorsMaxSatSolver(aba, state.getW()) : getSuccessorsByPaths(aba, state.getW());
+                        System.out.println("%%");
+                        System.out.println("for x " + x_.toString());
+                        System.out.println("all w succs " + allWSuccs.toString());
                         // only those with the same label
                         List<List<ABAState>> all_w_ = allWSuccs.get(label);
                         for (List<ABAState> w_ : all_w_) { // for all the x_ and w_ combinations add a new state
-                            w_.removeAll(buchiStates);
-                            w_.removeAll(x_);
+                            w_.removeAll(buchiStates); // \F
+                            w_.retainAll(x_);  // subseteq X_
                             String key = x_.toString() + "," + w_.toString();
                             BuchiState newState;
                             if (!out.containsState(key)) { // if not already existing

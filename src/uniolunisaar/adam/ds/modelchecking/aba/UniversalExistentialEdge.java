@@ -30,10 +30,10 @@ public class UniversalExistentialEdge implements IABALabeledEdge {
     private final List<ABAState> post;
     private final Special special;
 
-    public UniversalExistentialEdge(ABAState pre, Special special) {
+    public UniversalExistentialEdge(ABAState pre, Special special, String label) {
         this.pre = pre;
         this.type = null;
-        this.label = null;
+        this.label = label;
         this.post = null;
         this.special = special;
     }

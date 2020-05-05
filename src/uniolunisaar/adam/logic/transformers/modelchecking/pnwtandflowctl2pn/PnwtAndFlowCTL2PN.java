@@ -49,8 +49,8 @@ public class PnwtAndFlowCTL2PN {
     public static final String NORMAL_MODE = "<N>";
     public static final String STUTTERING_MODE = "<S>";
 
-    private Map<Integer, List<Transition>> skippingTransitions = new HashMap<>();
-    private Map<Integer, List<Transition>> stutteringTransitions = new HashMap<>();
+    private final Map<Integer, List<Transition>> skippingTransitions = new HashMap<>();
+    private final Map<Integer, List<Transition>> stutteringTransitions = new HashMap<>();
 
     PetriNetWithTransits createOriginalPartOfTheNet(PetriNetWithTransits orig) {
         // Copy the original net
@@ -115,6 +115,7 @@ public class PnwtAndFlowCTL2PN {
         Place stuttering = out.createPlace(STUTTERING_MODE + "_" + nb_ff);
         out.setPartition(stuttering, nb_ff + 1);
         Transition switchT = out.createTransition();
+        switchT.setLabel("switch");
         out.createFlow(normal, switchT);
         out.createFlow(switchT, stuttering);
 
@@ -139,6 +140,7 @@ public class PnwtAndFlowCTL2PN {
             // for all chains which are created during the time
             for (Place post : tfl.getPostset()) {
                 Transition tout = out.createTransition();
+//                System.out.println("LABEL: "+t.getId());
                 tout.setLabel(t.getId());
                 out.createFlow(init, tout);
                 // do the preset connection
@@ -217,6 +219,7 @@ public class PnwtAndFlowCTL2PN {
                 } else { // a normal transition
                     Transition tout = out.createTransition();
                     tout.setLabel(out.getTransition(transitionID).getId());
+//                    System.out.println("LABEL : " + out.getTransition(transitionID).getId());
                     connectApproachesPreset(out, tout, transitionID, nb_ff);
                     out.createFlow(pre, tout);
                     out.createFlow(tout, post);

@@ -76,7 +76,7 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
         return edge;
     }
 
-    public ABATrueFalseEdge createAndAddSpecialEdge(String preStateID, ABATrueFalseEdge.Type type, boolean check) {
+    public ABATrueFalseEdge createAndAddSpecialEdge(String preStateID, ABATrueFalseEdge.Type type, String label, boolean check) {
         Map<String, ABAState> states = getStates();
         Map<ABAState, List<IABALabeledHyperEdge>> edges = getEdges();
         if (check && !states.containsKey(preStateID)) {
@@ -88,7 +88,7 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
             postEdges = new ArrayList<>();
             edges.put(pre, postEdges);
         }
-        ABATrueFalseEdge edge = new ABATrueFalseEdge(pre, type);
+        ABATrueFalseEdge edge = new ABATrueFalseEdge(pre, type, label);
         postEdges.add(edge);
         return edge;
     }

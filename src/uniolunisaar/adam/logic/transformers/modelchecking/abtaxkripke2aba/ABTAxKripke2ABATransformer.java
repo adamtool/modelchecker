@@ -113,9 +113,9 @@ public class ABTAxKripke2ABATransformer {
             TransitionLabel transitionLabel, LinkedList<Pair<Key, ABAState>> todo) throws NotTransformableException {
         IPositiveBooleanFormula formula = treeEdge.getSuccessor();
         if (formula instanceof PositiveBooleanConstants.True) {
-            aba.createAndAddSpecialEdge(pre.getId(), ABATrueFalseEdge.Type.TRUE, false);
+            aba.createAndAddSpecialEdge(pre.getId(), ABATrueFalseEdge.Type.TRUE, transitionLabel.getId(), false);
         } else if (formula instanceof PositiveBooleanConstants.False) {
-            aba.createAndAddSpecialEdge(pre.getId(), ABATrueFalseEdge.Type.FALSE, false);
+            aba.createAndAddSpecialEdge(pre.getId(), ABATrueFalseEdge.Type.FALSE, transitionLabel.getId(), false);
         } else {
             addEdgesRecursively(aba, pre, treeEdge.getSuccessor(), kripkeEdges, transitionLabel, todo, null);
         }
