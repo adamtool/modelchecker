@@ -9,6 +9,7 @@ import java.util.Set;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import uniol.apt.adt.pn.Transition;
 import uniol.apt.util.Pair;
 import uniolunisaar.adam.ds.logics.ctl.CTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ctl.CTLConstants;
@@ -19,13 +20,11 @@ import uniolunisaar.adam.ds.logics.ctl.flowctl.forall.RunCTLForAllFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLLoLAModelcheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLModelcheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtTransitions;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
-import uniolunisaar.adam.logic.modelchecking.ctl.ModelCheckerFlowCTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -37,7 +36,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
 @Test
 public class TestingModelcheckingAccessControl {
 
-    private static final String outputDir = System.getProperty("testoutputfolder") + "/ctl/";
+    private static final String outputDir = System.getProperty("testoutputfolder") + "/accessControl/";
 
     @BeforeClass
     public void createFolder() {
@@ -52,25 +51,18 @@ public class TestingModelcheckingAccessControl {
 //      Logger.getInstance().setWarningStream(null);
     }
 
-    @BeforeClass
-    public void initMCSettings() {
-    	TestingMCFlowCTLForAll.settings = new FlowCTLModelcheckingSettings(
+    public FlowCTLModelcheckingSettings initMCSettings() {
+    	FlowCTLModelcheckingSettings settings = new FlowCTLModelcheckingSettings(
                 LogicsTools.TransitionSemantics.OUTGOING,
                 ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
-                AdamCircuitMCSettings.Maximality.MAX_NONE,
+                AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
                 true,
                 Abc.VerificationAlgo.IC3);
-    	TestingMCFlowCTLForAll.settings.setOutputData(new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, TestingMCFlowCTLForAll.verbose));
-    }
-    
-    public ModelCheckerFlowCTL getModelChecker(String name) {
-        FlowCTLLoLAModelcheckingSettings settings = new FlowCTLLoLAModelcheckingSettings(outputDir + name, true);
-//        settings.setApproach(ModelCheckingSettings.Approach.PARALLEL_INHIBITOR);
-        settings.setApproach(ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR);
-        return new ModelCheckerFlowCTL(settings);
+    	settings.setOutputData(new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, TestingMCFlowCTLForAll.verbose));
+    	return settings;
     }
     
     private PetriNetWithTransits createOfficeSmall() {
@@ -127,9 +119,16 @@ public class TestingModelcheckingAccessControl {
     	PetriNetWithTransits pnwt = createOfficeSmall();
         PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
 		
-        // want to check "𝔸EF itATbur", with negation: "𝔸( (⊥ 𝓤_ ¬itATbur) ) "
+        // want to check "𝔸EF itATbur", with negation: "𝔸( A (⊥ 𝓤_ ¬itATbur) ) "
         RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All,
                 new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.AUD, new CTLFormula(CTLOperators.Unary.NEG, new CTLAtomicProposition(pnwt.getPlace("itATbur"))))));
-        TestingMCFlowCTLForAll.check(pnwt, formula, TestingMCFlowCTLForAll.settings, LTLModelCheckingResult.Satisfied.TRUE);
+        
+        for (Transition t : pnwt.getTransitions()) {
+        	if (!t.getId().startsWith("FLOWCREATECHAIN")) {
+        		pnwt.setWeakFair(t);
+        	}
+        }
+        
+        TestingMCFlowCTLForAll.check(pnwt, formula, initMCSettings(), LTLModelCheckingResult.Satisfied.TRUE);
 	}
 }
