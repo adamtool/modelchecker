@@ -114,7 +114,7 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
             LTLFormula gf = new LTLFormula(LTLOperators.Unary.NEG, new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(buchis, false))));
             try {
                 // %%%%% REPLACE THE FLOW FORMULA
-                f = f.substitute(flowFormulas.get(i), new RunLTLFormula(gf));
+                f = f.substitute(flowFormula, new RunLTLFormula(gf));
 
             } catch (NotSubstitutableException ex) {
                 throw new RuntimeException("Cannot substitute the flow formula. (Should not happen).", ex);
