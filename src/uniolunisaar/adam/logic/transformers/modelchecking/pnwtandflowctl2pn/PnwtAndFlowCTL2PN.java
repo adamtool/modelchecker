@@ -84,8 +84,10 @@ public class PnwtAndFlowCTL2PN {
     PetriNetWithTransits addSubNet(PetriNetWithTransits orig, PetriNetWithTransits out, ICTLFormula formula, int nb_ff, FlowCTLModelcheckingSettings settings) throws NotConvertableException, NotTransformableException, IOException, InterruptedException {
         // create alternating Buchi tree automaton of the formula
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = CTL2AlternatingBuchiTreeAutomaton.transform(formula, orig);
-        System.out.println("Tree Automaton: ");
-        System.out.println(abta);
+        if (settings.getOutputData().isVerbose()) {
+            System.out.println("Tree Automaton: ");
+            System.out.println(abta);
+        }
         // create the Kripke structure of the Petri net with transits
         // todo: add a method getTransition atoms and put this to the create function and therewith improve the construction
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(orig, true);
@@ -102,7 +104,7 @@ public class PnwtAndFlowCTL2PN {
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + nba.getName(), nba);
         }
-        // determinize
+        // determinize (todo: don't need it anymore! I guess the violating chain, I can also guess the violating path of the automaton)
         BuchiAutomaton det = NDet2DetAutomatonTransformer.transform(nba);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + det.getName(), det);

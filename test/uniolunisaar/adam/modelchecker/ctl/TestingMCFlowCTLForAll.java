@@ -1,6 +1,8 @@
 package uniolunisaar.adam.modelchecker.ctl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -30,7 +32,6 @@ import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ltl.FlowCTLTra
 import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwtandflowctl2pn.PnwtAndFlowCTL2PN;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -166,12 +167,32 @@ public class TestingMCFlowCTLForAll {
             PNWTTools.savePnwt2PDF(settings.getOutputData().getPath() + out.getName(), out, true);
         }
 
-        ILTLFormula fairness = LogicsTools.getFairness(pnwt);
-        if (!fairness.toString().equals("TRUE")) { // todo: quick hack
-            formula = new RunCTLForAllFormula(fairness, RunOperators.Implication.IMP, formula);
+        // collect all ids of fair transitions
+        List<String> fairTransitions = new ArrayList<>();
+        for (Transition transition : pnwt.getTransitions()) {
+            if (pnwt.isStrongFair(transition) || pnwt.isWeakFair(transition)) { // to also collect weak is not right, but a quick hack
+                fairTransitions.add(transition.getId());                
+            }
         }
 
+        // for the general approach I have to do it here,
+        // but for strong I don't need the replacement
+//            ILTLFormula fairness = LogicsTools.getFairness(pnwt);
+//            if (!fairness.toString().equals("TRUE")) { // todo: quick hack
+//                formula = new RunCTLForAllFormula(fairness, RunOperators.Implication.IMP, formula);
+//            }
         ILTLFormula ltlFormula = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(pnwt, out, formula, settings);
+
+        // for the fast hack add now the fairness
+        if (!fairTransitions.isEmpty()) {
+            for (String fairTransition : fairTransitions) {
+                out.setStrongFair(out.getTransition(fairTransition));
+            }
+            ILTLFormula fairness = LogicsTools.getFairness(pnwt);
+            if (!fairness.toString().equals("TRUE")) { // todo: quick hack
+                ltlFormula = new LTLFormula(fairness, LTLOperators.Binary.IMP, ltlFormula);
+            }
+        }
         System.out.println("formula to check: " + ltlFormula.toSymbolString());
         AigerRenderer renderer = PnAndLTLtoCircuit.createCircuitWithoutFairnessAndMaximality(out, ltlFormula, settings);
         settings.fillAbcData(out);
