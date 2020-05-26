@@ -85,29 +85,37 @@ public class PnwtAndFlowCTL2PN {
         // create alternating Buchi tree automaton of the formula
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = CTL2AlternatingBuchiTreeAutomaton.transform(formula, orig);
         if (settings.getOutputData().isVerbose()) {
-            System.out.println("Tree Automaton: ");
-            System.out.println(abta);
+            Logger.getInstance().addMessage("Tree Automaton: ", false);
+            Logger.getInstance().addMessage(abta.toString(), false);
         }
         // create the Kripke structure of the Petri net with transits
         // todo: add a method getTransition atoms and put this to the create function and therewith improve the construction
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(orig, true);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + k.getName(), k);
+        } else {
+            Logger.getInstance().addMessage("Kripke structure:\n nb_states: " + k.getStates().size() + "\n nb_edges: " + k.getNumberOfEdges(), false);
         }
         // create the alternating Buchi product automaton
         GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + aba.getName(), aba);
+        } else {
+            Logger.getInstance().addMessage("Alternating Buchi word automata:\n nb_states: " + aba.getNumberOfStates() + "\n nb_edges: " + k.getNumberOfEdges(), true);
         }
         // create the nondeterministic Buchi automaton
         BuchiAutomaton nba = ABA2NDetTransformer.transform(aba, true);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + nba.getName(), nba);
+        } else {
+            Logger.getInstance().addMessage("Nondeterminisitic Buchi automata:\n nb_states: " + nba.getNumberOfStates() + "\n nb_edges: " + nba.getNumberOfEdges(), false);
         }
         // determinize (todo: don't need it anymore! I guess the violating chain, I can also guess the violating path of the automaton)
         BuchiAutomaton det = NDet2DetAutomatonTransformer.transform(nba);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + det.getName(), det);
+        } else {
+            Logger.getInstance().addMessage("Determinisitic Buchi automata:\n nb_states: " + det.getNumberOfStates() + "\n nb_edges: " + det.getNumberOfEdges(), false);
         }
 
         // create the switch from normal to stuttering mode
@@ -398,6 +406,8 @@ public class PnwtAndFlowCTL2PN {
                 out.removeInitialTransit(out.getPlace(place.getId()));
             }
         }
+
+        Logger.getInstance().addMessage("Model checking net:\n nb_places: " + out.getPlaces().size() + "\n nb_transitions: " + out.getTransitions().size(), false);
 
         return out;
     }

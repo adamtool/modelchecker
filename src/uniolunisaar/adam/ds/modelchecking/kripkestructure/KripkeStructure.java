@@ -51,6 +51,14 @@ public class KripkeStructure<SL extends ILabel, E extends KripkeEdge<SL>> implem
         return edges;
     }
 
+    public int getNumberOfEdges() {
+        int nb_edges = 0;
+        for (Set<E> post : edges.values()) {
+            nb_edges += post.size();
+        }
+        return nb_edges;
+    }
+
     @Override
     public String toDot() {
         StringBuilder sb = new StringBuilder();

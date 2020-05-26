@@ -88,6 +88,18 @@ public class AlternatingBuchiAutomaton<EDGE extends IABALabeledEdge> implements 
         return edges;
     }
 
+    public int getNumberOfStates() {
+        return states.size();
+    }
+
+    public int getNumberOfEdges() {
+        int nb_edges = 0;
+        for (List<EDGE> post : edges.values()) {
+            nb_edges += post.size();
+        }
+        return nb_edges;
+    }
+
     @Override
     public String toDot() {
         StringBuilder sb = new StringBuilder();

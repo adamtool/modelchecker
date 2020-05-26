@@ -188,7 +188,7 @@ public class TestingMCFlowCTLForAll {
             for (String fairTransition : fairTransitions) {
                 out.setStrongFair(out.getTransition(fairTransition));
             }
-            ILTLFormula fairness = LogicsTools.getFairness(pnwt);
+            ILTLFormula fairness = LogicsTools.getFairness(out);
             if (!fairness.toString().equals("TRUE")) { // todo: quick hack
                 ltlFormula = new LTLFormula(fairness, LTLOperators.Binary.IMP, ltlFormula);
             }
