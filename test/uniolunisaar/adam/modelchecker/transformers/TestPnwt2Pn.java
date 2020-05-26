@@ -15,6 +15,7 @@ import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
@@ -22,6 +23,7 @@ import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ltl.FlowCTLTransformerSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwtandflowctl2pn.PnwtAndFlowCTL2PN;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -43,9 +45,9 @@ public class TestPnwt2Pn {
     @BeforeClass
     public void silence() {
 //        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @Test
@@ -64,12 +66,12 @@ public class TestPnwt2Pn {
         check(pnwt, formula, LTLModelCheckingResult.Satisfied.FALSE);
 
         pnwt.setWeakFair(pnwt.getTransition("tp"));
-        check(pnwt, formula, LTLModelCheckingResult.Satisfied.TRUE);
+        check(pnwt, formula, LTLModelCheckingResult.Satisfied.TRUE); // todo: is this TRUE true or should it be false?
 
     }
 
     private void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, LTLModelCheckingResult.Satisfied sat) throws Exception {
-        FlowCTLModelcheckingSettings settings = new FlowCTLModelcheckingSettings();
+        FlowCTLModelcheckingSettings settings = new FlowCTLModelcheckingSettings(new AdamCircuitFlowLTLMCOutputData(outputDir + pnwt.getName(), false, false, false));
         PetriNetWithTransits out = new PnwtAndFlowCTL2PN().createSequential(pnwt, formula, settings);
         PNWTTools.savePnwt2PDF(outputDir + out.getName(), out, false);
 

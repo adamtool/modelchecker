@@ -1,9 +1,10 @@
 package uniolunisaar.adam.ds.modelchecking.settings.ctl;
 
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -11,25 +12,20 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class FlowCTLModelcheckingSettings extends AdamCircuitFlowLTLMCSettings {
 
-//    private boolean verbose = false;
-
-    public FlowCTLModelcheckingSettings() {
+    public FlowCTLModelcheckingSettings(AdamCircuitFlowLTLMCOutputData outputData) {
+        super(outputData);
     }
 
-    public FlowCTLModelcheckingSettings(AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp) {
-        super(optsSys, optsComp);
+    public FlowCTLModelcheckingSettings(AdamCircuitFlowLTLMCOutputData outputData, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp) {
+        super(outputData, optsSys, optsComp);
     }
 
-    public FlowCTLModelcheckingSettings(LogicsTools.TransitionSemantics semantics, Approach approach, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, boolean initFirst, Abc.VerificationAlgo... algo) {
-        super(semantics, approach, maximality, stuttering, optsSys, optsComp, initFirst, algo);
+    public FlowCTLModelcheckingSettings(AdamCircuitFlowLTLMCOutputData outputData, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, Abc.VerificationAlgo... algos) {
+        super(outputData, maximality, stuttering, optsSys, optsComp, algos);
     }
 
-//    public boolean isVerbose() {
-//        return verbose;
-//    }
-//
-//    public void setVerbose(boolean verbose) {
-//        this.verbose = verbose;
-//    }
+    public FlowCTLModelcheckingSettings(AdamCircuitFlowLTLMCOutputData outputData, Approach approach, Maximality maximality, Stuttering stuttering, CircuitRendererSettings.TransitionSemantics transitionSemantics, CircuitRendererSettings.TransitionEncoding transitionEncoding, CircuitRendererSettings.AtomicPropositions atomicPropositions, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, Abc.VerificationAlgo... algos) {
+        super(outputData, approach, maximality, stuttering, transitionSemantics, transitionEncoding, atomicPropositions, optsSys, optsComp, algos);
+    }
 
 }

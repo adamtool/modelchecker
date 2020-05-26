@@ -8,6 +8,7 @@ import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformer;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNWTTools;
 
@@ -29,9 +30,9 @@ public class TestPnwt2KripkeStructure {
     @BeforeClass
     public void silence() {
 //        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @Test

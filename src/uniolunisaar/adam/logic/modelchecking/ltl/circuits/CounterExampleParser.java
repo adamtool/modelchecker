@@ -10,12 +10,12 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import static uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister.STUTT_LATCH;
+import static uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister.STUTT_LATCH;
 import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.cex.CounterExampleElement;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AbcSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegisterLogTrans;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegisterLogTrans;
 import uniolunisaar.adam.tools.IOUtils;
 import uniolunisaar.adam.tools.Logger;
 
@@ -171,8 +171,8 @@ public class CounterExampleParser {
                             if (timestep != 0) { // for outgoing jump over the first step
                                 String id = elem.substring(0, elem.length() - 2);
 //                                System.out.println(id + "=" + val);
-                                if (id.startsWith(AigerRendererSafeOutStutterRegisterLogTrans.BIN_COD_ID)) {
-                                    String binIDChar = id.substring((AigerRendererSafeOutStutterRegisterLogTrans.BIN_COD_ID).length());
+                                if (id.startsWith(AigerRendererSafeStutterRegisterLogTrans.BIN_COD_ID)) {
+                                    String binIDChar = id.substring((AigerRendererSafeStutterRegisterLogTrans.BIN_COD_ID).length());
                                     cexe.add(Integer.parseInt(binIDChar), val);
                                 }
                                 if (val == '1') {

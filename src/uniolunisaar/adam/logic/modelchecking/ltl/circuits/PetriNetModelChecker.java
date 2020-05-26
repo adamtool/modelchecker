@@ -127,7 +127,7 @@ public class PetriNetModelChecker {
     public static LTLModelCheckingResult check(VerificationAlgo verificationAlgo, PetriNet net, AigerRenderer renderer, String formula, String path, String abcParameters) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(path + net.getName(), false, false);
         CircuitAndLTLtoCircuit.createCircuit(renderer, formula, data, null, false, PetriNetExtensionHandler.getProcessFamilyID(net));
-        String inputFile = path + net.getName() + ".aig";
+        String inputFile = path + net.getName() + PetriNetExtensionHandler.getProcessFamilyID(net).hashCode() + ".aig";
         return check(inputFile, verificationAlgo, net, renderer, path, abcParameters, data);
     }
 

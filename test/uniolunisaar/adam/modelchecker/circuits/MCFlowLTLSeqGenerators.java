@@ -6,9 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
@@ -29,7 +32,6 @@ import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
-import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -63,6 +65,24 @@ public class MCFlowLTLSeqGenerators {
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
     }
+    AdamCircuitFlowLTLMCSettings settings;
+
+    @BeforeMethod
+    public void createSettings() {
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + "buffer", false, false, true);
+        settings = new AdamCircuitFlowLTLMCSettings(
+                data,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
+                optSys,
+                optCom,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
+                VerificationAlgo.IC3);
+    }
 
     @Test(enabled = true)
     public void updatingNetworkBenchmark() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
@@ -82,18 +102,7 @@ public class MCFlowLTLSeqGenerators {
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
-        // maximality in circuit
-        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL_INHIBITOR,
-                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                Stuttering.PREFIX_REGISTER,
-                optSys,
-                optCom,
-                //                ModelCheckerMCHyper.VerificationAlgo.INT,
-                true,
-                VerificationAlgo.IC3);
-
+        // maximality in circuit       
         AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
@@ -111,20 +120,9 @@ public class MCFlowLTLSeqGenerators {
 
     @Test
     public void testParallelChecking() throws ParseException, FileNotFoundException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL_INHIBITOR,
-                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                Stuttering.PREFIX_REGISTER,
-                optSys,
-                optCom,
-                //                ModelCheckerMCHyper.VerificationAlgo.INT,
-                true,
-                //                VerificationAlgo.IC3, VerificationAlgo.BMC, VerificationAlgo.BMC2, VerificationAlgo.BMC3, VerificationAlgo.INT);
-                                VerificationAlgo.IC3, VerificationAlgo.BMC3);
-//                VerificationAlgo.IC3, VerificationAlgo.BMC3, VerificationAlgo.BMC2);
-//                VerificationAlgo.BMC3);
-//        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
+        settings.setVerificationAlgo(VerificationAlgo.IC3, VerificationAlgo.BMC3);
+
+//          PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
         PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(1, 1);
         String formula = "A F out";
 

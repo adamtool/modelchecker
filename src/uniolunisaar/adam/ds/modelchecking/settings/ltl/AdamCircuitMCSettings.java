@@ -2,12 +2,12 @@ package uniolunisaar.adam.ds.modelchecking.settings.ltl;
 
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniol.apt.adt.pn.PetriNet;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -17,6 +17,20 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S extends AdamCircuitLTLMCStatistics> extends ModelCheckingSettings {
 
+    /**
+     *
+     * The replacement idea is way to expensive, since we replace each
+     * transition with an until to jump over all stutter steps.
+     *
+     * The register idea should be also way faster, since we don't have to
+     * consider all the transitions in the formula but only have one additional
+     * register.
+     *
+     * The error register uses one globally less, but it still has to be tested
+     * if this is really faster (currently there could still be a problem for
+     * the logEncoding)
+     *
+     */
     public enum Stuttering {
         REPLACEMENT,
         REPLACEMENT_REGISTER,
@@ -32,13 +46,6 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         MAX_NONE
     }
 
-    public enum AtomicProps {
-        PLACES_AND_TRANSITIONS,
-        PLACES,
-        FIREABILITY
-    }
-
-    private LogicsTools.TransitionSemantics semantics = LogicsTools.TransitionSemantics.OUTGOING;
     private Maximality maximality = Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
     private Stuttering stuttering = Stuttering.PREFIX_REGISTER;
     private AigerRenderer.OptimizationsSystem optsSys = AigerRenderer.OptimizationsSystem.NONE;
@@ -46,14 +53,16 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
     private final AbcSettings abcSettings = new AbcSettings();
     private D outputData;
     private S statistics = null;
-    private boolean codeInputTransitionsBinary = true;
-//    private boolean codeInputTransitionsBinary = false;
     private boolean useFormulaFileForMcHyper = true;
-    private AtomicProps atomicPropositionType = AtomicProps.PLACES_AND_TRANSITIONS;
+    private CircuitRendererSettings rendererSettings = new CircuitRendererSettings(
+            CircuitRendererSettings.TransitionSemantics.OUTGOING,
+            CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+            CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS);
 
     public AdamCircuitMCSettings(D outputData) {
         super(Solver.ADAM_CIRCUIT);
         this.outputData = outputData;
+        rendererSettings.setMaxInterleaving(maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
     }
 
     public AdamCircuitMCSettings(D outputData, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp) {
@@ -61,17 +70,36 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         this.optsSys = optsSys;
         this.optsComp = optsComp;
         this.outputData = outputData;
+        rendererSettings.setMaxInterleaving(maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
     }
 
-    public AdamCircuitMCSettings(D outputData, LogicsTools.TransitionSemantics semantics, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, Abc.VerificationAlgo... algos) {
+    public AdamCircuitMCSettings(D outputData, Maximality maximality, Stuttering stuttering, AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp, Abc.VerificationAlgo... algos) {
         super(Solver.ADAM_CIRCUIT);
-        this.semantics = semantics;
         this.maximality = maximality;
         this.stuttering = stuttering;
         this.optsSys = optsSys;
         this.optsComp = optsComp;
         this.abcSettings.setVerificationAlgos(algos);
         this.outputData = outputData;
+        rendererSettings.setMaxInterleaving(maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
+    }
+
+    public AdamCircuitMCSettings(D outputData,
+            Maximality maximality, Stuttering stuttering,
+            CircuitRendererSettings.TransitionSemantics transitionSemantics,
+            CircuitRendererSettings.TransitionEncoding transitionEncoding,
+            CircuitRendererSettings.AtomicPropositions atomicPropositions,
+            AigerRenderer.OptimizationsSystem optsSys, AigerRenderer.OptimizationsComplete optsComp,
+            Abc.VerificationAlgo... algos) {
+        super(Solver.ADAM_CIRCUIT);
+        this.maximality = maximality;
+        this.stuttering = stuttering;
+        this.optsSys = optsSys;
+        this.optsComp = optsComp;
+        this.abcSettings.setVerificationAlgos(algos);
+        this.outputData = outputData;
+        rendererSettings = new CircuitRendererSettings(transitionSemantics, transitionEncoding, atomicPropositions);
+        rendererSettings.setMaxInterleaving(maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
     }
 
     public void fillAbcData(PetriNet net) {
@@ -81,12 +109,8 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         abcSettings.setProcessFamilyID(procID);
     }
 
-    public LogicsTools.TransitionSemantics getSemantics() {
-        return semantics;
-    }
-
-    public void setSemantics(LogicsTools.TransitionSemantics semantics) {
-        this.semantics = semantics;
+    public CircuitRendererSettings getRendererSettings() {
+        return rendererSettings;
     }
 
     public Maximality getMaximality() {
@@ -95,6 +119,7 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
 
     public void setMaximality(Maximality maximality) {
         this.maximality = maximality;
+        rendererSettings.setMaxInterleaving(this.maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT);
     }
 
     public Stuttering getStuttering() {
@@ -149,14 +174,6 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         this.stuttering = stuttering;
     }
 
-    public boolean isCodeInputTransitionsBinary() {
-        return codeInputTransitionsBinary;
-    }
-
-    public void setCodeInputTransitionsBinary(boolean codeInputTransitionsBinary) {
-        this.codeInputTransitionsBinary = codeInputTransitionsBinary;
-    }
-
     public boolean isUseFormulaFileForMcHyper() {
         return useFormulaFileForMcHyper;
     }
@@ -177,12 +194,15 @@ public class AdamCircuitMCSettings<D extends AdamCircuitLTLMCOutputData, S exten
         abcSettings.setPreProcessing(cmds);
     }
 
-    public AtomicProps getAtomicPropositionType() {
-        return atomicPropositionType;
+    public void setTransitionEncoding(CircuitRendererSettings.TransitionEncoding encoding) {
+        rendererSettings.setEncoding(encoding);
     }
 
-    public void setAtomicPropositionType(AtomicProps atomicPropositionType) {
-        this.atomicPropositionType = atomicPropositionType;
+    public void setCircuitAtoms(CircuitRendererSettings.AtomicPropositions atoms) {
+        rendererSettings.setAtoms(atoms);
     }
 
+    public void setTransitionSemantics(CircuitRendererSettings.TransitionSemantics semantics) {
+        rendererSettings.setSemantics(semantics);
+    }
 }

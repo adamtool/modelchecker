@@ -3,9 +3,8 @@ package uniolunisaar.adam.modelchecker.circuits;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerLTL;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
-import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import java.io.File;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 
@@ -19,6 +18,8 @@ import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.parser.impl.PnmlPNParser;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
 import uniolunisaar.adam.ds.logics.Constants;
@@ -46,7 +47,6 @@ import uniolunisaar.adam.tools.Logger;
 
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNTools;
-import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -91,7 +91,7 @@ public class TestingModelcheckingLTL {
 
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), new PetriNetWithTransits(net), false);
 
-        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, net); // MCHyper should not directly be used anymore
+        AigerRenderer renderer = new AigerRendererSafeStutterRegister(net, true, TransitionSemantics.OUTGOING); // MCHyper should not directly be used anymore
 
         String formula = "Forall (G (AP \"#out#_in\" 0))";
         LTLModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, net, renderer, formula, outputDir + net.getName(), "");
@@ -107,7 +107,7 @@ public class TestingModelcheckingLTL {
 
         PetriNet doublediamond = PNTools.createPetriNet("doublediamond");
 
-        renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, doublediamond); // the renderer are dependent of the net now 
+        renderer = new AigerRendererSafeStutterRegister(doublediamond, true, TransitionSemantics.OUTGOING); // the renderer are dependent of the net now 
         Place in = doublediamond.createPlace("in");
         in.setInitialToken(1);
 
@@ -187,21 +187,20 @@ public class TestingModelcheckingLTL {
 //        Transition t2 = game.createTransition("t2");
 //        game.createFlow(init2, t2);
 //        game.createFlow(t2, init2);
-        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + game.getName(), false, true);
+        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(data);
         settings.setMaximality(Maximality.MAX_NONE);
-        settings.setSemantics(TransitionSemantics.OUTGOING);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
 
         // initially the initial place
         ILTLFormula pA = new LTLAtomicProposition(init);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + game.getName(), false, true);
         settings.setOutputData(data);
         LTLModelCheckingResult cex = mc.check(game, pA);
         Assert.assertEquals(cex.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
         //// but not the other one
         // first test the stuttering formula         
 //        IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
-        ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+        ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.STUTT_LATCH);
         ILTLFormula stutt = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
                 LTLOperators.Binary.IMP,
                 new LTLFormula(LTLOperators.Unary.G, stutterReg)))
@@ -210,7 +209,7 @@ public class TestingModelcheckingLTL {
 //        cex = mc.check(game, new LTLFormula(initReg, LTLOperators.Binary.IMP, stutterReg), data);
 //        cex = mc.check(game, new Constants.False(), data);
         IFormula f = new Constants.False();
-        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + game.getName(), "");
+        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, new AigerRendererSafeStutterRegister(game, true, TransitionSemantics.OUTGOING), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), outputDir + game.getName(), "");
         Assert.assertEquals(cex.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         f = new LTLFormula(LTLOperators.Unary.X, stutt);
 //        cex = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, game), FlowLTLTransformerHyperLTL.toMCHyperFormat(f), "./" + game.getName(), "");
@@ -264,7 +263,7 @@ public class TestingModelcheckingLTL {
 
         PNWTTools.savePnwt2PDF(outputDir + game.getName(), game, true);
 
-        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, game); // MCHyper should not directly be used anymore
+        AigerRenderer renderer = new AigerRendererSafeStutterRegister(game, true, TransitionSemantics.OUTGOING); // MCHyper should not directly be used anymore
 //        check(game, "A((G(inittfl > 0)) OR (F(out > 0)))", "./testing");
         String formula = "Forall (G (AP \"#out#_inittflB\" 0))";
         LTLModelCheckingResult check = PetriNetModelChecker.check(VerificationAlgo.IC3, game, renderer, formula, outputDir + game.getName(), "");
@@ -335,11 +334,18 @@ public class TestingModelcheckingLTL {
 
         LTLModelCheckingResult cex;
 
-        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(TransitionSemantics.OUTGOING, Maximality.MAX_INTERLEAVING, Stuttering.PREFIX_REGISTER,
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + game.getName(), false, false);
+        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(
+                data,
+                Maximality.MAX_INTERLEAVING,
+                Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
                 VerificationAlgo.IC3);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + game.getName(), false, false);
         settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         cex = mc.check(game, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(tloop)));
@@ -352,15 +358,14 @@ public class TestingModelcheckingLTL {
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
 
-        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), true, true);
+        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(data);
         settings.setMaximality(Maximality.MAX_NONE); // since it is done by hand
-        settings.setSemantics(TransitionSemantics.INGOING);
+        settings.setTransitionSemantics(TransitionSemantics.INGOING);
 
         LTLFormula f = new LTLFormula(LTLOperators.Unary.F, new LTLFormula(new LTLAtomicProposition(pn.getPlace("A")), LTLOperators.Binary.OR, new LTLAtomicProposition(pn.getPlace("B"))));
         f = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), true, true);
 
-        settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         LTLModelCheckingResult check = mc.check(pn, f);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
@@ -388,7 +393,7 @@ public class TestingModelcheckingLTL {
         check = mc.check(pn, maxf);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
         // test next
-        settings.setSemantics(TransitionSemantics.OUTGOING);
+        settings.setTransitionSemantics(TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
@@ -406,14 +411,15 @@ public class TestingModelcheckingLTL {
                         new LTLFormula(LTLOperators.Unary.NEG, new LTLAtomicProposition(pn.getPlace("qbadB")))
                 ));
 
-        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, false);
+        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(data);
 
         settings.setMaximality(Maximality.MAX_NONE); // since it is done by hand
-        settings.setSemantics(TransitionSemantics.INGOING);
+        settings.setTransitionSemantics(TransitionSemantics.INGOING);
+
         // test previous
         LTLFormula maxf = new LTLFormula(FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
 //        CounterExample cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), data);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, false);
 
         settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
@@ -421,7 +427,7 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         //test next
-        settings.setSemantics(TransitionSemantics.OUTGOING);
+        settings.setTransitionSemantics(TransitionSemantics.OUTGOING);
         maxf = new LTLFormula(FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(pn), LTLOperators.Binary.IMP, f);
 //        cex = PetriNetModelChecker.check(pn, FlowLTLTransformerHyperLTL.toMCHyperFormat(maxf), "./" + pn.getName(), false);    
         check = mc.check(pn, maxf);
@@ -450,10 +456,11 @@ public class TestingModelcheckingLTL {
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), new PetriNetWithTransits(net), false);
 
         // Check previous semantics
-        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings();
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + net.getName(), false, true);
+        AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(data);
 
         settings.setMaximality(Maximality.MAX_NONE); // since we do it by hand
-        settings.setSemantics(TransitionSemantics.INGOING);
+        settings.setTransitionSemantics(TransitionSemantics.INGOING);
         ILTLFormula maxReisig = FormulaCreatorIngoingSemantics.getMaximalityConcurrentDirectAsObject(net);
         ILTLFormula maxStandard = FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(net);
 
@@ -461,7 +468,6 @@ public class TestingModelcheckingLTL {
         LTLFormula evB2 = new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(B2));
 
         LTLFormula f = new LTLFormula(maxStandard, LTLOperators.Binary.IMP, evA2);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + net.getName(), false, true);
 
 //        CounterExample cex = PetriNetModelChecker.check(net, FlowLTLTransformerHyperLTL.toMCHyperFormat(f), data);
         settings.setOutputData(data);
@@ -485,7 +491,7 @@ public class TestingModelcheckingLTL {
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // Check next semantics
-        settings.setSemantics(TransitionSemantics.OUTGOING);
+        settings.setTransitionSemantics(TransitionSemantics.OUTGOING);
         maxReisig = FormulaCreatorOutgoingSemantics.getMaximalityConcurrentDirectAsObject(net);
         maxStandard = FormulaCreatorOutgoingSemantics.getMaximalityInterleavingDirectAsObject(net);
 
@@ -519,16 +525,19 @@ public class TestingModelcheckingLTL {
         game.setName("asLink01a");
         (new File(output)).mkdirs();
 
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(output + game.getName() + "_deadlock", false, false);
         AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(
-                TransitionSemantics.OUTGOING,
+                data,
                 Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
                 VerificationAlgo.IC3
         );
         ILTLFormula deadlock = FormulaCreator.deadlock(net);
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(output + game.getName() + "_deadlock", false, false);
         settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         LTLModelCheckingResult check = mc.check(game, deadlock);
@@ -570,18 +579,20 @@ public class TestingModelcheckingLTL {
 
         PNWTTools.savePnwt2PDF(output + net.getName(), new PetriNetWithTransits(net), false);
 
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(output + net.getName(), true, true);
         AdamCircuitLTLMCSettings settings = new AdamCircuitLTLMCSettings(
-                TransitionSemantics.INGOING,
+                data,
                 Maximality.MAX_NONE,
                 Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.INGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
                 VerificationAlgo.IC3
         );
         ILTLFormula f = new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(init));
 
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(output + net.getName(), true, true);
-        settings.setOutputData(data);
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         LTLModelCheckingResult check = mc.check(new PetriNetWithTransits(net), f);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);

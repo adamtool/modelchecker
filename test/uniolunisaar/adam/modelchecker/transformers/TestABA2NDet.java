@@ -21,6 +21,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.ABA2NDetTransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformer;
 import static uniolunisaar.adam.modelchecker.transformers.TestABTAxKripkeStructure2ABA.createExampleTree;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNWTTools;
 
@@ -42,9 +43,9 @@ public class TestABA2NDet {
     @BeforeClass
     public void silence() {
 //        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @Test

@@ -70,9 +70,9 @@ public class TestingOptimizations {
 //                OptimizationsComplete.NONE,
 //                VerificationAlgo.IC3,
 //                true);
-        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(OptimizationsSystem.NB_GATES_AND_INDICES, OptimizationsComplete.NONE);
-        AdamCircuitFlowLTLMCStatistics statsGS = new AdamCircuitFlowLTLMCStatistics();
         AdamCircuitFlowLTLMCOutputData dataGS = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "GS", false, false, true);
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(dataGS, OptimizationsSystem.NB_GATES_AND_INDICES, OptimizationsComplete.NONE);
+        AdamCircuitFlowLTLMCStatistics statsGS = new AdamCircuitFlowLTLMCStatistics();
         settings.setOutputData(dataGS);
         settings.setStatistics(statsGS);
 
@@ -92,9 +92,9 @@ public class TestingOptimizations {
 //                OptimizationsComplete.NONE,
 //                VerificationAlgo.IC3,
 //                true);
-        settings = new AdamCircuitFlowLTLMCSettings(OptimizationsSystem.NB_GATES_AND_INDICES_AND_EQCOM, OptimizationsComplete.NONE);
-        AdamCircuitFlowLTLMCStatistics statsGSEQ = new AdamCircuitFlowLTLMCStatistics();
         AdamCircuitFlowLTLMCOutputData dataGSEQ = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "GS", false, false, true);
+        settings = new AdamCircuitFlowLTLMCSettings(dataGSEQ, OptimizationsSystem.NB_GATES_AND_INDICES_AND_EQCOM, OptimizationsComplete.NONE);
+        AdamCircuitFlowLTLMCStatistics statsGSEQ = new AdamCircuitFlowLTLMCStatistics();
         settings.setOutputData(dataGSEQ);
         settings.setStatistics(statsGSEQ);
 

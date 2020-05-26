@@ -4,6 +4,7 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerSequential;
@@ -13,9 +14,12 @@ import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTra
  * @author Manuel Gieseking
  */
 public class FlowLTLTransformerLoLA {
-
+    
     public static String createFormula4ModelChecking4LoLASequential(PetriNet orig, PetriNet mc, RunLTLFormula formula) throws NotConvertableException {
-        ILTLFormula f = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(orig, mc, formula, new AdamCircuitFlowLTLMCSettings());
+        //todo: this is a hack since the method only uses it for the init and the next properties,
+        // when in some point in time LoLA is able to really handle fairness, we have to add those parameters to the settings
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(new AdamCircuitFlowLTLMCOutputData("./", false, false, false));
+        ILTLFormula f = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(orig, mc, formula, settings);
         String lola = f.toLoLA();
         return "ALLPATH " + lola;
     }
@@ -27,5 +31,5 @@ public class FlowLTLTransformerLoLA {
         }
         return "A(G init_tfl > 0 OR " + formula + ")";
     }
-
+    
 }

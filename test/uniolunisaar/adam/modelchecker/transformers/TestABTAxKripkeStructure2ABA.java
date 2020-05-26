@@ -18,6 +18,7 @@ import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformer;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNWTTools;
 
@@ -39,9 +40,9 @@ public class TestABTAxKripkeStructure2ABA {
     @BeforeClass
     public void silence() {
 //        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @Test

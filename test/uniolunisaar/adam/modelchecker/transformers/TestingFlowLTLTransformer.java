@@ -10,6 +10,7 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
@@ -19,10 +20,10 @@ import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
-import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
@@ -31,6 +32,7 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -91,7 +93,7 @@ public class TestingFlowLTLTransformer {
 
         PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
         PNWTTools.savePnwt2PDF(outputDir + mc.getName() + "mc", mc, true);
-        ILTLFormula f_mc = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings());
+        ILTLFormula f_mc = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings(new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName(), false, false, false)));
 //        System.out.println(f_mc);
 
     }
@@ -108,7 +110,7 @@ public class TestingFlowLTLTransformer {
         String formula = "F TRUE";
         formula = FlowLTLTransformerHyperLTL.toMCHyperFormat(net, formula);
 //        System.out.println(formula);
-        LTLModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, net, Circuit.getRenderer(Circuit.Renderer.INGOING, net), formula, outputDir + net.getName(), "");
+        LTLModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, net, new AigerRendererSafeStutterRegister(net, true, CircuitRendererSettings.TransitionSemantics.OUTGOING), formula, outputDir + net.getName(), "");
         Assert.assertEquals(output.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
@@ -157,7 +159,7 @@ public class TestingFlowLTLTransformer {
 //        String formula = FlowLTLTransformer.toMCHyperFormat(f); // working
         Assert.assertEquals(formula, "Forall (And (G (F (Or (Neg (AP \"#out#_inittfl\" 0)) (X (AP \"#out#_tB\" 0))))) (G (F (Or (Neg (AP \"#out#_inittflB\" 0)) (X (AP \"#out#_tC\" 0))))))");
 
-        LTLModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, game, Circuit.getRenderer(Circuit.Renderer.INGOING, game), formula, outputDir + game.getName(), "");
+        LTLModelCheckingResult output = PetriNetModelChecker.check(VerificationAlgo.IC3, game, new AigerRendererSafeStutterRegister(game, true, CircuitRendererSettings.TransitionSemantics.OUTGOING), formula, outputDir + game.getName(), "");
         Assert.assertEquals(output.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         // new version

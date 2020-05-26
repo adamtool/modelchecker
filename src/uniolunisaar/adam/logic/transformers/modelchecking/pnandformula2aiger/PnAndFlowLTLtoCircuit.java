@@ -6,6 +6,7 @@ import java.util.List;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
@@ -30,7 +31,6 @@ import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTL
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
-import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -70,7 +70,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
      */
     public static AigerRenderer createCircuit(PetriNetWithTransits net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws InterruptedException, IOException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
-        TransitionSemantics semantics = settings.getSemantics();
+        TransitionSemantics semantics = settings.getRendererSettings().getSemantics();
         AdamCircuitFlowLTLMCStatistics stats = settings.getStatistics();
         AdamCircuitFlowLTLMCOutputData data = settings.getOutputData();
         AdamCircuitFlowLTLMCSettings.Approach approach = settings.getApproach();

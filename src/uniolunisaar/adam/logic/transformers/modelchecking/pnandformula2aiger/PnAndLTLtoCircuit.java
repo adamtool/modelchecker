@@ -5,13 +5,13 @@ import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.io.parser.ParseException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
@@ -21,7 +21,6 @@ import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
-import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -64,7 +63,7 @@ public class PnAndLTLtoCircuit {
 //    }
     public static AigerRenderer createCircuitWithFairnessAndMaximality(PetriNet net, ILTLFormula formula, AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
-        TransitionSemantics semantics = settings.getSemantics();
+        TransitionSemantics semantics = settings.getRendererSettings().getSemantics();
 
         // Add Fairness
         formula = LogicsTools.addFairness(net, formula);
@@ -103,7 +102,7 @@ public class PnAndLTLtoCircuit {
      */
     private static AigerRenderer createCircuit(PetriNet net, ILTLFormula formula, AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws InterruptedException, IOException, ParseException, ProcessNotStartedException, ExternalToolException {
         AdamCircuitLTLMCSettings.Maximality maximality = settings.getMaximality();
-        TransitionSemantics semantics = settings.getSemantics();
+        TransitionSemantics semantics = settings.getRendererSettings().getSemantics();
         AdamCircuitLTLMCSettings.Stuttering stuttering = settings.getStuttering();
         AigerRenderer.OptimizationsSystem optsSys = settings.getOptsSys();
         AigerRenderer.OptimizationsComplete optsComp = settings.getOptsComp();
@@ -122,72 +121,16 @@ public class PnAndLTLtoCircuit {
         // Choose renderer and add the corresponding stuttering
         AigerRenderer renderer;
         String mcHyperFormula;
-        if (semantics == TransitionSemantics.INGOING) {
-            // todo: do the stuttering here
-            renderer = Circuit.getRenderer(Circuit.Renderer.INGOING, net);
+
+        formula = LTL2CircuitFormula.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
+        try {
             mcHyperFormula = FlowLTLTransformerHyperLTL.toMCHyperFormat(formula);
-        } else {
-            formula = LTL2CircuitFormula.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
-            try {
-                mcHyperFormula = FlowLTLTransformerHyperLTL.toMCHyperFormat(formula);
-            } catch (StackOverflowError exp) { // formula size is too huge
-                // should now be handled by the writing to file possibility
-                throw exp;
-            }
-            if (maximality == Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
-                switch (settings.getAtomicPropositionType()) {
-                    case PLACES_AND_TRANSITIONS:
-                        if (settings.isCodeInputTransitionsBinary()) {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS_MAX_INTERLEAVING, net);
-                        } else {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_MAX_INTERLEAVING, net);
-                        }
-                        break;
-                    case PLACES:
-                        if (settings.isCodeInputTransitionsBinary()) {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES_BIN_TRANS_MAX_INTERLEAVING, net);
-                        } else {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES_MAX_INTERLEAVING, net);
-                        }
-                        break;
-                    case FIREABILITY:
-                        if (settings.isCodeInputTransitionsBinary()) {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS_MAX_INTERLEAVING, net);
-                        } else {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_MAX_INTERLEAVING, net);
-                        }
-                        break;
-                    default:
-                        throw new RuntimeException("Not yet implemented: " + settings.getAtomicPropositionType().name());
-                }
-            } else {
-                switch (settings.getAtomicPropositionType()) {
-                    case PLACES_AND_TRANSITIONS:
-                        if (settings.isCodeInputTransitionsBinary()) {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_BIN_TRANS, net);
-                        } else {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
-                        }
-                        break;
-                    case PLACES:
-                        if (settings.isCodeInputTransitionsBinary()) {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES_BIN_TRANS, net);
-                        } else {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_ONLYPLACES, net);
-                        }
-                        break;
-                    case FIREABILITY:
-                        if (settings.isCodeInputTransitionsBinary()) {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY_BIN_TRANS, net);
-                        } else {
-                            renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER_FIREABILITY, net);
-                        }
-                        break;
-                    default:
-                        throw new RuntimeException("Not yet implemented: " + settings.getAtomicPropositionType().name());
-                }
-            }
+        } catch (StackOverflowError exp) { // formula size is too huge
+            // should now be handled by the writing to file possibility
+            throw exp;
         }
+
+        renderer = Circuit.getRenderer(net, settings.getRendererSettings());
         renderer.setSystemOptimizations(optsSys);
         renderer.setMCHyperResultOptimizations(optsComp);
 

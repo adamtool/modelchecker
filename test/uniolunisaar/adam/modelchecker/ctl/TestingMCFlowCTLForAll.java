@@ -9,6 +9,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.logics.ctl.CTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ctl.CTLConstants;
 import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
@@ -65,16 +66,17 @@ public class TestingMCFlowCTLForAll {
     @BeforeMethod
     public void initMCSettings() {
         settings = new FlowCTLModelcheckingSettings(
-                LogicsTools.TransitionSemantics.OUTGOING,
+                new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, verbose),
                 ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                CircuitRendererSettings.TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
-                true,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
                 Abc.VerificationAlgo.IC3);
-        settings.setOutputData(new AdamCircuitFlowLTLMCOutputData(outputDir, false, false, verbose));
-//        settings.setCodeInputTransitionsBinary(false);
     }
 
     @Test
@@ -158,6 +160,7 @@ public class TestingMCFlowCTLForAll {
 
     }
 
+    @Test(enabled=false) // this is not a test, but 'ant test' tries to call it
     public static void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, FlowCTLModelcheckingSettings settings, LTLModelCheckingResult.Satisfied sat) throws Exception {
         PetriNetWithTransits out = new PnwtAndFlowCTL2PN().createSequential(pnwt, formula, settings);
         if (settings.getOutputData().isVerbose()) {
@@ -171,7 +174,7 @@ public class TestingMCFlowCTLForAll {
         List<String> fairTransitions = new ArrayList<>();
         for (Transition transition : pnwt.getTransitions()) {
             if (pnwt.isStrongFair(transition) || pnwt.isWeakFair(transition)) { // to also collect weak is not right, but a quick hack
-                fairTransitions.add(transition.getId());                
+                fairTransitions.add(transition.getId());
             }
         }
 

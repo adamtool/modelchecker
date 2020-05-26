@@ -154,6 +154,19 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         return phi;
     }
 
+    /**
+     * Remember we cannot just replace X with X^n, because, e.g., G X t would
+     * still fail or G(p -> X t), then p would also hold for the next n steps,
+     * but with X^n we would also want in all of these steps that t is the
+     * outgoing transition. But this depends on how we handle transitions.
+     *
+     * @param orig
+     * @param net
+     * @param phi
+     * @param scopeEventually
+     * @param nbFlowFormulas
+     * @return
+     */
     @Override
     ILTLFormula replaceFormulaUnaryInRunFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, boolean scopeEventually, int nbFlowFormulas) {
         FormulaUnary<ILTLFormula, LTLOperators.Unary> castPhi = phi;
@@ -210,6 +223,17 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
         return substPhi;
     }
 
+    /**
+     * Remember we cannot replace a transition t with X^n t, because then, e.g.,
+     * G t would still fail.
+     *
+     * @param orig
+     * @param net
+     * @param phi
+     * @param scopeEventually
+     * @param nbFlowFormulas
+     * @return
+     */
     @Override
     IFormula replaceLTLAtomicPropositionInRunFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, boolean scopeEventually, int nbFlowFormulas) {
         LTLAtomicProposition atom = phi;
@@ -218,24 +242,16 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
             if (scopeEventually) {
                 return phi;
             }
-            if (nbFlowFormulas > 0) {
-                ILTLFormula retPhi = atom;
-                for (int i = 0; i < nbFlowFormulas; i++) {
-                    retPhi = new LTLFormula(LTLOperators.Unary.X, retPhi); // todo: could still be smarter and move the nexts to the next temporal operator
+            // if it's not in the last scope of an eventually, then replace it according to the document
+            // all transitions of the subnets
+            Collection<ILTLFormula> elements = new ArrayList<>();
+            for (Transition t : net.getTransitions()) {
+                if (!orig.containsTransition(t.getId())) {
+                    elements.add(new LTLAtomicProposition(t));
                 }
-                return retPhi;
-            } else {
-                // if it's not in the last scope of an eventually, then replace it according to the document
-                // all transitions of the subnets
-                Collection<ILTLFormula> elements = new ArrayList<>();
-                for (Transition t : net.getTransitions()) {
-                    if (!orig.containsTransition(t.getId())) {
-                        elements.add(new LTLAtomicProposition(t));
-                    }
-                }
-                ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
-                return new LTLFormula(untilFirst, LTLOperators.Binary.U, atom);
             }
+            ILTLFormula untilFirst = FormulaCreator.bigWedgeOrVeeObject(elements, false);
+            return new LTLFormula(untilFirst, LTLOperators.Binary.U, atom);
         }
         return phi;
     }

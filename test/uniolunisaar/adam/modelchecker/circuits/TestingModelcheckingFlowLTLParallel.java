@@ -13,6 +13,8 @@ import uniol.apt.adt.pn.Transition;
 
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
@@ -29,9 +31,9 @@ import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
-import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT;
-import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
@@ -45,8 +47,6 @@ import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.modelchecker.util.TestModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
-import uniolunisaar.adam.util.logics.LogicsTools;
-import static uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics.OUTGOING;
 
 /**
  *
@@ -122,18 +122,20 @@ public class TestingModelcheckingFlowLTLParallel {
         String formula = "A F out";
         RunLTLFormula f = FlowLTLParser.parse(net, formula);
 
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
+
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                LogicsTools.TransitionSemantics.OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
+                data,
+                Approach.PARALLEL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
-                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
-                true,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
                 VerificationAlgo.IC3);
-
-        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
-        settings.setOutputData(data);
 
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, LTLModelCheckingResult.Satisfied.TRUE, settings);
     }
@@ -282,15 +284,18 @@ public class TestingModelcheckingFlowLTLParallel {
 
         // check maximal initerleaving in the circuit
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                LogicsTools.TransitionSemantics.OUTGOING,
+                dataInCircuit,
                 ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                CircuitRendererSettings.TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
-                true,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
                 VerificationAlgo.IC3);
-        settings.setOutputData(dataInCircuit);
+
         settings.getAbcSettings().setDetailedCEX(true);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
@@ -333,18 +338,21 @@ public class TestingModelcheckingFlowLTLParallel {
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
         // maximality in circuit 
+        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                OUTGOING,
-                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
-                MAX_INTERLEAVING_IN_CIRCUIT,
-                PREFIX_REGISTER,
+                dataInCircuit,
+                Approach.PARALLEL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
-                true,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
                 VerificationAlgo.IC3);
+
         AdamCircuitFlowLTLMCStatistics statsInCircuit = new AdamCircuitFlowLTLMCStatistics();
-        AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
-        settings.setOutputData(dataInCircuit);
         settings.setStatistics(statsInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
@@ -1314,18 +1322,21 @@ public class TestingModelcheckingFlowLTLParallel {
 
         RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("p6"))));
 
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
+
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                LogicsTools.TransitionSemantics.OUTGOING,
+                data,
                 ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 Maximality.MAX_INTERLEAVING,
-                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
-                true,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
                 VerificationAlgo.IC3);
 
-        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName() + "data", false, false, true);
-        settings.setOutputData(data);
         settings.getAbcSettings().setDetailedCEX(false);
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);

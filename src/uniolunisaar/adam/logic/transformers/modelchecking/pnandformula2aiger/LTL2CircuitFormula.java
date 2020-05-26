@@ -18,7 +18,7 @@ import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSetti
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.REPLACEMENT;
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.REPLACEMENT_REGISTER;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeOutStutterRegister;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 
 /**
@@ -27,6 +27,23 @@ import uniolunisaar.adam.util.logics.FormulaCreator;
  */
 public class LTL2CircuitFormula {
 
+    /**
+     * The replacement idea is way to expensive, since we replace each transition with an 
+     * until to jump over all stutter steps.
+     * 
+     * The register idea should be also way faster, since we don't have to consider all the 
+     * transitions in the formula but only have one additional register.
+     * 
+     * The error register uses one globally less, but it still has to be tested
+     * if this is really faster (currently there could still be a problem for the logEncoding)
+     * 
+     * @param net
+     * @param formula
+     * @param stutt
+     * @param max
+     * @return
+     * @throws ParseException 
+     */
     public static ILTLFormula handleStutteringOutGoingSemantics(PetriNet net, ILTLFormula formula, Stuttering stutt, Maximality max) throws ParseException {
         switch (stutt) {
             case REPLACEMENT: {
@@ -60,8 +77,8 @@ public class LTL2CircuitFormula {
                 return FlowLTLParser.parse(net, f).toLTLFormula();
             }
             case REPLACEMENT_REGISTER: {
-                ILTLFormula initReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
-                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+                ILTLFormula initReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.INIT_LATCH);
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.STUTT_LATCH);
                 String f = formula.toReplacableString();
                 for (Transition t : net.getTransitions()) {
                     f = f.replace("'" + t.getId() + "'", "'~#@" + t.getId() + "@#~'");
@@ -98,7 +115,7 @@ public class LTL2CircuitFormula {
             }
             case PREFIX_REGISTER: {
 //                IAtomicProposition initReg = new Constants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.INIT_LATCH);
-                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.STUTT_LATCH);
 //                return new LTLFormula(initReg, LTLOperators.Binary.IMP, new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(stutterReg,
 //                        LTLOperators.Binary.IMP,
 //                        new LTLFormula(LTLOperators.Unary.G, stutterReg))),
@@ -126,7 +143,7 @@ public class LTL2CircuitFormula {
                 );
             }
             case ERROR_REGISTER: {
-                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeOutStutterRegister.OUTPUT_PREFIX + AigerRendererSafeOutStutterRegister.STUTT_LATCH);
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.STUTT_LATCH);
                 ILTLFormula f = new LTLFormula(
                         new LTLFormula(
                                 LTLOperators.Unary.G,
