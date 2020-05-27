@@ -122,7 +122,11 @@ public class PnAndLTLtoCircuit {
         AigerRenderer renderer;
         String mcHyperFormula;
 
-        formula = LTL2CircuitFormula.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
+        if (semantics == TransitionSemantics.OUTGOING) {
+            formula = LTL2CircuitFormula.handleStutteringOutGoingSemantics(net, formula, stuttering, maximality);
+        } else if (semantics == TransitionSemantics.INGOING) {
+            formula = LTL2CircuitFormula.handleStutteringInGoingSemantics(net, formula, stuttering, maximality);
+        }
         try {
             mcHyperFormula = FlowLTLTransformerHyperLTL.toMCHyperFormat(formula);
         } catch (StackOverflowError exp) { // formula size is too huge

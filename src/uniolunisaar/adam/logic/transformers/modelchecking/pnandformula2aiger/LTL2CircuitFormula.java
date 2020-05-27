@@ -28,21 +28,70 @@ import uniolunisaar.adam.util.logics.FormulaCreator;
 public class LTL2CircuitFormula {
 
     /**
-     * The replacement idea is way to expensive, since we replace each transition with an 
-     * until to jump over all stutter steps.
-     * 
-     * The register idea should be also way faster, since we don't have to consider all the 
-     * transitions in the formula but only have one additional register.
-     * 
-     * The error register uses one globally less, but it still has to be tested
-     * if this is really faster (currently there could still be a problem for the logEncoding)
-     * 
+     * Here only the PREFIX_REGISTER AND THE ERROR_REGISTER are implemented. The
+     * others are to slow.
+     *
      * @param net
      * @param formula
      * @param stutt
      * @param max
      * @return
-     * @throws ParseException 
+     * @throws ParseException
+     */
+    public static ILTLFormula handleStutteringInGoingSemantics(PetriNet net, ILTLFormula formula, Stuttering stutt, Maximality max) throws ParseException {
+        switch (stutt) {
+            case PREFIX_REGISTER: {
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.STUTT_LATCH);
+                ILTLFormula f;
+                if (max != Maximality.MAX_INTERLEAVING_IN_CIRCUIT) {
+                    f = new LTLFormula(
+                            LTLOperators.Unary.G,
+                            new LTLFormula(stutterReg,
+                                    LTLOperators.Binary.IMP,
+                                    new LTLFormula(LTLOperators.Unary.G, stutterReg))
+                    );
+                } else {
+                    f = new LTLFormula(
+                            new LTLFormula(
+                                    LTLOperators.Unary.G,
+                                    new LTLFormula(LTLOperators.Unary.NEG, stutterReg)
+                            ));
+                }
+                return new LTLFormula(f, LTLOperators.Binary.IMP, formula);
+            }
+            case ERROR_REGISTER: {
+                ILTLFormula stutterReg = new LTLConstants.Container(AigerRendererSafeStutterRegister.OUTPUT_PREFIX + AigerRendererSafeStutterRegister.STUTT_LATCH);
+                ILTLFormula f = new LTLFormula(
+                        new LTLFormula(
+                                LTLOperators.Unary.G,
+                                new LTLFormula(LTLOperators.Unary.NEG, stutterReg)
+                        ));
+
+                return new LTLFormula(f, LTLOperators.Binary.IMP, formula);
+            }
+        }
+        throw new RuntimeException("Not for every possibility of stuttering approaches a case is handled. " + stutt + " is missing."
+                + " They are not implemented because they are too expensive.");
+    }
+
+    /**
+     * The replacement idea is way to expensive, since we replace each
+     * transition with an until to jump over all stutter steps.
+     *
+     * The register idea should be also way faster, since we don't have to
+     * consider all the transitions in the formula but only have one additional
+     * register.
+     *
+     * The error register uses one globally less, but it still has to be tested
+     * if this is really faster (currently there could still be a problem for
+     * the logEncoding)
+     *
+     * @param net
+     * @param formula
+     * @param stutt
+     * @param max
+     * @return
+     * @throws ParseException
      */
     public static ILTLFormula handleStutteringOutGoingSemantics(PetriNet net, ILTLFormula formula, Stuttering stutt, Maximality max) throws ParseException {
         switch (stutt) {
