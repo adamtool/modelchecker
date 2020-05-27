@@ -20,6 +20,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo.IC3;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerLTL;
+import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
@@ -84,9 +85,12 @@ public class TestingIngoingLTL {
         final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
+        pn.rename(pn.getPlace("A"), "a");
 
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, false);
         settings.setOutputData(data);
+
+        ModelCheckerLTL mc = new ModelCheckerLTL(settings);
 
         // no transition should be satisfied in the first step
         Collection<ILTLFormula> transitions = new ArrayList<>();
@@ -96,8 +100,28 @@ public class TestingIngoingLTL {
         ILTLFormula f = FormulaCreator.bigWedgeOrVeeObject(transitions, false);
         f = new LTLFormula(LTLOperators.Unary.NEG, f);
 
-        ModelCheckerLTL mc = new ModelCheckerLTL(settings);
         LTLModelCheckingResult check = mc.check(pn, f);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
+
+        // test the first transitions
+        String formula = "X ((AA -> t11) AND (BB->t22))";
+        f = FlowLTLParser.parse(pn, formula).toLTLFormula();
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
+        formula = "X ((a -> t1) AND (B->t2))";
+        f = FlowLTLParser.parse(pn, formula).toLTLFormula();
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
+        
+        // test it globally (should both be false because of concurrent transitions)
+        formula = "G ((AA -> t11) AND (BB->t22))";
+        f = FlowLTLParser.parse(pn, formula).toLTLFormula();
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+        formula = "G ((a -> t1) AND (B->t2))";
+        f = FlowLTLParser.parse(pn, formula).toLTLFormula();
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+        
     }
 }
