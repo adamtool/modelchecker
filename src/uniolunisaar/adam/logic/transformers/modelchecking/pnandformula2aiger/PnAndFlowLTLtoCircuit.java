@@ -29,6 +29,10 @@ import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTra
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingParallel;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNParallelInhibitor;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParallelNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSequentialNoInit;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -113,7 +117,13 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     if (flowFormulas.size() > 1) {
                         throw new NotConvertableException("The parallel approach (without inhibitor arcs) is not implemented for more than one flow subformula!. Please use another approach.");
                     }
-                    netMC = PnwtAndNbFlowFormulas2PNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    if (semantics == TransitionSemantics.INGOING) {
+                        netMC = PnwtAndNbFlowFormulas2PNParallelNoInit.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    } else if (semantics == TransitionSemantics.OUTGOING) {
+                        netMC = PnwtAndNbFlowFormulas2PNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    } else {
+                        throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                    }
                     if (data.isOutputTransformedNet()) {
                         // color all original places
                         for (Place p : netMC.getPlaces()) {
@@ -134,10 +144,20 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     }
                     break;
                 case PARALLEL_INHIBITOR:
-                    if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
-                        netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    if (semantics == TransitionSemantics.INGOING) {
+                        if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                            netMC = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallelOneFlowFormula(net);
+                        } else {
+                            netMC = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(net, flowFormulas.size());
+                        }
+                    } else if (semantics == TransitionSemantics.OUTGOING) {
+                        if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                            netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
+                        } else {
+                            netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallel(net, flowFormulas.size());
+                        }
                     } else {
-                        netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallel(net, flowFormulas.size());
+                        throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
                     }
                     if (data.isOutputTransformedNet()) {
                         // color all original places
@@ -159,7 +179,13 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     }
                     break;
                 case SEQUENTIAL: {
-                    netMC = PnwtAndNbFlowFormulas2PNSequential.createNet4ModelCheckingSequential(net, flowFormulas.size(), initFirst);
+                    if (semantics == TransitionSemantics.INGOING) {
+                        netMC = PnwtAndNbFlowFormulas2PNSequentialNoInit.createNet4ModelCheckingSequential(net, flowFormulas.size());
+                    } else if (semantics == TransitionSemantics.OUTGOING) {
+                        netMC = PnwtAndNbFlowFormulas2PNSequential.createNet4ModelCheckingSequential(net, flowFormulas.size(), initFirst);
+                    } else {
+                        throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                    }
                     if (data.isOutputTransformedNet()) {
                         // color all original places
                         for (Place p : netMC.getPlaces()) {
@@ -183,7 +209,13 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     break;
                 }
                 case SEQUENTIAL_INHIBITOR:
-                    netMC = PnwtAndNbFlowFormulas2PNSequentialInhibitor.createNet4ModelCheckingSequential(net, flowFormulas.size(), initFirst);
+                    if (semantics == TransitionSemantics.INGOING) {
+                        netMC = PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit.createNet4ModelCheckingSequential(net, flowFormulas.size());
+                    } else if (semantics == TransitionSemantics.OUTGOING) {
+                        netMC = PnwtAndNbFlowFormulas2PNSequentialInhibitor.createNet4ModelCheckingSequential(net, flowFormulas.size(), initFirst);
+                    } else {
+                        throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                    }
                     if (data.isOutputTransformedNet()) {
                         // color all original places
                         for (Place p : netMC.getPlaces()) {
