@@ -23,10 +23,10 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSetti
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings.Stucking;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.ACTIVATION_PREFIX_ID;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.TOKENFLOW_SUFFIX_ID;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.TOKENFLOW_SUFFIX_ID;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSequentialNoInit;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -52,7 +52,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
         Collection<ILTLFormula> elements = new ArrayList<>();
         for (Transition t : mcNet.getTransitions()) {
             if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))// the transitions of my subnet
-                    && !t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // which are not the nxt transitions
+                    && !t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequentialNoInit.NEXT_ID + "-" + nb_ff) // which are not the nxt transitions
                     ) {
                 elements.add(new LTLAtomicProposition(t));
             }
@@ -71,7 +71,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
         Collection<ILTLFormula> elements = new ArrayList<>();
         for (Transition t : mcNet.getTransitions()) {
             if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))// the transitions of my subnet
-                    && t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // which are not the nxt transitions
+                    && t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequentialNoInit.NEXT_ID + "-" + nb_ff) // which are not the nxt transitions
                     ) {
                 elements.add(new LTLAtomicProposition(t));
             }
@@ -203,7 +203,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
             Collection<ILTLFormula> elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
                 if (!t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff) // all transitions not belonging to my subnet
-                        || t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff)) // but skipping transitions are OK 
+                        || t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequentialNoInit.NEXT_ID + "-" + nb_ff)) // but skipping transitions are OK 
                 {
                     elements.add(new LTLAtomicProposition(t));
                 }
@@ -525,7 +525,6 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
     public ILTLFormula createFormula4ModelChecking4CircuitSequential(PetriNet orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
-        boolean initFirst = settings.isInitFirst();
         boolean useNext = settings.isUseNextToReplaceXandTransitionsInRunPart();
 
         int nbFlowFormulas = useNext ? LogicsTools.getFlowLTLFormulas(formula).size()
@@ -547,8 +546,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
 
             // %%%%%%%% NEWLY CREATED CHAINS CASE
             try {
-                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID + "-" + i));
-                LTLAtomicProposition newChains = new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "-" + i));
+                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID + "-" + i));
                 // is the first operator an eventually? Then do nothing.
                 boolean eventually = false;
                 if (flowFormulas.get(i).getPhi() instanceof LTLFormula) {
@@ -562,32 +560,21 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
                 ILTLFormula skipTillActiveChain = flowFormula.getPhi();
                 if (!eventually) { // the whole flowformula is not in the scope of an eventually, we have to skip as long as the new chain is created
                     // all transition starting a flow
-                    if (!net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "-" + i).getPostset().isEmpty()) { // only if new chains are created during the game
-//                 // %%% OLD VERSION       (attention here I don't use the 'U not new chain and phi' to ensure that the first transition is not considered of a newly created chain, check if needed here)
-                        if (settings.isNewChainsBySkippingTransitions()) {
-                            throw new RuntimeException("For the ingoing semantics this old and slow version for skipping the new chains until they are started is not implemented.");
-                        } else {
-//               //  %%% NEW VERSION: We skip as long as no transition creating a new chain has been token by this subnet
-                            skipTillActiveChain = new LTLFormula(
-                                    new LTLFormula(newChains, LTLOperators.Binary.OR, init),
-                                    LTLOperators.Binary.U,
-                                    // the new chain starts with a transition which has to be skipped (the next)                                    
-                                    new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, newChains), LTLOperators.Binary.AND, flowFormula.getPhi()));
-//                                    flowFormula.getPhi());
-                        }
-                    }
+                    skipTillActiveChain = new LTLFormula(
+                            init,
+                            LTLOperators.Binary.U,
+                            new LTLFormula(
+                                    new LTLFormula(LTLOperators.Unary.NEG, init),
+                                    LTLOperators.Binary.AND,
+                                    flowFormula.getPhi()
+                            )
+                    );
+
                 }
 
                 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NO CHAIN, OR WRONGLY DECIDED FOR NEW CHAIN
-                LTLFormula omitNoChainConsidered;
-                if (initFirst) {
-                    // it's OK when there is no chain or the subformula decided to consider a newly created chain but this doesn't exists in this run.
-                    omitNoChainConsidered = new LTLFormula(LTLOperators.Unary.G,
-                            new LTLFormula(newChains, LTLOperators.Binary.OR, init));
-                } else {
-                    // it's OK to consider no chain
-                    omitNoChainConsidered = new LTLFormula(LTLOperators.Unary.G, init);
-                }
+                // it's OK to consider no chain
+                LTLFormula omitNoChainConsidered = new LTLFormula(LTLOperators.Unary.G, init);
 
                 // %%%%% PUT TOGETHER FLOW FORMULA                
                 LTLFormula flowLTL = new LTLFormula(
@@ -604,21 +591,6 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
 
         // %%%%%%%%%% GENERAL FORMULA
         ILTLFormula ret = LogicsTools.convert2LTL(f);
-        // %%%%%%%%%%%%%%%% JUMP OVER INITIALIZATION
-        // The formula does not have to hold in the initilisation phase
-        if (initFirst) {
-            // don't need the forcing of the firing since it is later done with the active places or the max interleaving conditions
-            // so we can only jump over them
-            // Old version:
-//            // in the beginning all init transitions are allowed to fire until the original formula has to hold
-//            // to expensive better use the next            
-////            ILTLFormula init = new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(allInitPlaces, true));
-////            return new LTLFormula(init, LTLOperators.Binary.IMP, new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(allInitTransitions, false), LTLOperators.Binary.U, ret));
-//            return new LTLFormula(init, LTLOperators.Binary.IMP, next);
-            for (int i = 0; i < flowFormulas.size(); i++) {
-                ret = new LTLFormula(LTLOperators.Unary.X, ret);
-            }
-        }
 
         // %%%%%%%%%%%%%%%%%%%%%%%  NOT STUCKING IN SUBNET
         // since we don't want to stop within the subnets, omit these runs

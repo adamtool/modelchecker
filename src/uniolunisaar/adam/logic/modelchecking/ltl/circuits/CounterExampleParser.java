@@ -9,11 +9,15 @@ import java.util.Map;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import static uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister.STUTT_LATCH;
 import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
 import uniolunisaar.adam.ds.modelchecking.cex.CounterExampleElement;
+import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AbcSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegisterLogTrans;
 import uniolunisaar.adam.tools.IOUtils;
@@ -99,11 +103,12 @@ public class CounterExampleParser {
         }
     }
 
-    public static CounterExample parseCounterExampleWithStutteringLatch(AbcSettings settings, String path, CounterExample cex) throws IOException {
+    public static CounterExample parseCounterExampleWithStutteringLatch(AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings, String path, CounterExample cex) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(path)) {
-            PetriNet net = settings.getNet();
+            AbcSettings abcSettings = settings.getAbcSettings();
+            PetriNet net = abcSettings.getNet();
             boolean isParallel = net.hasExtension("parallel"); // todo: quick hack to have it properly printed
-            cex.setIsDetailed(settings.isDetailedCEX());
+            cex.setIsDetailed(abcSettings.isDetailedCEX());
             // start binary coding
             // if it is binary coded get the number of digits
             int digits = Integer.toBinaryString(net.getTransitions().size() - 1).length();
@@ -147,7 +152,7 @@ public class CounterExampleParser {
                     }
                 }
             }
-//            Logger.getInstance().addMessage(cropped.toString(), false);
+            Logger.getInstance().addMessage(cropped.toString(), false);
 //            System.out.println(cropped.toString());
             // create the counter example
             int timestep = 0;
@@ -168,7 +173,8 @@ public class CounterExampleParser {
                         } else if (elem.startsWith("entered_lasso")) {
                             cexe.setLooping(val == '1');
                         } else {
-                            if (timestep != 0) { // for outgoing jump over the first step
+                            // for outgoing jump over the first step
+                            if (settings.getRendererSettings().getSemantics() == CircuitRendererSettings.TransitionSemantics.INGOING || timestep != 0) {
                                 String id = elem.substring(0, elem.length() - 2);
 //                                System.out.println(id + "=" + val);
                                 if (id.startsWith(AigerRendererSafeStutterRegisterLogTrans.BIN_COD_ID)) {
@@ -178,12 +184,12 @@ public class CounterExampleParser {
                                 if (val == '1') {
                                     if (net.containsPlace(id)) {
                                         Place place = net.getPlace(id);
-                                        if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(place)) {
+                                        if (abcSettings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(place)) {
                                             cexe.add(place);
                                         }
                                     } else if (net.containsTransition(id)) {
                                         Transition t = net.getTransition(id);
-                                        if (settings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t) || isParallel) {
+                                        if (abcSettings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(t) || isParallel) {
                                             cexe.add(t);
                                         }
                                     }

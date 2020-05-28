@@ -17,6 +17,9 @@ import uniolunisaar.adam.tools.processHandling.ExternalProcessHandler;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AbcSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.tools.processHandling.ProcessPool;
 import uniolunisaar.adam.util.AigerTools;
@@ -29,7 +32,7 @@ import uniolunisaar.adam.util.AigerTools;
 public class PetriNetModelChecker {
 
     @Deprecated
-    private static LTLModelCheckingResult checkSeparate(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    private static LTLModelCheckingResult checkSeparate(AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
         return Abc.call(settings, outputData, stats);
     }
 
@@ -40,6 +43,7 @@ public class PetriNetModelChecker {
      * @param circ
      * @param path
      * @param abcParameters
+     * @param data
      * @return
      * @throws InterruptedException
      * @throws IOException
@@ -48,13 +52,17 @@ public class PetriNetModelChecker {
      */
     @Deprecated
     public static LTLModelCheckingResult check(String inputFile, VerificationAlgo alg, PetriNet net, AigerRenderer circ, String path, String abcParameters, AdamCircuitLTLMCOutputData data) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
-        AbcSettings settings = new AbcSettings(inputFile, abcParameters, true, null, new VerificationAlgo[]{alg});
-        settings.setNet(net);
-        return check(settings, data, net, null);
+        AdamCircuitLTLMCSettings set = new AdamCircuitLTLMCSettings(data);
+        set.setAbcParameters(abcParameters);
+        set.fillAbcData(net);
+        set.getAbcSettings().setInputFile(inputFile);
+        set.getAbcSettings().setVerbose(true);
+        set.getAbcSettings().setVerificationAlgos(new VerificationAlgo[]{alg});
+        return check(set, data, net, null);
     }
 
     @Deprecated
-    public static LTLModelCheckingResult check(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
+    public static LTLModelCheckingResult check(AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings, AdamCircuitLTLMCOutputData outputData, PetriNet net, AdamCircuitFlowLTLMCStatistics stats) throws InterruptedException, IOException, ProcessNotStartedException, ExternalToolException {
 //        return checkWithPythonScript(net, circ, formula, path);
         return checkSeparate(settings, outputData, net, stats);
     }
@@ -117,7 +125,9 @@ public class PetriNetModelChecker {
         if (exitValue == 42) { // has a counter example, ergo read it
             AbcSettings settings = new AbcSettings();
             settings.setNet(net);
-            return CounterExampleParser.parseCounterExampleWithStutteringLatch(settings, path + "_complete.cex", new CounterExample(false, false));
+            AdamCircuitLTLMCSettings set = new AdamCircuitLTLMCSettings(new AdamCircuitLTLMCOutputData(path, false, false));
+            set.fillAbcData(net);
+            return CounterExampleParser.parseCounterExampleWithStutteringLatch(set, path + "_complete.cex", new CounterExample(false, false));
         }
 
         return null;

@@ -50,7 +50,7 @@ public class ModelCheckerFlowLTL {
                 AdamCircuitFlowLTLMCSettings props = (AdamCircuitFlowLTLMCSettings) settings;
                 PnAndFlowLTLtoCircuit.createCircuit(net, formula, props);
                 props.fillAbcData(net);
-                return Abc.call(props.getAbcSettings(), props.getOutputData(), props.getStatistics());
+                return Abc.call(props, props.getOutputData(), props.getStatistics());
             case LOLA:
                 PetriNetWithTransits mcNet = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
                 String f = FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mcNet, formula);

@@ -48,7 +48,7 @@ public class ModelCheckerLTL {
                 AdamCircuitLTLMCSettings props = (AdamCircuitLTLMCSettings) settings;
                 PnAndLTLtoCircuit.createCircuitWithFairnessAndMaximality(net, formula, props);
                 props.fillAbcData(net);
-                return Abc.call(props.getAbcSettings(), props.getOutputData(), props.getStatistics());
+                return Abc.call(props, props.getOutputData(), props.getStatistics());
             case LOLA:
                 try {
                     Logger.getInstance().addWarning("You would like to use LoLA for the standard LTL model checking of Petri nets."

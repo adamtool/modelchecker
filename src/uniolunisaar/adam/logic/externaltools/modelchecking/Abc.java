@@ -20,6 +20,7 @@ import uniolunisaar.adam.tools.processHandling.ProcessPool;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitLTLMCStatistics;
 
 /**
@@ -39,30 +40,31 @@ public class Abc {
         BMC3
     }
 
-    public static LTLModelCheckingResult call(AbcSettings settings, AdamCircuitLTLMCOutputData outputData, AdamCircuitLTLMCStatistics stats) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
-        if (settings.getVerificationAlgos().length == 0) {
+    public static LTLModelCheckingResult call(AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings, AdamCircuitLTLMCOutputData outputData, AdamCircuitLTLMCStatistics stats) throws IOException, InterruptedException, ProcessNotStartedException, ExternalToolException {
+        AbcSettings abcSettings = settings.getAbcSettings();
+        if (abcSettings.getVerificationAlgos().length == 0) {
             throw new InvalidParameterException("At least one verification algorithm has to be given.");
         }
-        String name = settings.getProcessFamilyID();
-        if (settings.getVerificationAlgos().length == 1) {
+        String name = abcSettings.getProcessFamilyID();
+        if (abcSettings.getVerificationAlgos().length == 1) {
             String outputFile = outputData.getPath() + name + ".cex";
-            String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, settings.getVerificationAlgos()[0], settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
-                    settings.isCircuitReduction(), settings.getPreProcessing());
+            String abcOutput = call(abcSettings.getInputFile(), abcSettings.getParameters(), outputFile, abcSettings.getVerificationAlgos()[0], abcSettings.isVerbose(), abcSettings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
+                    abcSettings.isCircuitReduction(), abcSettings.getPreProcessing());
             LTLModelCheckingResult result = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
-            result.setAlgo(settings.getVerificationAlgos()[0]);
+            result.setAlgo(abcSettings.getVerificationAlgos()[0]);
             return result;
         }
         // Start all given verifier and falsifier in parallel, return when the first finished with a real result        
         final CountDownLatch latch = new CountDownLatch(1);
         final LTLModelCheckingResult result = new LTLModelCheckingResult();
-        for (VerificationAlgo verificationAlgo : settings.getVerificationAlgos()) {
+        for (VerificationAlgo verificationAlgo : abcSettings.getVerificationAlgos()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         String outputFile = outputData.getPath() + name + "_" + verificationAlgo.name() + ".cex";
-                        String abcOutput = call(settings.getInputFile(), settings.getParameters(), outputFile, verificationAlgo, settings.isVerbose(), settings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
-                                settings.isCircuitReduction(), settings.getPreProcessing());
+                        String abcOutput = call(abcSettings.getInputFile(), abcSettings.getParameters(), outputFile, verificationAlgo, abcSettings.isVerbose(), abcSettings.getProcessFamilyID(), stats != null && stats.isMeasure_abc(),
+                                abcSettings.isCircuitReduction(), abcSettings.getPreProcessing());
                         LTLModelCheckingResult out = Abc.parseOutput(outputData.getPath(), abcOutput, outputFile, stats, settings);
                         if (out.getSatisfied() != LTLModelCheckingResult.Satisfied.UNKNOWN) {
                             result.setCex(out.getCex());
@@ -78,9 +80,9 @@ public class Abc {
         }
         latch.await(); // todo: problem that it blocks when no processes returns a proper result
         // Kill all the other parallel algos
-        for (VerificationAlgo verificationAlgo : settings.getVerificationAlgos()) {
+        for (VerificationAlgo verificationAlgo : abcSettings.getVerificationAlgos()) {
             if (!verificationAlgo.equals(result.getAlgo())) {
-                ProcessPool.getInstance().destroyForciblyProcessAndChilds(settings.getProcessFamilyID() + "#abc" + verificationAlgo.name());
+                ProcessPool.getInstance().destroyForciblyProcessAndChilds(abcSettings.getProcessFamilyID() + "#abc" + verificationAlgo.name());
             }
         }
         return result;
@@ -169,7 +171,7 @@ public class Abc {
         return abcOutput + "\nERRORS: " + procAbc.getErrors();
     }
 
-    private static LTLModelCheckingResult parseOutput(String path, String abcOutput, String cexOutputFile, AdamCircuitLTLMCStatistics stats, AbcSettings settings) throws ExternalToolException, IOException {
+    private static LTLModelCheckingResult parseOutput(String path, String abcOutput, String cexOutputFile, AdamCircuitLTLMCStatistics stats, AdamCircuitMCSettings<? extends AdamCircuitLTLMCOutputData, ? extends AdamCircuitLTLMCStatistics> settings) throws ExternalToolException, IOException {
         Logger.getInstance().addMessage("Parsing abc output ...", false);
         //todo: hack for checking the abc output
 //        Logger.getInstance().addMessage(abcOutput, false, true);
@@ -188,7 +190,7 @@ public class Abc {
                 CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(settings, cexOutputFile, new CounterExample(safety, liveness));
                 ret.setCex(cex);
                 ret.setSat(LTLModelCheckingResult.Satisfied.FALSE);
-                if (!settings.isVerbose()) { // cleanup
+                if (!settings.getAbcSettings().isVerbose()) { // cleanup
                     Tools.deleteFile(cexOutputFile);
                 }
             } else {

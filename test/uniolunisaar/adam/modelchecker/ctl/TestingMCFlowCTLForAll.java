@@ -199,7 +199,7 @@ public class TestingMCFlowCTLForAll {
         System.out.println("formula to check: " + ltlFormula.toSymbolString());
         AigerRenderer renderer = PnAndLTLtoCircuit.createCircuitWithoutFairnessAndMaximality(out, ltlFormula, settings);
         settings.fillAbcData(out);
-        LTLModelCheckingResult result = Abc.call(settings.getAbcSettings(), settings.getOutputData(), settings.getStatistics());
+        LTLModelCheckingResult result = Abc.call(settings, settings.getOutputData(), settings.getStatistics());
 //        System.out.println(result.getSatisfied().toString());
         if (result.getCex() != null) {
             System.out.println(result.getCex().toString());
