@@ -14,7 +14,7 @@ import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndFlowCTLStarToPNNoInit {
+public class PnwtAndNbFlowFormulas2PNNoInit {
 
     public static final String ACTIVATION_PREFIX_ID = "<act>_";
     public static final String INIT_TOKENFLOW_ID = "<init_tfl>";

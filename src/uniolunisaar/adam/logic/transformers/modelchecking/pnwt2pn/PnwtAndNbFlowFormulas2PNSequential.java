@@ -15,12 +15,12 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
+public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN {
 
     public static final String NEXT_ID = "_<nxt>";
 
     /**
-     * Adds maximally a new copy for each place and each sub flow formula. Thus,
+     * Adds maximally a new copy for each place and each sub flow formula.Thus,
      * each sub flow formula yields one new block, where we check each flow
      * chain by creating a run for each chain. The succeeding of the flow chains
      * is done sequentially. The original net choses a transition and this
@@ -28,18 +28,17 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
      * flow subformula.
      *
      * @param orig
-     * @param formula
+     * @param nbFlowFormulas
      * @param initFirstStep
      * @return
      */
-    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits orig, IRunFormula formula, boolean initFirstStep) {
+    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits orig, int nbFlowFormulas, boolean initFirstStep) {
         PetriNetWithTransits out = createOriginalPartOfTheNet(orig, initFirstStep);
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
 
-        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(formula);
-        for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
+        for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
             addSubFlowFormulaNet(orig, out, nb_ff, initFirstStep);
 
@@ -186,7 +185,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
             }
         }
 
-        if (!flowFormulas.isEmpty()) {
+        if (nbFlowFormulas > 0) {
             if (initFirstStep) {
 //                   // this is the version where I removed the initial marking and added it later
 //                // Get the original initial Marking
@@ -199,11 +198,11 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
                 // all initialization transitions of each subformula already have an active place added (each subformula one)
                 // from which they are dependent by firing they give it to the next subformula (this is done here)
                 // the last one puts the initial marking to the original net
-                for (int i = 0; i < flowFormulas.size(); i++) {
+                for (int i = 0; i < nbFlowFormulas; i++) {
                     Place init = out.getPlace(INIT_TOKENFLOW_ID + "-" + i);
                     Place initAct = out.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + i);
                     Place initActNext = null;
-                    if (i + 1 < flowFormulas.size()) {
+                    if (i + 1 < nbFlowFormulas) {
                         initActNext = out.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + (i + 1));
                     }
                     // the transitions moving the init token, i.e., deciding on a chain or a later created new chain
@@ -262,7 +261,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
                 }
             }
             // move the active token through the subnets
-            for (int i = 1; i < flowFormulas.size(); i++) {
+            for (int i = 1; i < nbFlowFormulas; i++) {
                 for (Transition t : orig.getTransitions()) {
                     String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + (i - 1);
                     if (out.containsPlace(id)) {
@@ -290,7 +289,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
 //                }
 //            }
             for (Transition tOrig : orig.getTransitions()) {
-                String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1);
+                String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (nbFlowFormulas - 1);
                 if (out.containsPlace(id)) { // only if the transition has a token flow
                     Place actLast = out.getPlace(id);
                     for (Transition tr : actLast.getPostset()) {
@@ -300,7 +299,7 @@ public class PnwtAndFlowLTLtoPNSequential extends PnwtAndFlowLTLtoPN {
             }
         } else {
             // should not really be used, since the normal model checking should be used in these cases
-            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "'."
+            Logger.getInstance().addMessage("[WARNING] There is no flow subformula."
                     + " The standard LTL model checker should be used.", false);
             // but to have still some meaningful output add for all transition the
             // connections to the act places

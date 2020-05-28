@@ -27,10 +27,10 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSetti
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings.Stucking;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN.ACTIVATION_PREFIX_ID;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN.TOKENFLOW_SUFFIX_ID;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.ACTIVATION_PREFIX_ID;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.TOKENFLOW_SUFFIX_ID;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -72,7 +72,7 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
                 for (Transition t : net.getTransitions()) { // all transitions
                     if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
                             || // not of the subformula
-                            t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
+t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
                             ) {
                         elements.add(new LTLAtomicProposition(t));
                     }
@@ -84,7 +84,7 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
                 elements = new ArrayList<>();
                 for (Transition t : net.getTransitions()) { // all transitions
                     if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff)) //  of the subformula
-                            && !t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + nb_ff) // not the nxt transitions
+                            && !t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // not the nxt transitions
                             ) {
                         elements.add(new LTLAtomicProposition(t));
                     }
@@ -132,7 +132,7 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
                 for (Transition t : net.getTransitions()) { // all transitions
                     if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
                             || // not of the subformula
-                            t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
+t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // or its one of the nxt transitions
                             ) {
                         elements.add(new LTLAtomicProposition(t));
                     }
@@ -144,7 +144,7 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
                 for (Transition t : net.getTransitions()) {
                     if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff))
                             && // the transitions of my subnet
-                            !t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + nb_ff)
+                            !t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff)
                             &&// which are not the nxt transitions
                             t.getLabel().equals(atom.toString())) { // with the same label as the atom
                         elements.add(new LTLAtomicProposition(t));
@@ -407,8 +407,8 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
             // %%%%%%%%%%%%%% REPLACEMENT OF FLOW FORMULA
             // %%%%%%%% NEWLY CREATED CHAINS CASE
             try {
-                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID + "-" + i));
-                LTLAtomicProposition newChains = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i));
+                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID + "-" + i));
+                LTLAtomicProposition newChains = new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "-" + i));
                 // this is replaced by the stuff below since the no_chain case is subsumed by the new_tokenflow
                 //                LTLFormula flowLTL = new LTLFormula(
                 //                        new LTLFormula(LTLOperators.Unary.G, new AtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NO_CHAIN_ID + "-" + i))), // it's OK when there is no chain
@@ -431,11 +431,11 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
                 ILTLFormula newlyCreatedChains = null;
                 if (!eventually) { // the whole flowformula is not in the scope of an eventually, we have to skip as long as the new chain is created
                     // all transition starting a flow
-                    if (!net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i).getPostset().isEmpty()) { // only if new chains are created during the game
+                    if (!net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "-" + i).getPostset().isEmpty()) { // only if new chains are created during the game
                         if (settings.isNewChainsBySkippingTransitions()) {
                             // %%%%%%%%%%%%%%% OLD AND MORE EXPENSIVE VERSION: we skip all other transition than those which newly starts a chain, only in the next state the formula must hold
                             List<ILTLFormula> elements = new ArrayList<>();
-                            Place p = net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "-" + i);
+                            Place p = net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "-" + i);
                             for (Transition t : p.getPostset()) {
                                 elements.add(new LTLAtomicProposition(t));
                             }
@@ -444,7 +444,7 @@ public class FlowLTLTransformerOutgoingSequentialBackup extends FlowLTLTransform
                             for (Transition t : net.getTransitions()) { // all transitions
                                 if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(i))
                                         || // not of the subformula
-                                        t.getId().endsWith(PnwtAndFlowLTLtoPNSequential.NEXT_ID + "-" + i) // or its one of the nxt transitions
+t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + i) // or its one of the nxt transitions
                                         ) {
                                     others.add(new LTLAtomicProposition(t));
                                 }

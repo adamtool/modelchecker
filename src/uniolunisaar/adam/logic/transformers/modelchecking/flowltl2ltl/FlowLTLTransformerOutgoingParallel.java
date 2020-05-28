@@ -19,9 +19,9 @@ import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN.TOKENFLOW_SUFFIX_ID;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -133,7 +133,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
             flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
             try {
 //                LTLAtomicProposition init = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID + "_" + i));
-                LTLAtomicProposition newChains = new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "_" + i));
+                LTLAtomicProposition newChains = new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "_" + i));
 
                 //INITPLACES: it is also OK to chose two consider newly created chains, but newer do so
                 //(init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)   
@@ -195,7 +195,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
 //// END VERSION
 // VERSION: here we only consider runs where the initialization had been done
                 //INITPLACES: it is also OK to chose to consider newly created chains, but newer do so (init will be left as long as one transition is taken (not putting the init marking without deciding for new chain or init chain)               
-                ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.NEW_TOKENFLOW_ID + "_0")));
+                ILTLFormula newTokenFlow = new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID + "_0")));
                 f = f.substitute(flowFormulas.get(0), new RunLTLFormula(new LTLFormula(
                         new LTLFormula(LTLOperators.Unary.G, newTokenFlow),
                         LTLOperators.Binary.OR,
@@ -206,7 +206,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
                 ILTLFormula retF = LogicsTools.convert2LTL(f);
                 //INITPLACES: should skip the first init step (since we cannot force that the first step is really done, we omit those runs)
                 //              so only consider the runs where in the next step init not holds
-                retF = new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndFlowLTLtoPN.INIT_TOKENFLOW_ID + "_0")),
+                retF = new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID + "_0")),
                         LTLOperators.Binary.OR, retF));
 // END VERSION
                 return retF;

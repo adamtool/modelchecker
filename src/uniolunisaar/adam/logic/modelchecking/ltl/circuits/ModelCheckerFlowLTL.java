@@ -16,8 +16,9 @@ import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.modelchecking.ltl.lola.ModelCheckerLoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.PnAndFlowLTLtoCircuit;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNLoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.lola.FlowLTLTransformerLoLA;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -51,7 +52,7 @@ public class ModelCheckerFlowLTL {
                 props.fillAbcData(net);
                 return Abc.call(props.getAbcSettings(), props.getOutputData(), props.getStatistics());
             case LOLA:
-                PetriNetWithTransits mcNet = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+                PetriNetWithTransits mcNet = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
                 String f = FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mcNet, formula);
                 try {
                     return ModelCheckerLoLA.check(mcNet, f, ((LoLASettings) settings).getOutputPath());

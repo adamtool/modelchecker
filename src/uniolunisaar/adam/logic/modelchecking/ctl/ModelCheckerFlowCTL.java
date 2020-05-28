@@ -18,8 +18,8 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.LoLA;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTransformerParallel;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTransformerSequential;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNParInhibitorNoInit;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNSeqInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -60,7 +60,7 @@ public class ModelCheckerFlowCTL {
 //                f = new FlowCTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
 //                break;
             case PARALLEL_INHIBITOR:
-                mcNet = PnwtAndFlowCTLStarToPNParInhibitorNoInit.createNet4ModelCheckingParallel(net, formula, flowFormulas.size());
+                mcNet = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(net, flowFormulas.size());
                 f = new FlowCTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
                 break;
             case SEQUENTIAL:
@@ -69,7 +69,7 @@ public class ModelCheckerFlowCTL {
 //                f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitParallel(net, mcNet, formula);
 //                break;
             case SEQUENTIAL_INHIBITOR:
-                mcNet = PnwtAndFlowCTLStarToPNSeqInhibitorNoInit.createNet4ModelCheckingSequential(net, formula, flowFormulas.size());
+                mcNet = PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit.createNet4ModelCheckingSequential(net, flowFormulas.size());
                 f = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, mcNet, formula);
                 break;
             default:

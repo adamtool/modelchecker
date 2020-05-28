@@ -16,7 +16,7 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndFlowLTLtoPNParallel extends PnwtAndFlowLTLtoPN {
+public class PnwtAndNbFlowFormulas2PNParallel extends PnwtAndNbFlowFormulas2PN {
 
 //    /**
 //     * Fairness must be stated within the formula.

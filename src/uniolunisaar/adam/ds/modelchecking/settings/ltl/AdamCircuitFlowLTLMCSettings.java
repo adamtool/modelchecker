@@ -25,8 +25,8 @@ public class AdamCircuitFlowLTLMCSettings extends AdamCircuitMCSettings<AdamCirc
     private Stucking stucking = Stucking.GFANDNpi;
     private boolean newChainsBySkippingTransitions = false;
     private boolean notStuckingAlsoByMaxInCircuit = false;
-//    private boolean useNextToReplaceXandTransitionsInRunPart = true; // this is wrong for transitions but could work for just the next operator
-    private boolean useNextToReplaceXandTransitionsInRunPart = false;
+    private boolean useNextToReplaceXandTransitionsInRunPart = true; // this is wrong for transitions but could work for just the next operator
+//    private boolean useNextToReplaceXandTransitionsInRunPart = false;
 //
 //    public AdamCircuitFlowLTLMCSettings() {
 //        super(new AdamCircuitFlowLTLMCOutputData("./", false, false, false));

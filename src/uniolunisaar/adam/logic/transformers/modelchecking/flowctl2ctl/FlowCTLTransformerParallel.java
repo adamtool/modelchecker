@@ -18,8 +18,8 @@ import uniolunisaar.adam.ds.logics.ctl.flowctl.separate.RunCTLSeparateFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN.TOKENFLOW_SUFFIX_ID;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndFlowCTLStarToPNNoInit;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.TOKENFLOW_SUFFIX_ID;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -127,7 +127,7 @@ public class FlowCTLTransformerParallel extends FlowCTLTransformer {
             FlowCTLFormula flowFormula = flowFormulas.get(i);
             flowFormula = replaceInFlowFormula(orig, net, flowFormula, i);
             try {
-                CTLAtomicProposition init = new CTLAtomicProposition(net.getPlace(PnwtAndFlowCTLStarToPNNoInit.INIT_TOKENFLOW_ID + "_" + i));
+                CTLAtomicProposition init = new CTLAtomicProposition(net.getPlace(PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID + "_" + i));
                 CTLFormula phi2 = new CTLFormula(new CTLFormula(CTLOperators.Unary.NEG, init), CTLOperators.Binary.AND, flowFormula.getPhi());
                 CTLFormula subs = null;
                 if (flowFormula.getOp() == FlowCTLFormula.FlowCTLOperator.All) {

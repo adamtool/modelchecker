@@ -1,15 +1,11 @@
 package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces;
 
-import java.util.List;
 import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
-import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential.NEXT_ID;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential.NEXT_ID;
 import uniolunisaar.adam.tools.Logger;
-import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  * The class is a copy of PnwtAndFlowLTLtoPNSequentialInhibitor but simplified
@@ -17,7 +13,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStarToPNNoInit {
+public class PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit extends PnwtAndNbFlowFormulas2PNNoInit {
 
     /**
      * Adds maximally a new copy for each place and each sub flow formula.Thus,
@@ -28,19 +24,17 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
      * flow subformula.
      *
      * @param orig
-     * @param formula
      * @param nb_flowFormulas
      * @return
      */
-    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits orig, IRunFormula formula, int nb_flowFormulas) {
+    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits orig, int nb_flowFormulas) {
         PetriNetWithTransits out = createOriginalPartOfTheNet(orig);
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
         actO.setInitialToken(1);
 
-        List<FlowCTLFormula> flowFormulas = LogicsTools.getFlowCTLFormulas(formula);
-        for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
+        for (int nb_ff = 0; nb_ff < nb_flowFormulas; nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
             addSubFlowFormulaNet(orig, out, nb_ff);
             // for each original transition which is used create an active place 
@@ -93,7 +87,7 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
             }
         }
 
-        if (!flowFormulas.isEmpty()) {
+        if (nb_flowFormulas > 0) {
             for (Transition t : orig.getTransitions()) {
                 // take the active token
                 out.createFlow(actO, t);
@@ -109,7 +103,7 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
                 }
             }
             // move the active token through the subnets
-            for (int i = 1; i < flowFormulas.size(); i++) {
+            for (int i = 1; i < nb_flowFormulas; i++) {
                 for (Transition t : orig.getTransitions()) {
                     if (!orig.getTransits(t).isEmpty()) { // if this transition has a token flow
                         String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + (i - 1);
@@ -124,7 +118,7 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
                 }
             }
             for (Transition tOrig : orig.getTransitions()) {
-                String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (flowFormulas.size() - 1);
+                String id = ACTIVATION_PREFIX_ID + tOrig.getId() + TOKENFLOW_SUFFIX_ID + "-" + (nb_flowFormulas - 1);
                 if (out.containsPlace(id)) { // only if the transition has a token flow
                     Place actLast = out.getPlace(id);
                     for (Transition tr : actLast.getPostset()) {
@@ -134,7 +128,7 @@ public class PnwtAndFlowCTLStarToPNSeqInhibitorNoInit extends PnwtAndFlowCTLStar
             }
         } else {
             // should not really be used, since the normal model checking should be used in these cases
-            Logger.getInstance().addMessage("[WARNING] No flow subformula within '" + formula.toSymbolString() + "'."
+            Logger.getInstance().addMessage("[WARNING] There is no flow subformula."
                     + " The standard CTL model checker should be used.", false);
             // but to have still some meaningful output add for all transition the
             // connections to the act places

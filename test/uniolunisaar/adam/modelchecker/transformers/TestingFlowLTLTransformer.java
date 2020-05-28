@@ -30,10 +30,11 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSetti
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingSequential;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -91,7 +92,7 @@ public class TestingFlowLTLTransformer {
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));
         RunLTLFormula formula = new RunLTLFormula(new LTLFormula(LTLOperators.Unary.F, new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(t2))), RunOperators.Implication.IMP, new FlowLTLFormula(new LTLAtomicProposition(f)));
 
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNSequential.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size(), true);
         PNWTTools.savePnwt2PDF(outputDir + mc.getName() + "mc", mc, true);
         ILTLFormula f_mc = new FlowLTLTransformerOutgoingSequential().createFormula4ModelChecking4CircuitSequential(net, mc, formula, new AdamCircuitFlowLTLMCSettings(new AdamCircuitFlowLTLMCOutputData(outputDir + net.getName(), false, false, false)));
 //        System.out.println(f_mc);

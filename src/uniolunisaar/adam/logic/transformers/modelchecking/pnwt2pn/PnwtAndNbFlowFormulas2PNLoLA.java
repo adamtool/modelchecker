@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.ds.logics.flowlogics.IRunFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 import uniolunisaar.adam.tools.Logger;
@@ -13,21 +12,21 @@ import uniolunisaar.adam.tools.Logger;
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndFlowLTLtoPNLoLA {
+public class PnwtAndNbFlowFormulas2PNLoLA {
 
     /**
      * Uses the standard sequential method (without inhibitor arcs) and adds the
-     * fairness assumptions of the original transitions
-     * (not to the instances because the fairness is only stated to the transition 
-     * not to the transits). Weak fairness results in strong fairness because of
-     * the sequential passing.
+     * fairness assumptions of the original transitions (not to the instances
+     * because the fairness is only stated to the transition not to the
+     * transits).Weak fairness results in strong fairness because of the
+     * sequential passing.
      *
      * @param net
-     * @param formula
+     * @param nbFlowSubFormulas
      * @return
      */
-    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits net, IRunFormula formula) {
-        PetriNetWithTransits out = PnwtAndFlowLTLtoPNSequential.createNet4ModelCheckingSequential(net, formula, true);
+    public static PetriNetWithTransits createNet4ModelCheckingSequential(PetriNetWithTransits net, int nbFlowSubFormulas) {
+        PetriNetWithTransits out = PnwtAndNbFlowFormulas2PNSequential.createNet4ModelCheckingSequential(net, nbFlowSubFormulas, true);
         // add the fairness assumptions to all instances of the corresponding transitions
         // Because of the sequential passing of the token is a weak fairness of a transition going to be a strong fairness assumption
         for (Transition transition : net.getTransitions()) {
@@ -48,7 +47,7 @@ public class PnwtAndFlowLTLtoPNLoLA {
             // STRONG FAIR
             if (net.isStrongFair(transition)) {
                 // original transition
-                out.setStrongFair(out.getTransition(transition.getId()));                
+                out.setStrongFair(out.getTransition(transition.getId()));
                 // THE FAIRNESS ONLY SAYS S.TH. ABOUT THE TRANSITION NOT ABOUT THE TRANSITS
 //                // search for all corresponding transitions in the subnet
 //                // they have the form: t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff + "-" + (count++)
@@ -87,7 +86,7 @@ public class PnwtAndFlowLTLtoPNLoLA {
     @Deprecated
     public static PetriNetWithTransits createNet4ModelChecking4LoLA(PetriNetWithTransits net) {
         for (Transition transition : net.getTransitions()) {
-            if(net.isWeakFair(transition)) {                
+            if (net.isWeakFair(transition)) {
                 Logger.getInstance().addWarning("The sequential approach cannot handle weak fairness. We changed it to strong fairness.");
                 net.removeWeakFair(transition);
                 net.setStrongFair(transition);

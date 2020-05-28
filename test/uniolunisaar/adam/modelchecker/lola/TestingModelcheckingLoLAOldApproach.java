@@ -18,7 +18,7 @@ import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.util.PNWTTools;
 import static uniolunisaar.adam.logic.modelchecking.ltl.lola.ModelCheckerLoLA.check;
 import uniolunisaar.adam.logic.transformers.modelchecking.lola.FlowLTLTransformerLoLA;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNLoLA;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 
@@ -125,7 +125,7 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -134,7 +134,7 @@ public class TestingModelcheckingLoLAOldApproach {
         net = ToyExamples.createFirstExample(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
@@ -146,7 +146,7 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -158,7 +158,7 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -170,7 +170,7 @@ public class TestingModelcheckingLoLAOldApproach {
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, Exception {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F pOut > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
@@ -181,26 +181,26 @@ public class TestingModelcheckingLoLAOldApproach {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         String formula = "F out > 0";
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelChecking4LoLA(net);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLA(net, formula), "./" + net.getName());
     }
