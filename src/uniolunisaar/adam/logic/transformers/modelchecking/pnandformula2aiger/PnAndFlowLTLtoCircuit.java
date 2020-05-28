@@ -25,8 +25,8 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
-import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerParallel;
-import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingParallel;
+import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPNParallelInhibitor;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.util.logics.FormulaCreator;
@@ -127,9 +127,9 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
-                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f);
+                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
                     } else { // currently cannot occur
-                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
+                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
                     }
                     break;
                 case PARALLEL_INHIBITOR:
@@ -152,9 +152,9 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
-                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f);
+                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
                     } else {
-                        formulaMC = new FlowLTLTransformerParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f);
+                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
                     }
                     break;
                 case SEQUENTIAL:
@@ -172,7 +172,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         }
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
-                    formulaMC = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
+                    formulaMC = new FlowLTLTransformerOutgoingSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
 //                    formulaMC = FlowLTLTransformerSequentialBackup.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     break;
                 case SEQUENTIAL_INHIBITOR:
@@ -190,7 +190,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         }
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
-                    formulaMC = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
+                    formulaMC = new FlowLTLTransformerOutgoingSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
 //                    formulaMC = FlowLTLTransformerSequentialBackup.createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     break;
                 default:

@@ -7,7 +7,7 @@ import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
-import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingSequential;
 
 /**
  *
@@ -19,7 +19,7 @@ public class FlowLTLTransformerLoLA {
         //todo: this is a hack since the method only uses it for the init and the next properties,
         // when in some point in time LoLA is able to really handle fairness, we have to add those parameters to the settings
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(new AdamCircuitFlowLTLMCOutputData("./", false, false, false));
-        ILTLFormula f = new FlowLTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(orig, mc, formula, settings);
+        ILTLFormula f = new FlowLTLTransformerOutgoingSequential().createFormula4ModelChecking4CircuitSequential(orig, mc, formula, settings);
         String lola = f.toLoLA();
         return "ALLPATH " + lola;
     }

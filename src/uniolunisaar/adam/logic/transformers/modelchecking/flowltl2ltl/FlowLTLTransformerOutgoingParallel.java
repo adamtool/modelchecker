@@ -16,6 +16,7 @@ import uniolunisaar.adam.ds.logics.ltl.LTLConstants;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndFlowLTLtoPN;
@@ -29,7 +30,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  */
-public class FlowLTLTransformerParallel extends FlowLTLTransformer {
+public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
 
     @Override
     ILTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, int nb_ff, boolean scopeEventually) {
@@ -116,7 +117,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
         return phi;
     }
 
-    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula) throws NotConvertableException {
+    public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowLTLFormulas(formula).size();
         if (nbFlowFormulas == 0) {
             Logger.getInstance().addMessage("[WARNING] There is no flow formula within '" + formula.toString() + "'. The normal net model checker should be used.", false);
@@ -165,7 +166,7 @@ public class FlowLTLTransformerParallel extends FlowLTLTransformer {
      * @return
      * @throws uniolunisaar.adam.exceptions.logics.NotConvertableException
      */
-    public ILTLFormula createFormula4ModelChecking4CircuitParallelOneFlowFormula(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula) throws NotConvertableException {
+    public ILTLFormula createFormula4ModelChecking4CircuitParallelOneFlowFormula(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowLTLFormulas(formula).size();
 
         // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA

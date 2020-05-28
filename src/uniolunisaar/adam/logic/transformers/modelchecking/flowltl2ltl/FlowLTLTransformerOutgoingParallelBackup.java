@@ -35,7 +35,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  */
-public class FlowLTLTransformerParallelBackup extends FlowLTLTransformer {
+public class FlowLTLTransformerOutgoingParallelBackup extends FlowLTLTransformer {
 
     private static FlowLTLFormula replaceNextInFlowFormulaParallel(PetriNetWithTransits orig, PetriNet net, FlowLTLFormula flowFormula) {
         ILTLFormula phi = flowFormula.getPhi();

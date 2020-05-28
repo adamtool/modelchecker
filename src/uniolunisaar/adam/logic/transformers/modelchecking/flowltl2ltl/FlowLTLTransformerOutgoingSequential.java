@@ -32,7 +32,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  *
  * @author Manuel Gieseking
  */
-public class FlowLTLTransformerSequential extends FlowLTLTransformer {
+public class FlowLTLTransformerOutgoingSequential extends FlowLTLTransformer {
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FLOWFORMULA PART
     /**
@@ -101,7 +101,7 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     }
 
     /**
-     * Replaces only the transitions
+     * Replaces places and transitions
      *
      * @param orig
      * @param net
@@ -186,13 +186,13 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
 //            if (scopeEventually) {
 //                return substChildPhi;
 //            } this is not true F p -> X q, direct would work F X = F
-            if (nbFlowFormulas > 0) {
+            if (nbFlowFormulas > 0) {// case that we want to replace the next by means of the next operator
                 ILTLFormula retPhi = substChildPhi;
                 for (int i = 0; i < nbFlowFormulas; i++) {
                     retPhi = new LTLFormula(LTLOperators.Unary.X, retPhi); // todo: could still be smarter and move the nexts to the next temporal operator
                 }
                 return retPhi;
-            } else {
+            } else {// the special case chosed by giving -1, we don't want to replace it by means of the next operator (=0 should be checked and avoided before)
                 // if it's not in the last scope of an eventually, then replace it according to the document
                 // all transitions of the subnet
                 Collection<ILTLFormula> elements = new ArrayList<>();
@@ -224,6 +224,8 @@ public class FlowLTLTransformerSequential extends FlowLTLTransformer {
     }
 
     /**
+     * Replaces only the transitions
+     *
      * Remember we cannot replace a transition t with X^n t, because then, e.g.,
      * G t would still fail.
      *
