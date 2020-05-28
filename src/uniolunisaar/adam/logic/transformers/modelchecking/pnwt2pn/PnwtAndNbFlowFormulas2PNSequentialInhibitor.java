@@ -11,7 +11,7 @@ import uniolunisaar.adam.tools.Logger;
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndFlowLTLtoPNSequentialInhibitor extends PnwtAndNbFlowFormulas2PN {
+public class PnwtAndNbFlowFormulas2PNSequentialInhibitor extends PnwtAndNbFlowFormulas2PN {
 
     /**
      * Adds maximally a new copy for each place and each sub flow formula.Thus,
