@@ -17,6 +17,7 @@ public class CounterExample implements Iterable<String> {
     private final boolean safety;
     private final boolean liveness;
     private boolean isDetailed;
+    private String warning = null;
 
     // Only for the logCod case
     private Map<String, Transition> codingMap;
@@ -34,6 +35,9 @@ public class CounterExample implements Iterable<String> {
     public String toString() {
         String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
         StringBuilder sb = new StringBuilder("Counter example " + cause + " \n");
+        if (warning != null) {
+            sb.append("WARNING: ").append(warning).append("\n");
+        }
         for (int i = 0; i < timestep.size(); i++) {
             CounterExampleElement elem = timestep.get(i);
             StringBuilder lastElem = new StringBuilder();
@@ -102,6 +106,10 @@ public class CounterExample implements Iterable<String> {
     @Override
     public CounterExampleIterator iterator() {
         return new CounterExampleIterator();
+    }
+
+    public void setWarning(String warning) {
+        this.warning = warning;
     }
 
     public class CounterExampleIterator implements Iterator<String> {

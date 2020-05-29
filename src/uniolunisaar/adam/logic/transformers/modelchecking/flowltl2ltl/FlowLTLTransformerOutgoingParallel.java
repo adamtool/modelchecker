@@ -44,7 +44,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
                 // this is only for one subformula
 //                if (t.getLabel().equals(phi.getId()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
                 // for all subnet transition the extension saves the participating subnets              
-                if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) {
+                if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) { // todo: check ! NOt only the equally labelled?
                     mine.add(new LTLAtomicProposition(t));
                 } else {
                     if (!t.hasExtension("initSubnet")) { // not the init transitions

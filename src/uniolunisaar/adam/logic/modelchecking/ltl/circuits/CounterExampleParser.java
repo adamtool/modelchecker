@@ -223,7 +223,6 @@ public class CounterExampleParser {
                 }
                 prevCexe = cexe;
             }
-            Logger.getInstance().addMessage(cex.toString(), true);
             return cex;
         }
     }

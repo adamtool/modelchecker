@@ -23,6 +23,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSetti
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings.Stucking;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.ACTIVATION_PREFIX_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.TOKENFLOW_SUFFIX_ID;
@@ -133,7 +134,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FLOWFORMULA PART
     /**
-     * Replaces only the places
+     * Replaces the places and the transitions
      *
      * @param orig
      * @param net
@@ -152,6 +153,16 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
             }
             Place p = net.getPlace(id);
             return new LTLAtomicProposition(p);
+        } else if (atom.isTransition()) { // replace the transitions with a disjunction of all equally labelled transitions of this subnet
+            Collection<ILTLFormula> elements = new ArrayList<>();
+            for (Transition t : net.getTransitions()) {
+                if ((t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff)) // the transitions of my subnet
+                        && !t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // which are not the nxt transitions
+                        && t.getLabel().equals(atom.toString())) { // with the same label as the atom
+                    elements.add(new LTLAtomicProposition(t));
+                }
+            }
+            return FormulaCreator.bigWedgeOrVeeObject(elements, false);
         }
         return phi;
     }

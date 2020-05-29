@@ -21,6 +21,7 @@ import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
@@ -71,12 +72,23 @@ public class TestingIngoingFlowLTL {
         mcSettings_SeqI_IntC.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
         mcSettings_SeqI_IntC.setTransitionEncoding(CircuitRendererSettings.TransitionEncoding.EXPLICIT);
 
+        AdamCircuitFlowLTLMCSettings mcSettings_SeqI_N = TestModelCheckerTools.mcSettings_SeqI_N;
+        mcSettings_SeqI_N.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
+        mcSettings_SeqI_N.setTransitionEncoding(CircuitRendererSettings.TransitionEncoding.EXPLICIT);
+  
+        AdamCircuitFlowLTLMCSettings mcSettings_Seq_N = TestModelCheckerTools.mcSettings_Seq_N;
+        mcSettings_Seq_N.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
+        mcSettings_Seq_N.setTransitionEncoding(CircuitRendererSettings.TransitionEncoding.EXPLICIT);
+        
         AdamCircuitFlowLTLMCSettings mcSettings_SeqI_IntF = TestModelCheckerTools.mcSettings_SeqI_IntF;
         mcSettings_SeqI_IntF.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
 
         settings = new AdamCircuitFlowLTLMCSettings[]{
             //            mcSettings_ParI_IntC,
-            mcSettings_SeqI_IntC, //            mcSettings_SeqI_IntF
+//            mcSettings_SeqI_IntC,
+            //            mcSettings_SeqI_IntF
+            mcSettings_Seq_N,
+            mcSettings_SeqI_N
         };
 
     }
@@ -129,7 +141,7 @@ public class TestingIngoingFlowLTL {
         formula = new RunLTLFormula(a1, RunOperators.Binary.OR, a2); // should not hold because those are the only two transitions starting a flow chain, but for each A part the other one is missing
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunLTLFormula(new FlowLTLFormula(

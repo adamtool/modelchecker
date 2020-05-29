@@ -70,7 +70,7 @@ public class TestModelCheckerTools {
 
     public static final AdamCircuitFlowLTLMCSettings mcSettings_SeqI_N = new AdamCircuitFlowLTLMCSettings(
             new AdamCircuitFlowLTLMCOutputData(null, false, false, false),
-            ModelCheckingSettings.Approach.SEQUENTIAL,
+            ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
             Maximality.MAX_NONE,
             AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
             TransitionSemantics.OUTGOING,

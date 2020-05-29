@@ -115,7 +115,6 @@ public class TestingIngoingLTL {
         f = FlowLTLParser.parse(pn, formula).toLTLFormula();
         check = mc.check(pn, f);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
-
     }
 
 }
