@@ -3,7 +3,6 @@ package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittf
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -31,6 +30,7 @@ public class PnwtAndNbFlowFormulas2PNSequentialNoInit extends PnwtAndNbFlowFormu
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
+        actO.setInitialToken(1);
 
         for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow

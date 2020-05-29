@@ -213,7 +213,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
             // all other transitions
             Collection<ILTLFormula> elements = new ArrayList<>();
             for (Transition t : net.getTransitions()) {
-                if (!t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff) // all transitions not belonging to my subnet
+                if (!(t.hasExtension("subformula") && t.getExtension("subformula").equals(nb_ff)) // all transitions not belonging to my subnet
                         || t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequentialNoInit.NEXT_ID + "-" + nb_ff)) // but skipping transitions are OK 
                 {
                     elements.add(new LTLAtomicProposition(t));
