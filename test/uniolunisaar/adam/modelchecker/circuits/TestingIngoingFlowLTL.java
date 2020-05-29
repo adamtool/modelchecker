@@ -21,7 +21,6 @@ import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.results.ModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
@@ -75,20 +74,19 @@ public class TestingIngoingFlowLTL {
         AdamCircuitFlowLTLMCSettings mcSettings_SeqI_N = TestModelCheckerTools.mcSettings_SeqI_N;
         mcSettings_SeqI_N.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
         mcSettings_SeqI_N.setTransitionEncoding(CircuitRendererSettings.TransitionEncoding.EXPLICIT);
-  
+
         AdamCircuitFlowLTLMCSettings mcSettings_Seq_N = TestModelCheckerTools.mcSettings_Seq_N;
         mcSettings_Seq_N.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
         mcSettings_Seq_N.setTransitionEncoding(CircuitRendererSettings.TransitionEncoding.EXPLICIT);
-        
+
         AdamCircuitFlowLTLMCSettings mcSettings_SeqI_IntF = TestModelCheckerTools.mcSettings_SeqI_IntF;
         mcSettings_SeqI_IntF.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
 
         settings = new AdamCircuitFlowLTLMCSettings[]{
             //            mcSettings_ParI_IntC,
-//            mcSettings_SeqI_IntC,
-            //            mcSettings_SeqI_IntF
-            mcSettings_Seq_N,
-            mcSettings_SeqI_N
+//            mcSettings_SeqI_IntC, //            mcSettings_SeqI_IntF
+        //            mcSettings_Seq_N,
+                    mcSettings_SeqI_N
         };
 
     }
@@ -141,45 +139,58 @@ public class TestingIngoingFlowLTL {
         formula = new RunLTLFormula(a1, RunOperators.Binary.OR, a2); // should not hold because those are the only two transitions starting a flow chain, but for each A part the other one is missing
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);// error: is true
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%
         formula = new RunLTLFormula(new FlowLTLFormula(
                 new LTLFormula(new LTLAtomicProposition(init), LTLOperators.Binary.OR,
                         (new LTLAtomicProposition(o2))))); // should hold because those are the only two transitions starting a flow chain
         name = net.getName() + "_" + formula.toString().replace(" ", "");
-        data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
-        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
+        data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunLTLFormula(a1, RunOperators.Binary.OR, new FlowLTLFormula(new LTLAtomicProposition(f))); // should not hold because each case has the other case as counter example
+        // should not hold because each case has the other case as counter example
+        formula = new RunLTLFormula(a1, RunOperators.Binary.OR, new FlowLTLFormula(new LTLAtomicProposition(f)));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settingsFlowLTL);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings); // error: is true
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(o1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
+        // should hold because the one starts with the init transition, the other in f
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(init), LTLOperators.Binary.OR, new LTLAtomicProposition(f))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunLTLFormula(new LTLAtomicProposition(o1)); // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
+        // should not hold because in the ingoing semantics not transition is allowed in the first step
+        formula = new RunLTLFormula(new LTLAtomicProposition(init));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settingsFlowLTL);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunLTLFormula(new LTLAtomicProposition(o2)); // should not hold since the flows starting in A and B
+        // should  hold since we test it on the run and there is no other transition enabled and we demand maximality
+        // ONLY FOR MAXIMALITY!!
+        formula = new RunLTLFormula(new LTLFormula(LTLOperators.Unary.X, new LTLAtomicProposition(init)));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settingsFlowLTL);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
-        formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(o1))); // should not hold since t2 generates a new one which directly dies
+        // should not hold since the flows starting in a and F
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(o2)));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settingsFlowLTL);
+//        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);
+
+        // %%%%%%%%%%%%%%%%%%%%%%%%%
+        // should not hold since o2 generates a new one which directly dies
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(init)));
+        name = net.getName() + "_" + formula.toString().replace(" ", "");
+        data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, true, true);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.FALSE, data, settings);
     }
 
     @Test(enabled = true)

@@ -4,6 +4,7 @@ import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential.NEXT_ID;
 import uniolunisaar.adam.tools.Logger;
 
@@ -76,9 +77,11 @@ public class PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit extends PnwtAndNbFlowFor
                     for (Transition tpost : act.getPostset()) { // transitions which take the active token
                         for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
                             if (p != act) { // but not the active place itself 
-                                if (!tout.getPreset().contains(p)) { // if the flow is not already created before
-                                    Flow f = out.createFlow(p, tout);
-                                    out.setInhibitor(f);
+                                if (!p.getId().equals(INIT_TOKENFLOW_ID + "-" + nb_ff)) { // and the initial place can be skipped every time
+                                    if (!tout.getPreset().contains(p)) { // if the flow is not already created before                                    
+                                        Flow f = out.createFlow(p, tout);
+                                        out.setInhibitor(f);
+                                    }
                                 }
                             }
                         }
