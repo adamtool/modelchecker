@@ -152,12 +152,18 @@ public class CounterExampleParser {
                     }
                 }
             }
-            Logger.getInstance().addMessage(cropped.toString(), false);
+//            Logger.getInstance().addMessage(cropped.toString(), false);
 //            System.out.println(cropped.toString());
             // create the counter example
             int timestep = 0;
+            CounterExampleElement prevCexe = null;
             while (timestep >= 0) {
                 CounterExampleElement cexe = new CounterExampleElement(timestep, true, digits, isParallel);
+                // add the init step for the ingoing semantics, because without this it would be pruned since the list of transitions is empty
+                if (timestep == 0 && settings.getRendererSettings().getSemantics() == CircuitRendererSettings.TransitionSemantics.INGOING) {
+                    Transition t = null;
+                    cexe.add(t);
+                }
                 boolean found = false;
                 for (int i = 0; i < cropped.size(); i++) {
                     String elem = cropped.get(i);
@@ -173,8 +179,10 @@ public class CounterExampleParser {
                         } else if (elem.startsWith("entered_lasso")) {
                             cexe.setLooping(val == '1');
                         } else {
-                            // for outgoing jump over the first step
-                            if (settings.getRendererSettings().getSemantics() == CircuitRendererSettings.TransitionSemantics.INGOING || timestep != 0) {
+                            // the first step is bullshit for every semantics, because McHyper only has the old values of the
+                            // latches and the input variables as output. Thus, the cex has in the first step zeros for 
+                            // all latches and a random input transition
+                            if (timestep != 0) {
                                 String id = elem.substring(0, elem.length() - 2);
 //                                System.out.println(id + "=" + val);
                                 if (id.startsWith(AigerRendererSafeStutterRegisterLogTrans.BIN_COD_ID)) {
@@ -185,7 +193,15 @@ public class CounterExampleParser {
                                     if (net.containsPlace(id)) {
                                         Place place = net.getPlace(id);
                                         if (abcSettings.isDetailedCEX() || PetriNetExtensionHandler.isOriginal(place)) {
-                                            cexe.add(place);
+                                            if (settings.getRendererSettings().getSemantics() == CircuitRendererSettings.TransitionSemantics.INGOING) {
+                                                // for the ingoing semantics we have to delay the marking for one step, because McHyper
+                                                // only outputs the old latch values and the input of the transitions, not the old outputs                
+                                                if (prevCexe != null) {
+                                                    prevCexe.add(place);
+                                                }
+                                            } else {
+                                                cexe.add(place);
+                                            }
                                         }
                                     } else if (net.containsTransition(id)) {
                                         Transition t = net.getTransition(id);
@@ -205,6 +221,7 @@ public class CounterExampleParser {
                     cex.addTimeStep(cexe);
                     ++timestep;
                 }
+                prevCexe = cexe;
             }
             Logger.getInstance().addMessage(cex.toString(), true);
             return cex;

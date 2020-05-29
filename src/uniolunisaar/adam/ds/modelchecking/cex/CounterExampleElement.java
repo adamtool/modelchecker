@@ -133,11 +133,11 @@ public class CounterExampleElement {
         if (!marking.isEmpty()) {
             sb.setLength(sb.length() - 2);
         }
-        sb.append("}");
-        sb.append(" -> [");
+        sb.append("},");
+        sb.append(" [");
         if (binID == null) {
             for (Transition t : transitions) {
-                String id = (!isDetailed && isParallel) ? t.getLabel() : t.getId();
+                String id = t == null ? "-" : (!isDetailed && isParallel) ? t.getLabel() : t.getId();
                 sb.append(id).append(", ");
             }
             if (!transitions.isEmpty()) {

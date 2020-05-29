@@ -38,7 +38,8 @@ public class CounterExample implements Iterable<String> {
             CounterExampleElement elem = timestep.get(i);
             StringBuilder lastElem = new StringBuilder();
             boolean add = true;
-            if (!elem.getTransitions().isEmpty() || elem.getBinID() != null) { // prunes the detailed steps in the not detailed case and the last one for looping
+            if (!elem.getTransitions().isEmpty() || elem.getBinID() != null // prunes the detailed steps in the not detailed case and the last one for looping                    
+                    ) {
                 lastElem.append("----------- time step ").append(i).append(" -----------------");
                 if (elem.isStartsLoop()) {
                     lastElem.append(" start loop ->");

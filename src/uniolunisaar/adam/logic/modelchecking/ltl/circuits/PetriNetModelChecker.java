@@ -55,6 +55,7 @@ public class PetriNetModelChecker {
         AdamCircuitLTLMCSettings set = new AdamCircuitLTLMCSettings(data);
         set.setAbcParameters(abcParameters);
         set.fillAbcData(net);
+        set.getAbcSettings().setNet(net);
         set.getAbcSettings().setInputFile(inputFile);
         set.getAbcSettings().setVerbose(true);
         set.getAbcSettings().setVerificationAlgos(new VerificationAlgo[]{alg});

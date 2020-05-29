@@ -65,8 +65,8 @@ public class TestingIngoingLTL {
                 new AdamCircuitLTLMCOutputData(outputDir + "buf", false, false),
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
-                CircuitRendererSettings.TransitionSemantics.OUTGOING,
-                CircuitRendererSettings.TransitionEncoding.EXPLICIT,
+                CircuitRendererSettings.TransitionSemantics.INGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
                 CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
                 AigerRenderer.OptimizationsSystem.NONE,
                 AigerRenderer.OptimizationsComplete.NONE,
@@ -80,7 +80,7 @@ public class TestingIngoingLTL {
         PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
         pn.rename(pn.getPlace("A"), "a");
 
-        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, false);
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, true);
         settings.setOutputData(data);
 
         ModelCheckerLTL mc = new ModelCheckerLTL(settings);
