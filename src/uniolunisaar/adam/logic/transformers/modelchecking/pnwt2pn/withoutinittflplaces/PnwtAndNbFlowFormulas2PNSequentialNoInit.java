@@ -3,6 +3,7 @@ package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittf
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -92,12 +93,13 @@ public class PnwtAndNbFlowFormulas2PNSequentialNoInit extends PnwtAndNbFlowFormu
                     for (Transition tpost : act.getPostset()) { // transitions which take the active token
                         for (Place p : tpost.getPreset()) { // consider all places from which those transitions take a token
                             if (p != act && !p.getId().startsWith("!")) { // but not the active place itself and its negation
-                                Place negInput = out.getPlace("!" + p.getId());
-                                if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
-                                    out.createFlow(negInput, tout);
-                                    out.createFlow(tout, negInput);
+                                if (!p.getId().equals(INIT_TOKENFLOW_ID + "-" + nb_ff)) { // also not for the intial place
+                                    Place negInput = out.getPlace("!" + p.getId());
+                                    if (!tout.getPreset().contains(negInput)) { // if the flow is not already created before
+                                        out.createFlow(negInput, tout);
+                                        out.createFlow(tout, negInput);
+                                    }
                                 }
-
                             }
                         }
                     }
@@ -105,58 +107,7 @@ public class PnwtAndNbFlowFormulas2PNSequentialNoInit extends PnwtAndNbFlowFormu
             }
         }
 
-        if (nbFlowFormulas > 0) {
-            // all initialization transitions of each subformula already have an active place added (each subformula one)
-            // from which they are dependent by firing they give it to the next subformula (this is done here)
-            // the last one puts the initial marking to the original net
-            for (int i = 0; i < nbFlowFormulas; i++) {
-                Place init = out.getPlace(INIT_TOKENFLOW_ID + "-" + i);
-                Place initAct = out.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + i);
-                Place initActNext = null;
-                if (i + 1 < nbFlowFormulas) {
-                    initActNext = out.getPlace(ACTIVATION_PREFIX_ID + INIT_TOKENFLOW_ID + "-" + (i + 1));
-                }
-                // the transitions moving the init token, i.e., deciding on a chain or a later created new chain
-                for (Transition t : init.getPostset()) {
-                    out.createFlow(initAct, t);
-                    if (initActNext != null) {
-                        out.createFlow(t, initActNext);
-                    } else {
-//                              // this is the version where I removed the initial marking and added it later
-//                            for (Place place : initialMarking) {
-//                                out.createFlow(t, out.getPlace(place.getId()));
-//                            }
-                        out.createFlow(t, actO);
-                    }
-                }
-                // the next transition
-                Transition nxt = out.getTransition(INIT_TOKENFLOW_ID + NEXT_ID + "-" + i);
-                out.createFlow(initAct, nxt);
-                if (initActNext != null) {
-                    out.createFlow(nxt, initActNext);
-                } else {
-//                              // this is the version where I removed the initial marking and added it later
-//                        for (Place place : initialMarking) {
-//                            out.createFlow(nxt, out.getPlace(place.getId()));
-//                        }
-                    out.createFlow(nxt, actO);
-                }
-            }
-
-            // Move the active token through the subnets of the flow formulas
-            // deactivate all orginal transitions whenever an original transition fires
-            // this is the version when every original transition has its own token
-//            for (Transition t : orig.getTransitions()) {
-//                if (!orig.getTransits(t).isEmpty()) { // only for those which have tokenflows                        
-//                    for (Transition t2 : orig.getTransitions()) {
-//                        if (!orig.getTransits(t2).isEmpty()) { // only for those which have tokenflows                        
-//                            out.createFlow(out.getPlace(ACTIVATION_PREFIX_ID + t2.getId()), t);
-//                        }
-//                    }
-//                    // and move the active token to the first subnet
-//                    out.createFlow(t, out.getPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + 0));
-//                }
-//            }
+        if (nbFlowFormulas > 0) {            
             for (Transition t : orig.getTransitions()) {
                 // take the active token
                 out.createFlow(actO, t);
