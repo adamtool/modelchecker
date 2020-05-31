@@ -28,13 +28,13 @@ public class TestPositiveBooleanFormulaBDDSolver {
                 PositiveBooleanFormulaOperators.Binary.OR,
                 x3);
         List<List<IPositiveBooleanFormulaAtom>> solutions = PositiveBooleanFormulaSolverBDD.solve(f);
-        System.out.println(f.toString());
-        System.out.println(solutions.toString());
+//        System.out.println(f.toString());
+//        System.out.println(solutions.toString());
 
         f = PositiveBooleanFormulaFactory.createBinaryFormula(x1, PositiveBooleanFormulaOperators.Binary.AND, x2);
         solutions = PositiveBooleanFormulaSolverBDD.solve(f);
-        System.out.println(f.toString());
-        System.out.println(solutions.toString());
+//        System.out.println(f.toString());
+//        System.out.println(solutions.toString());
 
     }
 }

@@ -37,8 +37,12 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  */
 public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
 
-    private boolean runInScopeOfTemporalOperator;
-
+    // this was used for the idea to only replace the next operator when it is in 
+    // the scope of a temporal operator and just let it a normal X for the initial 
+    // step. This is not working, because, e.g., for globally,
+    // it has to hold in the initial step and also in all others.
+    // Thus, currently not used anymore
+//    private boolean runInScopeOfTemporalOperator;
     private ILTLFormula anyRunTransition = null;
     private ILTLFormula initAndRunStuttering = null;
 
@@ -353,7 +357,7 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
     ILTLFormula replaceFormulaUnaryInRunFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, boolean scopeEventually, int nbFlowFormulas) {
         if (phi.getOp() == LTLOperators.Unary.F) { // finally 
             scopeEventually = true;  // check if it's in the scope of an eventually
-            runInScopeOfTemporalOperator = true;
+//            runInScopeOfTemporalOperator = true; // so definition of the variable
             if (LogicsTools.getTransitionAtomicPropositions(phi.getPhi()).isEmpty()) {
                 return new LTLFormula(phi.getOp(), (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas)); // todo: could make it smarter and pass here that there is no transition in the subformulas
             }
@@ -367,44 +371,94 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
                             substChildPhi));
         } else if (phi.getOp() == LTLOperators.Unary.G) { // globally
             scopeEventually = false; // if the last operator is a globally, then the previous eventually is not helping anymore
-            runInScopeOfTemporalOperator = true;
+//            runInScopeOfTemporalOperator = true; // see definition of the variable
             if (LogicsTools.getTransitionAtomicPropositions(phi.getPhi()).isEmpty()) {
                 return new LTLFormula(phi.getOp(), (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas)); // todo: could make it smarter and pass here that there is no transition in the subformulas
             }
             ILTLFormula substChildPhi = (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas);
             // G(!(my or stuttering) or phi)
-            return new LTLFormula(LTLOperators.Unary.G,
+            LTLFormula ltlFormula = new LTLFormula(LTLOperators.Unary.G,
                     new LTLFormula(
                             new LTLFormula(LTLOperators.Unary.NEG,
                                     new LTLFormula(getRunTransitions(orig),
                                             LTLOperators.Binary.OR,
-                                            getInitAndRunStuttering(net))
+                                            getInitAndRunStuttering(net)
+                                    )
                             ),
                             LTLOperators.Binary.OR,
                             substChildPhi));
+            return ltlFormula;
         } else if (phi.getOp() == LTLOperators.Unary.X) { // next
             ILTLFormula substChildPhi = (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
             LTLFormula substPhi = new LTLFormula(phi.getOp(), substChildPhi);
-            // if it's under the scope of eventually, this means the last temporal operator Box or Diamond is a Diamond
-            // just delete the next, meaning just return the child
-//            if (scopeEventually) {
-//                return substChildPhi;
-//            } this is not true F p -> X q, direct would work F X = F
-            if (!runInScopeOfTemporalOperator) {
-                runInScopeOfTemporalOperator = true;
-                return substPhi;
-            }
-            if (nbFlowFormulas > 0) { // it is the case where we want to replace it by means of the next operator
-                // we just do the replacement when it is in the scope of X, F, or G, not as stated in the paper
-                // with skipping the initial part within the formula (should be faster)
+            // this was used for the idea to only replace the next operator when it is in 
+            // the scope of a temporal operator and just let it a normal X for the initial 
+            // step. This is not working, because, e.g., for globally,
+            // it has to hold in the initial step and also in all others
+// Thus, currently not used anymore: old idea            
+//            // if it's under the scope of eventually, this means the last temporal operator Box or Diamond is a Diamond
+//            // just delete the next, meaning just return the child
+////            if (scopeEventually) {
+////                return substChildPhi;
+////            } this is not true F p -> X q, direct would work F X = F
+//            if (!runInScopeOfTemporalOperator) {
+//                runInScopeOfTemporalOperator = true;
+//                return substPhi;
+//            }
+//            if (nbFlowFormulas > 0) { // it is the case where we want to replace it by means of the next operator
+//                // we just do the replacement when it is in the scope of X, F, or G, not as stated in the paper
+//                // with skipping the initial part within the formula (should be faster)
+//                ILTLFormula retPhi = substChildPhi;
+//                for (int i = 0; i <= nbFlowFormulas; i++) {
+//                    retPhi = new LTLFormula(LTLOperators.Unary.X, retPhi); // todo: could still be smarter and move the nexts to the next temporal operator
+//                }
+//                System.out.println("$$$$ " + retPhi.toSymbolString());
+//                return retPhi;
+//            } else { // the special case chosed by giving -1, we don't want to replace it by means of the next operator (=0 should be checked and avoided before)
+//                throw new RuntimeException("The approach for replacing the next operator without n nexts is not implemented for the ingoing semantics.");
+//            }
+// end old idea
+
+            if (nbFlowFormulas > 0) {
+                // for this version we still have to handle the optimisation that we don't have 
+                // the transitions in the subnet which does not transit the token flow. That means
+                // for transitions which have no correspondance in in the subnets_i, there also
+                // the next state is really the next one.
+                Collection<ILTLFormula> notInSubnets = new ArrayList<>();
+                for (Transition transition : orig.getTransitions()) {
+                    boolean found = false;
+                    for (Transition transition1 : net.getTransitions()) {
+                        if (!transition.getId().equals(transition1.getId()) && transition1.getLabel().equals(transition.getId())) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        notInSubnets.add(new LTLAtomicProposition(transition));
+                    }
+                }
+
+                ILTLFormula premissis = new LTLFormula(getInitAndRunStuttering(net), LTLOperators.Binary.OR, FormulaCreator.bigWedgeOrVeeObject(notInSubnets, false));
+
+                // for the first time step and stuttering, i.e., no transition entered the state
+                ILTLFormula init = new LTLFormula(
+                        premissis,
+                        LTLOperators.Binary.IMP,
+                        substPhi);
+
                 ILTLFormula retPhi = substChildPhi;
                 for (int i = 0; i <= nbFlowFormulas; i++) {
                     retPhi = new LTLFormula(LTLOperators.Unary.X, retPhi); // todo: could still be smarter and move the nexts to the next temporal operator
                 }
-                return retPhi;
+                ILTLFormula notInit = new LTLFormula(
+                        new LTLFormula(LTLOperators.Unary.NEG, premissis),
+                        LTLOperators.Binary.IMP,
+                        retPhi);
+                return new LTLFormula(init, LTLOperators.Binary.AND, notInit);
             } else { // the special case chosed by giving -1, we don't want to replace it by means of the next operator (=0 should be checked and avoided before)
                 throw new RuntimeException("The approach for replacing the next operator without n nexts is not implemented for the ingoing semantics.");
             }
+
         }
         // all others
         ILTLFormula substChildPhi = (ILTLFormula) replaceInRunFormula(orig, net, phi.getPhi(), scopeEventually, nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
@@ -419,8 +473,6 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
         IOperatorBinary<?, ?> gOp = phi.getOp();
         // only do s.th. for the LTL part and not for the real run binary formulas of the run part
         if (phi instanceof ILTLFormula) {
-            ILTLFormula phi1 = (ILTLFormula) gPhi1;
-            ILTLFormula phi2 = (ILTLFormula) gPhi2;
             LTLOperators.Binary op = (LTLOperators.Binary) gOp;
             // %%%%%%%%%%%%%%%%%%%%%%%%%%%% UNTIL
             if (op == LTLOperators.Binary.U) {
@@ -542,8 +594,12 @@ public class FlowLTLTransformerIngoingSequential extends FlowLTLTransformer {
                 : // todo: maybe expensive, could make this smarter
                 -1;
 
-        runInScopeOfTemporalOperator = false;
-
+        // this was used for the idea to only replace the next operator when it is in 
+        // the scope of a temporal operator and just let it a normal X for the initial 
+        // step. This is not working, because, e.g., for globally,
+        // it has to hold in the initial step and also in all others.
+        // Thus, currently not used anymore
+//        runInScopeOfTemporalOperator = false;
         // %%%%%%%%%%%%%%%%% REPLACE WITHIN RUN FORMULA
         // don't do the flow formula replacement within the framework 
         // because then we don't know the id (todo: could think of counting)

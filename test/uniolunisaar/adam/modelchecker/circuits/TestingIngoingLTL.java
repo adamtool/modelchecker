@@ -7,6 +7,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import uniol.apt.adt.pn.PetriNet;
+import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
@@ -24,8 +26,10 @@ import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
+import uniolunisaar.adam.util.PNTools;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.FormulaCreator;
+import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 
 /**
  *
@@ -38,11 +42,11 @@ public class TestingIngoingLTL {
 
     @BeforeClass
     public void silence() {
-        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setVerbose(false);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+//        Logger.getInstance().setVerbose(true);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -115,6 +119,62 @@ public class TestingIngoingLTL {
         f = FlowLTLParser.parse(pn, formula).toLTLFormula();
         check = mc.check(pn, f);
         Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+    }
+
+    @Test
+    public void testStuttering() throws Exception {
+        settings.setMaximality(AdamCircuitMCSettings.Maximality.MAX_NONE);
+        settings.setTransitionEncoding(CircuitRendererSettings.TransitionEncoding.EXPLICIT);
+//        settings.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.OUTGOING);
+        PetriNet pn = PNTools.createPetriNet("testStuttering");
+        Place p = pn.createPlace("start");
+        p.setInitialToken(1);
+
+        // infinite runs don't use stuttering
+        Transition t = pn.createTransition("t");
+        pn.createFlow(p, t);
+        pn.createFlow(t, p);
+        PNTools.savePN2PDF(outputDir + pn.getName(), pn, false, false);
+
+        AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, true);
+        settings.setOutputData(data);
+
+        ModelCheckerLTL mc = new ModelCheckerLTL(settings);
+
+        ILTLFormula f = new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(p));
+        LTLModelCheckingResult check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
+
+        // add an unmarked place and put the transition there (because there are still problems for nets without transitions)
+        Place buf = pn.createPlace("buf");
+        pn.removeFlow(p, t);
+        pn.removeFlow(t, p);
+        pn.createFlow(buf, t);
+        PNTools.savePN2PDF(outputDir + pn.getName(), pn, false, false);
+
+        data = new AdamCircuitLTLMCOutputData(outputDir + pn.getName(), false, true);
+        settings.setOutputData(data);
+
+        mc = new ModelCheckerLTL(settings);
+
+        f = new LTLFormula(LTLOperators.Unary.G, new LTLAtomicProposition(p));
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
+
+        f = new LTLFormula(new LTLFormula(LTLOperators.Unary.NEG, f));
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+
+        // mark the place
+        buf.setInitialToken(1);
+        check = mc.check(pn, f);
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+
+        // use maximality
+        ILTLFormula max = FormulaCreatorIngoingSemantics.getMaximalityInterleavingDirectAsObject(pn);
+        check = mc.check(pn, new LTLFormula(max, LTLOperators.Binary.IMP, f));
+        Assert.assertEquals(check.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+
     }
 
 }

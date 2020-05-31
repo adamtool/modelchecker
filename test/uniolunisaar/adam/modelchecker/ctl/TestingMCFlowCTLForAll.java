@@ -33,6 +33,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ltl.FlowCTLTra
 import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.PnAndLTLtoCircuit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwtandflowctl2pn.PnwtAndFlowCTL2PN;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -54,9 +55,10 @@ public class TestingMCFlowCTLForAll {
     @BeforeClass
     public void silence() {
 //        Logger.getInstance().setVerbose(true);
-//        Logger.getInstance().setShortMessageStream(null);
-//        Logger.getInstance().setVerboseMessageStream(null);
-//        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     static FlowCTLModelcheckingSettings settings;
@@ -160,7 +162,7 @@ public class TestingMCFlowCTLForAll {
 
     }
 
-    @Test(enabled=false) // this is not a test, but 'ant test' tries to call it
+    @Test(enabled = false) // this is not a test, but 'ant test' tries to call it
     public static void check(PetriNetWithTransits pnwt, RunCTLForAllFormula formula, FlowCTLModelcheckingSettings settings, LTLModelCheckingResult.Satisfied sat) throws Exception {
         PetriNetWithTransits out = new PnwtAndFlowCTL2PN().createSequential(pnwt, formula, settings);
         if (settings.getOutputData().isVerbose()) {

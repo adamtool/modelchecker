@@ -40,6 +40,7 @@ public class TestABTAxKripkeStructure2ABA {
     @BeforeClass
     public void silence() {
 //        Logger.getInstance().setVerbose(true);
+        Logger.getInstance().setVerbose(false);
         Logger.getInstance().setShortMessageStream(null);
         Logger.getInstance().setVerboseMessageStream(null);
         Logger.getInstance().setWarningStream(null);
