@@ -25,6 +25,7 @@ import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
+import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerIngoingParallel;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerIngoingSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingParallel;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingSequential;
@@ -138,9 +139,22 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
-                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
+
+                        if (semantics == TransitionSemantics.OUTGOING) {
+                            formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
+                        } else if (semantics == TransitionSemantics.INGOING) {
+                            formulaMC = new FlowLTLTransformerIngoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
+                        } else {
+                            throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                        }
                     } else { // currently cannot occur
-                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
+                        if (semantics == TransitionSemantics.OUTGOING) {
+                            formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
+                        } else if (semantics == TransitionSemantics.INGOING) {
+                            formulaMC = new FlowLTLTransformerIngoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
+                        } else {
+                            throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                        }
                     }
                     break;
                 case PARALLEL_INHIBITOR:
@@ -173,9 +187,22 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
                     }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
-                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
+                        if (semantics == TransitionSemantics.OUTGOING) {
+                            formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
+                        } else if (semantics == TransitionSemantics.INGOING) {
+                            formulaMC = new FlowLTLTransformerIngoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
+                        } else {
+                            throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                        }
+
                     } else {
-                        formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
+                        if (semantics == TransitionSemantics.OUTGOING) {
+                            formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
+                        } else if (semantics == TransitionSemantics.INGOING) {
+                            formulaMC = new FlowLTLTransformerIngoingParallel().createFormula4ModelChecking4CircuitParallel(net, netMC, f, settings);
+                        } else {
+                            throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                        }
                     }
                     break;
                 case SEQUENTIAL: {

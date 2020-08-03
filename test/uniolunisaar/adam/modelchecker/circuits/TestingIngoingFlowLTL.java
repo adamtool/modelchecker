@@ -42,11 +42,11 @@ public class TestingIngoingFlowLTL {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().setVerbose(false);
-        Logger.getInstance().setShortMessageStream(null);
-        Logger.getInstance().setVerboseMessageStream(null);
-        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().setVerbose(false);
+//        Logger.getInstance().setShortMessageStream(null);
+//        Logger.getInstance().setVerboseMessageStream(null);
+//        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -63,6 +63,10 @@ public class TestingIngoingFlowLTL {
 
     private AdamCircuitFlowLTLMCSettings[] settings;
 
+    /**
+     * Attention: at least the ant test-class seems not to use this method
+     * before every method, test-method however does so.
+     */
     @BeforeMethod
     public void initMCSettings() {
         AdamCircuitFlowLTLMCSettings mcSettings_ParI_IntC = TestModelCheckerTools.mcSettings_ParI_IntC;
@@ -87,10 +91,9 @@ public class TestingIngoingFlowLTL {
         mcSettings_Seq_IntF.setTransitionSemantics(CircuitRendererSettings.TransitionSemantics.INGOING);
 
         settings = new AdamCircuitFlowLTLMCSettings[]{
-            //            mcSettings_ParI_IntC,
-            mcSettings_SeqI_IntC,
-            mcSettings_SeqI_IntF,
-            mcSettings_Seq_IntF, //            mcSettings_Seq_N,
+            mcSettings_ParI_IntC, //            mcSettings_SeqI_IntC,
+        //            mcSettings_SeqI_IntF,
+        //            mcSettings_Seq_IntF, //            mcSettings_Seq_N,
         //            mcSettings_SeqI_N
         };
 
@@ -98,7 +101,9 @@ public class TestingIngoingFlowLTL {
 
     @Test(enabled = true)
     public void introducingExampleTransitions() throws Exception {
-        PetriNetWithTransits net = new PetriNetWithTransits("introduction");
+        PetriNetWithTransits net = new PetriNetWithTransits("introduction"
+                + "asdf"
+                + "asdf");
         Place a = net.createPlace("a");
 //        a.setInitialToken(1);
 //        net.setInitialTransit(a);// not possible for ingoing, thus
