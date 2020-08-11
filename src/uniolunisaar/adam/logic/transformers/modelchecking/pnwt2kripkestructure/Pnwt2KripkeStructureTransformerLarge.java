@@ -15,8 +15,11 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 
 /**
- * This transformer also adds and additional initial state and loops for every
+ * This transformer also adds an additional initial state and loops for every
  * transition not transiting the token chain.
+ * 
+ * This class corresponds to the outgoing semantics.
+ * The outgoing semantics makes it difficult to 
  *
  * @author Manuel Gieseking
  */
