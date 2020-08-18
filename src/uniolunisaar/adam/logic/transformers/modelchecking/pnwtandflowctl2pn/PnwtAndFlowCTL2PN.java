@@ -31,7 +31,7 @@ import uniolunisaar.adam.logic.transformers.automata.NDet2DetAutomatonTransforme
 import uniolunisaar.adam.logic.transformers.ctl.CTL2AlternatingBuchiTreeAutomaton;
 import uniolunisaar.adam.logic.transformers.modelchecking.ABA2NDetTransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformer;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerOutgoing;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential.NEXT_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.ACTIVATION_PREFIX_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID;
@@ -90,7 +90,7 @@ public class PnwtAndFlowCTL2PN {
         }
         // create the Kripke structure of the Petri net with transits
         // todo: add a method getTransition atoms and put this to the create function and therewith improve the construction
-        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformer.create(orig, true);
+        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerOutgoing.create(orig, true);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + k.getName(), k);
         } else {

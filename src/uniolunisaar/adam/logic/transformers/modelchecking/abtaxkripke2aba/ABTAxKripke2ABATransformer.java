@@ -61,7 +61,7 @@ public class ABTAxKripke2ABATransformer {
 
     /**
      * Attention: this method can only transform trees which had been created
-     * from a CTL formula (cp.An Automata-Theoretic Approach to Branching-Time
+     * from a CTL formula (cp. An Automata-Theoretic Approach to Branching-Time
      * Model Checking - Kupferman, Vardi, Wolper)
      *
      * @param tree

@@ -16,9 +16,21 @@ import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 
 /**
  *
+ * This class corresponds to the outgoing semantics. The outgoing semantics
+ * makes it difficult to properly handle the branching because every state
+ * branches with the same transition into several branches, another one for each
+ * different choice of the next outgoing transition. For the ABA construction we
+ * want to collect all equally labeled transitions together and treat those as
+ * the proper branching (because this is also the branching in the transition
+ * which we really want to consider. Hence, these branchings are
+ * indistinguishable). The solution for handling this is way more complicated,
+ * this is why we didn't introduce a reduction method into an ABA for this
+ * construction.
+ *
  * @author Manuel Gieseking
  */
-public class Pnwt2KripkeStructureTransformer {
+@Deprecated
+public class Pnwt2KripkeStructureTransformerOutgoing {
 
     public static PnwtKripkeStructure create(PetriNetWithTransits pnwt, boolean onlyPlacesInAP) {
         PnwtKripkeStructure k = new PnwtKripkeStructure(pnwt.getName() + "_ks");
