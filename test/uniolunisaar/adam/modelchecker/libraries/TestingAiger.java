@@ -10,10 +10,11 @@ import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.AigerTools;
@@ -52,7 +53,7 @@ public class TestingAiger {
         // save aiger file
         final String outputFolder = outputDir;
 //        TransformerTools.save2Aiger(pn, outputFolder + "/" + pn.getName());
-        AigerTools.save2Aiger(Circuit.getRenderer(Circuit.Renderer.INGOING, pn), outputFolder + "/" + pn.getName());
+        AigerTools.save2Aiger(new AigerRendererSafeStutterRegister(pn, true, CircuitRendererSettings.TransitionSemantics.INGOING), outputFolder + "/" + pn.getName());
         AigerTools.saveAiger2PDF(outputFolder + "/" + pn.getName() + ".aag", outputFolder + "/" + pn.getName(), PetriNetExtensionHandler.getProcessFamilyID(pn));
     }
 

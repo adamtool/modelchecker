@@ -9,17 +9,18 @@ import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.util.PNWTTools;
-import uniolunisaar.adam.logic.transformers.pn2aiger.Circuit;
-import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnandformula2aiger.CircuitAndLTLtoCircuit;
-import uniolunisaar.adam.logic.modelchecking.circuits.PetriNetModelChecker;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.CircuitAndLTLtoCircuit;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
+import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
 
 /**
@@ -83,12 +84,12 @@ public class TestingMCHyper {
 //        String formula = "Forall (F (Eq (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))"; // correkt
 
         String formula = "Forall (Until (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)) (Or (AP \"#out#_out\" 0) (AP \"#out#_out\" 0)))";
-        AigerRenderer renderer = Circuit.getRenderer(Circuit.Renderer.OUTGOING_REGISTER, net);
+        AigerRenderer renderer = new AigerRendererSafeStutterRegister(net, true, TransitionSemantics.OUTGOING);
         AdamCircuitLTLMCOutputData data = new AdamCircuitLTLMCOutputData(outputDir + net.getName(), false, false);
 
         CircuitAndLTLtoCircuit.createCircuit(renderer, formula, data, null, false, PetriNetExtensionHandler.getProcessFamilyID(net));
 
-        String inputFile = outputDir + net.getName() + ".aig";
+        String inputFile = outputDir + net.getName() + PetriNetExtensionHandler.getProcessFamilyID(net).hashCode() + ".aig";
         PetriNetModelChecker.check(inputFile, VerificationAlgo.IC3, net, renderer, outputDir + net.getName(), "", data);
     }
 

@@ -1,21 +1,24 @@
 package uniolunisaar.adam.modelchecker.circuits;
 
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import uniol.apt.io.parser.ParseException;
 import uniol.apt.io.renderer.RenderException;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitFlowLTLMCSettings;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Maximality;
-import uniolunisaar.adam.ds.modelchecking.settings.AdamCircuitMCSettings.Stuttering;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Maximality;
+import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings.Approach;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
@@ -26,10 +29,9 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
-import uniolunisaar.adam.logic.modelchecking.circuits.ModelCheckerFlowLTL;
+import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
-import uniolunisaar.adam.util.logics.LogicsTools.TransitionSemantics;
 
 /**
  *
@@ -63,6 +65,24 @@ public class MCFlowLTLSeqGenerators {
         (new File(outputDirInCircuit)).mkdirs();
         (new File(outputDirInFormula)).mkdirs();
     }
+    AdamCircuitFlowLTLMCSettings settings;
+
+    @BeforeMethod
+    public void createSettings() {
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + "buffer", false, false, true);
+        settings = new AdamCircuitFlowLTLMCSettings(
+                data,
+                Approach.SEQUENTIAL_INHIBITOR,
+                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
+                Stuttering.PREFIX_REGISTER,
+                TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
+                optSys,
+                optCom,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
+                VerificationAlgo.IC3);
+    }
 
     @Test(enabled = true)
     public void updatingNetworkBenchmark() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
@@ -74,31 +94,20 @@ public class MCFlowLTLSeqGenerators {
         (new File(outputDirInFormula)).mkdirs();
 
         String formula;
-        RunFormula f;
-        ModelCheckingResult ret;
+        RunLTLFormula f;
+        LTLModelCheckingResult ret;
         String name;
 
         formula = "A F pOut";
         f = FlowLTLParser.parse(net, formula);
         name = net.getName() + "_" + f.toString().replace(" ", "");
 
-        // maximality in circuit
-        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL_INHIBITOR,
-                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                Stuttering.PREFIX_REGISTER,
-                optSys,
-                optCom,
-                //                ModelCheckerMCHyper.VerificationAlgo.INT,
-                true,
-                VerificationAlgo.IC3);
-
+        // maximality in circuit       
         AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
         settings.setOutputData(dataInCircuit);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
         // maximality in formula
         settings.setInitFirst(true);
@@ -106,29 +115,18 @@ public class MCFlowLTLSeqGenerators {
         AdamCircuitFlowLTLMCOutputData dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDirInFormula + name + "_init", false, false, true);
         settings.setOutputData(dataInFormula);
         ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test
     public void testParallelChecking() throws ParseException, FileNotFoundException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
-                TransitionSemantics.OUTGOING,
-                Approach.SEQUENTIAL_INHIBITOR,
-                Maximality.MAX_INTERLEAVING_IN_CIRCUIT,
-                Stuttering.PREFIX_REGISTER,
-                optSys,
-                optCom,
-                //                ModelCheckerMCHyper.VerificationAlgo.INT,
-                true,
-                //                VerificationAlgo.IC3, VerificationAlgo.BMC, VerificationAlgo.BMC2, VerificationAlgo.BMC3, VerificationAlgo.INT);
-                                VerificationAlgo.IC3, VerificationAlgo.BMC3);
-//                VerificationAlgo.IC3, VerificationAlgo.BMC3, VerificationAlgo.BMC2);
-//                VerificationAlgo.BMC3);
-//        PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
+        settings.setVerificationAlgo(VerificationAlgo.IC3, VerificationAlgo.BMC3);
+
+//          PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(3, 3);
         PetriNetWithTransits net = RedundantNetwork.getUpdatingNetwork(1, 1);
         String formula = "A F out";
 
-        RunFormula f = FlowLTLParser.parse(net, formula);
+        RunLTLFormula f = FlowLTLParser.parse(net, formula);
         String name = net.getName() + "_" + f.toString().replace(" ", "");
         AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + name + "_init", false, false, true);
 
@@ -137,8 +135,8 @@ public class MCFlowLTLSeqGenerators {
         AdamCircuitFlowLTLMCStatistics stats = new AdamCircuitFlowLTLMCStatistics();
         settings.setStatistics(stats);
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
-        ModelCheckingResult ret = mc.check(net, f);
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult ret = mc.check(net, f);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 //        System.out.println(ret.getAlgo());
 //        System.out.println("ABC sec: " + stats.getAbc_sec());
     }

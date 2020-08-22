@@ -14,8 +14,8 @@ import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.util.SDNTools;
 import uniolunisaar.adam.util.logics.FormulaCreator;
@@ -26,17 +26,17 @@ import uniolunisaar.adam.util.logics.FormulaCreator;
  */
 public class SDNFormelCreator {
 
-    public static RunFormula createConnectivity(PetriNetWithTransits pnwt) {
+    public static RunLTLFormula createConnectivity(PetriNetWithTransits pnwt) {
         List<ILTLFormula> egresses = new ArrayList<>();
         for (Place place : pnwt.getPlaces()) {
             if (place.hasExtension(SDNTools.egressExtension)) {
                 egresses.add(new LTLAtomicProposition(place));
             }
         }
-        return new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(egresses, false)));
+        return new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, FormulaCreator.bigWedgeOrVeeObject(egresses, false)));
     }
 
-    public static RunFormula createLoopFreedom(PetriNetWithTransits pnwt, boolean weak) {
+    public static RunLTLFormula createLoopFreedom(PetriNetWithTransits pnwt, boolean weak) {
         List<ILTLFormula> sws = new ArrayList<>();
         for (Place place : pnwt.getPlaces()) {
             if (place.hasExtension(SDNTools.switchExtension) && !place.hasExtension(SDNTools.egressExtension)) {
@@ -47,13 +47,13 @@ public class SDNFormelCreator {
         }
         LTLFormula f = new LTLFormula(LTLOperators.Unary.G, FormulaCreator.bigWedgeOrVeeObject(sws, true));
         if (!weak) {
-            return new RunFormula(FlowFormula.FlowOperator.A, f);
+            return new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, f);
         } else {
-            return new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, f));
+            return new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, f));
         }
     }
 
-    public static RunFormula createDropFreedom(PetriNetWithTransits pnwt) {
+    public static RunLTLFormula createDropFreedom(PetriNetWithTransits pnwt) {
         List<ILTLFormula> egrs = new ArrayList<>();
         for (Place place : pnwt.getPlaces()) {
             if (place.hasExtension(SDNTools.egressExtension)) {
@@ -66,7 +66,7 @@ public class SDNFormelCreator {
                 fwds.add(new LTLAtomicProposition(t));
             }
         }
-        return new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.G,
+        return new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.G,
                 new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(egrs, true),
                         LTLOperators.Binary.IMP,
                         FormulaCreator.bigWedgeOrVeeObject(fwds, false))));
@@ -95,7 +95,7 @@ public class SDNFormelCreator {
         return path;
     }
 
-    public static RunFormula createPackageCoherence(PetriNetWithTransits pnwt) {
+    public static RunLTLFormula createPackageCoherence(PetriNetWithTransits pnwt) {
         // Get Path_1
         // all places connected to a fwd transition with an initially 
         // marked activation place
@@ -138,7 +138,7 @@ public class SDNFormelCreator {
         for (Place place : path) {
             path2.add(new LTLAtomicProposition(place));
         }
-        return new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(
+        return new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(
                 new LTLFormula(LTLOperators.Unary.G, FormulaCreator.bigWedgeOrVeeObject(path1, false)),
                 LTLOperators.Binary.OR,
                 new LTLFormula(LTLOperators.Unary.G, FormulaCreator.bigWedgeOrVeeObject(path2, false))));

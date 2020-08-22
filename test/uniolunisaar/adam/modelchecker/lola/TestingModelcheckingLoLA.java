@@ -8,19 +8,20 @@ import uniol.apt.io.renderer.RenderException;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.LTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowFormula;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
-import uniolunisaar.adam.ds.modelchecking.ModelCheckingResult;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
+import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.generators.pnwt.UpdatingNetwork;
 import uniolunisaar.adam.util.PNWTTools;
-import static uniolunisaar.adam.logic.modelchecking.lola.ModelCheckerLoLA.check;
+import static uniolunisaar.adam.logic.modelchecking.ltl.lola.ModelCheckerLoLA.check;
 import uniolunisaar.adam.logic.transformers.modelchecking.lola.FlowLTLTransformerLoLA;
-import uniolunisaar.adam.logic.transformers.modelchecking.circuit.pnwt2pn.PnwtAndFlowLTLtoPNLoLA;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNLoLA;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -43,19 +44,19 @@ public class TestingModelcheckingLoLA {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
 
     }
 
@@ -64,11 +65,11 @@ public class TestingModelcheckingLoLA {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
+        LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
     }
 
     @Test
@@ -76,19 +77,19 @@ public class TestingModelcheckingLoLA {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
-        ModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
-        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
+        LTLModelCheckingResult ret = check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 
     @Test
     public void updatingNetworkExample() throws IOException, InterruptedException, RenderException, NotConvertableException, Exception {
         PetriNetWithTransits net = UpdatingNetwork.create(3, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("pOut"))));
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("pOut"))));
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
     }
@@ -98,26 +99,26 @@ public class TestingModelcheckingLoLA {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
         PNWTTools.saveAPT(net.getName(), net, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        RunFormula formula = new RunFormula(FlowFormula.FlowOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
-        PetriNetWithTransits mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
+        PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
 
         net = RedundantNetwork.getUpdatingIncorrectFixedMutexNetwork(1, 1);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
-        mc = PnwtAndFlowLTLtoPNLoLA.createNet4ModelCheckingSequential(net, formula);
+        mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
         check(mc, FlowLTLTransformerLoLA.createFormula4ModelChecking4LoLASequential(net, mc, formula), "./" + net.getName());
     }

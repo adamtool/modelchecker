@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.io.parser.ParseException;
-import uniolunisaar.adam.ds.logics.ltl.flowltl.RunFormula;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.pnwt.SDNCreator;
 import uniolunisaar.adam.util.PNWTTools;
@@ -61,7 +61,7 @@ public class TestSDNFormulaCreator {
     @Test
     public void testConnectivity() throws ParseException {
         PetriNetWithTransits pnwt = SDNCreator.parse(topologyA, updateChangePipeLineParallel, true);
-        RunFormula f = SDNFormelCreator.createConnectivity(pnwt);
+        RunLTLFormula f = SDNFormelCreator.createConnectivity(pnwt);
         String formula = f.toString();
         Assert.assertTrue(formula.startsWith("A F ("));
         Assert.assertTrue(formula.contains(" OR "));
@@ -82,7 +82,7 @@ public class TestSDNFormulaCreator {
         // optimized
         PetriNetWithTransits pnwt = SDNCreator.parse(topologyA, updateChangePipeLineParallel, true);
         // strong
-        RunFormula f = SDNFormelCreator.createLoopFreedom(pnwt, false);
+        RunLTLFormula f = SDNFormelCreator.createLoopFreedom(pnwt, false);
         String formula = f.toString();
         Assert.assertTrue(formula.startsWith("A G ("));
         Assert.assertTrue(formula.contains("(s1 IMP (s1 U G NEG s1)"));
@@ -117,7 +117,7 @@ public class TestSDNFormulaCreator {
     public void dropFreedom() throws ParseException {
         // optimized
         PetriNetWithTransits pnwt = SDNCreator.parse(topologyA, updateChangePipeLineParallel, true);
-        RunFormula f = SDNFormelCreator.createDropFreedom(pnwt);
+        RunLTLFormula f = SDNFormelCreator.createDropFreedom(pnwt);
         String formula = f.toString();
         Assert.assertTrue(formula.startsWith("A G ("));
         Assert.assertTrue(formula.contains("NEG s4"));
@@ -182,7 +182,7 @@ public class TestSDNFormulaCreator {
         // optimized
         PetriNetWithTransits pnwt = SDNCreator.parse(topologyA, updateChangePipeLineParallel, true);
         PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, true);
-        RunFormula f = SDNFormelCreator.createPackageCoherence(pnwt);
+        RunLTLFormula f = SDNFormelCreator.createPackageCoherence(pnwt);
         String formula = f.toString();
         Assert.assertTrue(formula.startsWith("A ("));
         String pfad1 = formula.substring(0, formula.lastIndexOf("G"));
