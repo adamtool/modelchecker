@@ -5,7 +5,7 @@ DEPENDENCIES_REV="HEAD,HEAD,HEAD"
 # the build target
 FRAMEWORK_TARGETS = tools petrinetwithtransits
 MODELCHECKING_TARGETS = logics mc
-t=jar
+t=javac
 
 # should be executed no matter if a file with the same name exists or not
 .PHONY: check_dependencies
@@ -16,6 +16,8 @@ t=jar
 .PHONY: logics
 .PHONY: mc
 #.PHONY: javadoc
+.PHONY: setJavac
+.PHONY: setJar
 .PHONY: setClean
 .PHONY: setCleanAll
 .PHONY: clean
@@ -62,6 +64,9 @@ logics: check_dependencies
 
 mc: check_dependencies
 	ant -buildfile ./build.xml $(t)
+
+setJavac:
+	$(eval t=javac)
 
 setClean:
 	$(eval t=clean)
