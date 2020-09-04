@@ -48,6 +48,9 @@
 	<target name="test-class" depends="loadProperties" description="Runs the tests of a specific class">
 		<antcall target="modelchecking.fu.test-class"/>
 	</target>
+	<target name="javac" depends="loadProperties" description="Compiles the module">
+		<antcall target="modelchecking.fu.javac"/>
+	</target>
 	<target name="jar" depends="loadProperties" description="Builds a jar with all its dependencies">
 		<antcall target="modelchecking.fu.jar"/>
 	</target>

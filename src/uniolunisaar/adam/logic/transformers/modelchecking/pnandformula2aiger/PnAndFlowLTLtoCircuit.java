@@ -265,7 +265,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     }
                     break;
                 default:
-                    throw new RuntimeException("Didn't provided a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
+                    throw new RuntimeException("Didn't provide a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
             }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
