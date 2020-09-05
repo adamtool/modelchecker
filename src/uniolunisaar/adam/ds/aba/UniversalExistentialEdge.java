@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.aba;
+package uniolunisaar.adam.ds.aba;
 
 import java.util.List;
 import uniol.apt.adt.exception.StructureException;

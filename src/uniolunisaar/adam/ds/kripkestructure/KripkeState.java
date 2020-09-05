@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.kripkestructure;
+package uniolunisaar.adam.ds.kripkestructure;
 
 import java.util.Arrays;
 import java.util.HashSet;

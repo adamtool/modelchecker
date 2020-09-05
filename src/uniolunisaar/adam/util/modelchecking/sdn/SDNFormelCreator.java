@@ -1,4 +1,4 @@
-package uniolunisaar.adam.util.mc.sdn;
+package uniolunisaar.adam.util.modelchecking.sdn;
 
 import java.util.ArrayList;
 import java.util.HashSet;

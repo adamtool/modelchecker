@@ -14,9 +14,9 @@ import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaOperato
 import uniolunisaar.adam.ds.automata.BuchiAutomaton;
 import uniolunisaar.adam.ds.automata.BuchiState;
 import uniolunisaar.adam.ds.automata.StringLabel;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAState;
-import uniolunisaar.adam.ds.modelchecking.aba.AlternatingBuchiAutomaton;
-import uniolunisaar.adam.ds.modelchecking.aba.IABALabeledEdge;
+import uniolunisaar.adam.ds.aba.ABAState;
+import uniolunisaar.adam.ds.aba.AlternatingBuchiAutomaton;
+import uniolunisaar.adam.ds.aba.IABALabeledEdge;
 import uniolunisaar.adam.logic.solver.PositiveBooleanFormulaSolverBDD;
 
 /**

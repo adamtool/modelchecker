@@ -12,7 +12,7 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.pnwt.SDNCreator;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.SDNTools;
-import uniolunisaar.adam.util.mc.sdn.SDNFormelCreator;
+import uniolunisaar.adam.util.modelchecking.sdn.SDNFormelCreator;
 
 /**
  *

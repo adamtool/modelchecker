@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.aba;
+package uniolunisaar.adam.ds.aba;
 
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormula;
 

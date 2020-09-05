@@ -1,4 +1,4 @@
-package uniolunisaar.adam.ds.modelchecking.kripkestructure;
+package uniolunisaar.adam.ds.kripkestructure;
 
 import uniolunisaar.adam.ds.automata.ILabel;
 

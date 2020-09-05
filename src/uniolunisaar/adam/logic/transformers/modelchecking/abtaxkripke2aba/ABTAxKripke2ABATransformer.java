@@ -14,18 +14,18 @@ import uniolunisaar.adam.ds.abta.posbooleanformula.ParameterizedPositiveBooleanF
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanConstants;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaBinary;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaOperators.Binary;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAHyperEdge;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAIntermediateEndEdge;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAOperatorState;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAState;
-import uniolunisaar.adam.ds.modelchecking.aba.ABATrueFalseEdge;
-import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
-import uniolunisaar.adam.ds.modelchecking.aba.IABANode;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.KripkeState;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.LabeledKripkeEdge;
+import uniolunisaar.adam.ds.aba.ABAHyperEdge;
+import uniolunisaar.adam.ds.aba.ABAIntermediateEndEdge;
+import uniolunisaar.adam.ds.aba.ABAOperatorState;
+import uniolunisaar.adam.ds.aba.ABAState;
+import uniolunisaar.adam.ds.aba.ABATrueFalseEdge;
+import uniolunisaar.adam.ds.aba.GeneralAlternatingBuchiAutomaton;
+import uniolunisaar.adam.ds.aba.IABANode;
+import uniolunisaar.adam.ds.kripkestructure.KripkeState;
+import uniolunisaar.adam.ds.kripkestructure.LabeledKripkeEdge;
 import uniolunisaar.adam.ds.automata.NodeLabel;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.TransitionLabel;
+import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
+import uniolunisaar.adam.ds.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.exceptions.modelchecking.NotTransformableException;
 
 /**

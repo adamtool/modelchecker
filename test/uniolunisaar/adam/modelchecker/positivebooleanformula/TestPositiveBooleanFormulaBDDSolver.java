@@ -6,8 +6,8 @@ import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormula;
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormulaAtom;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaFactory;
 import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaOperators;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAState;
-import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
+import uniolunisaar.adam.ds.aba.ABAState;
+import uniolunisaar.adam.ds.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.logic.solver.PositiveBooleanFormulaSolverBDD;
 
 /**

@@ -6,10 +6,10 @@ import java.util.List;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.util.Pair;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.KripkeState;
+import uniolunisaar.adam.ds.kripkestructure.KripkeState;
 import uniolunisaar.adam.ds.automata.NodeLabel;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.PnwtKripkeStructure;
-import uniolunisaar.adam.ds.modelchecking.kripkestructure.TransitionLabel;
+import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
+import uniolunisaar.adam.ds.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 

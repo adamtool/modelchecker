@@ -3,12 +3,12 @@ package uniolunisaar.adam.modelchecker.aba;
 import java.io.File;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAOperatorState;
-import uniolunisaar.adam.ds.modelchecking.aba.UniversalExistentialEdge;
-import uniolunisaar.adam.ds.modelchecking.aba.ABAState;
-import uniolunisaar.adam.ds.modelchecking.aba.ABATrueFalseEdge;
-import uniolunisaar.adam.ds.modelchecking.aba.GeneralAlternatingBuchiAutomaton;
-import uniolunisaar.adam.ds.modelchecking.aba.UniversalExistentialBuchiAutomaton;
+import uniolunisaar.adam.ds.aba.ABAOperatorState;
+import uniolunisaar.adam.ds.aba.UniversalExistentialEdge;
+import uniolunisaar.adam.ds.aba.ABAState;
+import uniolunisaar.adam.ds.aba.ABATrueFalseEdge;
+import uniolunisaar.adam.ds.aba.GeneralAlternatingBuchiAutomaton;
+import uniolunisaar.adam.ds.aba.UniversalExistentialBuchiAutomaton;
 import uniolunisaar.adam.tools.Tools;
 
 /**
