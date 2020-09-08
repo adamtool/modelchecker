@@ -1,7 +1,9 @@
+## @author Manuel Gieseking
+
 # dependencies (folders and repos should be equally ordered)
-DEPENDENCIES_FOLDERS="libs,framework,logics"
-DEPENDENCIES_REPOS="git@github.com:adamtool/libs.git,git@github.com:adamtool/framework.git,git@github.com:adamtool/logics.git"
-DEPENDENCIES_REV="HEAD,HEAD,HEAD"
+DEPENDENCIES_FOLDERS="libs,examples,framework,logics"
+DEPENDENCIES_REPOS="git@github.com:adamtool/libs.git,git@github.com:adamtool/examples.git,git@github.com:adamtool/framework.git,git@github.com:adamtool/logics.git"
+DEPENDENCIES_REV="HEAD,HEAD,HEAD,HEAD"
 # the build target
 FRAMEWORK_TARGETS = tools petrinetwithtransits
 MODELCHECKING_TARGETS = logics mc
@@ -43,7 +45,7 @@ endef
 all: $(FRAMEWORK_TARGETS) $(MODELCHECKING_TARGETS)
 
 check_dependencies:
-	if [ ! -d "dependencies" ]; then \
+	@if [ ! -d "dependencies" ]; then \
 		echo "The dependencies folder is missing. Please execute make pull_dependencies first.";\
 	fi
 
@@ -51,7 +53,7 @@ pull_dependencies:
 	./pull_dependencies.sh ${DEPENDENCIES_FOLDERS} ${DEPENDENCIES_REPOS}
 
 rm_dependencies:
-	rm -rf dependencies
+	$(RM) -rf dependencies
 
 tools: check_dependencies
 	ant -buildfile ./dependencies/framework/tools/build.xml $(t)
@@ -75,12 +77,12 @@ setCleanAll:
 	$(eval t=clean-all)
 
 clean: setClean $(FRAMEWORK_TARGETS) logics
-	rm -r -f deploy
-	rm -r -f javadoc
+	$(RM) -r -f deploy
+	$(RM) -r -f javadoc
 
 clean-all: setCleanAll $(FRAMEWORK_TARGETS) logics
-	rm -r -f deploy
-	rm -r -f javadoc
+	$(RM) -r -f deploy
+	$(RM) -r -f javadoc
 
 #javadoc:
 #	ant javadoc
