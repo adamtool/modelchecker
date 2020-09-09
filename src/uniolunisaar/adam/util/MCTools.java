@@ -77,7 +77,7 @@ public class MCTools {
                 PetriNetExtensionHandler.setYCoord(node, orig.getYCoord(orig.getNode(origID)));
                 continue;
             }
-            if (id.contains(PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID)) { // the initial places of the subnet
+            if (mcnet.containsPlace(node.getId()) && id.contains(PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID)) { // the initial places of the subnet
                 Place place = (Place) node;
                 int subnet = PetriNetExtensionHandler.getPartition(place);
                 PetriNetExtensionHandler.setXCoord(node, bb.getLeft() + bb.getWidth() / 2.0f + subnet * (padding + bb.getWidth()));
