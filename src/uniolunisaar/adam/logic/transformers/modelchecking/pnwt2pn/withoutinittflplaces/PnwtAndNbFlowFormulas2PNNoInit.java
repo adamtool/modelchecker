@@ -2,6 +2,7 @@ package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittf
 
 import java.util.ArrayList;
 import java.util.List;
+import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
@@ -25,6 +26,11 @@ public class PnwtAndNbFlowFormulas2PNNoInit {
         // Copy the original net
         PetriNetWithTransits out = new PetriNetWithTransits(orig);
         out.setName(orig.getName() + "_mc");
+
+        // delete the transits of the transition
+        for (Flow edge : out.getEdges()) {
+            out.removeTransit(edge);
+        }
 
         // delete the fairness assumption of all original transitions
         // and mark them as original

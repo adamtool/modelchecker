@@ -26,7 +26,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
      *
      *
      * @param net
-     * @param formula
+     * @param nbFlowFormulas
      * @return
      */
     public static PetriNetWithTransits createNet4ModelCheckingParallel(PetriNetWithTransits net, int nbFlowFormulas) {
@@ -264,16 +264,17 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
 
         // %%%% CLEANUP
         for (Transition t : net.getTransitions()) {
-            // delete the fairness assumption of all original transitions            
-            out.removeStrongFair(out.getTransition(t.getId()));
-            out.removeWeakFair(out.getTransition(t.getId()));
+            // delete the fairness assumption of all original transitions  
+            Transition tout = out.getTransition(t.getId());
+            out.removeStrongFair(tout);
+            out.removeWeakFair(tout);
             // delete all token flows
-            for (Place p : t.getPreset()) {
-                out.removeTransit(p, t);
+            for (Place p : tout.getPreset()) {
+                out.removeTransit(p, tout);
             }
-            for (Place p : t.getPostset()) {
-                out.removeTransit(t, p);
-            }
+            for (Place p : tout.getPostset()) {
+                out.removeTransit(tout, p);
+            }            
         }
         // and the initial token flow markers
         for (Place place : net.getPlaces()) {
@@ -494,17 +495,18 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                 }
             }
         }
-        // cleanup
+        // cleanup      
         for (Transition t : net.getTransitions()) {
-            // delete the fairness assumption of all original transitions            
-            out.removeStrongFair(out.getTransition(t.getId()));
-            out.removeWeakFair(out.getTransition(t.getId()));
+            // delete the fairness assumption of all original transitions  
+            Transition tout = out.getTransition(t.getId());
+            out.removeStrongFair(tout);
+            out.removeWeakFair(tout);
             // delete all token flows
-            for (Place p : t.getPreset()) {
-                out.removeTransit(p, t);
+            for (Place p : tout.getPreset()) {
+                out.removeTransit(p, tout);
             }
-            for (Place p : t.getPostset()) {
-                out.removeTransit(t, p);
+            for (Place p : tout.getPostset()) {
+                out.removeTransit(tout, p);
             }
         }
         // and the initial token flow markers
