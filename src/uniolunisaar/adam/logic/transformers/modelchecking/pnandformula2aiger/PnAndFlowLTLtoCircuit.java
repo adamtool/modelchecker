@@ -34,6 +34,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittfl
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParallelNoInit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSequentialNoInit;
+import uniolunisaar.adam.util.MCTools;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -267,6 +268,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                 default:
                     throw new RuntimeException("Didn't provide a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
             }
+            MCTools.addCoordinates(net,netMC);
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {

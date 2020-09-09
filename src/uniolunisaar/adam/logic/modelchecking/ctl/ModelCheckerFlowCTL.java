@@ -21,6 +21,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.flowctl2ctl.FlowCTLTra
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParInhibitorNoInit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.MCTools;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -75,6 +76,7 @@ public class ModelCheckerFlowCTL {
             default:
                 throw new NotConvertableException("Didn't consider the approach: " + settings.getApproach().name());
         }
+        MCTools.addCoordinates(net,mcNet);
         if (settings.isVerbose()) { // todo: should add an additional flag
             Logger.getInstance().addMessage(f.toSymbolString(), true);
             // color all original places
