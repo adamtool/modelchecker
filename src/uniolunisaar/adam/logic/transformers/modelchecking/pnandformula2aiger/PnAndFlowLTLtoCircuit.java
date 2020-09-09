@@ -268,7 +268,7 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                 default:
                     throw new RuntimeException("Didn't provide a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
             }
-            MCTools.addCoordinates(net,netMC);
+            MCTools.addCoordinates(net, netMC);
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {
