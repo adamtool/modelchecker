@@ -115,7 +115,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void testCounterExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -301,7 +301,7 @@ public class TestingModelcheckingFlowLTLSequential {
         net.createTransit(b, t1, d);
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunLTLFormula formula;
@@ -461,7 +461,7 @@ public class TestingModelcheckingFlowLTLSequential {
         Place b = net.getPlace("B");
         Place d = net.getPlace("D");
         Place e = net.getPlace("E");
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunLTLFormula formula;
@@ -682,7 +682,7 @@ public class TestingModelcheckingFlowLTLSequential {
         net.createFlow(restart, c);
         net.createFlow(e, restart);
         net.createFlow(f, restart);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -751,7 +751,7 @@ public class TestingModelcheckingFlowLTLSequential {
         // let the flows be alive
         net.setName(net.getName() + "_alive");
         net.createTransit(e, restart, a);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -800,7 +800,7 @@ public class TestingModelcheckingFlowLTLSequential {
         net.createInitialTransit(create, in);
         net.setWeakFair(net.getTransition("t"));
 
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -849,7 +849,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -954,7 +954,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -1003,7 +1003,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = true)
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -1142,7 +1142,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = false) // due to time
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -1298,7 +1298,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test
     public void testNoChains() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
 
@@ -1350,7 +1350,7 @@ public class TestingModelcheckingFlowLTLSequential {
     @Test(enabled = false) // due to time
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
         AdamCircuitFlowLTLMCOutputData dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDirInCircuit + net.getName(), false, false, true);

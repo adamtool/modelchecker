@@ -42,7 +42,7 @@ public class TestingModelcheckingLoLA {
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, NotConvertableException, Exception {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
@@ -51,7 +51,7 @@ public class TestingModelcheckingLoLA {
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -63,7 +63,7 @@ public class TestingModelcheckingLoLA {
     @Test
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, NotConvertableException, Exception {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
@@ -75,7 +75,7 @@ public class TestingModelcheckingLoLA {
     @Test
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, NotConvertableException, Exception {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());
@@ -97,7 +97,7 @@ public class TestingModelcheckingLoLA {
     @Test(enabled = false)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, NotConvertableException, Exception {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("out"))));
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelCheckingSequential(net, LogicsTools.getFlowLTLFormulas(formula).size());

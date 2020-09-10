@@ -86,7 +86,7 @@ public class TestingFlowLTLTransformer {
         net.createTransit(b, t1, d);
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
 //        RunFormula formula = new RunFormula(new LTLFormula(LTLOperators.Unary.F, new AtomicProposition(t2)), RunOperators.Implication.IMP, new FlowFormula(new AtomicProposition(f)));

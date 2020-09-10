@@ -76,7 +76,7 @@ public class ModelCheckerFlowCTL {
             default:
                 throw new NotConvertableException("Didn't consider the approach: " + settings.getApproach().name());
         }
-        MCTools.addCoordinates(net,mcNet);
+        MCTools.addCoordinates(net, mcNet);
         if (settings.isVerbose()) { // todo: should add an additional flag
             Logger.getInstance().addMessage(f.toSymbolString(), true);
             // color all original places
@@ -86,7 +86,7 @@ public class ModelCheckerFlowCTL {
                 }
             }
             try {
-                PNWTTools.saveAPT(settings.getOutputPath() + "_mc", mcNet, false);
+                PNWTTools.saveAPT(settings.getOutputPath() + "_mc", mcNet, true, true);
             } catch (RenderException | FileNotFoundException ex) {
             }
             PNWTTools.savePnwt2PDF(settings.getOutputPath() + "_mc", mcNet, true, flowFormulas.size() + 1);

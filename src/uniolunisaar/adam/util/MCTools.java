@@ -18,33 +18,6 @@ import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittfl
 public class MCTools {
 
     /**
-     * Calculates the extension of the given Petri net with transits.
-     *
-     * @param net - the Petri net with transits
-     * @return a bounding box we the extensions of net
-     */
-    public static BoundingBox calculateBoundingBox(PetriNetWithTransits net) {
-        double top = Double.MAX_VALUE, bottom = -Double.MAX_VALUE, left = Double.MAX_VALUE, right = -Double.MAX_VALUE;
-        for (Node node : net.getNodes()) {
-            double xcoord = net.getXCoord(node);
-            if (xcoord < left) {
-                left = xcoord;
-            }
-            if (xcoord > right) {
-                right = xcoord;
-            }
-            double ycoord = net.getYCoord(node);
-            if (ycoord < top) {
-                top = ycoord;
-            }
-            if (ycoord > bottom) {
-                bottom = ycoord;
-            }
-        }
-        return new BoundingBox(top, bottom, left, right);
-    }
-
-    /**
      * Sets the y-coordinates of the places of the mcnet corresponding to places
      * in orig to the same value and the x-coordinates of the original
      * transitions and places also the same values as in orig. For all places in
@@ -54,7 +27,7 @@ public class MCTools {
      * @param mcnet
      */
     public static void addCoordinates(PetriNetWithTransits orig, PetriNet mcnet) {
-        BoundingBox bb = calculateBoundingBox(orig);
+        BoundingBox bb = PNTools.calculateBoundingBox(orig);
         final double padding = 50;
         final double topPadding = 10;
         for (Node node : mcnet.getNodes()) {

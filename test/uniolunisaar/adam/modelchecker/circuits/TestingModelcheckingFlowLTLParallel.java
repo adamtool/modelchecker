@@ -267,7 +267,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void testCounterExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -434,7 +434,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createTransit(b, t1, d);
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName() + "_net", net, false);
 
         RunLTLFormula formula;
@@ -588,7 +588,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createTransit(b, t1, d);
         net.createTransit(d, t2, e, b);
         net.createInitialTransit(t2, f);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunLTLFormula formula;
@@ -793,7 +793,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createFlow(restart, c);
         net.createFlow(e, restart);
         net.createFlow(f, restart);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -864,7 +864,7 @@ public class TestingModelcheckingFlowLTLParallel {
         // let the flows be alive
         net.setName(net.getName() + "_alive");
         net.createTransit(e, restart, a);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -914,7 +914,7 @@ public class TestingModelcheckingFlowLTLParallel {
         net.createInitialTransit(create, in);
         net.setWeakFair(net.getTransition("t"));
 
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         String formula;
@@ -961,7 +961,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
 
         String formula = "F out";
@@ -995,7 +995,7 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
-        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         mcNet = PnwtAndNbFlowFormulas2PNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
         PNWTTools.savePnwt2PDF(outDir + net.getName() + "_mc", mcNet, true);
@@ -1007,7 +1007,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
-        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
         RunLTLFormula f = FlowLTLParser.parse(net, formula);
@@ -1037,7 +1037,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
-        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
         RunLTLFormula f = FlowLTLParser.parse(net, formula);
@@ -1130,7 +1130,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, ParseException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
-        PNWTTools.saveAPT(outDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
         String formula = "A F out";
         RunLTLFormula f = FlowLTLParser.parse(net, formula);
@@ -1188,7 +1188,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test
     public void testNoChains() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/accessControl.apt"), false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
 //        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
@@ -1234,7 +1234,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test(enabled = true)
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
 //        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
@@ -1317,7 +1317,7 @@ public class TestingModelcheckingFlowLTLParallel {
     @Test
     public void testCounterExampleATVA() throws Exception {
         PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/ATVA19_motivatingExample.apt"), false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunLTLFormula formula = new RunLTLFormula(FlowLTLFormula.FlowLTLOperator.A, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace("p6"))));

@@ -136,7 +136,7 @@ public class TestingIngoingFlowLTL {
         net.createTransit(b, o1, d);
         net.createTransit(d, o2, e, b);
         net.createInitialTransit(o2, f);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunLTLFormula formula;
@@ -224,7 +224,7 @@ public class TestingIngoingFlowLTL {
         Place b = net.getPlace("B");
         Place d = net.getPlace("D");
         Place e = net.getPlace("E");
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         RunLTLFormula formula;
@@ -302,7 +302,7 @@ public class TestingIngoingFlowLTL {
         net.createFlow(restart, c);
         net.createFlow(e, restart);
         net.createFlow(f, restart);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -386,7 +386,7 @@ public class TestingIngoingFlowLTL {
         // let the flows be alive
         net.setName(net.getName() + "_alive");
         net.createTransit(e, restart, a);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -621,7 +621,7 @@ public class TestingIngoingFlowLTL {
         net.createFlow(restart, net.getPlace("C"));
         net.createFlow(net.getPlace("E"), restart);
         net.createFlow(net.getPlace("F"), restart);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 
         // should be false because there should be maximal runs

@@ -13,7 +13,6 @@ import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
@@ -35,6 +34,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittfl
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSequentialNoInit;
 import uniolunisaar.adam.util.MCTools;
+import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.benchmarks.modelchecking.BenchmarksMC;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
@@ -126,19 +126,6 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     } else {
                         throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
                     }
-                    if (data.isOutputTransformedNet()) {
-                        // color all original places
-                        for (Place p : netMC.getPlaces()) {
-                            if (!netMC.hasPartition(p)) {
-                                netMC.setPartition(p, 0);
-                            }
-                        }
-                        try {
-                            PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
-                        } catch (RenderException | FileNotFoundException ex) {
-                        }
-                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
-                    }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
 
                         if (semantics == TransitionSemantics.OUTGOING) {
@@ -174,19 +161,6 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     } else {
                         throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
                     }
-                    if (data.isOutputTransformedNet()) {
-                        // color all original places
-                        for (Place p : netMC.getPlaces()) {
-                            if (!netMC.hasPartition(p)) {
-                                netMC.setPartition(p, 0);
-                            }
-                        }
-                        try {
-                            PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
-                        } catch (RenderException | FileNotFoundException ex) {
-                        }
-                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
-                    }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
                         if (semantics == TransitionSemantics.OUTGOING) {
                             formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
@@ -214,19 +188,6 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     } else {
                         throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
                     }
-                    if (data.isOutputTransformedNet()) {
-                        // color all original places
-                        for (Place p : netMC.getPlaces()) {
-                            if (!netMC.hasPartition(p)) {
-                                netMC.setPartition(p, 0);
-                            }
-                        }
-                        try {
-                            PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
-                        } catch (RenderException | FileNotFoundException ex) {
-                        }
-                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
-                    }
                     if (semantics == TransitionSemantics.OUTGOING) {
                         formulaMC = new FlowLTLTransformerOutgoingSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     } else if (semantics == TransitionSemantics.INGOING) {
@@ -244,19 +205,6 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     } else {
                         throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
                     }
-                    if (data.isOutputTransformedNet()) {
-                        // color all original places
-                        for (Place p : netMC.getPlaces()) {
-                            if (!netMC.hasPartition(p)) {
-                                netMC.setPartition(p, 0);
-                            }
-                        }
-                        try {
-                            PNWTTools.saveAPT(data.getPath() + "_mc", netMC, false);
-                        } catch (RenderException | FileNotFoundException ex) {
-                        }
-                        PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
-                    }
                     if (semantics == TransitionSemantics.OUTGOING) {
                         formulaMC = new FlowLTLTransformerOutgoingSequential().createFormula4ModelChecking4CircuitSequential(net, netMC, f, settings);
                     } else if (semantics == TransitionSemantics.INGOING) {
@@ -269,6 +217,19 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     throw new RuntimeException("Didn't provide a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
             }
             MCTools.addCoordinates(net, netMC);
+            if (data.isOutputTransformedNet()) {
+                // color all original places
+                for (Place p : netMC.getPlaces()) {
+                    if (!netMC.hasPartition(p)) {
+                        netMC.setPartition(p, 0);
+                    }
+                }
+                try {
+                    PNWTTools.saveAPT(data.getPath() + "_mc", netMC, true, true);
+                } catch (RenderException | FileNotFoundException ex) {
+                }
+                PNWTTools.savePnwt2PDF(data.getPath() + "_mc", netMC, true, flowFormulas.size() + 1);
+            }
         }
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLLECT STATISTICS
         if (stats != null) {

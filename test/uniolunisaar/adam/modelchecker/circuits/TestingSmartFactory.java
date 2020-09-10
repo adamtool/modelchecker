@@ -59,7 +59,7 @@ public class TestingSmartFactory {
     @Test(enabled = true)
     public void testSmartFactoryFixed() throws ParseException, InterruptedException, IOException, NotConvertableException, ProcessNotStartedException, ExternalToolException, RenderException {
         PetriNetWithTransits net = SmartFactory.createMillingDrillingDeburringValidationExample(false);
-        PNWTTools.saveAPT(outputDir + net.getName(), net, true);
+        PNWTTools.saveAPT(outputDir + net.getName(), net, true, false);
 
         RunLTLFormula f;
         LTLModelCheckingResult ret;

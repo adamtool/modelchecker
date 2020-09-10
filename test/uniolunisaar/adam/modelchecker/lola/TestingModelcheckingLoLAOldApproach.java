@@ -123,7 +123,7 @@ public class TestingModelcheckingLoLAOldApproach {
     @Test
     public void checkFirstExample() throws RenderException, IOException, InterruptedException, FileNotFoundException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExample(true);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -132,7 +132,7 @@ public class TestingModelcheckingLoLAOldApproach {
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
 
         net = ToyExamples.createFirstExample(false);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -144,7 +144,7 @@ public class TestingModelcheckingLoLAOldApproach {
     @Test
     public void checkFirstExampleExtended() throws RenderException, IOException, InterruptedException, FileNotFoundException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(true);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -156,7 +156,7 @@ public class TestingModelcheckingLoLAOldApproach {
     @Test
     public void checkFirstExampleExtendedPositiv() throws RenderException, IOException, InterruptedException, FileNotFoundException, ExternalToolException {
         PetriNetWithTransits net = ToyExamples.createFirstExampleExtended(false);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
@@ -179,7 +179,7 @@ public class TestingModelcheckingLoLAOldApproach {
     @Test
     public void redundantFlowExample() throws IOException, InterruptedException, RenderException, Exception {
         PetriNetWithTransits net = RedundantNetwork.getBasis(1, 1);
-        PNWTTools.saveAPT(net.getName(), net, false);
+        PNWTTools.saveAPT(net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(net.getName(), net, false);
         PetriNetWithTransits mc = PnwtAndNbFlowFormulas2PNLoLA.createNet4ModelChecking4LoLA(net);
         PNWTTools.savePnwt2PDF(net.getName() + "_mc", mc, true);
