@@ -37,6 +37,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
+        out.setPartition(actO, 0);
 
         for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
             // adds the subnet which only creates places and copies of transitions for each flow
@@ -342,6 +343,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
         for (Transition t : net.getTransitions()) {
             if (!net.getTransits(t).isEmpty()) { // only for those which have tokenflows
                 Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+                out.setPartition(act, 0);
                 act.setInitialToken(1);
             }
         }
@@ -352,6 +354,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
             // create an initial place representing the chosen place
             Place init = out.createPlace(INIT_TOKENFLOW_ID + "-" + nb_ff);
             init.setInitialToken(1);
+            out.setPartition(init, nb_ff + 1);
 
             // collect the places which are newly created to only copy the necessary part of the net
             List<Place> todo = new ArrayList<>();
@@ -363,8 +366,10 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                     // create the place which is states that the chain is currently in this place
                     Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
                     out.setOrigID(p, place.getId());
+                    out.setPartition(p, nb_ff + 1);
                     // create the dual place of p
                     Place pNot = out.createPlace("!" + place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
+                    out.setPartition(pNot, nb_ff + 1);
                     pNot.setInitialToken(1);
                     out.setOrigID(pNot, place.getId());
                     // create a transition which move the token for the chain to this new initial place of a token chain
@@ -386,6 +391,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                 Place act = null;
                 if (!tfl.getPostset().isEmpty()) {
                     act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
+                    out.setPartition(act, nb_ff + 1);
                 }
                 // for all token flows which are created during the game
                 for (Place post : tfl.getPostset()) {
@@ -396,10 +402,12 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                     if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                         // create the place itself
                         p = out.createPlace(id);
+                        out.setPartition(p, nb_ff + 1);
                         out.setOrigID(p, post.getId());
                         todo.add(p);
                         // create the dual place of p
                         pNot = out.createPlace("!" + id);
+                        out.setPartition(pNot, nb_ff + 1);
                         pNot.setInitialToken(1);
                         out.setOrigID(pNot, post.getId());
                     } else {
@@ -440,6 +448,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                         String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                         if (!out.containsNode(id)) {
                             act = out.createPlace(id);
+                            out.setPartition(act, nb_ff + 1);
                         } else {
                             act = out.getPlace(id);
                         }
@@ -455,9 +464,11 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                             // create the place itself
                             pPost = out.createPlace(id);
                             out.setOrigID(pPost, post.getId());
+                            out.setPartition(pPost, nb_ff + 1);
                             todo.add(pPost);
                             // create the dual place of p
                             pPostNot = out.createPlace("!" + id);
+                            out.setPartition(pPostNot, nb_ff + 1);
                             pPostNot.setInitialToken(1);
                             out.setOrigID(pPostNot, post.getId());
                         } else {
@@ -609,6 +620,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
         for (Transition t : net.getTransitions()) {
             if (!net.getTransits(t).isEmpty()) { // only for those which have tokenflows
                 Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+                out.setPartition(act, 0);
                 act.setInitialToken(1);
             }
         }
@@ -623,6 +635,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
         for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) {
             // create an initial place representing the chosen place
             Place init = out.createPlace(INIT_TOKENFLOW_ID + "-" + nb_ff);
+            out.setPartition(init, nb_ff + 1);
             init.setInitialToken(1);
 
             // collect the places which are newly created to only copy the necessary part of the net
@@ -634,9 +647,11 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                 if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
                     // create the place which is states that the chain is currently in this place
                     Place p = out.createPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
+                    out.setPartition(p, nb_ff + 1);
                     out.setOrigID(p, place.getId());
                     // create the dual place of p
                     Place pNot = out.createPlace("!" + place.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
+                    out.setPartition(pNot, nb_ff + 1);
                     pNot.setInitialToken(1);
                     out.setOrigID(pNot, place.getId());
                     // create a transition which move the token for the chain to this new initial place of a token chain
@@ -654,6 +669,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
             // create the place and transition which choses that a new chain will be created during the processing of the net
             Transition newTfl = out.createTransition(INIT_TOKENFLOW_ID + "-" + NEW_TOKENFLOW_ID + "-" + nb_ff);
             Place newTflPlace = out.createPlace(NEW_TOKENFLOW_ID + "-" + nb_ff);
+            out.setPartition(newTflPlace, nb_ff + 1);
             out.createFlow(INIT_TOKENFLOW_ID + "-" + nb_ff, newTfl.getId());
             out.createFlow(newTfl, newTflPlace);
             // put the places into the former initial marking
@@ -671,6 +687,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                 Place act = null;
                 if (!tfl.getPostset().isEmpty()) {
                     act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff);
+                    out.setPartition(act, nb_ff + 1);
                 }
                 // for all token flows which are created during the game
                 for (Place post : tfl.getPostset()) {
@@ -681,10 +698,12 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                     if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                         // create the place itself
                         p = out.createPlace(id);
+                        out.setPartition(p, nb_ff + 1);
                         out.setOrigID(p, post.getId());
                         todo.add(p);
                         // create the dual place of p
                         pNot = out.createPlace("!" + id);
+                        out.setPartition(pNot, nb_ff + 1);
                         pNot.setInitialToken(1);
                         out.setOrigID(pNot, post.getId());
                     } else {
@@ -724,6 +743,7 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                         String id = ACTIVATION_PREFIX_ID + t.getId() + TOKENFLOW_SUFFIX_ID + "-" + nb_ff;
                         if (!out.containsNode(id)) {
                             act = out.createPlace(id);
+                            out.setPartition(act, nb_ff + 1);
                         } else {
                             act = out.getPlace(id);
                         }
@@ -738,10 +758,12 @@ public class PnwtAndNbFlowFormulas2PNSequential extends PnwtAndNbFlowFormulas2PN
                         if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                             // create the place itself
                             pPost = out.createPlace(id);
+                            out.setPartition(pPost, nb_ff + 1);
                             out.setOrigID(pPost, post.getId());
                             todo.add(pPost);
                             // create the dual place of p
                             pPostNot = out.createPlace("!" + id);
+                            out.setPartition(pPostNot, nb_ff + 1);
                             pPostNot.setInitialToken(1);
                             out.setOrigID(pPostNot, post.getId());
                         } else {

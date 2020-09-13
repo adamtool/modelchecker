@@ -98,6 +98,7 @@ public class PnwtAndNbFlowFormulas2PNLoLA {
         // as soon as we started to check a token chain
         for (Transition t : net.getTransitions()) {
             Place act = out.createPlace("act_" + t.getId());
+            out.setPartition(act, 0);
             act.setInitialToken(1);
             out.createFlow(act, t);
             out.createFlow(t, act);
@@ -106,11 +107,13 @@ public class PnwtAndNbFlowFormulas2PNLoLA {
         // add Place for the beginning of the guessed chain
         Place init = out.createPlace("init_tfl");
         init.setInitialToken(1);
+        out.setPartition(init, 1);
         // Add places which create a new token flow
         // via initial places
         for (Place place : net.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
                 Place p = out.createPlace(place.getId() + "_tf");
+                out.setPartition(p, 1);
                 todo.add(p);
                 out.setOrigID(p, place.getId());
                 Transition t = out.createTransition(place.getId() + "_tf_new");
@@ -136,6 +139,7 @@ public class PnwtAndNbFlowFormulas2PNLoLA {
                 Place p;
                 if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                     p = out.createPlace(id);
+                    out.setPartition(p, 1);
                     todo.add(p);
                     out.setOrigID(p, post.getId());
                 } else {
@@ -178,6 +182,7 @@ public class PnwtAndNbFlowFormulas2PNLoLA {
                     tout.setLabel(t.getId() + "_fair");
                     out.setStrongFair(tout);
                     buffer = out.createPlace();
+                    out.setPartition(buffer, 1);
                     out.createFlow(pl, tout);
                     out.createFlow(tout, buffer);
                     for (Place place : t.getPreset()) { // remove the tokens in the original net
@@ -200,6 +205,7 @@ public class PnwtAndNbFlowFormulas2PNLoLA {
                     Place pout;
                     if (!out.containsPlace(id)) { // create a new one if not already existent
                         pout = out.createPlace(id);
+                        out.setPartition(pout, +1);
                         todo.add(pout);
                         out.setOrigID(pout, post.getId());
                     } else {

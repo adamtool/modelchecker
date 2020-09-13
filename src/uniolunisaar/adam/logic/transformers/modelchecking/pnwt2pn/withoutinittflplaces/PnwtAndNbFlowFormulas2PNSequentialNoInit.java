@@ -30,6 +30,7 @@ public class PnwtAndNbFlowFormulas2PNSequentialNoInit extends PnwtAndNbFlowFormu
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
+        out.setPartition(actO, 0);
         actO.setInitialToken(1);
 
         for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
@@ -107,7 +108,7 @@ public class PnwtAndNbFlowFormulas2PNSequentialNoInit extends PnwtAndNbFlowFormu
             }
         }
 
-        if (nbFlowFormulas > 0) {            
+        if (nbFlowFormulas > 0) {
             for (Transition t : orig.getTransitions()) {
                 // take the active token
                 out.createFlow(actO, t);

@@ -32,6 +32,7 @@ public class PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit extends PnwtAndNbFlowFor
 
         // create one activation place for all original transitions
         Place actO = out.createPlace(ACTIVATION_PREFIX_ID + "orig");
+        out.setPartition(actO, 0);
         actO.setInitialToken(1);
 
         for (int nb_ff = 0; nb_ff < nb_flowFormulas; nb_ff++) {

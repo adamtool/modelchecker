@@ -208,6 +208,7 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
         List<Place> todo = new ArrayList<>();
         // add Place for the beginning of the guessed chain
         Place init = out.createPlace(INIT_TOKENFLOW_ID + "_0");
+        out.setPartition(init, 1);
         init.setInitialToken(1);
         // Add places which create a new token flow
         List<Integer> subNetid = new ArrayList<>();
@@ -223,6 +224,7 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
                 Place p;
                 if (!out.containsPlace(id)) { // create or get the place in which the chain is created
                     p = out.createPlace(id);
+                    out.setPartition(p, 1);
                     todo.add(p);
                     out.setOrigID(p, post.getId());
                     // add an inhibitor arc to all original transitions whichs succeed this chain
@@ -266,6 +268,7 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
                     Place pout;
                     if (!out.containsPlace(id)) { // create a new one if not already existent
                         pout = out.createPlace(id);
+                        out.setPartition(pout, 1);
                         todo.add(pout);
                         out.setOrigID(pout, post.getId());
                         // add an inhibitor arc to all original transitions whichs succeeds this chain

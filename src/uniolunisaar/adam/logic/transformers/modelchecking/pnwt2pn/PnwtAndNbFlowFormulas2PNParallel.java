@@ -155,6 +155,7 @@ public class PnwtAndNbFlowFormulas2PNParallel extends PnwtAndNbFlowFormulas2PN {
         // as soon as we started to check a token chain
         for (Transition t : net.getTransitions()) {
             Place act = out.createPlace(ACTIVATION_PREFIX_ID + t.getId());
+            out.setPartition(act, 0);
             act.setInitialToken(1);
             out.createFlow(act, t);
             out.createFlow(t, act);
