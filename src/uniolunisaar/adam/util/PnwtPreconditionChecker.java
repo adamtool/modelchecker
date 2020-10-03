@@ -1,7 +1,6 @@
 package uniolunisaar.adam.util;
 
 import uniol.apt.adt.IGraph;
-import uniol.apt.adt.IGraphListener;
 import uniol.apt.adt.pn.Flow;
 import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.PetriNet;
@@ -17,36 +16,30 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
  *
  * @author Manuel Gieseking
  */
-public class PreconditionChecker implements IGraphListener<PetriNet, Flow, Node> {
+public class PnwtPreconditionChecker extends PreconditionChecker {
 
-    private final PetriNetWithTransits pnwt;
     private BoundedResult bounded = null;
-    private boolean isChanged = true;
 
-    public PreconditionChecker(PetriNetWithTransits pnwt) {
-        this.pnwt = pnwt;
-        this.pnwt.addListener(this);
+    public PnwtPreconditionChecker(PetriNetWithTransits pnwt) {
+        super(pnwt);
     }
 
+    @Override
     public boolean check() {
         return isSafe();
     }
 
     public boolean isSafe() {
         if (bounded == null) {
-            bounded = Bounded.checkBounded(pnwt);
+            bounded = Bounded.checkBounded(getNet());
         }
         return bounded.isSafe();
     }
 
-    public boolean isIsChanged() {
-        return isChanged;
-    }
-
     @Override
     public boolean changeOccurred(IGraph<PetriNet, Flow, Node> graph) {
+        super.changeOccurred(graph);
         bounded = null;
-        isChanged = true;
         return true;
     }
 
