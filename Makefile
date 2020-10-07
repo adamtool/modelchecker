@@ -1,10 +1,13 @@
+## @author Manuel Gieseking
+
 # dependencies (folders and repos should be equally ordered)
-DEPENDENCIES_FOLDERS="libs,framework,logics"
-DEPENDENCIES_REPOS="git@github.com:adamtool/libs.git,git@github.com:adamtool/framework.git,git@github.com:adamtool/logics.git"
+DEPENDENCIES_FOLDERS="libs,examples,framework,logics"
+DEPENDENCIES_REPOS="git@github.com:adamtool/libs.git,git@github.com:adamtool/examples.git,git@github.com:adamtool/framework.git,git@github.com:adamtool/logics.git"
+DEPENDENCIES_REV="HEAD,HEAD,HEAD,HEAD"
 # the build target
 FRAMEWORK_TARGETS = tools petrinetwithtransits
 MODELCHECKING_TARGETS = logics mc
-t=jar
+t=javac
 
 # should be executed no matter if a file with the same name exists or not
 .PHONY: check_dependencies
@@ -16,6 +19,8 @@ t=jar
 .PHONY: mc
 #.PHONY: javadoc
 .PHONY: setStandalone
+.PHONY: setJavac
+.PHONY: setJar
 .PHONY: setClean
 .PHONY: setCleanAll
 .PHONY: clean
@@ -49,7 +54,7 @@ pull_dependencies:
 	./pull_dependencies.sh ${DEPENDENCIES_FOLDERS} ${DEPENDENCIES_REPOS}
 
 rm_dependencies:
-	rm -rf dependencies
+	$(RM) -rf dependencies
 
 tools: check_dependencies
 	ant -buildfile ./dependencies/framework/tools/build.xml $(t)
@@ -65,6 +70,9 @@ mc: check_dependencies
 
 setStandalone:
 	$(eval t=jar-standalone)
+
+setJavac:
+	$(eval t=javac)
 
 setClean:
 	$(eval t=clean)
