@@ -114,7 +114,7 @@ public class TestingModelcheckingLoLAOldApproach {
 
     @Test
     public void testLoLa() throws ParseException, IOException, RenderException, InterruptedException, Exception {
-        final String path = System.getProperty("examplesfolder") + "/forallsafety/burglar/";
+        final String path = System.getProperty("examplesfolder") + "/synthesis/forallsafety/burglar/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
         final String formula = "EF qbadA > 0 OR qbadB > 0";
         check(pn, formula, path + "burglar");

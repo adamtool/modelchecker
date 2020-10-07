@@ -79,7 +79,7 @@ public class TestingIngoingLTL {
 
     @Test(enabled = true)
     void testFirstExamplePaper() throws Exception {
-        final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
+        final String path = System.getProperty("examplesfolder") + "/synthesis/forallsafety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
         pn.rename(pn.getPlace("A"), "a");
