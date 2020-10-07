@@ -18,6 +18,7 @@ t=javac
 .PHONY: logics
 .PHONY: mc
 #.PHONY: javadoc
+.PHONY: setStandalone
 .PHONY: setJavac
 .PHONY: setJar
 .PHONY: setClean
@@ -67,6 +68,9 @@ logics: check_dependencies
 mc: check_dependencies
 	ant -buildfile ./build.xml $(t)
 
+setStandalone:
+	$(eval t=jar-standalone)
+
 setJavac:
 	$(eval t=javac)
 
@@ -76,13 +80,13 @@ setClean:
 setCleanAll:
 	$(eval t=clean-all)
 
-clean: setClean $(FRAMEWORK_TARGETS) logics
-	$(RM) -r -f deploy
-	$(RM) -r -f javadoc
+clean: setClean $(FRAMEWORK_TARGETS) $(MODELCHECKING_TARGETS)
+	rm -r -f deploy
+	rm -r -f javadoc
 
-clean-all: setCleanAll $(FRAMEWORK_TARGETS) logics
-	$(RM) -r -f deploy
-	$(RM) -r -f javadoc
+clean-all: setCleanAll $(FRAMEWORK_TARGETS) $(MODELCHECKING_TARGETS)
+	rm -r -f deploy
+	rm -r -f javadoc
 
 #javadoc:
 #	ant javadoc
