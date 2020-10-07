@@ -89,9 +89,9 @@ ant test
 ```
 For testing a specific class use for example
 ```
-ant test-class -Dclass.name=uniolunisaar.adam.tests.logics.flowltl.TestFlowLTL
+ant test-class -Dclass.name=uniolunisaar.adam.tests.mc.circuits.TestingIngoingLTL
 ```
 and for testing a specific method use for example
 ```
-ant test-method -Dclass.name=uniolunisaar.adam.tests.transformers.TestCTL2ABTA -Dmethod.name=firstTest
+ant test-method -Dclass.name=uniolunisaar.adam.tests.mc.circuits.TestingModelcheckingFlowLTLParallel -Dmethod.name=exampleToolPaper
 ```
