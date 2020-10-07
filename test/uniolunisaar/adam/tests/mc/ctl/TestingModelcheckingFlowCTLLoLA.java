@@ -198,7 +198,7 @@ public class TestingModelcheckingFlowCTLLoLA {
 
     @Test(enabled = true)
     void testFirstExamplePaper() throws Exception {
-        final String path = System.getProperty("examplesfolder") + "/forallsafety/firstExamplePaper/";
+        final String path = System.getProperty("examplesfolder") + "/synthesis/forallsafety/firstExamplePaper/";
         PetriNetWithTransits net = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         Transition start = net.createTransition("startFlow");
         Place sys = net.getPlace("Sys");
