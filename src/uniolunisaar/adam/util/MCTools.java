@@ -28,6 +28,9 @@ public class MCTools {
      */
     public static void addCoordinates(PetriNetWithTransits orig, PetriNet mcnet) {
         BoundingBox bb = PNTools.calculateBoundingBox(orig);
+        if (bb == null) {
+            return;
+        }
         final double padding = 50;
         final double topPadding = 10;
         for (Node node : mcnet.getNodes()) {
