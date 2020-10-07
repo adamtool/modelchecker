@@ -59,7 +59,7 @@ public class TestingAiger {
 
     @Test(enabled = true)
     void testAigerRenderer() throws ParseException, IOException, InterruptedException, ExternalToolException {
-        final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
+        final String path = System.getProperty("examplesfolder") + "/forallsafety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
 //        PNWTTools.savePnwt2PDF(outputDir + "/example", new PetriNetWithTransits(pn), false);
         testAiger(pn);
