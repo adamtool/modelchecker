@@ -15,6 +15,7 @@ t=jar
 .PHONY: logics
 .PHONY: mc
 #.PHONY: javadoc
+.PHONY: setStandalone
 .PHONY: setClean
 .PHONY: setCleanAll
 .PHONY: clean
@@ -40,7 +41,7 @@ endef
 all: $(FRAMEWORK_TARGETS) $(MODELCHECKING_TARGETS)
 
 check_dependencies:
-	if [ ! -d "dependencies" ]; then \
+	@if [ ! -d "dependencies" ]; then \
 		echo "The dependencies folder is missing. Please execute make pull_dependencies first.";\
 	fi
 
@@ -62,17 +63,20 @@ logics: check_dependencies
 mc: check_dependencies
 	ant -buildfile ./build.xml $(t)
 
+setStandalone:
+	$(eval t=jar-standalone)
+
 setClean:
 	$(eval t=clean)
 
 setCleanAll:
 	$(eval t=clean-all)
 
-clean: setClean $(FRAMEWORK_TARGETS) logics
+clean: setClean $(FRAMEWORK_TARGETS) $(MODELCHECKING_TARGETS)
 	rm -r -f deploy
 	rm -r -f javadoc
 
-clean-all: setCleanAll $(FRAMEWORK_TARGETS) logics
+clean-all: setCleanAll $(FRAMEWORK_TARGETS) $(MODELCHECKING_TARGETS)
 	rm -r -f deploy
 	rm -r -f javadoc
 
