@@ -354,7 +354,7 @@ public class TestingModelcheckingLTL {
 
     @Test(enabled = true)
     void testFirstExamplePaper() throws ParseException, IOException, InterruptedException, NotSubstitutableException, ProcessNotStartedException, ExternalToolException {
-        final String path = System.getProperty("examplesfolder") + "/safety/firstExamplePaper/";
+        final String path = System.getProperty("examplesfolder") + "/synthesis/forallsafety/firstExamplePaper/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "firstExamplePaper.apt"));
         PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
 
@@ -400,7 +400,7 @@ public class TestingModelcheckingLTL {
 
     @Test(enabled = true)
     public void testBurglar() throws ParseException, IOException, RenderException, InterruptedException, NotSubstitutableException, ExternalToolException, ProcessNotStartedException {
-        final String path = System.getProperty("examplesfolder") + "/safety/burglar/";
+        final String path = System.getProperty("examplesfolder") + "/synthesis/forallsafety/burglar/";
         PetriNetWithTransits pn = new PetriNetWithTransits(Tools.getPetriNet(path + "burglar.apt"));
         PNWTTools.savePnwt2PDF(outputDir + pn.getName(), new PetriNetWithTransits(pn), false);
 
