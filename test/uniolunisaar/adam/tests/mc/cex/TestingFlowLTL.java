@@ -95,6 +95,7 @@ public class TestingFlowLTL {
         net.setWeakFair(t);
 
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false,false);
 
         String formula = "A  out";
         RunLTLFormula f = FlowLTLParser.parse(net, formula);
@@ -103,6 +104,7 @@ public class TestingFlowLTL {
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 data,
+//                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
                 ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
@@ -118,15 +120,15 @@ public class TestingFlowLTL {
         LTLModelCheckingResult ret = mc.check(net, f);
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         Logger.getInstance().addMessage(ret.getCex().toString());
-        ReducedCounterExample cex = new ReducedCounterExample(ret.getCex());
-        List<List<String>> markingSequence = cex.getMarkingSequence();
-        List<String> firingSequence = cex.getFiringSequence();
+        ReducedCounterExample cex = new ReducedCounterExample(net, ret.getCex(), false);
+        List<List<Place>> markingSequence = cex.getMarkingSequence();
+        List<Transition> firingSequence = cex.getFiringSequence();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < firingSequence.size(); i++) {
-            String transition = firingSequence.get(i);
-            List<String> marking = markingSequence.get(i);
-            sb.append(marking.toString().replace("[", "{").replace("]", "}")).append(" [").append(transition).append("> ");
+            Transition transition = firingSequence.get(i);
+            List<Place> marking = markingSequence.get(i);
+            sb.append(marking.toString().replace("[", "{").replace("]", "}")).append(" [").append(transition.getId()).append("> ");
         }
-        Logger.getInstance().addMessage(sb.toString());                
+        Logger.getInstance().addMessage(sb.toString());
     }
 }

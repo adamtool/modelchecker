@@ -117,7 +117,7 @@ public class CounterExampleElement {
         return init && transitions.isEmpty() && marking.isEmpty();
     }
 
-    public String getStringRepresenation(boolean isDetailed) {
+    public String getStringRepresenation(boolean isDetailed, boolean forceLabels) {
         StringBuilder sb = new StringBuilder();
         if (isDetailed) {
             sb.append("init:").append(init);
@@ -137,7 +137,7 @@ public class CounterExampleElement {
         sb.append(" [");
         if (binID == null) {
             for (Transition t : transitions) {
-                String id = t == null ? "-" : (!isDetailed && isParallel) ? t.getLabel() : t.getId();
+                String id = t == null ? "-" : ((!isDetailed && isParallel) || forceLabels) ? t.getLabel() : t.getId();
                 sb.append(id).append(", ");
             }
             if (!transitions.isEmpty()) {
@@ -152,11 +152,15 @@ public class CounterExampleElement {
 
     @Override
     public String toString() {
-        return getStringRepresenation(true);
+        return getStringRepresenation(true, false);
     }
 
     public char[] getBinID() {
         return binID;
+    }
+
+    public boolean isIsParallel() {
+        return isParallel;
     }
 
 }

@@ -18,6 +18,7 @@ public class AbcSettings {
     private String preProcessing = null;
     private PetriNet net; // only for parsing the CEX
     private boolean detailedCEX = true;
+    private boolean CEXforParallelApproach = false;
 
     public AbcSettings() {
         verificationAlgos = new VerificationAlgo[]{VerificationAlgo.IC3};
@@ -101,6 +102,14 @@ public class AbcSettings {
 
     public void setDetailedCEX(boolean detailedCEX) {
         this.detailedCEX = detailedCEX;
+    }
+
+    public boolean isCEXforParallelApproach() {
+        return CEXforParallelApproach;
+    }
+
+    public void setCEXforParallelApproach(boolean CEXforParallelApproach) {
+        this.CEXforParallelApproach = CEXforParallelApproach;
     }
 
 }

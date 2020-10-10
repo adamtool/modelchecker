@@ -32,7 +32,6 @@ public class PnwtAndNbFlowFormulas2PNParallelNoInit extends PnwtAndNbFlowFormula
     public static PetriNetWithTransits createNet4ModelCheckingParallelOneFlowFormula(PetriNetWithTransits net) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
         out.setName(net.getName() + "_mc");
-        out.putExtension("parallel", true);// todo: just a quick hack to have the counter example properly printed
 
         // Add to each original transition a place such that we can disable these transitions
         // as soon as we started to check a token chain

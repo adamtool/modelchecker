@@ -31,14 +31,8 @@ public class CounterExample implements Iterable<String> {
         return timestep.add(elem);
     }
 
-    @Override
-    public String toString() {
-//        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
-        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found.";
-        StringBuilder sb = new StringBuilder("Counter example " + cause + "\n");
-        if (warning != null) {
-            sb.append("WARNING: ").append(warning).append("\n");
-        }
+    public String represenationTimeSteps(boolean forceLabels) {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < timestep.size(); i++) {
             CounterExampleElement elem = timestep.get(i);
             StringBuilder lastElem = new StringBuilder();
@@ -53,14 +47,15 @@ public class CounterExample implements Iterable<String> {
 //                    elemSB.append(" looping");
 //                }
                 lastElem.append("\n");
-                String value = elem.getStringRepresenation(isDetailed);
+                String value = elem.getStringRepresenation(isDetailed, forceLabels);
                 if (elem.isStutter()) {
                     lastElem.append("--- stuttering ...");
                 } else {
                     if (elem.getBinID() != null) { // this for binary coded
                         String binString = new String(elem.getBinID());
                         Transition t = codingMap.get(binString);
-                        String id = (t != null) ? t.getId() : "-"; // if the next step is a stuttering (could still be wrong cause could be any transition but prevents nullPointer)
+//                        String id = (t != null) ? t.getId() : "-";                         
+                        String id = t == null ? "-" : ((!isDetailed && elem.isIsParallel()) || forceLabels) ? t.getLabel() : t.getId(); // if the next step is a stuttering (could still be wrong cause could be any transition but prevents nullPointer)
                         value = value.replace(CounterExampleElement.PLACEHOLDER_FOR_BINTRAN, id);
                         if (t != null && !PetriNetExtensionHandler.isOriginal(t) && !isDetailed) { // for stuttering t could be null
                             add = false;
@@ -93,6 +88,18 @@ public class CounterExample implements Iterable<String> {
                 }
             }
         }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+//        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
+        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found.";
+        StringBuilder sb = new StringBuilder("Counter example " + cause + "\n");
+        if (warning != null) {
+            sb.append("WARNING: ").append(warning).append("\n");
+        }
+        sb.append(represenationTimeSteps(false));
         return sb.toString();
     }
 

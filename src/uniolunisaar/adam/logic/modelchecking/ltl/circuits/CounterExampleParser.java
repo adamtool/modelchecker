@@ -107,7 +107,7 @@ public class CounterExampleParser {
         try (FileInputStream inputStream = new FileInputStream(path)) {
             AbcSettings abcSettings = settings.getAbcSettings();
             PetriNet net = abcSettings.getNet();
-            boolean isParallel = net.hasExtension("parallel"); // todo: quick hack to have it properly printed
+            boolean isParallel = abcSettings.isCEXforParallelApproach();
             cex.setIsDetailed(abcSettings.isDetailedCEX());
             // start binary coding
             // if it is binary coded get the number of digits

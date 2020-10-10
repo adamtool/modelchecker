@@ -28,7 +28,6 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
      */
     public static PetriNetWithTransits createNet4ModelCheckingParallel(PetriNetWithTransits net, int nb_flowFormulas) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
-        out.putExtension("parallel", true);// todo: just a quick hack to have the counter example properly printed
         out.setName(net.getName() + "_mc");
 
         // for all subformulas
@@ -202,7 +201,6 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
      */
     public static PetriNetWithTransits createNet4ModelCheckingParallelOneFlowFormula(PetriNetWithTransits net) {
         PetriNetWithTransits out = new PetriNetWithTransits(net);
-        out.putExtension("parallel", true);// todo: just a quick hack to have the counter example properly printed
         out.setName(net.getName() + "_mc");
 
         List<Place> todo = new ArrayList<>();
