@@ -33,8 +33,9 @@ public class CounterExample implements Iterable<String> {
 
     @Override
     public String toString() {
-        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
-        StringBuilder sb = new StringBuilder("Counter example " + cause + " \n");
+//        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found but couldn't figure out the cause.";
+        String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found.";
+        StringBuilder sb = new StringBuilder("Counter example " + cause + "\n");
         if (warning != null) {
             sb.append("WARNING: ").append(warning).append("\n");
         }
