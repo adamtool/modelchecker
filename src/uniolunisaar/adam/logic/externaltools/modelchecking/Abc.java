@@ -82,7 +82,7 @@ public class Abc {
         // Kill all the other parallel algos
         for (VerificationAlgo verificationAlgo : abcSettings.getVerificationAlgos()) {
             if (!verificationAlgo.equals(result.getAlgo())) {
-                ProcessPool.getInstance().destroyForciblyProcessAndChilds(abcSettings.getProcessFamilyID() + "#abc" + verificationAlgo.name());
+                ProcessPool.getInstance().destroyForciblyProcessAndChildren(abcSettings.getProcessFamilyID() + "#abc" + verificationAlgo.name());
             }
         }
         return result;
