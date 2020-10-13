@@ -6,8 +6,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.AdamModelChecker;
 import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.cex.ReducedCounterExample;
@@ -17,6 +19,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
@@ -37,11 +40,11 @@ public class TestingFlowLTL {
 
     @BeforeClass
     public void silence() {
-//        Logger.getInstance().setVerbose(true);
-        Logger.getInstance().setVerbose(false);
-        Logger.getInstance().setShortMessageStream(null);
-        Logger.getInstance().setVerboseMessageStream(null);
-        Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(true);
+//        Logger.getInstance().setVerbose(false);
+//        Logger.getInstance().setShortMessageStream(null);
+//        Logger.getInstance().setVerboseMessageStream(null);
+//        Logger.getInstance().setWarningStream(null);
     }
 
     @BeforeClass
@@ -95,7 +98,7 @@ public class TestingFlowLTL {
         net.setWeakFair(t);
 
         PNWTTools.savePnwt2PDF(outDir + net.getName(), net, false);
-        PNWTTools.saveAPT(outDir + net.getName(), net, false,false);
+        PNWTTools.saveAPT(outDir + net.getName(), net, false, false);
 
         String formula = "A  out";
         RunLTLFormula f = FlowLTLParser.parse(net, formula);
@@ -104,7 +107,7 @@ public class TestingFlowLTL {
 
         AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
                 data,
-//                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
+                //                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
                 ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
                 AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING,
                 AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
@@ -118,9 +121,11 @@ public class TestingFlowLTL {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(net, f);
+        PetriNet mcNet = AdamModelChecker.getModelCheckingNet(net, f, settings);
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         Logger.getInstance().addMessage(ret.getCex().toString());
-        ReducedCounterExample cex = new ReducedCounterExample(net, ret.getCex(), false);
+
+        ReducedCounterExample cex = new ReducedCounterExample(net, ret.getCex(), true);
         List<List<Place>> markingSequence = cex.getMarkingSequence();
         List<Transition> firingSequence = cex.getFiringSequence();
         StringBuilder sb = new StringBuilder();
@@ -130,5 +135,65 @@ public class TestingFlowLTL {
             sb.append(marking.toString().replace("[", "{").replace("]", "}")).append(" [").append(transition.getId()).append("> ");
         }
         Logger.getInstance().addMessage(sb.toString());
+        Logger.getInstance().addMessage(cex.toString());
+
+        Logger.getInstance().addMessage("detailed:");
+        ReducedCounterExample cexDetailed = new ReducedCounterExample(mcNet, ret.getCex(), true);
+        List<List<Place>> markingSequenceDetailed = cexDetailed.getMarkingSequence();
+        List<Transition> firingSequenceDetailed = cexDetailed.getFiringSequence();
+        sb = new StringBuilder();
+        for (int i = 0; i < firingSequenceDetailed.size(); i++) {
+            Transition transition = firingSequenceDetailed.get(i);
+            List<Place> marking = markingSequenceDetailed.get(i);
+            sb.append("{");
+            for (Place place : marking) {
+                sb.append(place.getId()).append(",");
+            }
+            if (!marking.isEmpty()) {
+                sb.replace(sb.length() - 1, sb.length(), "}");
+            } else {
+                sb.append("}");
+            }
+
+            sb.append(" [").append(transition.getId()).append("> ");
+        }
+        Logger.getInstance().addMessage(sb.toString());
+        Logger.getInstance().addMessage("TOSTRING");
+        Logger.getInstance().addMessage(cexDetailed.toString());
+    }
+
+    @Test
+    public void dataFlowWitness() throws Exception {
+        PetriNetWithTransits pnwt = ToyExamples.createIntroductoryExample();
+        PNWTTools.savePnwt2PDF(outDir + pnwt.getName(), pnwt, false);
+        PNWTTools.saveAPT(outDir + pnwt.getName(), pnwt, false, false);
+
+        String formula = "A  out";
+        RunLTLFormula f = FlowLTLParser.parse(pnwt, formula);
+
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + pnwt.getName() + "data", false, false, true);
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                data,
+                //                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
+                AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                CircuitRendererSettings.TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
+                Abc.VerificationAlgo.IC3);
+
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        LTLModelCheckingResult ret = mc.check(pnwt, f);
+        PetriNet mcNet = AdamModelChecker.getModelCheckingNet(pnwt, f, settings);
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+        Logger.getInstance().addMessage(ret.getCex().toString());
+
+        ReducedCounterExample cex = new ReducedCounterExample(pnwt, ret.getCex(), true);
+
     }
 }

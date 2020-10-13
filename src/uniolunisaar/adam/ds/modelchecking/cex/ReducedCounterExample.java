@@ -69,4 +69,28 @@ public class ReducedCounterExample {
         return loopingID != -1;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < firingSequence.size(); i++) {
+            Transition transition = firingSequence.get(i);
+            List<Place> marking = markingSequence.get(i);
+            sb.append("{");
+            for (Place place : marking) {
+                sb.append(place.getId()).append(",");
+            }
+            if (!marking.isEmpty()) {
+                sb.replace(sb.length() - 1, sb.length(), "}");
+            } else {
+                sb.append("}");
+            }
+
+            sb.append(" [").append(transition.getId()).append("> ");
+        }
+        if (loopingID != -1) {
+            sb.append(" ... ");
+        }
+        return sb.toString();
+    }
+
 }
