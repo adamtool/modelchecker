@@ -127,7 +127,6 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                         throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
                     }
                     if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
-
                         if (semantics == TransitionSemantics.OUTGOING) {
                             formulaMC = new FlowLTLTransformerOutgoingParallel().createFormula4ModelChecking4CircuitParallelOneFlowFormula(net, netMC, f, settings);
                         } else if (semantics == TransitionSemantics.INGOING) {
@@ -155,8 +154,10 @@ public class PnAndFlowLTLtoCircuit extends PnAndLTLtoCircuit {
                     } else if (semantics == TransitionSemantics.OUTGOING) {
                         if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
                             netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
+//                            netMC = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallelOneFlowFormula(net);
                         } else {
                             netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallel(net, flowFormulas.size());
+//                            netMC = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(net, flowFormulas.size());
                         }
                     } else {
                         throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");

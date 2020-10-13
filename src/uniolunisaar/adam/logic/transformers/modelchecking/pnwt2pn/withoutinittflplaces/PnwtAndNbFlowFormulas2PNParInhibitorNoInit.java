@@ -115,7 +115,9 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
                                 Place preOut = out.getPlace(id);
                                 Flow f = out.createFlow(preOut, tOut);
                                 if (!set.contains(nb_ff)) {
-                                    out.setInhibitor(f);
+                                    if (preOrig != null) { // don't want an inhibitor arc to the init place of the subnet since we want to guess the chain
+                                        out.setInhibitor(f);
+                                    }
                                 } else {
                                     out.createFlow(tOut, out.getPlace(postOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff));
                                 }

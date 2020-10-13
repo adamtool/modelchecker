@@ -29,6 +29,7 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtTransitions;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 
 /**
@@ -48,9 +49,10 @@ public class TestingModelcheckingAccessControl {
     @BeforeClass
     public void silence() {
 //      Logger.getInstance().setVerbose(true);
-//      Logger.getInstance().setShortMessageStream(null);
-//      Logger.getInstance().setVerboseMessageStream(null);
-//      Logger.getInstance().setWarningStream(null);
+      Logger.getInstance().setVerbose(false);
+      Logger.getInstance().setShortMessageStream(null);
+      Logger.getInstance().setVerboseMessageStream(null);
+      Logger.getInstance().setWarningStream(null);
     }
 
     public FlowCTLModelcheckingSettings initMCSettings() {

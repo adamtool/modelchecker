@@ -87,8 +87,9 @@ public class TestingModelcheckingFlowLTLParallel {
         settings = new AdamCircuitFlowLTLMCSettings[]{
             //                        TestModelCheckerTools.mcSettings_Seq_IntF, TestModelCheckerTools.mcSettings_Seq_IntC,
             //                        TestModelCheckerTools.mcSettings_SeqI_IntF, TestModelCheckerTools.mcSettings_SeqI_IntC,
-            TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
+//            TestModelCheckerTools.mcSettings_Par_IntF, TestModelCheckerTools.mcSettings_Par_IntC,
             TestModelCheckerTools.mcSettings_ParI_IntF, TestModelCheckerTools.mcSettings_ParI_IntC
+//            TestModelCheckerTools.mcSettings_ParI_IntC
         //            TestModelCheckerTools.mcSettings_Par_N, TestModelCheckerTools.mcSettings_ParI_N
 //            TestModelCheckerTools.mcSettings_ParI_IntC, //            TestModelCheckerTools.mcSettings_Seq_IntF
 //                                    TestModelCheckerTools.mcSettings_SeqI_IntC, //            TestModelCheckerTools.mcSettings_Seq_IntF
@@ -473,7 +474,9 @@ public class TestingModelcheckingFlowLTLParallel {
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, LTLModelCheckingResult.Satisfied.FALSE, settings);
 
         // %%%%%%%% newly added (not done for all cases)
-        formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); // should hold then the initial one start with a1 and the new one starts with f
+        // A(t1 OR f)
+        // should hold since the initial one starts with a1 or B (thus o1 is the first outgoing transition) and the new one starts with f
+        formula = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(t1), LTLOperators.Binary.OR, new LTLAtomicProposition(f)))); 
         name = net.getName() + "_" + formula.toString().replace(" ", "");
 //        dataInFormula = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
 //        dataInCircuit = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);

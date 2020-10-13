@@ -80,12 +80,12 @@ public class TestPnwt2Pn {
         formula = new RunCTLForAllFormula(fairness, RunOperators.Implication.IMP, formula);
 
         ILTLFormula ltlFormula = new FlowCTLTransformerSequential().createFormula4ModelChecking4CircuitSequential(pnwt, out, formula, settings);
-        System.out.println("formula to check: " + ltlFormula.toSymbolString());
+//        System.out.println("formula to check: " + ltlFormula.toSymbolString());
         PnAndLTLtoCircuit.createCircuitWithoutFairnessAndMaximality(out, ltlFormula, settings);
         settings.fillAbcData(out);
         LTLModelCheckingResult result = Abc.call(settings, settings.getOutputData(), settings.getStatistics());
 //        System.out.println(result.getSatisfied().toString());
-        System.out.println(result.getCex().toString());
+//        System.out.println(result.getCex().toString());
         Assert.assertEquals(result.getSatisfied(), sat);
     }
 }

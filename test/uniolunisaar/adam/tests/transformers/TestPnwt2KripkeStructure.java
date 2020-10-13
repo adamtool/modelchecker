@@ -45,6 +45,6 @@ public class TestPnwt2KripkeStructure {
 
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerOutgoing.create(pnwt, true);
         Tools.save2DotAndPDF(outputDir + "initLate_ks", k);
-        System.out.println(k.getEdges().toString());
+//        System.out.println(k.getEdges().toString());
     }
 }

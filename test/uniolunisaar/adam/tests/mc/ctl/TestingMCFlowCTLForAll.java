@@ -198,13 +198,13 @@ public class TestingMCFlowCTLForAll {
                 ltlFormula = new LTLFormula(fairness, LTLOperators.Binary.IMP, ltlFormula);
             }
         }
-        System.out.println("formula to check: " + ltlFormula.toSymbolString());
+//        System.out.println("formula to check: " + ltlFormula.toSymbolString());
         AigerRenderer renderer = PnAndLTLtoCircuit.createCircuitWithoutFairnessAndMaximality(out, ltlFormula, settings);
         settings.fillAbcData(out);
         LTLModelCheckingResult result = Abc.call(settings, settings.getOutputData(), settings.getStatistics());
 //        System.out.println(result.getSatisfied().toString());
         if (result.getCex() != null) {
-            System.out.println(result.getCex().toString());
+//            System.out.println(result.getCex().toString());
         }
         Assert.assertEquals(result.getSatisfied(), sat);
     }

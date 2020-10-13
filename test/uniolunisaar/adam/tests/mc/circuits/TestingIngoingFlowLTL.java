@@ -159,7 +159,7 @@ public class TestingIngoingFlowLTL {
                         (new LTLAtomicProposition(o2)))));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings); //todo: what happend currently 13.10.2020 it's false
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         // should not hold because each case has the other case as counter example
@@ -434,7 +434,7 @@ public class TestingIngoingFlowLTL {
         ));
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings); //todo: what happend currently 13.10.2020 it's false
 
         //%%%%%%%%%%%%%%%%%%%
         // should be false because a chain can loop finitely long in 'in' A (X^n mid) 
@@ -492,7 +492,7 @@ public class TestingIngoingFlowLTL {
         formula = new RunLTLFormula(new LTLFormula(LTLOperators.Unary.X, new LTLFormula(new LTLAtomicProposition(init), LTLOperators.Binary.OR, D)), RunOperators.Binary.AND, flowLTLFormula);
         name = net.getName() + "_" + formula.toString().replace(" ", "");
         data = new AdamCircuitFlowLTLMCOutputData(outputDir + name + "_init", false, false, true);
-        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings);
+        TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, formula, ModelCheckingResult.Satisfied.TRUE, data, settings); //todo: what happend currently 13.10.2020 it's false
 
         //%%%%%%%%%%%%%%%%%%%
         // should be false because without fairness we can loop in t0 (F D and true)

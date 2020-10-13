@@ -222,6 +222,10 @@ public class TestingFlowLTL {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(pnwt, f);
         PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);
+        
+        PetriNetWithTransits mcNetNoInit = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(pnwt, 2);        
+        PNWTTools.savePnwt2PDF(outDir + mcNetNoInit.getName()+"NOINIT", mcNetNoInit, false);
+        
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         Logger.getInstance().addMessage(ret.getCex().toString());
 

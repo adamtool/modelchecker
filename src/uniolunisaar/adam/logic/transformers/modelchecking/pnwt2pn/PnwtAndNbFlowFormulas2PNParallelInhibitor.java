@@ -38,7 +38,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
 //           Also just taken the token while firing the original transition 
 //           should be a problem, since then everytime passing this place
 //           it could be chosen to consider it as creating a new chain.  
-//          Changes are marekd by keyword INITPLACES:
+//          Changes are marked by keyword INITPLACES:
         // INITPLACES:
         Set<Place> origInitMarking = new HashSet<>();
         for (Node node : out.getNodes()) {
@@ -227,7 +227,9 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                                 Place preOut = out.getPlace(id);
                                 Flow f = out.createFlow(preOut, tOut);
                                 if (!set.contains(nb_ff)) {
-                                    out.setInhibitor(f);
+                                    if (preOrig != null) { // don't add inhibitor arcs to the new places, since we would like to decide which one we take
+                                        out.setInhibitor(f);
+                                    }
                                 } else {
                                     out.createFlow(tOut, out.getPlace(postOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff));
                                 }
