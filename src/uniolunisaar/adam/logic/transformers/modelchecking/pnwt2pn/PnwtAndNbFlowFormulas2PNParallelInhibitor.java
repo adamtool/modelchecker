@@ -227,8 +227,10 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                                 Place preOut = out.getPlace(id);
                                 Flow f = out.createFlow(preOut, tOut);
                                 if (!set.contains(nb_ff)) {
-                                    if (preOrig != null) { // don't add inhibitor arcs to the new places, since we would like to decide which one we take
+                                    if (preOrig != null) { // don't add inhibitor arcs (or even arcs) to the new places, since we would like to decide which one we take
                                         out.setInhibitor(f);
+                                    } else {
+                                        out.removeFlow(f); // there should be no arc, since we would like to decide which one we take for the new places
                                     }
                                 } else {
                                     out.createFlow(tOut, out.getPlace(postOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff));

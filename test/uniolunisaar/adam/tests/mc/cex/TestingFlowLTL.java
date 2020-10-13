@@ -43,6 +43,7 @@ import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tests.mc.util.TestModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.MCTools;
+import uniolunisaar.adam.util.PNTools;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -221,7 +222,8 @@ public class TestingFlowLTL {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(pnwt, f);
-        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);
+        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);     
+        PNTools.savePN2PDF(outDir + mcNet.getName(), mcNet, true, false);
         
         PetriNetWithTransits mcNetNoInit = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(pnwt, 2);        
         PNWTTools.savePnwt2PDF(outDir + mcNetNoInit.getName()+"NOINIT", mcNetNoInit, false);
