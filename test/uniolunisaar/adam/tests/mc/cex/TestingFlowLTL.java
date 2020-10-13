@@ -9,8 +9,10 @@ import org.testng.annotations.Test;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
-import uniolunisaar.adam.AdamModelChecker;
 import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
+import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.RunLTLFormula;
 import uniolunisaar.adam.ds.modelchecking.cex.ReducedCounterExample;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
@@ -19,14 +21,25 @@ import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNParallel;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNParallelInhibitor;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequentialInhibitor;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNParallelNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNSequentialNoInit;
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tests.mc.util.TestModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.util.MCTools;
 import uniolunisaar.adam.util.PNWTTools;
+import uniolunisaar.adam.util.logics.LogicsTools;
 
 /**
  *
@@ -121,7 +134,7 @@ public class TestingFlowLTL {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(net, f);
-        PetriNet mcNet = AdamModelChecker.getModelCheckingNet(net, f, settings);
+        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(net, f, settings);
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         Logger.getInstance().addMessage(ret.getCex().toString());
 
@@ -168,8 +181,9 @@ public class TestingFlowLTL {
         PNWTTools.savePnwt2PDF(outDir + pnwt.getName(), pnwt, false);
         PNWTTools.saveAPT(outDir + pnwt.getName(), pnwt, false, false);
 
-        String formula = "A  out";
-        RunLTLFormula f = FlowLTLParser.parse(pnwt, formula);
+//        String formula = "A  F";
+//        RunLTLFormula f = FlowLTLParser.parse(pnwt, formula);
+        RunLTLFormula f = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(pnwt.getPlace("F"))));
 
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + pnwt.getName() + "data", false, false, true);
 
@@ -189,11 +203,79 @@ public class TestingFlowLTL {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(pnwt, f);
-        PetriNet mcNet = AdamModelChecker.getModelCheckingNet(pnwt, f, settings);
+        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         Logger.getInstance().addMessage(ret.getCex().toString());
 
-        ReducedCounterExample cex = new ReducedCounterExample(pnwt, ret.getCex(), true);
+        ReducedCounterExample cex = new ReducedCounterExample(pnwt, ret.getCex(), false);
+        Logger.getInstance().addMessage(cex.toString());
+        ReducedCounterExample cexDetailed = new ReducedCounterExample(mcNet, ret.getCex(), true);
+        Logger.getInstance().addMessage(cexDetailed.toString());
 
+    }
+
+    public static PetriNet getModelCheckingNet(PetriNetWithTransits net, RunLTLFormula f, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
+        if ((f.getPhi() instanceof ILTLFormula)) {
+            return net;
+        }
+        ModelCheckingSettings.Approach approach = settings.getApproach();
+        CircuitRendererSettings.TransitionSemantics semantics = settings.getRendererSettings().getSemantics();
+        List<FlowLTLFormula> flowFormulas = LogicsTools.getFlowLTLFormulas(f);
+        PetriNet netMC;
+        switch (approach) {
+            case PARALLEL:
+                if (flowFormulas.size() > 1) {
+                    throw new NotConvertableException("The parallel approach (without inhibitor arcs) is not implemented for more than one flow subformula!."
+                            + " Please use another approach.");
+                }
+                if (semantics == CircuitRendererSettings.TransitionSemantics.INGOING) {
+                    netMC = PnwtAndNbFlowFormulas2PNParallelNoInit.createNet4ModelCheckingParallelOneFlowFormula(net);
+                } else if (semantics == CircuitRendererSettings.TransitionSemantics.OUTGOING) {
+                    netMC = PnwtAndNbFlowFormulas2PNParallel.createNet4ModelCheckingParallelOneFlowFormula(net);
+                } else {
+                    throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                }
+                break;
+            case PARALLEL_INHIBITOR:
+                if (semantics == CircuitRendererSettings.TransitionSemantics.INGOING) {
+                    if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                        netMC = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    } else {
+                        netMC = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(net, flowFormulas.size());
+                    }
+                } else if (semantics == CircuitRendererSettings.TransitionSemantics.OUTGOING) {
+                    if (flowFormulas.size() == 1) { // take the special case (todo: check if this has any advantages compared to the general one)
+                        netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallelOneFlowFormula(net);
+                    } else {
+                        netMC = PnwtAndNbFlowFormulas2PNParallelInhibitor.createNet4ModelCheckingParallel(net, flowFormulas.size());
+                    }
+                } else {
+                    throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                }
+                break;
+            case SEQUENTIAL: {
+                if (semantics == CircuitRendererSettings.TransitionSemantics.INGOING) {
+                    netMC = PnwtAndNbFlowFormulas2PNSequentialNoInit.createNet4ModelCheckingSequential(net, flowFormulas.size());
+                } else if (semantics == CircuitRendererSettings.TransitionSemantics.OUTGOING) {
+                    netMC = PnwtAndNbFlowFormulas2PNSequential.createNet4ModelCheckingSequential(net, flowFormulas.size(), true);
+                } else {
+                    throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                }
+                break;
+            }
+            case SEQUENTIAL_INHIBITOR:
+                if (semantics == CircuitRendererSettings.TransitionSemantics.INGOING) {
+                    netMC = PnwtAndNbFlowFormulas2PNSeqInhibitorNoInit.createNet4ModelCheckingSequential(net, flowFormulas.size());
+                } else if (semantics == CircuitRendererSettings.TransitionSemantics.OUTGOING) {
+                    netMC = PnwtAndNbFlowFormulas2PNSequentialInhibitor.createNet4ModelCheckingSequential(net, flowFormulas.size(), true);
+                } else {
+                    throw new RuntimeException("The transitions semantics: '" + settings.getRendererSettings().getSemantics() + "' is not yet implemented.");
+                }
+                break;
+            default:
+                throw new RuntimeException("Didn't provide a solution for all approaches yet. Approach '" + approach + "' is missing; sry.");
+        }
+        MCTools.addCoordinates(net, netMC);
+        return netMC;
     }
 }

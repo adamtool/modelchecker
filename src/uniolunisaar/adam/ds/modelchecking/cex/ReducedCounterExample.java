@@ -32,10 +32,16 @@ public class ReducedCounterExample {
                     int start = line.indexOf("{");
                     int end = line.indexOf("}");
                     // parse transition
-                    String transition = line.substring(end + 4, line.length() - 1);
-                    transition = transition.trim();
-                    if (net.containsTransition(transition)) { // only do it for those transitions belonging to the net (this possibly omits the step of the detailed cex)
-                        firingSequence.add(net.getTransition(transition));
+                    String transitionID;
+                    if (line.endsWith("-")) { // case transition is just '-' stating the example is finite
+                        transitionID = "-";
+                    } else {
+                        transitionID = line.substring(end + 4, line.length() - 1).trim();
+                    }
+                    if (net.containsTransition(transitionID) || transitionID.equals("-")) { // only do it for those transitions belonging to the net (this possibly omits the step of the detailed cex)
+                        if (!transitionID.equals("-")) {
+                            firingSequence.add(net.getTransition(transitionID));
+                        }
                         // parse marking
                         String marking = line.substring(start + 1, end);
                         String[] places = marking.split(",");
@@ -87,9 +93,22 @@ public class ReducedCounterExample {
 
             sb.append(" [").append(transition.getId()).append("> ");
         }
-        if (loopingID != -1) {
+        if (markingSequence.size() > firingSequence.size()) { // the sequence was finite
+            List<Place> marking = markingSequence.get(markingSequence.size() - 1);
+            sb.append("{");
+            for (Place place : marking) {
+                sb.append(place.getId()).append(",");
+            }
+            if (!marking.isEmpty()) {
+                sb.replace(sb.length() - 1, sb.length(), "}");
+            } else {
+                sb.append("}");
+            }
+        }
+        if (loopingID != -1 && markingSequence.size() == firingSequence.size()) { // looping and not finite
             sb.append(" ... ");
         }
+
         return sb.toString();
     }
 
