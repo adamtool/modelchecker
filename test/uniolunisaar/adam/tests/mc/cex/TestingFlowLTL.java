@@ -11,6 +11,7 @@ import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
+import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.logics.ltl.ILTLFormula;
 import uniolunisaar.adam.ds.logics.ltl.LTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
@@ -196,7 +197,11 @@ public class TestingFlowLTL {
 
 //        String formula = "A  F";
 //        RunLTLFormula f = FlowLTLParser.parse(pnwt, formula);
-        RunLTLFormula f = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(pnwt.getPlace("F"))));
+        RunLTLFormula f1 = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(pnwt.getPlace("F")))); // should be false
+        RunLTLFormula f2 = new RunLTLFormula(new FlowLTLFormula(new LTLAtomicProposition(pnwt.getPlace("a")))); // should be false
+//        RunLTLFormula f = new RunLTLFormula(f1, RunOperators.Binary.AND, f2); // should be false
+//        RunLTLFormula f = new RunLTLFormula(new FlowLTLFormula(new LTLFormula(new LTLAtomicProposition(pnwt.getPlace("F")), LTLOperators.Binary.OR, new LTLAtomicProposition(pnwt.getPlace("a"))))); // should be true
+        RunLTLFormula f = new RunLTLFormula(f1, RunOperators.Binary.OR, f2); // should be false
 
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + pnwt.getName() + "data", false, false, true);
 
@@ -223,12 +228,12 @@ public class TestingFlowLTL {
         ReducedCounterExample cex = new ReducedCounterExample(pnwt, ret.getCex(), false);
         Logger.getInstance().addMessage(cex.toString());
         ReducedCounterExample cexDetailed = new ReducedCounterExample(mcNet, ret.getCex(), true);
-        Logger.getInstance().addMessage("Detailed:" +cexDetailed.toString());
+        Logger.getInstance().addMessage("Detailed:" + cexDetailed.toString());
 
         // data flow trees
         List<DataFlowTree> dataFlowTrees = PNWTTools.getDataFlowTrees(pnwt, cex.getFiringSequence());
         PNWTTools.saveDataFlowTreesToPDF(outputDir + pnwt.getName() + "_dft", dataFlowTrees, PetriNetExtensionHandler.getProcessFamilyID(pnwt));
-        
+
         Map<Integer, DataFlowChain> witnessDataFlowChains = MCTools.getWitnessDataFlowChains(pnwt, cexDetailed);
         Logger.getInstance().addMessage(witnessDataFlowChains.toString());
     }
