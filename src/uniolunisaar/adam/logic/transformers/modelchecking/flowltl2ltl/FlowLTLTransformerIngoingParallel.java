@@ -19,7 +19,6 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSetti
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.exceptions.logics.NotSubstitutableException;
-import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.INIT_TOKENFLOW_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.TOKENFLOW_SUFFIX_ID;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit;
 import uniolunisaar.adam.tools.Logger;
@@ -44,7 +43,7 @@ public class FlowLTLTransformerIngoingParallel extends FlowLTLTransformer {
                 // this is only for one subformula
 //                if (t.getLabel().equals(phi.getId()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
                 // for all subnet transition the extension saves the participating subnets              
-                if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) { // todo: check ! NOt only the equally labelled?
+                if (t.hasExtension("subnets") && ((List<Integer>) t.getExtension("subnets")).contains(nb_ff) && t.getLabel().equals(phi.getId())) {
                     mine.add(new LTLAtomicProposition(t));
                 } else {
                     if (!t.hasExtension("initSubnet")) { // not the init transitions
@@ -84,7 +83,7 @@ public class FlowLTLTransformerIngoingParallel extends FlowLTLTransformer {
                 Collection<ILTLFormula> mine = new ArrayList<>();
                 for (Transition t : net.getTransitions()) {
                     // for all subnet transition the extension saves the participating subnets              
-                    if (t.hasExtension("subnet") && ((List<Integer>) t.getExtension("subnet")).contains(nb_ff)) {
+                    if (t.hasExtension("subnets") && ((List<Integer>) t.getExtension("subnets")).contains(nb_ff)) {
                         mine.add(new LTLAtomicProposition(t));
                     } else {
                         if (!t.hasExtension("initSubnet")) { // not the init transitions

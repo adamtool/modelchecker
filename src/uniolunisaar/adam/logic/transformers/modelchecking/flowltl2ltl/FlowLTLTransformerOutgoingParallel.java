@@ -31,7 +31,7 @@ import uniolunisaar.adam.util.logics.LogicsTools;
  * @author Manuel Gieseking
  */
 public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
-    
+
     @Override
     ILTLFormula replaceAtomicPropositionInFlowFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, int nb_ff, boolean scopeEventually) {
         if (phi.isTransition()) {
@@ -44,7 +44,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
                 // this is only for one subformula
 //                if (t.getLabel().equals(phi.getId()) && !t.getLabel().equals(t.getId())) { // not the original trans, which is also labelled 
                 // for all subnet transition the extension saves the participating subnets    
-                if (t.hasExtension("subnets") && ((List<Integer>) t.getExtension("subnets")).contains(nb_ff) && t.getLabel().equals(phi.getId())) { // todo: check ! NOt only the equally labelled?
+                if (t.hasExtension("subnets") && ((List<Integer>) t.getExtension("subnets")).contains(nb_ff) && t.getLabel().equals(phi.getId())) {
                     mine.add(new LTLAtomicProposition(t));
                 } else {
                     if (!t.hasExtension("initSubnet")) { // not the init transitions
@@ -63,7 +63,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
         }
         return phi;
     }
-    
+
     @Override
     ILTLFormula replaceFormulaUnaryInFlowFormula(PetriNet orig, PetriNet net, FormulaUnary<ILTLFormula, LTLOperators.Unary> phi, int nb_ff, boolean scopeEventually) {
         if (!scopeEventually && phi.getOp() == LTLOperators.Unary.F) {
@@ -95,13 +95,13 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
                 ILTLFormula Vmine = FormulaCreator.bigWedgeOrVeeObject(mine, false);
                 LTLFormula mineAndNext = new LTLFormula(Vmine, LTLOperators.Binary.AND, new LTLFormula(phi.getOp(), subst));
                 LTLFormula neverMine = new LTLFormula(new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.NEG, Vmine)), LTLOperators.Binary.AND, subst);
-                
+
                 return new LTLFormula(FormulaCreator.bigWedgeOrVeeObject(other, false), LTLOperators.Binary.U, new LTLFormula(mineAndNext, LTLOperators.Binary.OR, neverMine));
             }
         }
         return new LTLFormula(phi.getOp(), subst);
     }
-    
+
     @Override
     IFormula replaceLTLAtomicPropositionInRunFormula(PetriNet orig, PetriNet net, LTLAtomicProposition phi, boolean scopeEventually, int nbFlowFormulas) {
         if (phi.isTransition()) {
@@ -116,7 +116,7 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
         }
         return phi;
     }
-    
+
     public ILTLFormula createFormula4ModelChecking4CircuitParallel(PetriNetWithTransits orig, PetriNet net, RunLTLFormula formula, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
         int nbFlowFormulas = LogicsTools.getFlowLTLFormulas(formula).size();
         if (nbFlowFormulas == 0) {
@@ -218,5 +218,5 @@ public class FlowLTLTransformerOutgoingParallel extends FlowLTLTransformer {
             return LogicsTools.convert2LTL(f);
         }
     }
-    
+
 }
