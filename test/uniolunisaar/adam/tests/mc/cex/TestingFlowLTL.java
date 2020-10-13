@@ -2,6 +2,7 @@ package uniolunisaar.adam.tests.mc.cex;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -20,6 +21,9 @@ import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.settings.ModelCheckingSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSettings;
 import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings;
+import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
+import uniolunisaar.adam.ds.petrinetwithtransits.DataFlowChain;
+import uniolunisaar.adam.ds.petrinetwithtransits.DataFlowTree;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.generators.pnwt.ToyExamples;
@@ -178,6 +182,15 @@ public class TestingFlowLTL {
     @Test
     public void dataFlowWitness() throws Exception {
         PetriNetWithTransits pnwt = ToyExamples.createIntroductoryExample();
+        pnwt.removeInitialTransit(pnwt.getPlace("B"));
+        pnwt.removeInitialTransit(pnwt.getPlace("a"));
+        pnwt.getPlace("a").setInitialToken(0);
+        Transition t = pnwt.createTransition("initTr");
+        Place init = pnwt.createPlace("initPl");
+        init.setInitialToken(1);
+        pnwt.createFlow(init, t);
+        pnwt.createFlow(t, pnwt.getPlace("a"));
+        pnwt.createInitialTransit(t, pnwt.getPlace("a"));
         PNWTTools.savePnwt2PDF(outDir + pnwt.getName(), pnwt, false);
         PNWTTools.saveAPT(outDir + pnwt.getName(), pnwt, false, false);
 
@@ -210,8 +223,14 @@ public class TestingFlowLTL {
         ReducedCounterExample cex = new ReducedCounterExample(pnwt, ret.getCex(), false);
         Logger.getInstance().addMessage(cex.toString());
         ReducedCounterExample cexDetailed = new ReducedCounterExample(mcNet, ret.getCex(), true);
-        Logger.getInstance().addMessage(cexDetailed.toString());
+        Logger.getInstance().addMessage("Detailed:" +cexDetailed.toString());
 
+        // data flow trees
+        List<DataFlowTree> dataFlowTrees = PNWTTools.getDataFlowTrees(pnwt, cex.getFiringSequence());
+        PNWTTools.saveDataFlowTreesToPDF(outputDir + pnwt.getName() + "_dft", dataFlowTrees, PetriNetExtensionHandler.getProcessFamilyID(pnwt));
+        
+        Map<Integer, DataFlowChain> witnessDataFlowChains = MCTools.getWitnessDataFlowChains(pnwt, cexDetailed);
+        Logger.getInstance().addMessage(witnessDataFlowChains.toString());
     }
 
     public static PetriNet getModelCheckingNet(PetriNetWithTransits net, RunLTLFormula f, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {

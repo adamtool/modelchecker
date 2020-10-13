@@ -1,13 +1,18 @@
 package uniolunisaar.adam.util;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import uniolunisaar.adam.ds.BoundingBox;
 import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
+import uniolunisaar.adam.ds.modelchecking.cex.ReducedCounterExample;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
+import uniolunisaar.adam.ds.petrinetwithtransits.DataFlowChain;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit;
 
@@ -89,6 +94,24 @@ public class MCTools {
                 PetriNetExtensionHandler.setYCoord(node, bb.getBottom() + yMean / diffY);
             }
         }
+    }
+
+    public static Map<Integer, DataFlowChain> getWitnessDataFlowChains(PetriNetWithTransits pnwt, ReducedCounterExample detailedCEX) {
+        Map<Integer, DataFlowChain> flowchains = new HashMap<>();
+        for (int i = 0; i < detailedCEX.getMarkingSequence().size(); i++) {
+            List<Place> m = detailedCEX.getMarkingSequence().get(i);
+            for (Place place : m) {
+                if (pnwt.hasPartition(place)) {
+                    DataFlowChain chain = flowchains.get(pnwt.getPartition(place));
+                    if (chain == null) {
+                        chain = new DataFlowChain();
+                        flowchains.put(pnwt.getPartition(place), chain);
+                    }
+                    chain.add(place);
+                }
+            }
+        }
+        return flowchains;
     }
 
 }
