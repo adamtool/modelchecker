@@ -1,6 +1,7 @@
 package uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,18 +10,21 @@ import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Token;
 import uniol.apt.adt.pn.Transition;
-import uniol.apt.util.Pair;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import uniolunisaar.adam.tools.CartesianProduct;
 import uniolunisaar.adam.tools.Logger;
 
 /**
+ * This should be the same class as PnwtAndNbFlowFormulas2PNParallelInhibitor,
+ * but here we use the power set to calculate the connections for each
+ * transition and each of its transits the new transitions of the model checking
+ * net and the connections. This means this only works correctly when each transition
+ * only has one transit.
  *
  * @author Manuel Gieseking
  */
-public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowFormulas2PN {
+public class PnwtAndNbFlowFormulas2PNParallelInhibitorOnlyOneTransitPerTransition extends PnwtAndNbFlowFormulas2PN {
 
     /**
      * Fairness must be stated within the formula.
@@ -63,7 +67,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
 
             return net;
         }
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLACES
+        int[] indices = new int[nbFlowFormulas];
         // %%% CREATE ALL PLACES FOR EACH SUBNET 
         for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
             List<Place> todo = new ArrayList<>();
@@ -128,9 +132,9 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                     }
                 }
             }
+            indices[nb_ff] = nb_ff;
         }
 
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRANSITIONS
         // CREATE THE INIT AND NEW CHAIN GUESSING TRANSITION
         // this means we need a transition for every combination of guesses
         // that is m = |initPlaces|+1 (the one for the new chains)
@@ -167,86 +171,107 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                 }
             }
         }
+//        for (Place place : net.getPlaces()) {
+//            if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
+//                for (ArrayList<Integer> set : powerSet) {
+//                    Transition t = out.createTransition();
+//                    // INITPLACES: activate the original initial marking
+//                    for (Place place1 : origInitMarking) {
+//                        out.createFlow(t, place1);
+//                    }
+//                    for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) { // add all arcs and inhibitor arcs to this transition
+//                        if (set.contains(nb_ff)) {
+//                            out.createFlow(out.getPlace(INIT_TOKENFLOW_ID + "_" + nb_ff), t);
+//                            out.createFlow(t, out.getPlace(place.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        for (ArrayList<Integer> set : powerSet) {
+//            // put a token into new tokenflow
+//            if (!set.isEmpty()) {
+//                Transition t = out.createTransition();
+//                // INITPLACES: activate the original initial marking
+//                for (Place place1 : origInitMarking) {
+//                    out.createFlow(t, place1);
+//                }
+//                for (int nb_ff = 0; nb_ff < flowFormulas.size(); nb_ff++) { // add all arcs and inhibitor arcs to this transition
+//                    if (set.contains(nb_ff)) {
+//                        out.createFlow(out.getPlace(INIT_TOKENFLOW_ID + "_" + nb_ff), t);
+//                        out.createFlow(t, out.getPlace(NEW_TOKENFLOW_ID + "_" + nb_ff));
+//                    }
+//                }
+//            }
+//        }
+        ArrayList<ArrayList<Integer>> powerSet = new ArrayList<>();
+        powerSet(indices, 0, new ArrayList<>(), powerSet);
 
-        // ADD THE |T|*(|Y(t)|+1)^n NEW TRANSITIONS
-        for (Transition tOrig : net.getTransitions()) { // for each transition
-
-            // calculate the list of all transits +1 for (|Y(t)|+1)
-            List<Pair<Place, Place>> transits = new ArrayList<>();
-            // only collect those transits which are really occurring
-            for (Transit transit : net.getTransits(tOrig)) {
+        // ADD THE POWER SET OF ALL TRANSITIONS FOR EACH TRANSIT
+        for (Transition tOrig : net.getTransitions()) {
+            Collection<Transit> transits = net.getTransits(tOrig);
+            for (Transit transit : transits) { // for each transition and each transit
+                Place preOrig = null;
                 if (!transit.isInitial()) {
+                    preOrig = transit.getPresetPlace();
                     // if this transit belongs to an unconnected area -> skip
-                    if (!out.containsPlace(transit.getPresetPlace().getId() + TOKENFLOW_SUFFIX_ID + "_0")) {
+                    if (!out.containsPlace(preOrig.getId() + TOKENFLOW_SUFFIX_ID + "_0")) {
                         continue;
                     }
                 }
                 for (Place postOrig : transit.getPostset()) { // so here each transit
-                    transits.add(new Pair<>(transit.getPresetPlace(), postOrig));
-                }
-            }
-            // add the special marker (the +1) for that no subnet should contain any of the transits
-            transits.add(null);
-
-            // create the cartesian product to obtain (|Y(t)|+1)^n
-            List<List<Pair<Place, Place>>> combinations = new ArrayList<>();
-            for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
-                combinations.add(transits);
-            }
-            CartesianProduct<Pair<Place, Place>> product = new CartesianProduct<>(combinations);
-
-            // now add for all of these tuples a new transition and connect it to the subnets accordingly
-            for (List<Pair<Place, Place>> tuples : product) {
-                // create a list of only the ids of the subnets which are involved for this combination
-                // especially if the list is empty it was the (null,null,...,null) tuple, i.e., no subnet is involved
-                List<Integer> involvedSubnets = new ArrayList<>();
-                for (int i = 0; i < tuples.size(); i++) {
-                    Pair<Place, Place> tuple = tuples.get(i);
-                    if (tuple != null) {
-                        involvedSubnets.add(i);
-                    }
-                }
-
-                if (!involvedSubnets.isEmpty()) { // we have to connect subnets
-                    // for each combination which is not belonging to the original net add a transition and connected them accordingly
-                    Transition tOut = out.createTransition();
-                    tOut.putExtension("subnets", involvedSubnets); // remember which subnets are involved
-                    tOut.setLabel(tOrig.getId());
-                    // add all arcs and inhibitor arcs to this transition
-                    for (int nb_ff = 0; nb_ff < tuples.size(); nb_ff++) {
-                        Pair<Place, Place> tuple = tuples.get(nb_ff);
-                        if (tuple == null) { // this net is not involved, i.e., tuple = null, or in other words !involvedSubnets.contains(nb_ff)
-                            // we need inhibitor arcs to every pre set place of any transit
-                            addInhibitorArcsToAllPresetsOfTransits(net, out, tOrig, nb_ff);
+                    for (ArrayList<Integer> set : powerSet) {
+                        // for each combination which is not belonging to the original net add a transition and connected them accordingly
+                        if (!set.isEmpty()) {
+                            Transition tOut = out.createTransition();
+                            tOut.putExtension("subnets", set); // remember which subnets are involved
+                            tOut.setLabel(tOrig.getId());
+                            for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) { // add all arcs and inhibitor arcs to this transition
+                                // get either the new or the corresponding place as predecessor (if was connected with transits)
+                                String id = preOrig == null ? NEW_TOKENFLOW_ID + "_" + nb_ff : preOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
+                                Place preOut = out.getPlace(id);
+                                Flow f = out.createFlow(preOut, tOut);
+                                if (!set.contains(nb_ff)) {
+                                    if (preOrig != null) { // don't add inhibitor arcs (or even arcs) to the new places, since we would like to decide which one we take
+                                        out.setInhibitor(f);
+                                    } else {
+                                        out.removeFlow(f); // there should be no arc, since we would like to decide which one we take for the new places
+                                    }
+                                } else {
+                                    out.createFlow(tOut, out.getPlace(postOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff));
+                                }
+                            }
+                            // add the original pre and postsets
+                            for (Place place : tOrig.getPreset()) { // works since it is done via the ids and we copied the net
+                                out.createFlow(place.getId(), tOut.getId());
+                            }
+                            for (Place place : tOrig.getPostset()) {// works since it is done via the ids and we copied the net
+                                out.createFlow(tOut.getId(), place.getId());
+                            }
                         } else {
-                            Place preOrig = tuple.getFirst();
-                            // get either the new or the corresponding place as predecessor (if was connected with transits)
-                            String id = preOrig == null ? NEW_TOKENFLOW_ID + "_" + nb_ff : preOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
-                            Place preOut = out.getPlace(id);
-                            out.createFlow(preOut, tOut);
-                            out.createFlow(tOut, out.getPlace(tuple.getSecond().getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff));
+                            // add the inhibitor arcs for the original transition (if not already existent)
+                            // if it is not a newly created token flow
+                            if (preOrig != null) {
+                                for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
+                                    String id = preOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
+                                    if (out.containsPlace(id)) { // only iff the place really was connected
+                                        Place preOut = out.getPlace(id);
+                                        Transition tOut = out.getTransition(tOrig.getId());
+                                        if (!preOut.getPostset().contains(tOut)) {
+                                            Flow f = out.createFlow(preOut, tOut);
+                                            out.setInhibitor(f);
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    }
-                    // add the original pre and postsets
-                    for (Place place : tOrig.getPreset()) { // works since it is done via the ids and we copied the net
-                        out.createFlow(place.getId(), tOut.getId());
-                    }
-                    for (Place place : tOrig.getPostset()) {// works since it is done via the ids and we copied the net
-                        out.createFlow(tOut.getId(), place.getId());
-                    }
-                } else { // no subnet should be involved, i.e., this is only allowed when no place of any transit of this transition is occupied
-                    // add the inhibitor arcs for the original transition (if not already existent)
-                    // if it is not a newly created token flow
-                    for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
-                        addInhibitorArcsToAllPresetsOfTransits(net, out, tOrig, nb_ff);
                     }
                 }
             }
         }
 
         // %%%% CLEANUP
-        for (Transition t
-                : net.getTransitions()) {
+        for (Transition t : net.getTransitions()) {
             // delete the fairness assumption of all original transitions  
             Transition tout = out.getTransition(t.getId());
             out.removeStrongFair(tout);
@@ -260,8 +285,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
             }
         }
         // and the initial token flow markers
-        for (Place place
-                : net.getPlaces()) {
+        for (Place place : net.getPlaces()) {
             if (place.getInitialToken().getValue() > 0 && net.isInitialTransit(place)) {
                 out.removeInitialTransit(out.getPlace(place.getId()));
             }
@@ -269,20 +293,14 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
         return out;
     }
 
-    private static void addInhibitorArcsToAllPresetsOfTransits(PetriNetWithTransits net, PetriNetWithTransits out, Transition tOrig, int nb_ff) {
-        for (Transit transit : net.getTransits(tOrig)) {
-            Place preOrig = transit.getPresetPlace();
-            if (preOrig != null) { // it is not an initial transit                         
-                String id = preOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
-                if (out.containsPlace(id)) { // only iff the place really was connected
-                    Place preOut = out.getPlace(id);
-                    Transition tOut = out.getTransition(tOrig.getId());
-                    if (!preOut.getPostset().contains(tOut)) {
-                        Flow f = out.createFlow(preOut, tOut);
-                        out.setInhibitor(f);
-                    }
-                }
-            }
+    private static void powerSet(int[] flowFormulaIndices, int index, ArrayList<Integer> used, ArrayList<ArrayList<Integer>> powerSet) {
+        if (index == flowFormulaIndices.length) {
+            powerSet.add(used);
+        } else {
+            powerSet(flowFormulaIndices, index + 1, used, powerSet);
+            ArrayList<Integer> set = new ArrayList<>(used);
+            set.add(flowFormulaIndices[index]);
+            powerSet(flowFormulaIndices, index + 1, set, powerSet);
         }
     }
 
