@@ -269,7 +269,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
         return out;
     }
 
-    private static void addInhibitorArcsToAllPresetsOfTransits(PetriNetWithTransits net, PetriNetWithTransits out, Transition tOrig, int nb_ff) {
+    public static void addInhibitorArcsToAllPresetsOfTransits(PetriNetWithTransits net, PetriNetWithTransits out, Transition tOrig, int nb_ff) {
         for (Transit transit : net.getTransits(tOrig)) {
             Place preOrig = transit.getPresetPlace();
             if (preOrig != null) { // it is not an initial transit                         
