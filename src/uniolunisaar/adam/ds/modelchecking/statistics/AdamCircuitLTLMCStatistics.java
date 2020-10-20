@@ -14,9 +14,9 @@ import uniolunisaar.adam.tools.Tools;
 public class AdamCircuitLTLMCStatistics {
 
     // input tool
-    private long in_nb_places;
-    private long in_nb_transitions;
-    private long in_size_formula;
+    private long input_nb_places;
+    private long input_nb_transitions;
+    private long input_size_formula_with_max_and_fairness;
     // input circuit
     private long sys_nb_latches;
     private long sys_nb_gates;
@@ -54,27 +54,27 @@ public class AdamCircuitLTLMCStatistics {
     }
 
     public long getIn_nb_places() {
-        return in_nb_places;
+        return input_nb_places;
     }
 
     public void setIn_nb_places(long in_nb_places) {
-        this.in_nb_places = in_nb_places;
+        this.input_nb_places = in_nb_places;
     }
 
     public long getIn_nb_transitions() {
-        return in_nb_transitions;
+        return input_nb_transitions;
     }
 
     public void setIn_nb_transitions(long in_nb_transitions) {
-        this.in_nb_transitions = in_nb_transitions;
+        this.input_nb_transitions = in_nb_transitions;
     }
 
     public long getIn_size_formula() {
-        return in_size_formula;
+        return input_size_formula_with_max_and_fairness;
     }
 
     public void setIn_size_formula(long in_size_formula) {
-        this.in_size_formula = in_size_formula;
+        this.input_size_formula_with_max_and_fairness = in_size_formula;
     }
 
     public boolean isMeasure_abc() {
@@ -228,9 +228,9 @@ public class AdamCircuitLTLMCStatistics {
         }
         sb.append(" #Lt, #Gt, |=\n");
         sb.append("sizes:")
-                .append(in_nb_places).append("  &  ")
-                .append(in_nb_transitions).append("  &  ")
-                .append(in_size_formula).append("  &  ")
+                .append(input_nb_places).append("  &  ")
+                .append(input_nb_transitions).append("  &  ")
+                .append(input_size_formula_with_max_and_fairness).append("  &  ")
                 .append(formula.getSize()).append("  &  ");
         if (printSysCircuitSizes) {
             sb.append(sys_nb_latches).append("  &  ")

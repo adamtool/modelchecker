@@ -9,6 +9,7 @@ import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.analysis.bounded.Bounded;
 import uniol.apt.analysis.bounded.BoundedResult;
+import uniol.apt.util.interrupt.InterrupterRegistry;
 import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators.Binary;
@@ -86,9 +87,10 @@ public class PnwtPreconditionChecker extends PreconditionChecker {
         if (noFormulaKeywordsUsedAsNodeNames == null) {
             noFormulaKeywordsUsedAsNodeNames = true;
             for (Node node : getNet().getNodes()) {
+//                InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
                 if (formulaKeywords.contains(node.getId())) {
                     noFormulaKeywordsUsedAsNodeNames = false;
-                    formulaKeywordsUsedAsNodeNamesException = new StructureException("The node '" + node.getId() + "' is a keyword for parsing the formula.");
+                    formulaKeywordsUsedAsNodeNamesException = new StructureException("The node '" + node.getId() + "' is a keyword in the syntax of the formula.");
                     throw formulaKeywordsUsedAsNodeNamesException;
                 }
             }
