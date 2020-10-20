@@ -1349,7 +1349,7 @@ public class TestingModelcheckingFlowLTLSequential {
 
     @Test(enabled = false) // due to time
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net1.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();

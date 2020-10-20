@@ -217,7 +217,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                         Pair<Place, Place> tuple = tuples.get(nb_ff);
                         if (tuple == null) { // this net is not involved, i.e., tuple = null, or in other words !involvedSubnets.contains(nb_ff)
                             // we need inhibitor arcs to every pre set place of any transit
-                            addInhibitorArcsToAllPresetsOfTransits(net, out, tOrig, nb_ff);
+                            addInhibitorArcsToAllPresetsOfTransits(net, out, tOut, nb_ff);
                         } else {
                             Place preOrig = tuple.getFirst();
                             // get either the new or the corresponding place as predecessor (if was connected with transits)
@@ -238,7 +238,7 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
                     // add the inhibitor arcs for the original transition (if not already existent)
                     // if it is not a newly created token flow
                     for (int nb_ff = 0; nb_ff < nbFlowFormulas; nb_ff++) {
-                        addInhibitorArcsToAllPresetsOfTransits(net, out, tOrig, nb_ff);
+                        addInhibitorArcsToAllPresetsOfTransits(net, out, out.getTransition(tOrig.getId()), nb_ff);
                     }
                 }
             }
@@ -269,16 +269,16 @@ public class PnwtAndNbFlowFormulas2PNParallelInhibitor extends PnwtAndNbFlowForm
         return out;
     }
 
-    public static void addInhibitorArcsToAllPresetsOfTransits(PetriNetWithTransits net, PetriNetWithTransits out, Transition tOrig, int nb_ff) {
+    public static void addInhibitorArcsToAllPresetsOfTransits(PetriNetWithTransits net, PetriNetWithTransits out, Transition t, int nb_ff) {
+        Transition tOrig = net.getTransition(t.getLabel());
         for (Transit transit : net.getTransits(tOrig)) {
             Place preOrig = transit.getPresetPlace();
             if (preOrig != null) { // it is not an initial transit                         
                 String id = preOrig.getId() + TOKENFLOW_SUFFIX_ID + "_" + nb_ff;
                 if (out.containsPlace(id)) { // only iff the place really was connected
                     Place preOut = out.getPlace(id);
-                    Transition tOut = out.getTransition(tOrig.getId());
-                    if (!preOut.getPostset().contains(tOut)) {
-                        Flow f = out.createFlow(preOut, tOut);
+                    if (!preOut.getPostset().contains(t)) {
+                        Flow f = out.createFlow(preOut, t);
                         out.setInhibitor(f);
                     }
                 }

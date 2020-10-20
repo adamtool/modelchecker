@@ -1236,7 +1236,7 @@ public class TestingModelcheckingFlowLTLParallel {
 
     @Test(enabled = true)
     public void testTransitions() throws ParseException, IOException, RenderException, InterruptedException, NotConvertableException, ProcessNotStartedException, ExternalToolException {
-        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net.apt"), false);
+        PetriNetWithTransits net = PNWTTools.getPetriNetWithTransitsFromParsedPetriNet(Tools.getPetriNet(System.getProperty("examplesfolder") + "/modelchecking/ltl/Net1.apt"), false);
         PNWTTools.saveAPT(outputDir + net.getName(), net, false, false);
         PNWTTools.savePnwt2PDF(outputDir + net.getName(), net, false);
 //        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL();
@@ -1259,13 +1259,13 @@ public class TestingModelcheckingFlowLTLParallel {
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.TRUE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, LTLModelCheckingResult.Satisfied.TRUE, settings);
 
-        f = FlowLTLParser.parse(net, "𝔸 ⬜ pOut");
+        f = FlowLTLParser.parse(net, "𝔸 G pOut");
         stats = new AdamCircuitFlowLTLMCStatistics();
 //        ret = mc.check(net, f); // takes some time
 //        Assert.assertEquals(ret.getSatisfied(), ModelCheckingResult.Satisfied.FALSE);
         TestModelCheckerTools.checkFlowLTLFormulaWithSeveralSettings(net, f, LTLModelCheckingResult.Satisfied.FALSE, settings);
 
-        f = FlowLTLParser.parse(net, "𝔸 ⬜ sw002fwdTosw000");
+        f = FlowLTLParser.parse(net, "𝔸 G sw002fwdTosw000");
 
         stats = new AdamCircuitFlowLTLMCStatistics();
 //        ret = mc.check(net, f);  // takes some time

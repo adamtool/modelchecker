@@ -137,7 +137,7 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
                         Pair<Place, Place> tuple = tuples.get(nb_ff);
                         if (tuple == null) { // this net is not involved, i.e., tuple = null, or in other words !involvedSubnets.contains(nb_ff)
                             // we need inhibitor arcs to every preset place of any transit
-                            addInhibitorArcsToAllPresetsOfTransits(net, out, tOrig, nb_ff);
+                            addInhibitorArcsToAllPresetsOfTransits(net, out, tOut, nb_ff);
                         } else {
                             Place preOrig = tuple.getFirst();
                             // get either the new or the corresponding place as predecessor (if was connected with transits)
@@ -159,7 +159,7 @@ public class PnwtAndNbFlowFormulas2PNParInhibitorNoInit extends PnwtAndNbFlowFor
                     // add the inhibitor arcs for the original transition (if not already existent)
                     // if it is not a newly created token flow
                     for (int nb_ff = 0; nb_ff < nb_flowFormulas; nb_ff++) {
-                        addInhibitorArcsToAllPresetsOfTransits(net, out, tOrig, nb_ff);
+                        addInhibitorArcsToAllPresetsOfTransits(net, out, out.getTransition(tOrig.getId()), nb_ff);
                     }
                 }
             }

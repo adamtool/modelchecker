@@ -42,6 +42,7 @@ import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittfl
 import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tests.mc.util.TestModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
+import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.MCTools;
 import uniolunisaar.adam.util.PNTools;
 import uniolunisaar.adam.util.PNWTTools;
@@ -248,10 +249,21 @@ public class TestingFlowLTL {
     @Test
     public void dataFlowWitnessFirstExampleExtended() throws Exception {
         PetriNetWithTransits pnwt = ToyExamples.createFirstExampleExtended(true);
+        pnwt.removeInitialTransit(pnwt.getPlace("in"));
+        pnwt.getPlace("in").setInitialToken(0);
+        Transition t = pnwt.createTransition("initTr");
+        Place init = pnwt.createPlace("initPl");
+        init.setInitialToken(1);
+        pnwt.createFlow(init, t);
+        pnwt.createFlow(t, pnwt.getPlace("in"));
+        pnwt.createInitialTransit(t, pnwt.getPlace("in"));
+
         PNWTTools.savePnwt2PDF(outDir + pnwt.getName(), pnwt, false);
         PNWTTools.saveAPT(outDir + pnwt.getName(), pnwt, false, false);
 
-        String formula = "A  out";
+//        String formula = "((A  out OR  A F out) AND A in)";  // false
+        String formula = "(A  out OR A F out)"; // false
+//        String formula = "A in"; // true 
         RunLTLFormula f = FlowLTLParser.parse(pnwt, formula);
 
         AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + pnwt.getName() + "data", false, false, true);
@@ -273,6 +285,7 @@ public class TestingFlowLTL {
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(pnwt, f);
         PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);
+        Tools.savePN(outDir+mcNet.getName(), mcNet);
         PNTools.savePN2PDF(outDir + mcNet.getName(), mcNet, true, false);
 
         PetriNetWithTransits mcNetNoInit = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(pnwt, 2);
