@@ -222,12 +222,12 @@ public class TestingFlowLTL {
 
         ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
         LTLModelCheckingResult ret = mc.check(pnwt, f);
-        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);     
+        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);
         PNTools.savePN2PDF(outDir + mcNet.getName(), mcNet, true, false);
-        
-        PetriNetWithTransits mcNetNoInit = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(pnwt, 2);        
-        PNWTTools.savePnwt2PDF(outDir + mcNetNoInit.getName()+"NOINIT", mcNetNoInit, false);
-        
+
+        PetriNetWithTransits mcNetNoInit = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(pnwt, 2);
+        PNWTTools.savePnwt2PDF(outDir + mcNetNoInit.getName() + "NOINIT", mcNetNoInit, false);
+
         Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
         Logger.getInstance().addMessage(ret.getCex().toString());
 
@@ -240,8 +240,59 @@ public class TestingFlowLTL {
         List<DataFlowTree> dataFlowTrees = PNWTTools.getDataFlowTrees(pnwt, cex.getFiringSequence());
         PNWTTools.saveDataFlowTreesToPDF(outputDir + pnwt.getName() + "_dft", dataFlowTrees, PetriNetExtensionHandler.getProcessFamilyID(pnwt));
 
-        Map<Integer, DataFlowChain> witnessDataFlowChains = MCTools.getWitnessDataFlowChains(pnwt, cexDetailed);
+        Map<Integer, DataFlowChain> witnessDataFlowChains = MCTools.getWitnessDataFlowChains(pnwt, cexDetailed, true);
         Logger.getInstance().addMessage(witnessDataFlowChains.toString());
+        MCTools.saveDataFlowWitnessToPDF(outDir + pnwt.getName() + "_cex", pnwt, cexDetailed, PetriNetExtensionHandler.getProcessFamilyID(pnwt));
+    }
+
+    @Test
+    public void dataFlowWitnessFirstExampleExtended() throws Exception {
+        PetriNetWithTransits pnwt = ToyExamples.createFirstExampleExtended(true);
+        PNWTTools.savePnwt2PDF(outDir + pnwt.getName(), pnwt, false);
+        PNWTTools.saveAPT(outDir + pnwt.getName(), pnwt, false, false);
+
+        String formula = "A  out";
+        RunLTLFormula f = FlowLTLParser.parse(pnwt, formula);
+
+        AdamCircuitFlowLTLMCOutputData data = new AdamCircuitFlowLTLMCOutputData(outputDir + pnwt.getName() + "data", false, false, true);
+
+        AdamCircuitFlowLTLMCSettings settings = new AdamCircuitFlowLTLMCSettings(
+                data,
+                //                ModelCheckingSettings.Approach.SEQUENTIAL_INHIBITOR,
+                ModelCheckingSettings.Approach.PARALLEL_INHIBITOR,
+                AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING,
+                AdamCircuitMCSettings.Stuttering.PREFIX_REGISTER,
+                CircuitRendererSettings.TransitionSemantics.OUTGOING,
+                CircuitRendererSettings.TransitionEncoding.LOGARITHMIC,
+                CircuitRendererSettings.AtomicPropositions.PLACES_AND_TRANSITIONS,
+                AigerRenderer.OptimizationsSystem.NONE,
+                AigerRenderer.OptimizationsComplete.NONE,
+                //                ModelCheckerMCHyper.VerificationAlgo.INT,                
+                Abc.VerificationAlgo.IC3);
+
+        ModelCheckerFlowLTL mc = new ModelCheckerFlowLTL(settings);
+        LTLModelCheckingResult ret = mc.check(pnwt, f);
+        PetriNet mcNet = TestingFlowLTL.getModelCheckingNet(pnwt, f, settings);
+        PNTools.savePN2PDF(outDir + mcNet.getName(), mcNet, true, false);
+
+        PetriNetWithTransits mcNetNoInit = PnwtAndNbFlowFormulas2PNParInhibitorNoInit.createNet4ModelCheckingParallel(pnwt, 2);
+        PNWTTools.savePnwt2PDF(outDir + mcNetNoInit.getName() + "NOINIT", mcNetNoInit, false);
+
+        Assert.assertEquals(ret.getSatisfied(), LTLModelCheckingResult.Satisfied.FALSE);
+        Logger.getInstance().addMessage(ret.getCex().toString());
+
+        ReducedCounterExample cex = new ReducedCounterExample(pnwt, ret.getCex(), false);
+        Logger.getInstance().addMessage(cex.toString());
+        ReducedCounterExample cexDetailed = new ReducedCounterExample(mcNet, ret.getCex(), true);
+        Logger.getInstance().addMessage("Detailed:" + cexDetailed.toString());
+
+        // data flow trees
+        List<DataFlowTree> dataFlowTrees = PNWTTools.getDataFlowTrees(pnwt, cex.getFiringSequence());
+        PNWTTools.saveDataFlowTreesToPDF(outputDir + pnwt.getName() + "_dft", dataFlowTrees, PetriNetExtensionHandler.getProcessFamilyID(pnwt));
+
+        Map<Integer, DataFlowChain> witnessDataFlowChains = MCTools.getWitnessDataFlowChains(pnwt, cexDetailed, true);
+        Logger.getInstance().addMessage(witnessDataFlowChains.toString());
+        MCTools.saveDataFlowWitnessToPDF(outDir + pnwt.getName() + "_cex", pnwt, cexDetailed, PetriNetExtensionHandler.getProcessFamilyID(pnwt));
     }
 
     public static PetriNet getModelCheckingNet(PetriNetWithTransits net, RunLTLFormula f, AdamCircuitFlowLTLMCSettings settings) throws NotConvertableException {
