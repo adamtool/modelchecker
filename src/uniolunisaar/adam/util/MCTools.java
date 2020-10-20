@@ -1,5 +1,6 @@
 package uniolunisaar.adam.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import uniolunisaar.adam.ds.modelchecking.cex.ReducedCounterExample;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.DataFlowChain;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit;
 
 /**
@@ -28,6 +30,9 @@ public class MCTools {
      * transitions and places also the same values as in orig. For all places in
      * a subnet we add a padding an move them appropriate to the right.
      *
+     * The method is optimized for the parallel approach regarding the
+     * transitions
+     *
      * @param orig
      * @param mcnet
      */
@@ -38,11 +43,15 @@ public class MCTools {
         }
         final double padding = 50;
         final double topPadding = 10;
+        List<String> coords = new ArrayList<>();
         for (Node node : mcnet.getNodes()) {
             String id = node.getId();
             if (orig.containsNode(id)) { // the copies of the original nodes
-                PetriNetExtensionHandler.setXCoord(node, orig.getXCoord(orig.getNode(id)));
-                PetriNetExtensionHandler.setYCoord(node, orig.getYCoord(orig.getNode(id)));
+                double x = orig.getXCoord(orig.getNode(id));
+                double y = orig.getYCoord(orig.getNode(id));
+                coords.add(x + "," + y);
+                PetriNetExtensionHandler.setXCoord(node, x);
+                PetriNetExtensionHandler.setYCoord(node, y);
                 continue;
             }
             // we don't have to parse it, easier version below
@@ -54,20 +63,36 @@ public class MCTools {
                 Place place = (Place) node;
                 String origID = PetriNetExtensionHandler.getOrigID(place);
                 int subnet = PetriNetExtensionHandler.getPartition(place);
-                PetriNetExtensionHandler.setXCoord(node, orig.getXCoord(orig.getNode(origID)) + subnet * (padding + bb.getWidth()));
-                PetriNetExtensionHandler.setYCoord(node, orig.getYCoord(orig.getNode(origID)));
+                double x = orig.getXCoord(orig.getNode(origID)) + subnet * (padding + bb.getWidth());
+                double y = orig.getYCoord(orig.getNode(origID));
+                coords.add(x + "," + y);
+                PetriNetExtensionHandler.setXCoord(node, x);
+                PetriNetExtensionHandler.setYCoord(node, y);
                 continue;
             }
             if (mcnet.containsPlace(node.getId()) && id.contains(PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID)) { // the initial places of the subnet
                 Place place = (Place) node;
                 int subnet = PetriNetExtensionHandler.getPartition(place);
-                PetriNetExtensionHandler.setXCoord(node, bb.getLeft() + bb.getWidth() / 2.0f + subnet * (padding + bb.getWidth()));
-                PetriNetExtensionHandler.setYCoord(node, bb.getTop() + topPadding);
+                double x = bb.getLeft() + bb.getWidth() / 2.0f + subnet * (padding + bb.getWidth());
+                double y = bb.getTop() - topPadding;
+                coords.add(x + "," + y);
+                PetriNetExtensionHandler.setXCoord(node, x);
+                PetriNetExtensionHandler.setYCoord(node, y);
+                continue;
+            }
+            if (mcnet.containsPlace(node.getId()) && id.contains(PnwtAndNbFlowFormulas2PN.NEW_TOKENFLOW_ID)) { // the new token flow place of the net
+                Place place = (Place) node;
+                int subnet = PetriNetExtensionHandler.getPartition(place);
+                double x = bb.getLeft() + bb.getWidth() / 2.0f + subnet * (padding + bb.getWidth());
+                double y = bb.getTop() - topPadding + 50;
+                coords.add(x + "," + y);
+                PetriNetExtensionHandler.setXCoord(node, x);
+                PetriNetExtensionHandler.setYCoord(node, y);
                 continue;
             }
             if (mcnet.containsTransition(node.getId())) { // it's a subnet transition
                 // everything is not really nice, but the clearst view could maybe achieved by putting them in the middle of the pre- and postsets
-                // and move them to the buttom
+                // and move them to the bottom
                 double xMean = 0, yMean = 0;
                 int diffX = 0, diffY = 0;
                 Transition t = (Transition) node;
@@ -90,8 +115,15 @@ public class MCTools {
                         diffY++;
                     }
                 }
-                PetriNetExtensionHandler.setXCoord(node, xMean / diffX);
-                PetriNetExtensionHandler.setYCoord(node, bb.getBottom() + yMean / diffY);
+                double x = xMean / diffX;
+                double y = bb.getBottom() + yMean / diffY;
+                while (coords.contains(x + "," + y)) { // when it already exists move it a little bit
+                    x += 5;
+                    y -= 5;
+                }
+                coords.add(x + "," + y);
+                PetriNetExtensionHandler.setXCoord(node, x);
+                PetriNetExtensionHandler.setYCoord(node, y);
             }
         }
     }
