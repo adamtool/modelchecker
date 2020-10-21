@@ -238,9 +238,6 @@ public class MCTools {
                 boolean isFirable = true;
                 for (Flow f : t.getPresetEdges()) {
                     if (!pnwt.isInhibitor(f) && !marking.contains(f.getPlace())) {
-                        System.out.println("M = " + marking.toString());
-                        System.out.println("t = " + t.toString());
-                        System.out.println(t.getPreset());
                         isFirable = false;
                     }
                 }
