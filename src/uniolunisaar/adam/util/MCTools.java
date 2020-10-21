@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import uniol.apt.adt.pn.Marking;
 import uniolunisaar.adam.ds.BoundingBox;
 import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.PetriNet;
@@ -91,7 +92,7 @@ public class MCTools {
                 Place place = (Place) node;
                 int subnet = PetriNetExtensionHandler.getPartition(place);
                 double x = bb.getLeft() + bb.getWidth() / 2.0f + subnet * (padding + bb.getWidth());
-                double y = bb.getTop() - topPadding + 50;
+                double y = bb.getTop() - topPadding + 100;
                 coords.add(x + "," + y);
                 PetriNetExtensionHandler.setXCoord(node, x);
                 PetriNetExtensionHandler.setYCoord(node, y);
@@ -178,28 +179,6 @@ public class MCTools {
         return flowchains;
     }
 
-//    private static void addChild(DataFlowTree tree, DataFlowTreeNode node, StringBuilder sb) {
-//        String parentID = tree.hashCode() + "." + node.getParent().hashCode();
-//        String childID = tree.hashCode() + "." + node.hashCode();
-//        // child node
-//        sb.append("\"").append(childID).append("\"[label=\"").append(node.getNode().getId()).append("\", shape=none]\n");
-//        // edge
-//        sb.append("\"").append(parentID).append("\"").append("->").append("\"").append(childID).append("\"\n");
-//        // if there is no successor this branch is finished
-//        if (node.getChildren() == null || node.getChildren().isEmpty()) {
-//            return;
-//        }
-//        // add the next transition
-//        DataFlowTreeNode tNode = node.getChildren().get(0); // there can only be one child
-//        String tNodeID = tree.hashCode() + "." + tNode.hashCode();
-//        sb.append("\"").append(tNodeID).append("\"[shape=point]").append("\n");
-//        sb.append("\"").append(childID).append("\"").append("->").append("\"").append(tNodeID);
-//        sb.append("\"[label=\"").append(tNode.getNode().getId()).append("\",arrowhead=none]\n");
-//        // recursively all children
-//        for (DataFlowTreeNode child : tNode.getChildren()) {
-//            addChild(tree, child, sb);
-//        }
-//    }
     /**
      * Only for the cases where we don't have places marked as having an initial
      * token flow
@@ -254,13 +233,26 @@ public class MCTools {
                 sb.append("\"").append(lastNodes.get(-1)).append("\"").append("->").append("\"").append(markingID).append("\"\n");
             }
             if (t != null) {
-                // add the node for the transition
-                String transitionID = t.getId() + "." + t.hashCode() + "." + i;
-                sb.append("\"").append(transitionID).append("\"[label=\"").append(t.getLabel()).append("\", shape=none]\n");
-                // add the edge to the marking
-                sb.append("\"").append(markingID).append("\"").append("->").append("\"").append(transitionID).append("\"[arrowhead=none]\n");
-                // and add it to the last nodes
-                lastNodes.put(-1, transitionID);
+                // check if the example is finite, this means for the second last marking the transition is not firable
+                boolean isFirable = true;
+                for (Place place : t.getPreset()) {
+                    if (!marking.contains(place)) {
+                        isFirable = false;
+                    }
+                }
+                // and only add it if it is firable
+                if (isFirable) {
+                    // add the node for the transition
+                    String transitionID = t.getId() + "." + t.hashCode() + "." + i;
+                    sb.append("\"").append(transitionID).append("\"[label=\"").append(t.getLabel()).append("\", shape=none]\n");
+                    // add the edge to the marking
+                    sb.append("\"").append(markingID).append("\"").append("->").append("\"").append(transitionID).append("\"[arrowhead=none]\n");
+                    // and add it to the last nodes
+                    lastNodes.put(-1, transitionID);
+                } else {
+                    // we could finish since it is the end
+                    break;
+                }
             }
 
             // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% The data part

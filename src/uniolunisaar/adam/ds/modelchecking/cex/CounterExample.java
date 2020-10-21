@@ -81,6 +81,15 @@ public class CounterExample implements Iterable<String> {
                         }
                     }
                 }
+                //  TODO: Attention this should at least work for the standard approach, but
+                // check if it is correct for all approaches
+                // delete the transition of the last step at least for the outgoing semantics
+                if (i == timestep.size() - 1) {
+                    int startIdx = lastElem.indexOf("[");
+                    if (startIdx >= 0) {
+                        lastElem.replace(startIdx, lastElem.indexOf("]") + 1, "-");
+                    }
+                }
                 sb.append(lastElem);
             } else {
                 if (elem.isStartsLoop()) {
