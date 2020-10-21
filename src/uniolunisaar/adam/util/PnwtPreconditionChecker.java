@@ -9,7 +9,7 @@ import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.PetriNet;
 import uniol.apt.analysis.bounded.Bounded;
 import uniol.apt.analysis.bounded.BoundedResult;
-import uniol.apt.util.interrupt.InterrupterRegistry;
+import uniol.apt.util.interrupt.UncheckedInterruptedException;
 import uniolunisaar.adam.ds.logics.flowlogics.RunOperators;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators;
 import uniolunisaar.adam.ds.logics.ltl.LTLOperators.Binary;
@@ -17,6 +17,8 @@ import uniolunisaar.adam.ds.logics.ltl.LTLOperators.Unary;
 import uniolunisaar.adam.ds.logics.ltl.flowltl.FlowLTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.pnwt.NetNotSafeException;
+import uniolunisaar.adam.exceptions.pnwt.CalculationInterruptedException;
+import uniolunisaar.adam.tools.Logger;
 
 /**
  * This class is used to check and store all preconditions of a Petri net with
@@ -71,7 +73,7 @@ public class PnwtPreconditionChecker extends PreconditionChecker {
     }
 
     @Override
-    public boolean check() throws NetNotSafeException, StructureException {
+    public boolean check() throws NetNotSafeException, StructureException, CalculationInterruptedException {
         boolean safe = isSafe();
         if (!safe) {
             throw new NetNotSafeException(bounded.unboundedPlace.getId(), bounded.sequence.toString());
@@ -83,10 +85,15 @@ public class PnwtPreconditionChecker extends PreconditionChecker {
         return true;
     }
 
-    public boolean noFormulaKeywordsUsedAsNodeNames() throws StructureException {
+    public boolean noFormulaKeywordsUsedAsNodeNames() throws StructureException, CalculationInterruptedException {
         if (noFormulaKeywordsUsedAsNodeNames == null) {
             noFormulaKeywordsUsedAsNodeNames = true;
             for (Node node : getNet().getNodes()) {
+                if (Thread.interrupted()) {
+                    CalculationInterruptedException e = new CalculationInterruptedException();
+                    Logger.getInstance().addError(e.getMessage(), e);
+                    throw e;
+                }
 //                InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
                 if (formulaKeywords.contains(node.getId())) {
                     noFormulaKeywordsUsedAsNodeNames = false;
@@ -98,9 +105,15 @@ public class PnwtPreconditionChecker extends PreconditionChecker {
         return noFormulaKeywordsUsedAsNodeNames;
     }
 
-    public boolean isSafe() {
+    public boolean isSafe() throws CalculationInterruptedException {
         if (bounded == null) {
-            bounded = Bounded.checkBounded(getNet());
+            try {
+                bounded = Bounded.checkBounded(getNet());
+            } catch (UncheckedInterruptedException ex) {
+                CalculationInterruptedException e = new CalculationInterruptedException(ex.getMessage());
+                Logger.getInstance().addError(e.getMessage(), e);
+                throw e;
+            }
         }
         return bounded.isSafe();
     }
