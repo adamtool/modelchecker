@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import uniol.apt.adt.pn.Marking;
+import uniol.apt.adt.pn.Flow;
 import uniolunisaar.adam.ds.BoundingBox;
 import uniol.apt.adt.pn.Node;
 import uniol.apt.adt.pn.PetriNet;
@@ -204,6 +204,7 @@ public class MCTools {
         }
         Integer jumpBackMarkingIDForLooping = null;
         for (int i = 1; i < markingSequence.size(); i++) { // we jump over the first step, since we don't want to have the initial guessing of the subnets here
+            boolean isFinite = false; // for skipping the end for finite traces
             List<Place> marking = markingSequence.get(i);
             Transition t = i < firingSequence.size() ? firingSequence.get(i) : null;
             // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% The control part
@@ -235,8 +236,11 @@ public class MCTools {
             if (t != null) {
                 // check if the example is finite, this means for the second last marking the transition is not firable
                 boolean isFirable = true;
-                for (Place place : t.getPreset()) {
-                    if (!marking.contains(place)) {
+                for (Flow f : t.getPresetEdges()) {
+                    if (!pnwt.isInhibitor(f) && !marking.contains(f.getPlace())) {
+                        System.out.println("M = " + marking.toString());
+                        System.out.println("t = " + t.toString());
+                        System.out.println(t.getPreset());
                         isFirable = false;
                     }
                 }
@@ -250,8 +254,7 @@ public class MCTools {
                     // and add it to the last nodes
                     lastNodes.put(-1, transitionID);
                 } else {
-                    // we could finish since it is the end
-                    break;
+                    isFinite = true;
                 }
             }
 
@@ -288,6 +291,9 @@ public class MCTools {
                         sb.append("\"").append(markingTransitionId).append("\"").append("->").append("\"").append(transitionID).append("\"[style=dashed,arrowhead=none]\n");
                         sb.append("{rank = same; \"").append(markingTransitionId).append("\";\"").append(transitionID).append("\";}\n"); // put them on the same rank
                     }
+                }
+                if (isFinite) {
+                    i++;
                 }
             }
         }
