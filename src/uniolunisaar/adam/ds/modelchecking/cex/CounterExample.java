@@ -106,7 +106,7 @@ public class CounterExample implements Iterable<String> {
         String cause = (safety) ? "with safety violation." : (liveness) ? "with liveness." : "found.";
         StringBuilder sb = new StringBuilder("Counter example " + cause + "\n");
         if (warning != null) {
-            sb.append("WARNING: ").append(warning).append("\n");
+//            sb.append("WARNING: ").append(warning).append("\n");
         }
         sb.append(represenationTimeSteps(false));
         return sb.toString();
