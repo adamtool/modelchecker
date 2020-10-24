@@ -1,5 +1,5 @@
-Modelchecking Petri nets with Transits against Flow-LTL/CTL
-===========================================================
+Model checking Petri nets with Transits against Flow-LTL/CTL
+============================================================
 A framework for model checking Petri nets with transits against Flow-LTL and Flow-CTL.
 This module is the model and controller part of AdamMC.
 It uses
@@ -17,7 +17,7 @@ Contains:
   * Petri nets with transits / Flow-LTL to Petri nets and LTL
   * Petri nets with transits / Flow-CTL to Petri nets and LTL
   * Petri nets to Circuit
-  
+
 Integration:
 ------------
 This module can be used as separate library and
@@ -30,11 +30,11 @@ Related Publications:
 For Flow-LTL
 - _Bernd Finkbeiner, Manuel Gieseking, Jesko Hecking-Harbusch, Ernst-Rüdiger Olderog:_
   [Model Checking Data Flows in Concurrent Network Updates](https://doi.org/10.1007/978-3-030-31784-3_30). ATVA 2019: 515-533 [(Full Version)](http://arxiv.org/abs/1907.11061).
-  
+
 For Flow-CTL
 - _Bernd Finkbeiner, Manuel Gieseking, Jesko Hecking-Harbusch, Ernst-Rüdiger Olderog:_
   [Model Checking Branching Properties on Petri Nets with Transits](
-https://doi.org/10.1007/978-3-030-59152-6_22). ATVA 2020: 394-410 [(Full Version)](https://arxiv.org/abs/2007.07235). 
+https://doi.org/10.1007/978-3-030-59152-6_22). ATVA 2020: 394-410 [(Full Version)](https://arxiv.org/abs/2007.07235).
 
 AdamMC:
 - _Bernd Finkbeiner, Manuel Gieseking, Jesko Hecking-Harbusch, Ernst-Rüdiger Olderog:_
