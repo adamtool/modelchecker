@@ -105,7 +105,7 @@ public class ReducedCounterExample {
                 sb.append("}");
             }
         }
-        if (loopingID != -1 && markingSequence.size() == firingSequence.size()) { // looping and not finite
+        if (loopingID != -1 && markingSequence.size() == firingSequence.size() - 1) { // looping and not finite
             sb.append(" ... ");
         }
 
