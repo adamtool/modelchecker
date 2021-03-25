@@ -20,7 +20,6 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitFlowLTLMCSetti
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PN.ACTIVATION_PREFIX_ID;
-import uniolunisaar.adam.util.AdamExtensions;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 import uniolunisaar.adam.util.logics.LogicsTools;
 
@@ -107,7 +106,7 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
             // get the buchi places of this subnet
             List<LTLAtomicProposition> buchis = new ArrayList<>();
             for (Place place : net.getPlaces()) {
-                if (PetriNetExtensionHandler.isBuchi(place) && i + 1 == (Integer) place.getExtension(AdamExtensions.token.name())) { // todo: quick hack put it properly
+                if (PetriNetExtensionHandler.isBuchi(place) && i + 1 == PetriNetExtensionHandler.getPartition(place)) { // todo: quick hack put it properly
                     buchis.add(new LTLAtomicProposition(place));
                 }
             }
@@ -123,7 +122,7 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
 
 //        // %%%%%%%%%% GENERAL FORMULA
         ILTLFormula ret = LogicsTools.convert2LTL(f);
-                // GF act_o AND ! FG act_o <- don't want the last one since would prevent correct stuttering (for the mode stuttering has act preset place
+        // GF act_o AND ! FG act_o <- don't want the last one since would prevent correct stuttering (for the mode stuttering has act preset place
 //        LTLAtomicProposition actO = new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig"));
 //        ret = new LTLFormula(
 //                new LTLFormula(
@@ -135,8 +134,6 @@ public class FlowCTLTransformerSequential extends FlowCTLTransformer {
         ret = new LTLFormula(
                 new LTLFormula(LTLOperators.Unary.G, new LTLFormula(LTLOperators.Unary.F, new LTLAtomicProposition(net.getPlace(ACTIVATION_PREFIX_ID + "orig")))),
                 LTLOperators.Binary.IMP, ret);
-        
-        
 
         return ret;
 
