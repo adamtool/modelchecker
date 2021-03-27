@@ -28,7 +28,7 @@ import uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stu
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.generators.pnwt.util.acencoding.AccessControlChainSplitAtTransitions;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.PNWTTools;
 

@@ -13,14 +13,14 @@ import uniolunisaar.adam.ds.circuits.CircuitRendererSettings.TransitionSemantics
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
 import uniolunisaar.adam.util.PNWTTools;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger.CircuitAndLTLtoCircuit;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
 
 /**

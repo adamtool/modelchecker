@@ -3,7 +3,7 @@ package uniolunisaar.adam.logic.transformers.modelchecking.pnandformula2aiger;
 import uniolunisaar.adam.ds.circuits.AigerFile;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitLTLMCOutputData;
 import uniolunisaar.adam.logic.externaltools.pnwt.AigToAig;

@@ -43,7 +43,7 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNParallel;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tests.mc.util.TestModelCheckerTools;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;

@@ -32,7 +32,7 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.logic.transformers.modelchecking.flowltl2ltl.FlowLTLTransformerOutgoingSequential;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.util.logics.LogicsTools;
 

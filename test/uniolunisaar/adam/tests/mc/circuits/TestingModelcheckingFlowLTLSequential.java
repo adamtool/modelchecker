@@ -39,9 +39,9 @@ import uniolunisaar.adam.exceptions.logics.NotConvertableException;
 import uniolunisaar.adam.ds.modelchecking.statistics.AdamCircuitFlowLTLMCStatistics;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsComplete;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer.OptimizationsComplete;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.tools.Tools;
 
 /**

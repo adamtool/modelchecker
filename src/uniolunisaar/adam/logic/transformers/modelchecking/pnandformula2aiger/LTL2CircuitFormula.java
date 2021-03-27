@@ -18,7 +18,7 @@ import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSetti
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.REPLACEMENT;
 import static uniolunisaar.adam.ds.modelchecking.settings.ltl.AdamCircuitMCSettings.Stuttering.REPLACEMENT_REGISTER;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.util.logics.FormulaCreator;
 
 /**

@@ -4,8 +4,8 @@ import uniolunisaar.adam.logic.modelchecking.ltl.circuits.PetriNetModelChecker;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerLTL;
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import java.io.File;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRendererSafeStutterRegister;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import java.io.IOException;
 
 import org.testng.Assert;
@@ -42,7 +42,7 @@ import uniolunisaar.adam.util.logics.FormulaCreatorIngoingSemantics;
 import uniolunisaar.adam.exceptions.ExternalToolException;
 import uniolunisaar.adam.logic.transformers.flowltl.FlowLTLTransformerHyperLTL;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer.OptimizationsSystem;
 import uniolunisaar.adam.tools.Logger;
 
 import uniolunisaar.adam.tools.Tools;

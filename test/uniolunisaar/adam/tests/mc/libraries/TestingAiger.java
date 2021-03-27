@@ -14,7 +14,7 @@ import uniolunisaar.adam.ds.circuits.CircuitRendererSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.exceptions.ExternalToolException;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRendererSafeStutterRegister;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRendererSafeStutterRegister;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.AigerTools;

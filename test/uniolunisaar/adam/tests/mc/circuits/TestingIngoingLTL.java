@@ -23,7 +23,7 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import static uniolunisaar.adam.logic.externaltools.modelchecking.Abc.VerificationAlgo.IC3;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerLTL;
 import uniolunisaar.adam.logic.parser.logics.flowltl.FlowLTLParser;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
 import uniolunisaar.adam.util.PNTools;

@@ -2,7 +2,7 @@ package uniolunisaar.adam.logic.modelchecking.ltl.circuits;
 
 import uniolunisaar.adam.ds.modelchecking.results.LTLModelCheckingResult;
 import uniolunisaar.adam.ds.modelchecking.cex.CounterExample;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
 import java.io.IOException;
 import java.util.Arrays;
 import uniol.apt.adt.pn.PetriNet;

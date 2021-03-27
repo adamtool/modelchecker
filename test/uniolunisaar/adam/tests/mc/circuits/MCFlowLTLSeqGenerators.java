@@ -30,8 +30,8 @@ import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.exceptions.ProcessNotStartedException;
 import uniolunisaar.adam.generators.pnwt.RedundantNetwork;
 import uniolunisaar.adam.logic.modelchecking.ltl.circuits.ModelCheckerFlowLTL;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer;
-import uniolunisaar.adam.logic.transformers.pn2aiger.AigerRenderer.OptimizationsSystem;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer;
+import uniolunisaar.adam.logic.transformers.petrinet.pn2aiger.AigerRenderer.OptimizationsSystem;
 
 /**
  *
