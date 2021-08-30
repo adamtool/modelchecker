@@ -138,4 +138,5 @@ public class TestingModelcheckingAccessControl {
 
         TestingMCFlowCTLForAll.check(pnwt, formula, initMCSettings(), LTLModelCheckingResult.Satisfied.TRUE);
     }
+
 }

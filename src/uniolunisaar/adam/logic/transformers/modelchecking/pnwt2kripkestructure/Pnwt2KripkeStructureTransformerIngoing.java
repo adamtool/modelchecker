@@ -53,17 +53,20 @@ public class Pnwt2KripkeStructureTransformerIngoing {
             // take the next state
             KripkeState<NodeLabel> pre = todo.pop();
             // Get the corresponding place
-            Place place = pnwt.getPlace(pre.getId());
-
-            // for all successors reached by a transit add the correspoing state and edge
+            String id = pre.getId();
+            if (id.contains(",")) {
+                id = id.substring(id.indexOf(",") + 1, id.length());
+            }
+            Place place = pnwt.getPlace(id);
+            // for all successors reached by a transit add the corresponding state and edge
             for (Transition t : place.getPostset()) { // get all transiting successors
                 Transit succTransit = pnwt.getTransit(t, place);
                 if (succTransit != null) { // this transition can further transit the token
-                    t = succTransit.getTransition();
+//                    t = succTransit.getTransition();
                     boolean withTransition = trAPs.contains(t); // the starting transition is contained in the formula
                     for (Place post : succTransit.getPostset()) {
                         KripkeState<NodeLabel> succ = createAndAddSuccessorState(k, pnwt, withTransition ? t : null, post, todo, tpStates);
-                        k.createAndAddEdge(place.getId(), new TransitionLabel(t), succ.getId());
+                        k.createAndAddEdge(pre.getId(), new TransitionLabel(t), succ.getId());
                     }
                 }
             }

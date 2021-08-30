@@ -1,12 +1,15 @@
 package uniolunisaar.adam.tests.transformers;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoing;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerOutgoing;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
@@ -46,5 +49,16 @@ public class TestPnwt2KripkeStructure {
         PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerOutgoing.create(pnwt, true);
         Tools.save2DotAndPDF(outputDir + "initLate_ks", k);
 //        System.out.println(k.getEdges().toString());
+    }
+
+    @Test
+    public void testExampleLectureHall() throws Exception {
+        PetriNetWithTransits pnwt = PNWTTools.getPetriNetWithTransitsFromFile(inputDir + "lectureHall.apt", false);
+        PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
+
+        List<Transition> trAP = new ArrayList<>();
+        trAP.add(pnwt.getTransition("emergency"));
+        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoing.create(pnwt, trAP);
+        Tools.save2DotAndPDF(outputDir + "lectureHall_ks", k);
     }
 }
