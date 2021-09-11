@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import uniol.apt.adt.pn.Transition;
 import uniol.apt.util.Pair;
 import uniolunisaar.adam.ds.abta.AlternatingBuchiTreeAutomaton;
 import uniolunisaar.adam.ds.abta.TreeDirectionxState;
@@ -30,11 +31,11 @@ import uniolunisaar.adam.ds.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.exceptions.modelchecking.NotTransformableException;
 
 /**
- * This class belongs to the ATVA20 paper.
+ * The class belongs to the construction in the thesis.
  *
  * @author Manuel Gieseking
  */
-public class ABTAxKripke2ABATransformer {
+public class ABTAxKripke2ABATransformerFull {
 
     private static class Key {
 
@@ -73,10 +74,24 @@ public class ABTAxKripke2ABATransformer {
      * uniolunisaar.adam.exceptions.modelchecking.NotTransformableException
      */
     public static GeneralAlternatingBuchiAutomaton transform(AlternatingBuchiTreeAutomaton<Set<NodeLabel>> tree, PnwtKripkeStructure k) throws NotTransformableException {
-        // extract the atomic propositions (todo: could make it smarter)
-        Set<NodeLabel> AP = new HashSet<>();
-        for (Set<NodeLabel> set : tree.getAlphabet()) {
-            AP.addAll(set);
+// now the Kripke structure is already restricted to this.
+//        // extract the atomic propositions (todo: could make it smarter)
+//        Set<NodeLabel> AP = new HashSet<>();
+//        for (Set<NodeLabel> set : tree.getAlphabet()) {
+//            AP.addAll(set);
+//        }
+
+        // get all labels of edges (belonging to transitions) of the Kripke structure
+        Set<Transition> alphabet = new HashSet<>();
+        for (Map.Entry<KripkeState<NodeLabel>, Set<LabeledKripkeEdge<NodeLabel, TransitionLabel>>> entry : k.getEdges().entrySet()) {
+            KripkeState<NodeLabel> key = entry.getKey();
+            Set<LabeledKripkeEdge<NodeLabel, TransitionLabel>> value = entry.getValue();
+            for (LabeledKripkeEdge<NodeLabel, TransitionLabel> labeledKripkeEdge : value) {
+                TransitionLabel lab = labeledKripkeEdge.getLabel();
+                if (lab != null) {
+                    alphabet.add(lab.getTransition());
+                }
+            }
         }
 
         GeneralAlternatingBuchiAutomaton aba = new GeneralAlternatingBuchiAutomaton("T_" + tree.getName() + "xK_" + k.getName());
@@ -100,14 +115,25 @@ public class ABTAxKripke2ABATransformer {
             TreeState treeState = pop.getFirst().getTreeState();
             KripkeState<NodeLabel> kripkeState = pop.getFirst().getKripkeState();
             Set<NodeLabel> labels = kripkeState.getLabels();
-            labels.retainAll(AP); // restrict the labels to the atomic propositions (todo: should be faster doing it just once for the kripke structure)
+            // this is now already done in the Kripke structure
+//            labels.retainAll(AP); // restrict the labels to the atomic propositions (todo: should be faster doing it just once for the kripke structure)
             // the edge of the tree
             TreeEdge<Set<NodeLabel>> treeEdge = tree.getEdge(treeState.getId(), labels);
             // the edges of the kripke structure
             Map<TransitionLabel, Set<LabeledKripkeEdge<NodeLabel, TransitionLabel>>> postEdgesWithSameLabel = k.getPostEdgesWithSameLabel(kripkeState);
             // for each equally labelled transition of the kripke strukture add the corresponding arc (with respect to the tree automaton) to the aba
+            Set<Transition> trans = new HashSet<>();
             for (TransitionLabel transitionLabel : postEdgesWithSameLabel.keySet()) {
                 addEdge(aba, pop.getSecond(), treeEdge, postEdgesWithSameLabel.get(transitionLabel), transitionLabel, todo);
+                trans.add(transitionLabel.getTransition());
+            }
+
+            // add the additional loops                  
+            for (Transition transition : alphabet) {
+                if (!trans.contains(transition)) { // for this label there are no successors
+                    // just loop
+                    aba.createAndAddDirectEdge(pop.getFirst().toString(), ABAOperatorState.TYPE.ALL, transition.getId(), true, pop.getFirst().toString());
+                }
             }
         }
         return aba;
@@ -126,31 +152,17 @@ public class ABTAxKripke2ABATransformer {
         }
     }
 
-    /**
-     * Goes through the positive Boolean formula and adds one hyper edge for the
-     * formula.
-     *
-     * @param pre
-     * @param formula
-     * @param kripkeEdges
-     * @param transitionLabel
-     * @param todo
-     * @param edge
-     * @return
-     * @throws NotTransformableException
-     */
     private static IABALabeledHyperEdge addEdgesRecursively(GeneralAlternatingBuchiAutomaton aba, IABANode pre,
             IPositiveBooleanFormula formula, Set<LabeledKripkeEdge<NodeLabel, TransitionLabel>> kripkeEdges,
             TransitionLabel transitionLabel, LinkedList<Pair<Key, ABAState>> todo,
             ABAHyperEdge edge) throws NotTransformableException {
 
-        if (formula instanceof ParameterizedPositiveBooleanFormula) { // These are disjunctions or conjunctions ranging of the degree of the Kripke structure node
+        if (formula instanceof ParameterizedPositiveBooleanFormula) {
             ParameterizedPositiveBooleanFormula f = (ParameterizedPositiveBooleanFormula) formula;
             ABAOperatorState.TYPE type = f.getOp() == Binary.AND ? ABAOperatorState.TYPE.ALL : ABAOperatorState.TYPE.EXISTS;
             int k = kripkeEdges.size();
             TreeDirectionxState post = (TreeDirectionxState) f.getElement(); // when created from CTL this is the only possibility
             TreeState treePostState = post.getState();
-            // create all post states
             String[] postStateIds = new String[k];
             int i = 0;
             for (LabeledKripkeEdge<NodeLabel, TransitionLabel> kripkeEdge : kripkeEdges) {
@@ -167,7 +179,6 @@ public class ABTAxKripke2ABATransformer {
                     todo.add(new Pair<>(key, postState)); // add it to later add the successors
                 }
                 postStateIds[i++] = postState.getId();
-//                System.out.println(postState.getId());
             }
             if (edge == null) { // the inital call
                 return aba.createAndAddDirectEdge(pre.getId(), type, transitionLabel.getId(), false, postStateIds);
@@ -176,7 +187,6 @@ public class ABTAxKripke2ABATransformer {
                 if (k == 1) { // when there is only one successor we don't want to have the operator
                     edge.addABAEdge(op, aba.createEndEdge(op, aba.getState(postStateIds[0])));
                 } else {
-//                System.out.println("drin");
                     ABAIntermediateEndEdge intEdge = aba.createIntermediateEdge(op, type);
                     edge.addABAEdge(op, intEdge);
                     ABAOperatorState postOp = (ABAOperatorState) intEdge.getPost(); // we just created this operator
@@ -190,9 +200,7 @@ public class ABTAxKripke2ABATransformer {
             PositiveBooleanFormulaBinary f = (PositiveBooleanFormulaBinary) formula;
             ABAOperatorState.TYPE type = f.getOp() == Binary.AND ? ABAOperatorState.TYPE.ALL : ABAOperatorState.TYPE.EXISTS;
             if (edge == null) { // the initial call
-//                System.out.println("edge =null " + pre.getId() + "  " + transitionLabel.getId());
                 edge = aba.createAndAddStartEdge(pre.getId(), type, transitionLabel.getId());
-//                System.out.println(edge.toDot());
                 ABAOperatorState opState = edge.getStart().getPost();
                 addEdgesRecursively(aba, opState, f.getPhi1(), kripkeEdges, transitionLabel, todo, edge);
                 addEdgesRecursively(aba, opState, f.getPhi2(), kripkeEdges, transitionLabel, todo, edge);

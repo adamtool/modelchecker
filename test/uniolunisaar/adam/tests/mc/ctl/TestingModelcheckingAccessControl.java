@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import uniol.apt.adt.pn.Place;
 
 import uniol.apt.adt.pn.Transition;
 import uniol.apt.util.Pair;
@@ -17,6 +18,7 @@ import uniolunisaar.adam.ds.logics.ctl.CTLAtomicProposition;
 import uniolunisaar.adam.ds.logics.ctl.CTLConstants;
 import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
+import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.forall.RunCTLForAllFormula;
 import uniolunisaar.adam.ds.modelchecking.output.AdamCircuitFlowLTLMCOutputData;
@@ -40,6 +42,7 @@ import uniolunisaar.adam.util.PNWTTools;
 public class TestingModelcheckingAccessControl {
 
     private static final String outputDir = System.getProperty("testoutputfolder") + "/accessControl/";
+    private static final String inputDir = System.getProperty("examplesfolder") + "/modelchecking/ctl/";
 
     @BeforeClass
     public void createFolder() {
@@ -49,10 +52,10 @@ public class TestingModelcheckingAccessControl {
     @BeforeClass
     public void silence() {
 //      Logger.getInstance().setVerbose(true);
-      Logger.getInstance().setVerbose(false);
-      Logger.getInstance().setShortMessageStream(null);
-      Logger.getInstance().setVerboseMessageStream(null);
-      Logger.getInstance().setWarningStream(null);
+        Logger.getInstance().setVerbose(false);
+        Logger.getInstance().setShortMessageStream(null);
+        Logger.getInstance().setVerboseMessageStream(null);
+        Logger.getInstance().setWarningStream(null);
     }
 
     public FlowCTLModelcheckingSettings initMCSettings() {
@@ -136,6 +139,31 @@ public class TestingModelcheckingAccessControl {
             }
         }
 
+        TestingMCFlowCTLForAll.check(pnwt, formula, initMCSettings(), LTLModelCheckingResult.Satisfied.TRUE);
+    }
+
+    @Test(enabled = true)
+    void testLectureHall() throws Exception {
+        PetriNetWithTransits pnwt = PNWTTools.getPetriNetWithTransitsFromFile(inputDir + "lectureHall.apt", false);
+        PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
+
+        Place yard = pnwt.getPlace("yard");
+        Transition emergency = pnwt.getTransition("emergency");
+        CTLAtomicProposition y = new CTLAtomicProposition(yard);
+        CTLAtomicProposition em = new CTLAtomicProposition(emergency);
+
+        // want to check "𝔸 AG(emergency -> EF yard)"
+        // transformed is this "𝔸 E(false U' \neg emergency v E(true U yard))
+//        ICTLFormula ftrans = new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.EUD, new CTLFormula(new CTLFormula(CTLOperators.Unary.NEG, em), CTLOperators.Binary.OR,
+//                new CTLFormula(new CTLConstants.True(), CTLOperators.Binary.EU, y)));        
+        // todo: don't I have to take the negation?
+        // negation: "𝔸 \neg AG(emergency -> EF yard) = E(true U emergency \wedge E(false U' \neg yard))"
+        ICTLFormula ftrans = new CTLFormula(new CTLConstants.True(), CTLOperators.Binary.EU, new CTLFormula(em, CTLOperators.Binary.AND,
+                new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.EUD, new CTLFormula(CTLOperators.Unary.NEG, y))));
+
+        RunCTLForAllFormula formula = new RunCTLForAllFormula(new FlowCTLFormula(FlowCTLFormula.FlowCTLOperator.All, ftrans));
+
+        TestingMCFlowCTLForAll.check(pnwt, formula, initMCSettings(), LTLModelCheckingResult.Satisfied.TRUE);
         TestingMCFlowCTLForAll.check(pnwt, formula, initMCSettings(), LTLModelCheckingResult.Satisfied.TRUE);
     }
 

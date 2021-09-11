@@ -44,7 +44,7 @@ public class ABAStartEdge {
 
     @Override
     public String toString() {
-        return "ABAStartEdge{" + "pre=" + pre + ", label=" + label + ", post=" + post + '}';
+        return pre.getId() + "-- " + label + " --" + post.getId();
     }
 
 }

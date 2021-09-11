@@ -19,7 +19,6 @@ import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
  *
  * @author Manuel Gieseking
  */
-@Deprecated
 public class Pnwt2KripkeStructureTransformerIngoing {
 
     // stuttering is currently done with a transition label with a null as transition
@@ -99,7 +98,7 @@ public class Pnwt2KripkeStructureTransformerIngoing {
                 succ = k.createAndAddState(id, new NodeLabel(tin), new NodeLabel(post));
                 // not do it directly here, this could lead to unnecessary larger Kripke structures
                 // because it could possible be that we only need the additional place state for the stuttering
-                // and don't want to check it further on from their. But we can also not leave it completely out.
+                // and don't want to check it further on from there. But we can also not leave it completely out.
                 // To not have to check all states again we add the needed states here for a postprocess to add the edges
                 tpStates.add(new Pair<>(post, succ));
 //                            // add the stutter edge to the state which only contains the place

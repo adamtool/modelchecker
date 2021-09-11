@@ -21,6 +21,7 @@ import uniolunisaar.adam.ds.logics.ctl.flowctl.FlowCTLFormula;
 import uniolunisaar.adam.ds.logics.ctl.flowctl.forall.RunCTLForAllFormula;
 import uniolunisaar.adam.ds.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
+import uniolunisaar.adam.ds.logics.AtomicProposition;
 import uniolunisaar.adam.ds.modelchecking.settings.ctl.FlowCTLModelcheckingSettings;
 import uniolunisaar.adam.ds.petrinet.PetriNetExtensionHandler;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
@@ -31,7 +32,7 @@ import uniolunisaar.adam.logic.transformers.automata.NDet2DetAutomatonTransforme
 import uniolunisaar.adam.logic.transformers.ctl.CTL2AlternatingBuchiTreeAutomaton;
 import uniolunisaar.adam.logic.transformers.modelchecking.ABA2NDetTransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerOutgoing;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoing;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.PnwtAndNbFlowFormulas2PNSequential.NEXT_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.ACTIVATION_PREFIX_ID;
 import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2pn.withoutinittflplaces.PnwtAndNbFlowFormulas2PNNoInit.INIT_TOKENFLOW_ID;
@@ -89,8 +90,11 @@ public class PnwtAndFlowCTL2PN {
             Logger.getInstance().addMessage(abta.toString(), false);
         }
         // create the Kripke structure of the Petri net with transits
-        // todo: add a method getTransition atoms and put this to the create function and therewith improve the construction
-        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerOutgoing.create(orig, true);
+        List<Transition> trAP = new ArrayList<>();
+        for (AtomicProposition transition : formula.getTransitions()) {
+            trAP.add(orig.getTransition(transition.getId()));
+        }
+        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoing.create(orig, trAP);
         if (settings.getOutputData().isVerbose()) {
             Tools.save2PDF(settings.getOutputData().getPath() + k.getName(), k);
         } else {

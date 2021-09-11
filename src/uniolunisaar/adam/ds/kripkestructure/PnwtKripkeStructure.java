@@ -34,8 +34,17 @@ public class PnwtKripkeStructure extends LabeledKripkeStructure<NodeLabel, Trans
         if (states.containsKey(preStateID)) {
             if (states.containsKey(postStateID)) {
                 KripkeState<NodeLabel> pre = states.get(preStateID);
-                LabeledKripkeEdge<NodeLabel, TransitionLabel> edge = new LabeledKripkeEdge<>(pre, label, states.get(postStateID));
+                KripkeState<NodeLabel> post = states.get(postStateID);
                 Set<LabeledKripkeEdge<NodeLabel, TransitionLabel>> edges = getEdges().get(pre);
+                // check if the edge already exists
+                if (edges != null) {
+                    for (LabeledKripkeEdge<NodeLabel, TransitionLabel> edge : edges) {
+                        if (edge.getPost().equals(post) && edge.getLabel().getId().equals(label.getId())) {
+                            return edge; // found it, give it back
+                        }
+                    }
+                }
+                LabeledKripkeEdge<NodeLabel, TransitionLabel> edge = new LabeledKripkeEdge<>(pre, label, post);
                 if (edges == null) {
                     edges = new HashSet<>();
                     getEdges().put(pre, edges);

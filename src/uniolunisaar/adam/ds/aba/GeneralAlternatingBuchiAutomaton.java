@@ -18,11 +18,11 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
 //    public ABAHyperEdge createAndAddDirectEdge(String preStateID, String label, boolean check, IPositiveBooleanFormula formula) {
 //    }
 
-    public ABAIntermediateEndEdge createAndAddIntermediateEdge(ABAOperatorState pre, ABAOperatorState.TYPE postType) {
+    public ABAIntermediateEndEdge createIntermediateEdge(ABAOperatorState pre, ABAOperatorState.TYPE postType) {
         return new ABAIntermediateEndEdge(pre, new ABAOperatorState(postType));
     }
 
-    public ABAIntermediateEndEdge createAndAddEndEdge(ABAOperatorState pre, ABAState post) {
+    public ABAIntermediateEndEdge createEndEdge(ABAOperatorState pre, ABAState post) {
         return new ABAIntermediateEndEdge(pre, post);
     }
 
@@ -34,10 +34,12 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
             postEdges = new ArrayList<>();
             edges.put(pre, postEdges);
         }
-        return new ABAHyperEdge(new ABAStartEdge(pre, label, new ABAOperatorState(type)));
+        ABAHyperEdge edge = new ABAHyperEdge(new ABAStartEdge(pre, label, new ABAOperatorState(type)));
+        postEdges.add(edge);
+        return edge;
     }
 
-    public ABAHyperEdge createAndAddDirectEdge(String preStateID, ABAOperatorState.TYPE type, String label, boolean check, String... postStateIDs) {
+    public IABALabeledHyperEdge createAndAddDirectEdge(String preStateID, ABAOperatorState.TYPE type, String label, boolean check, String... postStateIDs) {
         Map<String, ABAState> states = getStates();
         Map<ABAState, List<IABALabeledHyperEdge>> edges = getEdges();
         ABAState pre = states.get(preStateID);
@@ -62,18 +64,26 @@ public class GeneralAlternatingBuchiAutomaton extends AlternatingBuchiAutomaton<
             postEdges = new ArrayList<>();
             edges.put(pre, postEdges);
         }
-        ABAOperatorState op = new ABAOperatorState(type);
-        ABAStartEdge start = new ABAStartEdge(pre, label, op);
-        ABAHyperEdge edge = new ABAHyperEdge(start);
-        for (String post : postStateIDs) {
-            if (check) {
-                edge.addABAEdgeAndCheckConnectivity(op, new ABAIntermediateEndEdge(op, states.get(post)));
-            } else {
-                edge.addABAEdge(op, new ABAIntermediateEndEdge(op, states.get(post)));
+
+        // when there is only one successor make it a standard edge
+        if (postStateIDs.length == 1) {
+            IABALabeledHyperEdge edge = new ABADirectEdge(pre, label, states.get(postStateIDs[0]));
+            postEdges.add(edge);
+            return edge;
+        } else {
+            ABAOperatorState op = new ABAOperatorState(type);
+            ABAStartEdge start = new ABAStartEdge(pre, label, op);
+            ABAHyperEdge edge = new ABAHyperEdge(start);
+            for (String post : postStateIDs) {
+                if (check) {
+                    edge.addABAEdgeAndCheckConnectivity(op, new ABAIntermediateEndEdge(op, states.get(post)));
+                } else {
+                    edge.addABAEdge(op, new ABAIntermediateEndEdge(op, states.get(post)));
+                }
             }
+            postEdges.add(edge);
+            return edge;
         }
-        postEdges.add(edge);
-        return edge;
     }
 
     public ABATrueFalseEdge createAndAddSpecialEdge(String preStateID, ABATrueFalseEdge.Type type, String label, boolean check) {

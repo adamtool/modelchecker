@@ -1,11 +1,14 @@
 package uniolunisaar.adam.tests.transformers;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import uniol.apt.adt.pn.Place;
 import uniol.apt.adt.pn.Transition;
 import uniolunisaar.adam.ds.abta.AlternatingBuchiTreeAutomaton;
 import uniolunisaar.adam.ds.abta.TreeDirectionxState;
@@ -15,8 +18,15 @@ import uniolunisaar.adam.ds.abta.posbooleanformula.PositiveBooleanFormulaOperato
 import uniolunisaar.adam.ds.aba.GeneralAlternatingBuchiAutomaton;
 import uniolunisaar.adam.ds.automata.NodeLabel;
 import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
+import uniolunisaar.adam.ds.logics.ctl.CTLAtomicProposition;
+import uniolunisaar.adam.ds.logics.ctl.CTLConstants;
+import uniolunisaar.adam.ds.logics.ctl.CTLFormula;
+import uniolunisaar.adam.ds.logics.ctl.CTLOperators;
+import uniolunisaar.adam.ds.logics.ctl.ICTLFormula;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
+import uniolunisaar.adam.logic.transformers.ctl.CTL2AlternatingBuchiTreeAutomaton;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoing;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerOutgoing;
 import uniolunisaar.adam.tools.Logger;
 import uniolunisaar.adam.tools.Tools;
@@ -60,6 +70,44 @@ public class TestABTAxKripkeStructure2ABA {
         // create tree
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = createExampleTree(pnwt);
 
+        GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
+        Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
+    }
+
+    @Test
+    public void testLectureHall() throws Exception {
+        // Load Kripke structure
+        PetriNetWithTransits pnwt = PNWTTools.getPetriNetWithTransitsFromFile(inputDir + "lectureHall.apt", false);
+        PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
+
+        List<String> AP = new ArrayList<>();
+        AP.add("emergency");
+        AP.add("yard");
+//        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoingFull.create(pnwt, AP);
+        List<Transition> trAP = new ArrayList<>();
+        trAP.add(pnwt.getTransition("emergency"));
+        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoing.create(pnwt, trAP);
+        Tools.save2DotAndPDF(outputDir + "lectureHall_ks", k);
+
+        // create tree
+        Place yard = pnwt.getPlace("yard");
+        Transition emergency = pnwt.getTransition("emergency");
+        CTLAtomicProposition y = new CTLAtomicProposition(yard);
+        CTLAtomicProposition em = new CTLAtomicProposition(emergency);
+
+        // want to check "𝔸 AG(emergency -> EF yard)"
+        // transformed is this "𝔸 E(false U' \neg emergency v E(true U yard))
+//        ICTLFormula ftrans = new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.EUD, new CTLFormula(new CTLFormula(CTLOperators.Unary.NEG, em), CTLOperators.Binary.OR,
+//                new CTLFormula(new CTLConstants.True(), CTLOperators.Binary.EU, y)));        
+        // todo: don't I have to take the negation?
+        // negation: "𝔸 \neg AG(emergency -> EF yard) = E(true U emergency \wedge E(false U' \neg yard))"
+        ICTLFormula ftrans = new CTLFormula(new CTLConstants.True(), CTLOperators.Binary.EU, new CTLFormula(em, CTLOperators.Binary.AND,
+                new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.EUD, new CTLFormula(CTLOperators.Unary.NEG, y))));
+
+        AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = CTL2AlternatingBuchiTreeAutomaton.transform(ftrans, pnwt);
+        System.out.println(abta.toString());
+
+//        GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformerFull.transform(abta, k);
         GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
         Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
     }

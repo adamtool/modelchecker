@@ -17,7 +17,7 @@ public class LabeledKripkeEdge<SL extends ILabel, EL extends ILabel> extends Kri
         this.label = label;
     }
 
-    EL getLabel() {
+    public EL getLabel() {
         return label;
     }
 

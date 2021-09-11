@@ -114,5 +114,17 @@ public class ABAHyperEdge implements IABALabeledHyperEdge {
         }
         return sb.toString();
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(start.toString()).append("\n");
+        for (List<IABASubEdge> subedges : edges.values()) {
+            for (IABASubEdge edge : subedges) {
+                sb.append("            ").append(edge.toString()).append("\n");
+            }
+        }
+        return sb.toString();
+    }    
 
 }

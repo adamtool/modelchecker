@@ -44,7 +44,7 @@ public class ABAIntermediateEndEdge implements IABASubEdge {
 
     @Override
     public String toString() {
-        return "ABAIntermediateEndEdge{" + "pre=" + pre + ", post=" + post + '}';
+        return pre.getId() + "--" + post.getId();
     }
 
 }
