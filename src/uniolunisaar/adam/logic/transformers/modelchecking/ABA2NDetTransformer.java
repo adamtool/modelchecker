@@ -73,6 +73,7 @@ public class ABA2NDetTransformer {
 
         while (!todo.isEmpty()) {
             TransformerState state = todo.pop();
+//            System.out.println("pop "+state.toString());
             // loop for each element in the alphabet in the special case of the ([],[]) state
             if (state.getW().isEmpty() && state.getX().isEmpty()) {
                 for (String label : alphabet) {
@@ -112,7 +113,11 @@ public class ABA2NDetTransformer {
 //                        System.out.println("for x " + x_.toString());
 //                        System.out.println("all w succs " + allWSuccs.toString());
                         // only those with the same label
-                        List<List<ABAState>> all_w_ = allWSuccs.get(label);
+//                        System.out.println("label "+label);
+                        List<List<ABAState>> all_w_ = allWSuccs.get(label);                        
+                        if(all_w_== null) {
+                            continue;
+                        }
                         for (List<ABAState> w_ : all_w_) { // for all the x_ and w_ combinations add a new state
                             w_.removeAll(buchiStates); // \F
                             w_.retainAll(x_);  // subseteq X_

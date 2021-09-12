@@ -1,10 +1,12 @@
 package uniolunisaar.adam.logic.solver;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import net.sf.javabdd.BDD;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormula;
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormulaAtom;
 import uniolunisaar.adam.logic.transformers.modelchecking.positivebooleanformula.PositiveBooleanFormula2BDD;
@@ -16,12 +18,13 @@ import uniolunisaar.adam.logic.transformers.modelchecking.positivebooleanformula
 public class PositiveBooleanFormulaSolverBDD {
 
     public static List<List<IPositiveBooleanFormulaAtom>> solve(IPositiveBooleanFormula formula) {
-        List<IPositiveBooleanFormulaAtom> atoms = formula.getAtoms();
+        Set<IPositiveBooleanFormulaAtom> atoms = formula.getAtoms();
         // create the variable atoms mapping
-        Map<IPositiveBooleanFormulaAtom, Integer> map = new HashMap<>();
-        for (int i = 0; i < atoms.size(); i++) {
-            IPositiveBooleanFormulaAtom atom = atoms.get(i);
-            map.put(atom, i);
+        BidiMap<IPositiveBooleanFormulaAtom, Integer> map = new DualHashBidiMap<>();
+        int j = 0;
+        for (Iterator<IPositiveBooleanFormulaAtom> it = atoms.iterator(); it.hasNext();) {
+            IPositiveBooleanFormulaAtom atom = it.next();
+            map.put(atom, j++);
         }
         BDD bdd = PositiveBooleanFormula2BDD.transform(formula, map);
 
@@ -39,13 +42,13 @@ public class PositiveBooleanFormulaSolverBDD {
                 byte b = solution[i];
                 if (b == 1) {
                     for (List<IPositiveBooleanFormulaAtom> currentSolution : currentSolutions) { // add it to all solutions
-                        currentSolution.add(atoms.get(i));
+                        currentSolution.add(map.getKey(i));
                     }
                 } else if (b == -1) { // it is a solution this variable to be true as well as to be true
                     List< List<IPositiveBooleanFormulaAtom>> newSolutions = new ArrayList<>();
                     for (List<IPositiveBooleanFormulaAtom> currentSolution : currentSolutions) {
                         newSolutions.add(new ArrayList<>(currentSolution)); // copy the solution for the negative case
-                        currentSolution.add(atoms.get(i));// add it to the solution for the positive case
+                        currentSolution.add(map.getKey(i));// add it to the solution for the positive case
                     }
                     currentSolutions.addAll(newSolutions);
                 }

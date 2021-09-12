@@ -1,7 +1,7 @@
 package uniolunisaar.adam.ds.aba;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import uniolunisaar.adam.ds.automata.BuchiState;
 import uniolunisaar.adam.ds.abta.posbooleanformula.IPositiveBooleanFormulaAtom;
 
@@ -38,8 +38,8 @@ public class ABAState extends BuchiState implements IABANode, IPositiveBooleanFo
     }
 
     @Override
-    public List<IPositiveBooleanFormulaAtom> getAtoms() {
-        List<IPositiveBooleanFormulaAtom> list = new ArrayList<>();
+    public Set<IPositiveBooleanFormulaAtom> getAtoms() {
+        Set<IPositiveBooleanFormulaAtom> list = new HashSet<>();
         list.add(this);
         return list;
     }

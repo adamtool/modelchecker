@@ -28,7 +28,8 @@ import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.logic.transformers.ctl.CTL2AlternatingBuchiTreeAutomaton;
 import uniolunisaar.adam.logic.transformers.modelchecking.ABA2NDetTransformer;
 import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformer;
-import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoing;
+import uniolunisaar.adam.logic.transformers.modelchecking.abtaxkripke2aba.ABTAxKripke2ABATransformerFull;
+import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoingFull;
 import uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerOutgoing;
 import static uniolunisaar.adam.tests.transformers.TestABTAxKripkeStructure2ABA.createExampleTree;
 import uniolunisaar.adam.tools.Logger;
@@ -129,10 +130,14 @@ public class TestABA2NDet {
         // Load Kripke structure
         PetriNetWithTransits pnwt = PNWTTools.getPetriNetWithTransitsFromFile(inputDir + "lectureHall.apt", false);
         PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
-
+        
+        List<String> AP = new ArrayList<>();
+        AP.add("emergency");
+        AP.add("yard");
+        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoingFull.create(pnwt, AP);
         List<Transition> trAP = new ArrayList<>();
         trAP.add(pnwt.getTransition("emergency"));
-        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoing.create(pnwt, trAP);
+//        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoing.create(pnwt, trAP);
         Tools.save2DotAndPDF(outputDir + "lectureHall_ks", k);
 
         // create tree
@@ -151,10 +156,15 @@ public class TestABA2NDet {
 
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = CTL2AlternatingBuchiTreeAutomaton.transform(ftrans, pnwt);
 
-        GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
+        System.out.println("created the tree");
+//        GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
+        GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformerFull.transform(abta, k);
         Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
 
+        
+        System.out.println("created the product");
         BuchiAutomaton ndet = ABA2NDetTransformer.transform(aba, true);
+        System.out.println("created the NBA");
         Tools.save2DotAndPDF(outputDir + ndet.getName(), ndet);
     }
 
