@@ -75,11 +75,17 @@ public class Pnwt2KripkeStructureTransformerIngoingFull {
             LinkedList<KripkeState<NodeLabel>> todo) {
         String id = tin != null ? tin.getId() + "," + post.getId() : post.getId();
         KripkeState<NodeLabel> succ;
+        System.out.println("----- id " + id);
+        System.out.println(AP.toString());
+        System.out.println("contains");
+        System.out.println(post.getId());
         if (!k.stateExists(id)) { // the state does not exist, create a new one
             if (tin != null && AP.contains(post.getId())) { // create the state with the transition
                 succ = k.createAndAddState(id, new NodeLabel(tin), new NodeLabel(post));
             } else if (AP.contains(post.getId())) {
                 succ = k.createAndAddState(id, new NodeLabel(post));
+            } else if (tin != null) {
+                succ = k.createAndAddState(id, new NodeLabel(tin));
             } else {
                 succ = k.createAndAddState(id);
             }
@@ -104,7 +110,7 @@ public class Pnwt2KripkeStructureTransformerIngoingFull {
         } else {
             succ = k.getState(id);
             // add also the edge to the stutter place
-             k.createAndAddEdge(succ.getId(), new TransitionLabel(null), post.getId()+STUTTERSYMBOL); // it's kind of hacky but here we know its #_p, because it's not a loop in the stutter state              
+            k.createAndAddEdge(succ.getId(), new TransitionLabel(null), post.getId() + STUTTERSYMBOL); // it's kind of hacky but here we know its #_p, because it's not a loop in the stutter state              
         }
         return succ;
     }

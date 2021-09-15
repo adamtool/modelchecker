@@ -128,9 +128,11 @@ public class TestABA2NDet {
     @Test
     public void testLectureHall() throws Exception {
         // Load Kripke structure
-        PetriNetWithTransits pnwt = PNWTTools.getPetriNetWithTransitsFromFile(inputDir + "lectureHall.apt", false);
+//        String name = "lectureHallSmall";
+        String name = "lectureHall";
+        PetriNetWithTransits pnwt = PNWTTools.getPetriNetWithTransitsFromFile(inputDir + name + ".apt", false);
         PNWTTools.savePnwt2PDF(outputDir + pnwt.getName(), pnwt, false);
-        
+
         List<String> AP = new ArrayList<>();
         AP.add("emergency");
         AP.add("yard");
@@ -138,7 +140,7 @@ public class TestABA2NDet {
         List<Transition> trAP = new ArrayList<>();
         trAP.add(pnwt.getTransition("emergency"));
 //        PnwtKripkeStructure k = Pnwt2KripkeStructureTransformerIngoing.create(pnwt, trAP);
-        Tools.save2DotAndPDF(outputDir + "lectureHall_ks", k);
+        Tools.save2DotAndPDF(outputDir + name + "_ks", k);
 
         // create tree
         Place yard = pnwt.getPlace("yard");
@@ -155,13 +157,13 @@ public class TestABA2NDet {
                 new CTLFormula(new CTLConstants.False(), CTLOperators.Binary.EUD, new CTLFormula(CTLOperators.Unary.NEG, y))));
 
         AlternatingBuchiTreeAutomaton<Set<NodeLabel>> abta = CTL2AlternatingBuchiTreeAutomaton.transform(ftrans, pnwt);
+        System.out.println(abta.toString());
 
         System.out.println("created the tree");
 //        GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformer.transform(abta, k);
         GeneralAlternatingBuchiAutomaton aba = ABTAxKripke2ABATransformerFull.transform(abta, k);
         Tools.save2DotAndPDF(outputDir + aba.getName(), aba);
 
-        
         System.out.println("created the product");
         BuchiAutomaton ndet = ABA2NDetTransformer.transform(aba, true);
         System.out.println("created the NBA");
