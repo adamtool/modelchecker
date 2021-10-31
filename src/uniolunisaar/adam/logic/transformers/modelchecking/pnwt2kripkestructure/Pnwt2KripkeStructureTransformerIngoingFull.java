@@ -75,10 +75,6 @@ public class Pnwt2KripkeStructureTransformerIngoingFull {
             LinkedList<KripkeState<NodeLabel>> todo) {
         String id = tin != null ? tin.getId() + "," + post.getId() : post.getId();
         KripkeState<NodeLabel> succ;
-        System.out.println("----- id " + id);
-        System.out.println(AP.toString());
-        System.out.println("contains");
-        System.out.println(post.getId());
         if (!k.stateExists(id)) { // the state does not exist, create a new one
             if (tin != null && AP.contains(post.getId())) { // create the state with the transition
                 succ = k.createAndAddState(id, new NodeLabel(tin), new NodeLabel(post));
@@ -100,8 +96,8 @@ public class Pnwt2KripkeStructureTransformerIngoingFull {
                     stutterState = k.createAndAddState(idStutterState);
                 }
                 // add the edge and the selfloops
-                k.createAndAddEdge(succ.getId(), new TransitionLabel(null), stutterState.getId()); // it's kind of hacky but here we know its #_p, because it's not a loop in the stutter state
-                k.createAndAddEdge(stutterState.getId(), new TransitionLabel(null), stutterState.getId()); // here we know its # because it's a loop in the stutter state...
+                k.createAndAddEdge(succ.getId(), new TransitionLabel(STUTTERSYMBOL + post.getId()), stutterState.getId()); // here stutter edge
+                k.createAndAddEdge(stutterState.getId(), new TransitionLabel("" + STUTTERSYMBOL), stutterState.getId()); // here stutter loop
                 for (Transition transition : pnwt.getTransitions()) {
                     k.createAndAddEdge(stutterState.getId(), new TransitionLabel(transition), stutterState.getId());
                 }
@@ -110,7 +106,7 @@ public class Pnwt2KripkeStructureTransformerIngoingFull {
         } else {
             succ = k.getState(id);
             // add also the edge to the stutter place
-            k.createAndAddEdge(succ.getId(), new TransitionLabel(null), post.getId() + STUTTERSYMBOL); // it's kind of hacky but here we know its #_p, because it's not a loop in the stutter state              
+            k.createAndAddEdge(succ.getId(), new TransitionLabel(STUTTERSYMBOL + post.getId()), post.getId() + STUTTERSYMBOL); // the stutter edge         
         }
         return succ;
     }

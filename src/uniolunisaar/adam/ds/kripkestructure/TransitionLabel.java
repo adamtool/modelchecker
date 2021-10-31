@@ -11,9 +11,16 @@ import uniolunisaar.adam.ds.automata.ILabel;
 public class TransitionLabel implements ILabel {
 
     private final Transition t;
+    private final String id;
 
     public TransitionLabel(Transition t) {
         this.t = t;
+        this.id = t.getId();
+    }
+
+    public TransitionLabel(String id) {
+        this.t = null;
+        this.id = id;
     }
 
     public Transition getTransition() {
@@ -21,7 +28,8 @@ public class TransitionLabel implements ILabel {
     }
 
     public String getId() {
-        return t == null ? "-" : t.getId();
+//        return t == null ? "-" : t.getId();
+        return id;
     }
 
     @Override

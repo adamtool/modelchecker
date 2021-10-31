@@ -176,7 +176,9 @@ t.getId().endsWith(PnwtAndNbFlowFormulas2PNSequential.NEXT_ID + "-" + nb_ff) // 
             scopeEventually = true;
         } else if (scopeEventually && castPhi.getOp() == LTLOperators.Unary.G) { // if the last operator is a globally, then the previous eventually is not helping anymore
             scopeEventually = false;
-        }
+        } else if (scopeEventually && castPhi.getOp() == LTLOperators.Unary.X) { // if the last operator is a next, then the previous eventually is not helping anymore
+            scopeEventually = false; // in a direct scope that would be fine because F X = F, but for F (p -> X t), e.g., not
+        } 
 
         ILTLFormula substChildPhi = (ILTLFormula) replaceInRunFormula(orig, net, castPhi.getPhi(), scopeEventually, nbFlowFormulas); // since castPhi is of type ILTLFormula this must result an ILTLFormula
         LTLFormula substPhi = new LTLFormula(castPhi.getOp(), substChildPhi);

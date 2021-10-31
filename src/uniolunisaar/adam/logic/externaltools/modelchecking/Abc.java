@@ -190,7 +190,7 @@ public class Abc {
                 CounterExample cex = CounterExampleParser.parseCounterExampleWithStutteringLatch(settings, cexOutputFile, new CounterExample(safety, liveness));
                 if (settings.getMaximality() == AdamCircuitMCSettings.Maximality.MAX_INTERLEAVING_IN_CIRCUIT) { // or when using the error latch rather than the stuttering latch
                     cex.setWarning("In the case of the maximality checked in the circuit, or using the error latch the transitions "
-                            + "for the stutting for finite runs is not meaningful. McHyper has to be improved to fix this.");
+                            + "for the stuttering for finite runs is not meaningful. McHyper has to be improved to fix this.");
                 }
                 Logger.getInstance().addMessage(cex.toString(), true);
                 ret.setCex(cex);
