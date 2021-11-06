@@ -13,6 +13,7 @@ import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoingFull.STUTTERSYMBOL;
 
 /**
  *
@@ -77,7 +78,7 @@ public class Pnwt2KripkeStructureTransformerOutgoing {
                 // add the special loop to keep it smaller
                 // with the transition of the transition label == null to state all 
                 // other transitions which are not transiting in this place
-                k.createAndAddEdge(place.getId(), new TransitionLabel(null), place.getId());
+                k.createAndAddEdge(place.getId(), new TransitionLabel("" + STUTTERSYMBOL), place.getId());
             } else {
                 // get the place and transition of the labels
                 Place p = null;

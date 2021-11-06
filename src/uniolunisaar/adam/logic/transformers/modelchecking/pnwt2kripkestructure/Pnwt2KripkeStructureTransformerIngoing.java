@@ -12,6 +12,7 @@ import uniolunisaar.adam.ds.kripkestructure.PnwtKripkeStructure;
 import uniolunisaar.adam.ds.kripkestructure.TransitionLabel;
 import uniolunisaar.adam.ds.petrinetwithtransits.PetriNetWithTransits;
 import uniolunisaar.adam.ds.petrinetwithtransits.Transit;
+import static uniolunisaar.adam.logic.transformers.modelchecking.pnwt2kripkestructure.Pnwt2KripkeStructureTransformerIngoingFull.STUTTERSYMBOL;
 
 /**
  * The class corresponds to the ingoing semantics and implements the
@@ -78,12 +79,12 @@ public class Pnwt2KripkeStructureTransformerIngoing {
             if (!k.stateExists(place.getId())) { // if the p state does not exist create the state with the stutter edge
                 succ = k.createAndAddState(place.getId(), new NodeLabel(place));
                 // add the stutter selfloop
-                k.createAndAddEdge(succ.getId(), new TransitionLabel(null), succ.getId());
+                k.createAndAddEdge(succ.getId(), new TransitionLabel("" + STUTTERSYMBOL), succ.getId());
             } else {
                 succ = k.getState(place.getId());
             }
             // add the stutter edge 
-            k.createAndAddEdge(tpState.getSecond().getId(), new TransitionLabel(null), succ.getId());
+            k.createAndAddEdge(tpState.getSecond().getId(), new TransitionLabel(STUTTERSYMBOL + place.getId()), succ.getId());
         }
         return k;
     }
@@ -113,7 +114,7 @@ public class Pnwt2KripkeStructureTransformerIngoing {
             } else {
                 succ = k.createAndAddState(id, new NodeLabel(post));
                 // add the stutter selfloop
-                k.createAndAddEdge(succ.getId(), new TransitionLabel(null), succ.getId());
+                k.createAndAddEdge(succ.getId(), new TransitionLabel("" + STUTTERSYMBOL), succ.getId());
             }
             todo.add(succ);
         } else {
